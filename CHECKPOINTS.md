@@ -6,7 +6,7 @@
 |---|---|---|
 | К0 | Принято пользователем | План принят к работе до К11; Product Help `en_US` разрешён |
 | К1 | Пройден | STATUS-K1-BASELINE.md: clean checkout, 312 C#, 114 Python; оба GitHub Windows CI успешны |
-| К2 | Выполняется | Созданы проекты net10.0; закреплённые зависимости восстановлены; tools/tests ещё не приняты |
+| К2 | Локально пройден; CI ожидается | STATUS-K2-SDK.md: SDK-host, 45 .NET tests, independent STDIO/Python journal parity, Inspector CLI |
 | К3 | Не начато | Шесть read-only tools, handles и запреты прямых мутационных вызовов |
 | К4 | Не начато | Перенос safety stores с byte/hash parity |
 | К5 | Не начато | Паритет owned open/translation; решение о live переключении |

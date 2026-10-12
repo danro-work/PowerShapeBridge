@@ -1,0 +1,41 @@
+name: MCP SDK without CAD
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sdk:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.20.0'
+      - name: Install pinned MCP Inspector
+        shell: pwsh
+        run: |
+          npm install --global @modelcontextprotocol/inspector@2.10.1
+          if ($LASTEXITCODE -ne 0) { throw 'Inspector installation failed.' }
+      - name: Verify SDK and independent clients
+        shell: pwsh
+        run: |
+          $taskInspector = Join-Path (npm prefix --global) 'mcp-inspector.cmd'
+          ./verify-sdk.ps1 -DotnetPath (Get-Command dotnet.exe).Source -PythonPath (Get-Command python.exe).Source -InspectorPath $taskInspector
+      - name: Preserve SDK verification evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: K2-sdk
+          path: evidence/K2-sdk
+          if-no-files-found: error
