@@ -1,5 +1,11 @@
 # Дальнейшая работа
 
+K7 PR8: сохранить результат ongoing clean SDK5da2c04 и exact-head CI блока
+внешнего recovery STDIO test. Domain/protocol262 passed; independent six-case
+full/RO tool reads passed, protected71 files unchanged. Затем отдельный К7
+outcome-resolution contract и complete fault matrix; checkpoint recovery требует
+отдельно принятого сценария. Не выдавать reader за завершение всей К7.
+
 K6 apply approval остаётся pending; опубликованный SDK0.36.3 package и native
 staging0.33 не пересобирать поверх без необходимости. Независимый source SDK
 0.37.0-dev recovery inspection реализован; RECOVERY-INSPECTION.md. Завершить

@@ -1,5 +1,20 @@
 # К7 — чтение неизвестного исхода, первый блок
 
+Дополнение проверки: отказ oversized plan теперь возвращает
+recovery_inspection_unavailable, сохраняя unknown, вместо исключения наружу.
+20 domain/3 protocol recovery cases; чистый код5da2c04 прошёл262 .NET tests.
+Независимый src/test_sdk_recovery_stdio.py проверил шесть успешных чтений через
+STDIO: start без return, return без fresh verification и исторический success,
+каждый в full/read-only. Ошибочный extra command отклонён; SHA/атрибуты всех
+фиктивных файлов неизменны, requests не создан. Тест включён в verify-sdk.ps1;
+внешних STDIO scripts теперь восемь. Evidence: evidence/K7-recovery/independent.
+71 protected files после actual old-unknown inspection совпали с доинспекционным
+snapshot по double SHA/size: reader/protected-after-inspection.json. Это проверка
+сохранённых байтов в данный момент, не оценка текущей несохранённой CAD-модели.
+Clean baselinee6b6588 пройден; последняя правка не меняет native/Python source.
+Полный clean SDK5da2c04 и exact-head CI следующего test-only блока выполняются.
+Draft PR8: https://github.com/danro-work/PowerShapeBridge/pull/8. К7 не завершён.
+
 13 октября 2026. Реализован SDK0.37.0-dev `inspect_operation_recovery(operationId)`
 через RecoveryTools.Create/ToolCatalog. Новый opt-in профиль
 config/general-recovery-inspection.json включает recoveryInspectionExperimental;

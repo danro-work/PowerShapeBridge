@@ -1,5 +1,14 @@
 # PowerShape Bridge — состояние для продолжения
 
+K7 draft PR8 создан/прикреплён; source SDK0.37.0-dev. Исправлен structured отказ
+oversized recovery plan; clean code5da2c04 прошёл262 .NET tests. Новый внешний
+src/test_sdk_recovery_stdio.py: шесть full/read-only successful reads, extra
+command refusal, unchanged artifacts/no requests. Добавлен в verify-sdk (8 STDIO).
+71 protected files double-SHA/size совпали после actual unknown inspection.
+Clean baselinee6b6588 passed; final SDK regression/CI ещё выполняются. Runtime/
+CAD/default config не менялись; K6 Apply permission pending; K7 только первый
+reader block, outcome-resolution/checkpoint recovery/fault matrix ещё впереди.
+
 К7 independent reader начат, пока K6 installation permission pending. Source
 SDK0.37.0-dev: inspect_operation_recovery, RecoveryInspection/RecoveryTools,
 explicit recoveryInspectionExperimental profile28/7, без флага27/6 unchanged.
