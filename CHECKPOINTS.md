@@ -9,7 +9,7 @@
 | К2 | Пройден | STATUS-K2-SDK.md: clean checkout, 45 .NET tests, STDIO/Python journal parity, Inspector; все Windows CI успешны |
 | К3 | Пройден | SDK 0.33.0-dev: clean checkout, 98 .NET tests, independent Python parity/Inspector; все CI успешны |
 | К4 | Пройден | SDK 0.34.0-dev full/read-only 16/6; clean checkout/CI, 141 .NET, 312 native/63 artifact cases |
-| К5 | Выполняется | Паритет owned open/translation; готовый пакет и решение о live переключении |
+| К5 | Выполняется | One-use/proof functions, 146 .NET tests; execution endpoints/live scenario ещё впереди |
 | К6 | Не начато | SaveAs результата, saved bytes и отдельный reopen |
 | К7 | Не начато | Interrupted recovery и fault matrix |
 | К8 | Не начато | Общие transforms и organization |
