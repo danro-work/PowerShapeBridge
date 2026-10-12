@@ -5,7 +5,10 @@ typed savedResultHandle с minimum TTL/raw proof/journal/file validation.
 212 .NET/432 native, 124 artifacts (0 mismatches), пять STDIO клиентов/
 Inspector passed offline; evidence/K6-save-as/sdk-saved-results-full.
 Full save profile 24/readonly 6; runtime0.32/published K5 SDK0.35.1/config
-не менялись. Clean checkout/CI нового SDK-блока впереди, затем qualified
+не менялись. Clean baseline/SDK checkout aeeeb43 и все четыре Windows CI passed;
+доказательства: work/K6-sdk-save-clean/evidence/K6-sdk-save-clean-short и
+K1-baseline. Длинный первый test staging сохранён failed, новый work/n1 passed.
+Далее qualified
 saved-byte clone/reopen/new binding и own live К6. К6–К11 не завершены;
 STATUS-K6-SAVE-AS.md. Далее история предыдущих блоков.
 

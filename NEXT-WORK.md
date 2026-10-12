@@ -1,11 +1,13 @@
 # Дальнейшая работа
 
-Текущий следующий блок К6: clean checkout/Windows CI SDK0.36.1 SaveAs tools;
-затем native byte-stable own saved-result clone и отдельно named reopen intent,
+Текущий следующий блок К6: native byte-stable own saved-result clone и отдельно named reopen intent,
 guarded OPEN, independent content/units/file checks и new binding. Не ослаблять
 общий source-copy FileShare.Read; clone занятого saved result имеет отдельный
 qualified contract. SDK execute/verify/savedResult leases уже реализованы:
-212 .NET/432 native/124 artifacts, пять STDIO/Inspector passed offline.
+212 .NET/432 native/124 artifacts, пять STDIO/Inspector passed offline;
+clean baseline/SDK aeeeb43 и все четыре Windows CI успешны. Для Framework tests
+использовать короткие staging paths (успешный clean work/n1), без повторного
+использования частично созданного NativeStageDirectory.
 Runtime0.32/published K5/config unchanged; default decision pending. Own live К6
 только после fresh process/model/context/ownership checks. К6–К11 обязательны.
 

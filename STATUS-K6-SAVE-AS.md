@@ -23,7 +23,14 @@ native journal. Evidence: evidence/K6-save-as/sdk-saved-results-full;
 от 200ms pre-publication fsync race; production timeout/IPC не изменён.
 Native Save fixtures получили полный inventory для SDK read admission.
 
-Clean checkout/Windows CI этого нового SDK-блока ещё предстоят. Reopen/new
+Clean checkout aeeeb43afdff91afbeacc8cb95f0fca6406af6db прошёл baseline и полный
+SDK regression: work/K6-sdk-save-clean/evidence/K1-baseline и
+work/K6-sdk-save-clean/evidence/K6-sdk-save-clean-short. Source/binary SHA
+receipt совпадают. Первый длинный staging превысил Framework MAX_PATH;
+частичный failed receipt сохранён, новый work/n1 прошёл все checks. CI на своих
+коротких runner paths успешен: runs 38287279348/38287283849 (baseline push/PR)
+и 38287279304/38287283845 (SDK push/PR). Все четыре CI завершены success.
+Reopen/new
 binding и live qualification К6 не выполнены. Native0.32/published K5 SDK0.35.1/
 config.toml не менялись; default switch decision pending. К6–К11 остаются целью.
 
