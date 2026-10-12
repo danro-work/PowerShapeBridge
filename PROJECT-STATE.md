@@ -19,7 +19,12 @@ offline; evidence/K6-save-as/reopen-execution-full. Один первый fake I
 поймал неатомарный ответ fixture; publication .pending→.json исправлена, оба
 SDK routes затем прошли. Первый native test отказал из-за завышенного fixture
 expiry; test clip к prepared expiry исправлен, production guard сохранился.
-Clean/CI нового блока ещё ожидаются. Live К6 ещё не выполнялся; К6–К11 остаются
+Commit4a230a6: оба baseline CI и один SDK CI passed; второй SDK CI failed в
+native fixture на первой verification. Добавлены диагностический receipt и
+20ms offset synthetic read timestamps для coarse Framework clock ticks;
+production freshness guard строго сохраняется. Targeted native35 passed после
+правки; повторный CI ещё ожидается. Clean4a230a6 baseline passed, SDK выполняется.
+Live К6 ещё не выполнялся; К6–К11 остаются
 целью. Installed runtime/published K5 SDK/config этим блоком не менялись.
 Ниже история предыдущих блоков.
 

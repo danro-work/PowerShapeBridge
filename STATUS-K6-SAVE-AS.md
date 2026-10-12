@@ -34,7 +34,14 @@ terminal actual native reopen proof и synthetic fresh read/verifier/binding;
 Первый fake IPC response был опубликован неатомарно и rejected; fixture теперь
 использует .pending→.json, оба official pipe tests прошли. Native fixture сначала
 завышал expiry, guard отказал до команды; fixture ограничен prepared expiry.
-Production guards/deadlines не ослаблены. Clean/CI этого блока ещё ожидаются.
+Production guards/deadlines не ослаблены. Commit4a230a6: baseline CI
+38310409223/38310404870 и SDK38310404732 passed; SDK38310408896 failed на первой
+native verification fixture, до artifact/STDIO qualification. Failed evidence
+сохранён в GitHub. Добавлены точный first-verifier diagnostic и synthetic read
+timestamp offset20ms, чтобы быстрый Framework UtcNow tick не совпадал с return.
+Это тестовый clock сценарий; production fresh-receipt guard не менялся.
+Targeted native35 passed; новый CI ожидается. Clean4a230a6 baseline passed,
+SDK ещё выполняется в work/c6o/evidence/K6-reopen-execution-clean.
 Следом clean/CI и own live SaveAs→reopen→fresh binding К6 после актуальных
 process/document/ownership reads. Installed runtime/config не менялись.
 К6 не завершён; весь объём К7–К11 сохраняется.

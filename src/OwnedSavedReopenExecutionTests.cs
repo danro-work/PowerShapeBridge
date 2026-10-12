@@ -40,8 +40,12 @@ namespace PowerShapeBridge {
     Reads(Args,"inspectionRequestId","inspectionSha256","listingRequestId","listingSha256");
    }
    internal void Reads(Dictionary<string,object> args,string inspectionId,string inspectionSha,string listingId,string listingSha) {
-    string snapshotId=Guid.NewGuid().ToString("N"),windowsId=Guid.NewGuid().ToString("N");var snapshot=Context.Observation();snapshot["timestampUtc"]=DateTime.UtcNow.ToString("o");snapshot["bridgeRequestId"]=snapshotId;
-    var listing=Context.Windows();listing["timestampUtc"]=DateTime.UtcNow.ToString("o");listing["bridgeRequestId"]=windowsId;
+    // Framework UtcNow can return the same coarse clock tick as the preceding
+    // synthetic command return on fast Windows runners. Put fake reads in the
+    // next observed tick; production receipt freshness remains strictly checked.
+    string stamp=DateTime.UtcNow.AddMilliseconds(20).ToString("o");
+    string snapshotId=Guid.NewGuid().ToString("N"),windowsId=Guid.NewGuid().ToString("N");var snapshot=Context.Observation();snapshot["timestampUtc"]=stamp;snapshot["bridgeRequestId"]=snapshotId;
+    var listing=Context.Windows();listing["timestampUtc"]=stamp;listing["bridgeRequestId"]=windowsId;
     args[inspectionId]=snapshotId;args[inspectionSha]=NativeJournal.Freeze(Path.Combine(Root,"responses",snapshotId+".json"),snapshot);
     args[listingId]=windowsId;args[listingSha]=NativeJournal.Freeze(Path.Combine(Root,"responses",windowsId+".json"),listing);
    }
@@ -58,6 +62,7 @@ namespace PowerShapeBridge {
    int count=0;Action<bool> check=ok=>{if(!ok)throw new Exception("Saved reopen executor self-test failed at "+count);count++;};
    var good=new Case();var executed=good.Execute();if(!Equals(executed["state"],"owned_saved_reopen_executed_unverified"))throw new Exception("Saved reopen first execution: "+Program.Json.Serialize(executed));check(good.Context.Commands==1&&Equals(executed["observableContentChecked"],true));
    var proof=good.Proof(executed);string verifyId=Guid.NewGuid().ToString("N");var verified=OwnedSavedReopenVerification.Verify(good.Root,verifyId,proof,good.Context);
+   if(!Equals(verified["state"],"owned_saved_reopen_verified_observed"))throw new Exception("Saved reopen first verification: "+Program.Json.Serialize(verified));
    check(Equals(verified["state"],"owned_saved_reopen_verified_observed")&&good.Context.Commands==1&&Equals(verified["noCommandReplay"],true)&&good.Saved.Save.Protected());
    var binding=DocumentBindings.Load(good.Root,new Dictionary<string,object>{{"bindingId",verified["bindingId"]},{"bindingSha256",verified["bindingSha256"]}});
    check(Equals(binding["inspectionRequestId"],proof["inspectionRequestId"])&&Equals(binding["copyId"],good.Prepared["reopenId"])&&Equals(((Dictionary<string,object>)verified["model"])["id"],500));
