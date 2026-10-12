@@ -12,7 +12,7 @@ Manager **2.9.1** и GitHub CLI **2.102.0**. Инициализирован ло
 `C:\Users\rozhdestvenskii.da\.codex\skills\dotnet-mcp-builder` из commit
 `70ddff7fab9d4d49743d221b56d761cff58048d0`, SHA256 `SKILL.md`:
 `7860696a124e61fc1fa6bb38f9c79f6be6eda130e245a814e41f0e7030d09619`.
-Он доступен Codex со следующего сообщения.
+Навык доступен в текущем каталоге Codex.
 
 Git-репозиторий предназначен для исходников `src`, общих профилей `config`,
 скриптов сборки и актуальных контрактов/отчётов в корне. `.gitignore`
@@ -73,16 +73,20 @@ push ветки → pull request → review. Создание remote или пу
 | Инструмент | Проверенное состояние | Роль |
 |---|---|---|
 | .NET Framework | Release 533325, версия 4.8.09037; x64 csc/MSBuild 4.8.9037.0 | Существующий WinForms/STA/COM worker |
-| VS Code | 1.107.1 x64, `D:\Program Files\Microsoft VS Code` | Редактор; пользовательских расширений при проверке не найдено |
+| .NET SDK | 10.0.401, `C:\Program Files\dotnet` | Установлен; отдельные console build/run прошли |
+| VS Code | 1.107.1 x64, `D:\Program Files\Microsoft VS Code`; C# 2.160.4, .NET Install Tool 3.2.0 | Редактор с установленным C# extension |
 | Python | 3.12.14 во встроенном runtime Codex | Текущий MCP stdio и проверки, стандартная библиотека |
-| Node.js | 24.19.0 во встроенном runtime Codex | Потенциально Inspector; npm/npx в обычном PATH не найдены |
+| Node.js | 24.20.0 system LTS; npm/npx 11.19.0 | Установлены в `C:\Program Files\nodejs` |
+| MCP Inspector | 2.10.1, global npm prefix | Launcher и CLI-client help прошли; built clients присутствуют |
 | PowerShape 2023 | ProductVersion 23202, ожидаемая версия Bridge 23.2.2 | Лицензированный CAD в пользовательском Windows-сеансе |
 
 В обычном PATH `python` сейчас указывает на WindowsApps alias. Рабочий Python:
 `C:\Users\rozhdestvenskii.da\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe`.
 Для независимой от Codex среды полезна отдельная установка Python.
 
-В проекте пока нет `.csproj`/`.sln` и пакетных манифестов. `build.ps1` вызывает
+В продуктовых исходниках пока нет `.csproj`/`.sln` и пакетных манифестов.
+Отдельный SDK console smoke project находится в исключённом `work`.
+`build.ps1` вызывает
 `C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe` напрямую.
 Для существующего worker modern .NET SDK, полный Visual Studio, отдельный
 NuGet CLI, pywin32, pytest или Python-пакет MCP не обязательны.
@@ -102,10 +106,10 @@ NuGet CLI, pywin32, pytest или Python-пакет MCP не обязатель�
 
 | Инструмент | Зачем | Статус/условие |
 |---|---|---|
-| .NET 10 SDK | Новый C# MCP-адаптер по dotnet-mcp-builder | SDK отсутствует; установлен только .NET runtime 8.0.25. Установка SDK — следующий шаг для C#-адаптера |
-| ModelContextProtocol, стабильная 2.x | Официальный C# MCP SDK, stdio transport и схемы tools | Зависимость будущего `.csproj`, фиксировать точную проверенную версию |
-| Node/npm/npx + MCP Inspector | Независимый клиент: negotiation, catalog, tool schemas, ответы/ошибки | Inspector требует Node >=22.19.0; встроенный Node подходит по версии, нужен доступный npm/npx |
-| Расширение C# для VS Code | Навигация, диагностика и отладка C# | Рекомендуется; не требуется для нынешней csc-сборки |
+| .NET 10 SDK | Новый C# MCP-адаптер по dotnet-mcp-builder | Установлен и проверен 10.0.401; код host ещё не создан |
+| ModelContextProtocol, стабильная 2.x | Официальный C# MCP SDK, stdio transport и схемы tools | NuGet 2.2.0 проверен; зависимость будущего `.csproj`; Hosting-кандидат 10.0.12 |
+| Node/npm/npx + MCP Inspector | Независимый клиент: negotiation, catalog, tool schemas, ответы/ошибки | Node 24.20.0, npm/npx 11.19.0, Inspector 2.10.1 установлены; actual host qualification впереди |
+| Расширение C# для VS Code | Навигация, диагностика и отладка C# | Установлено 2.160.4 с runtime extension 3.2.0; full Dev Kit не понадобился |
 | GitHub Actions | Воспроизводимые проверки без CAD на Windows runner | Настраивать после разделения автономных тестов и локальной квалификации |
 | .NET Framework Developer Pack/Build Tools | Targeting pack, MSBuild и отладка при переходе worker к `.csproj` | При необходимости; сейчас csc уже работает |
 
@@ -171,6 +175,12 @@ self-test journal в staging (`PSBRIDGE_TEST_STAGE` или `work/P2.29-open`).
 и qualify-скрипты — отдельная разрешённая CAD-квалификация на собственных копиях.
 Hosted GitHub runner не заменяет лицензированный PowerShape и его пользовательский
 сеанс. Вызовы CAD и мутационные self-test не запускать при установке инструментов.
+
+Установка 12 октября завершена до планирования. Доказательства и команды:
+[SOFTWARE-SETUP-2026-10-12.md](SOFTWARE-SETUP-2026-10-12.md).
+Проект плана — [MCP-DEVELOPMENT-PLAN.md](MCP-DEVELOPMENT-PLAN.md);
+решения по заимствованию/переписи — [MODULE-MIGRATION-MATRIX.md](MODULE-MIGRATION-MATRIX.md).
+План ожидает пользовательского решения К0; реализация нового MCP не начата.
 
 ## Результат настройки Git
 

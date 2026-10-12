@@ -1,5 +1,15 @@
 # План после уточнения пользователя, 9 октября 2026
 
+12 октября: новый MCP-DEVELOPMENT-PLAN.md принят пользователем, К0 закрыт.
+Разработка до К11 авторизована; К1 выполняется, доказательства — CHECKPOINTS.md.
+Ниже журнал подготовки и старых этапов.
+
+12 октября: подготовлена SDK-среда и новый проект управляемого плана в
+[MCP-DEVELOPMENT-PLAN.md](MCP-DEVELOPMENT-PLAN.md) с
+[матрицей модулей](MODULE-MIGRATION-MATRIX.md). Он ожидает согласования К0;
+существующий контракт общего v1 и приёмка P2.31 этим не заменяются. Нового
+MCP-host/runtime пока нет; пользовательские technological rules остаются вне ядра.
+
 P2.31, 12 октября 2026: runtime 0.31.0, каталог 21/read-only 6. Первый общий executor переносит один SOLID в manifest-owned копии: два guard-прохода в удерживаемой COM-паре, один TranslateItem, постоянный intent claim, copy fence и отдельная independent verification. Live X +1 и отдельный X −1 подтверждены; наблюдения собственной копии восстановлены, Test_Block_P2 снова активен, четыре окна и protected saved hashes сохранены. Save/open/close/selection/screenshot не выполнялись. OWNED-TRANSLATION.md и STATUS-P2.31-EXECUTOR.md; ниже история предыдущих блоков. MCP v1 не завершён.
 
 ## Этап A — рабочий PowerShape MCP

@@ -1,5 +1,23 @@
 # PowerShape Bridge — состояние для продолжения
 
+12 октября 2026: пользователь принял MCP-DEVELOPMENT-PLAN.md и матрицу,
+авторизовал автономную разработку до К11 и разрешил Product Help `en_US`.
+К0 закрыт. К1 выполняется: чистый checkout, синтетические проверки и Windows CI.
+Текущие контрольные точки — CHECKPOINTS.md. Современный host пока не собран;
+последняя CAD-квалификация остаётся P2.31. Runtime/CAD не изменялись.
+Ниже сохранён журнал подготовки; его ожидание согласования К0 уже закрыто.
+
+Подготовка SDK-разработки, 12 октября 2026: .NET SDK 10.0.401, Node 24.20.0,
+npm/npx 11.19.0, MCP Inspector 2.10.1 и VS Code C# 2.160.4 (+ runtime extension
+3.2.0) установлены и проверены. Отдельная console build/run и Inspector CLI help
+прошли; SOFTWARE-SETUP-2026-10-12.md. Пользователь уведомлён о готовности до
+начала анализа модулей. Новый код MCP/worker не разрабатывался, native tests/CAD/
+deployment не выполнялись. P2.31 остаётся последней квалификационной стадией.
+Подготовлены MCP-DEVELOPMENT-PLAN.md и MODULE-MIGRATION-MATRIX.md в ветке
+docs/dotnet-mcp-plan; это проект для согласования, не принятая архитектура.
+Следующее действие — решение пользователя по К0, затем воспроизводимая база К1
+и минимальный SDK-host К2. Общий v1 и технологический клиент остаются раздельными.
+
 Инструменты разработки, 12 октября 2026: установлен dotnet-mcp-builder
 (source commit 70ddff7fab9d4d49743d221b56d761cff58048d0, 13 references),
 Git for Windows 2.55.0.windows.5 / Credential Manager 2.9.1 / gh 2.102.0.
@@ -13,7 +31,7 @@ Git for Windows 2.55.0.windows.5 / Credential Manager 2.9.1 / gh 2.102.0.
 danro-work/PowerShapeBridge. Репозиторий создан, исходная база опубликована;
 origin/main настроен, локальный и удалённый SHA сверены. Итоги — в receipt.
 Разбор двух чатов и инвентарь среды — DEVELOPMENT-TOOLS.md; receipt —
-reports/tooling-setup-2026-10-12.json. Modern .NET SDK не установлен;
+reports/tooling-setup-2026-10-12.json. Modern .NET SDK установлен отдельным блоком выше;
 новый C# MCP-host по навыку рекомендуется отдельно от существующего Framework STA-worker.
 Этот блок не меняет квалификационную стадию P2.31: CAD, deployment и self-test
 при настройке инструментов не выполнялись.
