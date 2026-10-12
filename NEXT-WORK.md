@@ -1,8 +1,10 @@
 # Дальнейшая работа
 
 12 октября: К0 принят пользователем, разработка до К11 авторизована.
-Сейчас К1: clean checkout и синтетические проверки с явным профилем config,
-без установленных моделей/runtime. Следом К2 SDK-host/fake-panel.
+К1 пройден локально и в Windows CI. К2 локально пройден: SDK-host/fake-panel,
+45 .NET tests, independent STDIO/Python journal parity и Inspector; clean checkout
+и все Windows CI успешны, К2 закрыт. Сейчас К3: read-only catalog из шести tools,
+leases и direct-call mutation refusals.
 Product Help — `en_US`, отчёты на русском; CHECKPOINTS.md хранит текущий статус.
 Ниже историческая запись подготовки, её ожидание К0 уже закрыто.
 
