@@ -7,6 +7,8 @@ namespace PowerShapeMcp;
 public sealed class ReferenceRejected(string code) : Exception(code)
 {
     public string Code { get; } = code;
+    public string? OperationId { get; init; }
+    public string? PlanSha256 { get; init; }
 }
 
 public readonly record struct EntityKey(long Type, long Id);

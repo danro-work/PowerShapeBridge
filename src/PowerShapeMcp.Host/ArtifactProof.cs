@@ -24,12 +24,18 @@ public static class ArtifactProof
     }
     public static bool Fields(JsonObject value,params string[] names)=>new HashSet<string>(value.Select(p=>p.Key)).SetEquals(names);
     public static bool Boolean(JsonNode? value,bool expected)=>value is JsonValue scalar&&scalar.TryGetValue<bool>(out var actual)&&actual==expected;
+    public static bool IntegerIs(JsonNode? value,long expected)
+    {
+        if(value is null)return false;
+        var raw=JsonSerializer.SerializeToElement(value);
+        return raw.ValueKind==JsonValueKind.Number&&raw.TryGetInt64(out var number)&&number==expected;
+    }
     public static string String(JsonObject value,string name,string code)=>value[name] is JsonValue scalar&&scalar.TryGetValue<string>(out var text)?text:throw new ReferenceRejected(code);
     public static JsonObject Journal(string root,string id)
     {
         var result=new OperationJournal(root).Read(id);
         if(result["state"]?.GetValue<string>()!="operation_receipt_read"||result["receipt"] is not JsonObject journal)
             throw new ReferenceRejected("operation_journal_unreadable");
-        return journal;
+        return journal.DeepClone().AsObject();
     }
 }

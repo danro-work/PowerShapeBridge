@@ -78,6 +78,7 @@ public sealed class CandidateStore(Func<double>? clock=null,Func<DateTimeOffset>
         Purge();if(!sets.TryGetValue(handle,out var found))throw new ReferenceRejected("entity_set_handle_unknown_or_expired");
         return found.Parameters.DeepClone().AsObject();
     }
+    public double SetRemaining(string handle){SetParameters(handle);return sets[handle].Expires-now();}
     // Internal K4 seam only; no public preparation tool is registered by this class.
     public JsonObject PrepareParameters(string document,string[] handles)
     {

@@ -8,7 +8,7 @@
 | К1 | Пройден | STATUS-K1-BASELINE.md: clean checkout, 312 C#, 114 Python; оба GitHub Windows CI успешны |
 | К2 | Пройден | STATUS-K2-SDK.md: clean checkout, 45 .NET tests, STDIO/Python journal parity, Inspector; все Windows CI успешны |
 | К3 | Пройден | SDK 0.33.0-dev: clean checkout, 98 .NET tests, independent Python parity/Inspector; все CI успешны |
-| К4 | Выполняется | Frozen/raw artifact proof и set/copy leases, 109 .NET tests. Plans/bindings/packets/routes ещё впереди |
+| К4 | Выполняется | Passive plans/journals/bindings/packets, 134 .NET tests. SDK facades/independent parity ещё впереди |
 | К5 | Не начато | Паритет owned open/translation; решение о live переключении |
 | К6 | Не начато | SaveAs результата, saved bytes и отдельный reopen |
 | К7 | Не начато | Interrupted recovery и fault matrix |
