@@ -5,7 +5,13 @@ oversized recovery plan; clean code5da2c04 прошёл262 .NET tests. Новы�
 src/test_sdk_recovery_stdio.py: шесть full/read-only successful reads, extra
 command refusal, unchanged artifacts/no requests. Добавлен в verify-sdk (8 STDIO).
 71 protected files double-SHA/size совпали после actual unknown inspection.
-Clean baselinee6b6588 passed; final SDK regression/CI ещё выполняются. Runtime/
+Clean baselinee6b6588 и full SDK5da2c04 passed:262 .NET/514 native/171 artifacts,
+seven прежних STDIO/Inspector;123 recorded source/binary SHA matched. Восьмой
+script отдельно passed на clean DLL. Actual unknown eventCount3/tail SHA/plan
+SHA/claim content совпали с recorded inspection; old command не повторялся.
+Все четыре CI блокаdaba4db passed:38316661689/38316666225 baseline,
+38316661779/38316666329 SDK; actual SDK log262 tests/171 artifacts/eight STDIO
+scripts (six recovery cases)/Inspector подтверждён. Runtime/
 CAD/default config не менялись; K6 Apply permission pending; K7 только первый
 reader block, outcome-resolution/checkpoint recovery/fault matrix ещё впереди.
 

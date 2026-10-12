@@ -12,7 +12,15 @@ STDIO: start без return, return без fresh verification и историче
 snapshot по double SHA/size: reader/protected-after-inspection.json. Это проверка
 сохранённых байтов в данный момент, не оценка текущей несохранённой CAD-модели.
 Clean baselinee6b6588 пройден; последняя правка не меняет native/Python source.
-Полный clean SDK5da2c04 и exact-head CI следующего test-only блока выполняются.
+Полный clean SDK5da2c04 прошёл:262 .NET/514 native/171 artifacts, seven прежних
+STDIO scripts/Inspector; все123 recorded source/binary SHA совпали с clean files.
+Новый восьмой script проверен отдельно на этой clean DLL. Evidence:
+work/c7s/evidence/K7-clean-sdk; reader/clean-hash-audit.json. Exact-head CI
+daba4db passed: baseline38316661689/38316666225, SDK38316661779/38316666329.
+Actual SDK log подтвердил262 tests/171 artifact cases/eight STDIO scripts,
+включая six external recovery cases, и Inspector. Original unknown journal tail SHA,
+plan SHA и claim content повторно сверены: reader/retained-unknown-audit.json,
+все совпали; eventCount3 и исход unknown сохраняются.
 Draft PR8: https://github.com/danro-work/PowerShapeBridge/pull/8. К7 не завершён.
 
 13 октября 2026. Реализован SDK0.37.0-dev `inspect_operation_recovery(operationId)`

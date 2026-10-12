@@ -1,8 +1,9 @@
 # Дальнейшая работа
 
-K7 PR8: сохранить результат ongoing clean SDK5da2c04 и exact-head CI блока
-внешнего recovery STDIO test. Domain/protocol262 passed; independent six-case
-full/RO tool reads passed, protected71 files unchanged. Затем отдельный К7
+K7 PR8: clean SDK5da2c04 passed262 .NET/514 native/171 artifacts; все четыре
+CI daba4db passed, включая eighth external recovery STDIO script.123 hashes
+matched; independent six-case full/RO tool reads passed, protected71 files и
+old unknown journal/plan/claim unchanged. Следом отдельный К7
 outcome-resolution contract и complete fault matrix; checkpoint recovery требует
 отдельно принятого сценария. Не выдавать reader за завершение всей К7.
 
