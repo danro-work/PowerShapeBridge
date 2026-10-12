@@ -1,43 +1,54 @@
-# К4 — правила подготовки, выполняется
+# К4 — подготовка и доказательства
 
-12 октября 2026. К4 ещё не завершён; SDK public catalog остаётся 0.33.0-dev
-с шестью read-only tools. Native runtime/worker/CAD не изменялись.
+12 октября 2026. Локальная проверка пройдена; clean checkout/Windows CI ещё
+ожидаются. SDK-host 0.34.0-dev, native runtime 0.31.0 не менялся.
+General catalog содержит 16 tools, отдельный read-only — 6 (5 без candidates).
+Open/activation/translation/verify endpoints квалифицируются на К5.
 
-Готовы исходные хранилища для подключения к SDK:
+Перенесены set/copy leases, immutable local plans/prepared journals,
+document bindings и owned packets. Схемы/TTL/dependency checks сохранены;
+native COM/held-context guards остаются в существующем Framework worker.
+Python и native C# digest encoding разделены. SHA считается из original bytes,
+включая BOM/CRLF/whitespace; frozen plans пишутся CreateNew + Flush(true).
 
-- PythonJson.Indented сохраняет legacy indent=2, порядок полей, Unicode и
-  числовую форму из parsed JSON; raw receipt SHA не строится пересериализацией.
-- ArtifactProof проверяет token/size/path и SHA оригинальных bytes, включая
-  BOM/CRLF/whitespace. Freeze создаёт файл через CreateNew + Flush(true),
-  повторное создание отвергается. Local prepared artifacts — отдельная схема;
-  native C# digest не заменяется Python encoding.
-- CandidateStore хранит observed set leases, отзывает их при observed switch
-  и expiration; выдача set handle не исполняет CAD.
-- WorkingCopyStore переносит saved-source argument/path policy, copy ownership
-  leases и verified-open lease seam для следующей стадии. TTL не продлевается,
-  чужое подключение не принимает handle. Никакой copy/open facade пока нет.
+Десять prepared facades явно разрешены флагами конфигурации только в general
+mode. StrictTool проверяет exact fields/types/tokens, наборы/uniqueness,
+qualified operation parameters и source path policy до IPC/файлов.
+Schemas зафиксированы из Python catalog; SDK descriptions добавлены отдельно.
+BridgeSession владеет всеми stores, ReferenceGate охватывает подготовку,
+native response, dependency recheck и выдачу lease. Deadline включает очередь.
 
-OperationPlanStore перенесён: strict arguments/finite vectors/units/frame,
-чтение exact source/set hashes, полный source projection, explicit intersection
-roles/disjointness, disabled local plan и только prepared journal. Cache TTL
-после подготовки ограничен оставшимися UTC/set leases, без продления на время IO.
-PreparedJournal создаёт только первое событие. Interrupted writer.lock сохраняется;
-native executor/verifier остаются владельцами последующих command transitions.
+Local plan/inspect не отправляют CAD-заявку. Другие facades публикуют только
+фиксированные recipe.prepare/имена и параметры из выданных этому подключению
+leases. Read references не принимаются за candidates. Prepared plan/packet
+сохраняет executionEnabled=false, standalone validate не разрешает edit.
+Verification не дописывает journal. Прерывание writer сохраняет marker;
+unknown после native submit не повторяется, .processing не удаляется.
+Истечение dependency во время native callback не выдаёт binding/packet.
+Отмена после claim отзывает соответствующие leases, без остановки CAD/retry.
 
-DocumentBindingStore и OwnedOperationStore перепроверяют зависимости после
-native результата, exact schemas/false execution flags, raw hashes и prepared
-journal. Expiration — минимум всех связанных leases; изменение/исчезновение
-proof или зависимостей отвергается до дальнейшей работы. Verification читает
-готовые bytes и не дописывает событие. Native и Python digest encoding разделены.
+| Проверка | Результат |
+|---|---|
+| Locked restore/Release build | 0 errors, 0 warnings |
+| .NET tests | 141 passed, 0 failed, 0 skipped |
+| Independent STDIO journal/read tests | Schema constraints, raw hashes, read namespace/scope, stale/no-revival |
+| Independent prepared Python parity | 10 facades, exact private parameters; local plan и first prepared event совпали byte-for-byte |
+| Framework self-tests в новом staging | 312 checks, fake retained COM context и opaque saved-file fixtures; no CAD |
+| Actual Framework artifacts | Python oracle/C# verifier: 63 cases, 0 mismatches, native encoding не заменяется Python |
+| Inspector CLI 2.10.1 | Read-only catalog/status; UI не открывался |
 
-Проверки: 134 .NET tests passed, 0 failed, 0 skipped;
-`evidence/K4-safety/K4-prepared.trx`. Из них 98 — база К3, два artifact proof
-tests, девять copy/set/source-policy и 25 prepared-plan/binding/packet/fault cases.
-Предыдущие artifact/lease TRX
-сохранён рядом. Проверки выполнялись в обычном пользовательском Windows-контексте
-с synthetic файлам; нет CAD-команд, GUI, deployment или runtime обновления.
+Raw evidence: evidence/K4-safety/full — sdk-tests.trx, три transcript/stderr,
+fake-panel envelopes, native-fixture-tests.txt, native-oracle.json,
+native-compatibility.json, Inspector results и sdk-verification.json с SHA.
+Ранние artifact/lease/prepared/facade TRX — история, не текущая приёмка.
 
-До закрытия К4 нужно подключить перенесённые stores к BridgeSession/ReferenceGate,
-добавить SDK prepared facades и mode refusals;
-независимый Python/native byte/schema parity, tamper/concurrency/fault checks,
-clean checkout и Windows CI. Execute/verify/open endpoints относятся к К5.
+verify-sdk.ps1 создаёт fresh native stage (отказывается использовать уже
+существующий), затем запускает только reviewed --self-test без COM/UI.
+Повторный ручной запуск требует нового -NativeStageDirectory. CI собирает
+в новом checkout и сохраняет artifact SDK-verification.
+Обычный native build/deployment скрипт не изменён, second panel/worker не запускались.
+
+К4 закрывается после clean checkout и CI. После этого К5 переносит remaining
+context/open/execute/verify facade, доказывает one-use native execution на новом
+owned scenario и готовит решение пользователя о default live adapter switch.
+Общий v1 по-прежнему включает К6–К11; технологический модуль отдельно.

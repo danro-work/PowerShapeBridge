@@ -8,12 +8,12 @@
 independent Python read/digest/raw-byte parity и Inspector CLI. Clean checkout
 и все CI успешны, К3 закрыт. Сейчас К4 — entity sets/local plans/copy/binding/owned
 stores с byte/schema parity, сохраняющий native worker и separate execute/verify.
-К4 stores готовы для подключения: ArtifactProof/PythonJson.Indented, set/copy
-leases, read_set/source projection, local prepared plan/journal, bindings/owned
-packets; 134 .NET tests. Следом SDK prepare/validate facades и independent Python/
-native byte/schema parity, tamper/timeout/cancellation tests, clean checkout/CI.
-До К5 не добавлять execute/open и не менять live runtime. Подключать все stores
-к одному BridgeSession и его ReferenceGate; readonly должен оставаться шестью tools.
+К4 локально пройден: подключены десять prepared facades, full/read-only 16/6,
+141 .NET tests, independent Python byte/schema/private envelope parity,
+312 Framework synthetic checks/63 actual artifact cases и Inspector CLI.
+Следом clean checkout/CI К4, затем К5 — owned context/open/translation/verify
+facades и квалификация на новой собственной копии; обычный live adapter switch
+принимает пользователь по готовому пакету/rollback. Native runtime пока не менять.
 Не переносить C# native digest в Python encoding: это разные схемы.
 Product Help — `en_US`, отчёты на русском; CHECKPOINTS.md хранит текущий статус.
 Ниже историческая запись подготовки, её ожидание К0 уже закрыто.
