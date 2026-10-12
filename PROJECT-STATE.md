@@ -1,5 +1,15 @@
 # PowerShape Bridge — состояние для продолжения
 
+К6 filesystem/SDK passive target foundation реализована, без новых CAD-команд
+и public endpoints. Source native0.33.0-dev, установленный native0.32.0/published
+K5 SDK0.35.1 не менялись. OwnedSaveTargets/OwnedDirectoryLease/OwnedSaveTargetStore:
+fixed new result path, reservation/native directory pin, exact receipt+dependency
+SHA, minimum TTL, no overwrite/claim/fence/replay. 177 .NET/349 native synthetic
+и 86 actual artifact cases (0 mismatches), four STDIO clients/oracle tests/Inspector
+пройдены; полный regression passed. Clean checkout/CI нового блока ещё впереди.
+STATUS-K6-SAVE-AS.md; evidence/K6-save-as. К6 executor/verifiers/reopen/public
+tools ещё впереди. К5 user default connection decision pending; config не менялся.
+
 К5 технически квалифицирован: native 0.32.0 установлен и SDK 0.35.1-dev
 published/full-readonly 21/6 проверен. Clean baseline/SDK и четыре Windows CI
 cf863d2 пройдены. После backup-aware idle deploy 28 protected hashes совпали.
@@ -16,7 +26,7 @@ claim/journal не изменены. K5-SDK-SWITCH.md — готовый review/
 read-only server. Config.toml пока не менялся. К5 ожидает это решение,
 К6–К11 обязательны. К6 начат проектом OWNED-SAVE-AS.md с Autodesk sources:
 typed prepared target/one SaveAs/separate verify/unique saved-byte reopen/new
-binding. Реализации и live qualification К6 пока нет. Далее история предыдущих блоков.
+binding. Foundation добавлена выше; live qualification К6 пока нет. Далее история предыдущих блоков.
 
 Предшествующий К5 блок: SDK source 0.35.1-dev, native source/staging 0.32.0;
 установленный native всё ещё 0.31.0. Live OPEN на НОВОЙ copy

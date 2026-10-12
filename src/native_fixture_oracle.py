@@ -8,6 +8,7 @@ from pathlib import Path
 from document_bindings import DocumentBindingStore
 from owned_operation_plans import OwnedOperationStore
 from owned_translation import execution_receipt
+from save_target_fixture_oracle import verify as verify_save_target
 
 
 def generate(stage, target):
@@ -74,6 +75,25 @@ def generate(stage, target):
         raise AssertionError('Framework synthetic fixtures are missing or insufficient.')
     if not any(case['kind'] == 'execution' and case['accepted'] for case in cases):
         raise AssertionError('Actual Framework successful execution receipt coverage is missing.')
+    for root in sorted((stage / 'work').glob('owned-operation-self-test-*')):
+        for path in sorted((root / 'savedresults').glob('*/prepared-receipt.json')):
+            receipt = json.loads(path.read_text(encoding='utf-8-sig'))
+            variants = [receipt]
+            for key, value in [('schemaVersion', True), ('executionEnabled', True), ('resultPath', receipt['target']['workingPath']),
+                               ('nativeObservedPropertiesSha256', 'f' * 64), ('extra', 'SAVE')]:
+                changed = copy.deepcopy(receipt)
+                changed['target'][key] = value
+                variants.append(changed)
+            changed = copy.deepcopy(receipt)
+            changed['targetSha256'] = 'f' * 64
+            variants.append(changed)
+            for variant in variants:
+                try:
+                    verify_save_target(root, variant)
+                    accepted = True
+                except (OSError, ValueError, TypeError, KeyError):
+                    accepted = False
+                cases.append({'kind': 'save_target', 'root': str(root), 'receipt': variant, 'accepted': accepted})
     Path(target).parent.mkdir(parents=True, exist_ok=True)
     Path(target).write_text(json.dumps({'stage': str(stage), 'cases': cases}, indent=2, ensure_ascii=False), encoding='utf-8')
     print('Generated Python oracle for %d actual Framework artifact cases.' % len(cases))

@@ -1,5 +1,11 @@
 # Дальнейшая работа
 
+К6 source native0.33.0-dev: filesystem target + pinned directories + SDK target
+store реализованы. Runtime0.32/published K5 SDK/config unchanged. Полный
+evidence/K6-save-as/verified-targets passed. Сохранить блок в Git, проверить clean/CI, затем passive
+prepare facade/flag и native one-use SaveAs/independent verifier/reopen/new binding.
+STATUS-K6-SAVE-AS.md. Подготовка target не авторизует команду, COM guard обязателен.
+
 К5 technical pilot/clean/CI/deployment/independent audit пройдены; user default
 switch decision pending. K5-SDK-SWITCH.md содержит proposed full + read-only
 config и rollback. До ответа config.toml не менять. Если пользователь разрешит,

@@ -77,7 +77,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.32.0";
+        public const string ReleaseVersion = "0.33.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -698,6 +698,7 @@ namespace PowerShapeBridge
             count += WorkingCopyOpen.SelfTest();
             count += OwnedOperationPlanTests.Run();
             count += OwnedTranslationTests.Run();
+            count += OwnedSaveTargetTests.Run();
             Action<bool> check = ok => { if (!ok) throw new Exception("Self-test failed at " + count); count++; };
             string statusRoot=Path.Combine(Program.Root,"work","status-self-test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(statusRoot);
             string statusPath=Path.Combine(statusRoot,"panel-status.json"),statusTemporary=statusPath+".tmp";File.WriteAllText(statusPath,"old");File.WriteAllText(statusTemporary,"new");
