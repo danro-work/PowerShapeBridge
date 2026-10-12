@@ -2,7 +2,10 @@
 
 12 октября 2026. Локальный чистый экспорт commit
 `ed39833dbb5aa6e1c8d966a981beabeae21ddde0` проверен без PowerShape.
-Windows CI ещё ожидается; К1 не закрыт до его результата.
+Windows CI на commit `83f8e8a6f62cc3193387d71fd83ade788b759f0d`
+прошёл для push и pull_request. [CI push](https://github.com/danro-work/PowerShapeBridge/actions/runs/38235222317),
+[CI PR](https://github.com/danro-work/PowerShapeBridge/actions/runs/38235222252).
+К1 закрыт; это не приёмка CAD или всего v1.
 
 | Проверка | Результат |
 |---|---|
