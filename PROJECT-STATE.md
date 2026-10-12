@@ -2,7 +2,7 @@
 
 К6: SDK0.36.0-dev prepare_owned_save_as зарегистрирован; native0.33.0-dev
 one-use SaveAs и separate verifier реализованы с gated recipes. 188 .NET/
-426 native synthetic, 114 artifacts (0 mismatches), четыре STDIO клиента/
+432 native synthetic, 114 artifacts (0 mismatches), четыре STDIO клиента/
 Inspector и independent native saved-byte/journal audit passed. Всё offline;
 установленные native0.32/published K5 SDK0.35.1/config.toml не менялись.
 SDK execution/verifier/saved-result leases, reopen/new binding и live К6 ещё

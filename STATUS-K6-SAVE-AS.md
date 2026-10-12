@@ -18,7 +18,7 @@ listing receipts, result SHA/file identity, наблюдаемые свойст�
 Native recipes gated флагом ownedSavesExperimental; config/general-owned-saves.json
 не установлен. SDK execute/verify/saved-result leases пока не подключены.
 
-Пройдены 188 .NET tests, 426 native synthetic checks, четыре независимых STDIO
+Пройдены 188 .NET tests, 432 native synthetic checks, четыре независимых STDIO
 клиента, oracle regression, Inspector и 114 actual Framework artifact cases
 (95 accepted, 0 mismatches). Отдельный Python audit проверил actual native SaveAs
 raw receipts, шесть journal events, один command-start/return, retained claim,

@@ -48,12 +48,14 @@ namespace PowerShapeBridge {
    check(NativeJournal.ForVerification(successful.Fixture.Root,id,(string)result["planSha256"]).State=="executed_unverified");
    var replay=successful.Context();check(Equals(successful.Execute(replay)["state"],"owned_save_as_rejected_before_change")&&replay.Calls==0);
    check(EntitySets.Canonical(OwnedSaveAs.SavedProof(successful.ResultPath))==EntitySets.Canonical(result["savedResult"]));
-   foreach(string fault in new[]{"throw","no_file","wrong_content","changed_context","wrong_window","changed_working","checkpoint_write"}) {
+   foreach(string fault in new[]{"throw","no_file","wrong_content","changed_context","wrong_window","changed_working","checkpoint_write","wrong_model_name","active_listing_mismatch"}) {
     var test=new Case();var fake=test.Context();fake.Throw=fault=="throw";fake.NoFile=fault=="no_file";fake.WrongContent=fault=="wrong_content";
     if(fault=="changed_context")fake.DuringSave=path=>fake.Changed=true;
     if(fault=="wrong_window")fake.DuringSave=path=>fake.Window()["nativeWindowId"]=77;
     if(fault=="changed_working")fake.DuringSave=path=>File.AppendAllText(test.Fixture.Working,"synthetic external saved-byte change");
     if(fault=="checkpoint_write")fake.DuringSave=path=>File.AppendAllText(test.Checkpoint,"synthetic forbidden checkpoint write");
+    if(fault=="wrong_model_name")fake.DuringRead=n=>{if(n==5)fake.Window()["modelName"]="Another saved document";};
+    if(fault=="active_listing_mismatch")fake.DuringRead=n=>{if(n==5){var active=Clone(fake.Window());active["syntheticUnexpectedMetadata"]="different";fake.Listing["activeWindow"]=active;}};
     var failure=test.Execute(fake);check(Equals(failure["state"],"owned_save_as_outcome_unknown")&&fake.Calls==1&&File.Exists(test.Fence)&&File.Exists(test.Claim));
     var retry=test.Context();check(Equals(test.Execute(retry)["state"],"owned_save_as_rejected_before_change")&&retry.Calls==0);
     check(Program.Hash(test.Checkpoint)==test.CheckpointSha&&(fault=="changed_working"?!test.Protected():test.Protected()));

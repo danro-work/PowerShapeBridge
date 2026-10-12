@@ -49,7 +49,10 @@ namespace PowerShapeBridge {
     if(ReferenceEquals(window,originals[0]))continue;
     if(current.Count(value=>WindowKey(window)==WindowKey(value))!=1)throw new InvalidOperationException("Unrelated SaveAs window changed.");
    }
-   if(current.Count(value=>value.ContainsKey("modelPath")&&string.Equals(OwnedCopies.LocalPath((string)value["modelPath"]),target,StringComparison.OrdinalIgnoreCase))!=1)throw new InvalidOperationException("SaveAs target window ambiguous.");
+   var targets=current.Where(value=>value.ContainsKey("modelPath")&&string.Equals(OwnedCopies.LocalPath((string)value["modelPath"]),target,StringComparison.OrdinalIgnoreCase)).ToArray();
+   if(targets.Length!=1||EntitySets.Canonical(targets[0])!=EntitySets.Canonical(active)||
+      !active.ContainsKey("modelName")||!string.Equals(active["modelName"] as string,Path.GetFileNameWithoutExtension(target),StringComparison.OrdinalIgnoreCase)||
+      current.Select(window=>window["nativeWindowId"]).Distinct().Count()!=current.Length)throw new InvalidOperationException("SaveAs target window listing/model identity ambiguous.");
   }
   internal static Dictionary<string,object> Execute(string root,string id,Dictionary<string,object> parameters,IContext context) {
    var result=new Dictionary<string,object>{{"state","owned_save_as_rejected_before_change"},{"operationId",id},{"bridgeVersion",Program.ReleaseVersion},

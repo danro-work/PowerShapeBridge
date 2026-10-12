@@ -3,7 +3,7 @@
 Текущий следующий блок К6: SDK execute_owned_save_as/verify_owned_save_as,
 connection-scoped savedResult lease, отдельно квалифицированный clone занятого
 saved result, own uniquely named reopen/new binding. Native one-save executor/
-fresh verifier и SDK passive prepare уже реализованы; 188 .NET/426 native,
+fresh verifier и SDK passive prepare уже реализованы; 188 .NET/432 native,
 114 artifact cases и independent native save audit passed offline. Сначала
 clean checkout/CI текущего блока; затем закончить SDK routes/proofs и reopen.
 Runtime0.32/published SDK0.35.1/config не менялись, default switch pending.
