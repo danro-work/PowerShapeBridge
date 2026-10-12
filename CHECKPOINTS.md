@@ -5,8 +5,8 @@
 | Точка | Состояние | Доказательство / следующий шаг |
 |---|---|---|
 | К0 | Принято пользователем | План принят к работе до К11; Product Help `en_US` разрешён |
-| К1 | Выполняется | verify-baseline.ps1, Windows baseline CI; результаты ещё не получены |
-| К2 | Не начато | SDK STDIO-host с двумя диагностическими tools и fake-panel |
+| К1 | Локально пройден; CI ожидается | STATUS-K1-BASELINE.md: clean checkout, 312 C#, 114 Python и protocol/file/deployment проверки |
+| К2 | Выполняется | Созданы проекты net10.0; закреплённые зависимости восстановлены; tools/tests ещё не приняты |
 | К3 | Не начато | Шесть read-only tools, handles и запреты прямых мутационных вызовов |
 | К4 | Не начато | Перенос safety stores с byte/hash parity |
 | К5 | Не начато | Паритет owned open/translation; решение о live переключении |
