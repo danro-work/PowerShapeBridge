@@ -15,6 +15,11 @@ digest/raw-byte parity и Inspector CLI прошли без CAD. Clean checkout 
 Windows CI успешны; К3 закрыт, К4 начат. STATUS-K3-READONLY.md.
 Native runtime 0.31.0 не изменён,
 live адаптер не переключался; mutation tools в новом host пока отсутствуют.
+Начат К4: Python-compatible indent/freeze, verified raw artifact SHA, set/copy
+leases, source path validation и expiry/dependency seams. 109 .NET tests прошли
+без CAD; evidence/K4-safety. Новый код К4 пока не зарегистрирован как SDK tools.
+Продолжить local plan/journal, binding и owned-operation stores, затем prepared
+facades с независимым byte/schema parity. STATUS-K4-SAFETY.md.
 Текущие контрольные точки — CHECKPOINTS.md. SDK-host собран и проверен без CAD;
 последняя CAD-квалификация остаётся P2.31. Runtime/CAD не изменялись.
 Ниже сохранён журнал подготовки; его ожидание согласования К0 уже закрыто.
