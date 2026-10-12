@@ -1,0 +1,314 @@
+[
+  {
+    "name": "prepare_entity_set",
+    "description": "Experimental: prepare an immutable observed set of SOLID/SURFACE/COMPCURVE candidates in the explicit candidate document. Worker verifies original native receipt, expiry and fresh document/inventory/properties before writing a local set artifact. Does not edit CAD or accept P2.21 read references. No mutation tools accept these sets yet.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "candidateDocumentHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "candidateEntityHandles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "candidateDocumentHandle",
+        "candidateEntityHandles"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "validate_entity_set",
+    "description": "Experimental: freshly validate an observed set in the worker, using an opaque handle from this connection. Rechecks set artifact/native receipt hashes, lifetime and document/inventory/properties. No selection, activation, save or capture. A standalone check is not authorization or validation immediately before a later edit.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "entitySetHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "entitySetHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "prepare_operation_plan",
+    "description": "Experimental local plan only: translate one observed entity set or intersect two disjoint sets (SOLID/SURFACE primary, SURFACE secondary). Pins set/source receipt SHA, identity, raw units, parameters and expiry; writes immutable plan and prepared journal. Does not contact CAD or execute commands. Execution remains disabled until owned-copy/checkpoint policy, worker guard and operation qualification are implemented.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "translate_entities",
+            "intersect_entity_sets"
+          ]
+        },
+        "entitySetHandles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "parameters": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "vector": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": -1000000,
+                    "maximum": 1000000
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "coordinateFrame": {
+                  "const": "world"
+                },
+                "lengthUnits": {
+                  "const": "document_raw"
+                },
+                "mode": {
+                  "const": "move"
+                }
+              },
+              "required": [
+                "vector",
+                "coordinateFrame",
+                "lengthUnits",
+                "mode"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "offset": {
+                  "const": 0
+                }
+              },
+              "required": [
+                "offset"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "operation",
+        "entitySetHandles",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "inspect_operation_plan",
+    "description": "Experimental local check of this connection's plan handle, hashes, original native receipts, lease expiry and recorded journal. No live CAD read, command or edit authorization. Requires preparation in the same connection; absent from read-only server.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operationPlanHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "operationPlanHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "prepare_working_copy",
+    "description": "Experimental saved-file operation: copy the explicit local .psmodel whose disk SHA256 matches into a new owned Working.psmodel and separate independent read-only Before.psmodel checkpoint. Records native file identity and immutable ownership receipt. Source is held read-only with writes/deletes denied; busy/changed sources are rejected without weaker sharing. No CAD connection, activation, SaveAs or unsaved-model capture. Copies are not certified loadable or accepted for geometry execution yet.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sourcePath": {
+          "type": "string"
+        },
+        "sourceSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "sourcePath",
+        "sourceSha256"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "inspect_working_copy",
+    "description": "Experimental local-file inspection using a workingCopyHandle issued in this connection (300 seconds). Checks ownership SHA, fixed paths, native file identities, no reparse/hard-link aliases and unchanged independent read-only checkpoint. Reports point-in-time working SHA/changed bytes. No CAD connection, activation or save; not an executor COM guard. Absent from read-only server because handles are issued only by preparation.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "workingCopyHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "workingCopyHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "bind_working_document",
+    "description": "Experimental passive binding of the already-active owned Working.psmodel. Requires candidateDocumentHandle from a fresh inspection and workingCopyHandle in this connection. Rechecks the pinned receipt, two observations and native windows using one retained COM application/document, plus retained ownership/working/checkpoint file handles. Writes an immutable binding artifact; no open, activation, selection, save, screenshot or geometry command. Rejects source/checkpoint/foreign models. Not a later edit authorization or persistent lifecycle identity.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "candidateDocumentHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "workingCopyHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "candidateDocumentHandle",
+        "workingCopyHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "validate_working_document_binding",
+    "description": "Experimental passive validation of this connection's workingDocumentBindingHandle. Rechecks immutable binding/receipt hashes, expiry, ownership/checkpoint and active model/window observations using one retained COM context. No CAD commands; does not authorize an action after this standalone check. Read-only server does not issue binding handles.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "workingDocumentBindingHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "workingDocumentBindingHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "prepare_owned_operation",
+    "description": "Experimental passive guard: couple this connection's immutable local operation plan and owned document binding. Native worker pins plan/set/receipt/binding/ownership/checkpoint bytes and checks one retained COM application/document twice before/after writing a disabled packet and prepared journal. No CAD commands, geometry execution or authorization for a later edit.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operationPlanHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "workingDocumentBindingHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "operationPlanHandle",
+        "workingDocumentBindingHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "validate_owned_operation",
+    "description": "Experimental passive guard for this connection's disabled ownedOperationHandle: recheck every plan/set/binding dependency, working-byte hash, checkpoint and retained live COM context. Returns observations only; no execution or lasting edit authorization. No native ID/path/command arguments; absent from read-only server.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "ownedOperationHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "ownedOperationHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  }
+]

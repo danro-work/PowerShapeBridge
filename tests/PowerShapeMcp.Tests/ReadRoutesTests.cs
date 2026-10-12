@@ -69,12 +69,12 @@ public sealed class ReadRoutesTests
     [Theory]
     [InlineData(true,true,6)]
     [InlineData(true,false,5)]
-    [InlineData(false,true,6)]
+    [InlineData(false,true,8)]
     public async Task ExplicitCatalogAndEveryMutationRefuseBeforeQueue(bool readOnly,bool candidates,int count)
     {
         await using var connection=await Connection.Create(readOnly,candidates);
         var tools=await connection.Client.ListToolsAsync();Assert.Equal(count,tools.Count);
-        Assert.All(tools,tool=>{Assert.True(tool.ProtocolTool.Annotations!.ReadOnlyHint);Assert.False(tool.JsonSchema.GetProperty("additionalProperties").GetBoolean());});
+        Assert.All(tools,tool=>{if(readOnly)Assert.True(tool.ProtocolTool.Annotations!.ReadOnlyHint);Assert.False(tool.JsonSchema.GetProperty("additionalProperties").GetBoolean());});
         foreach(var name in new[]{"activate_document","prepare_entity_set","validate_entity_set","prepare_operation_plan","inspect_operation_plan","prepare_working_copy","inspect_working_copy",
                     "bind_working_document","validate_working_document_binding","prepare_owned_operation","validate_owned_operation","open_working_copy","verify_working_copy_open","execute_owned_translation","verify_owned_translation",
                     "model_snapshot","select_entities","save_as","screenshot","execute_command"})

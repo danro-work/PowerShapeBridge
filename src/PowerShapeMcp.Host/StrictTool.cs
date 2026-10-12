@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
@@ -12,10 +13,12 @@ public sealed class StrictTool : DelegatingMcpServerTool
 {
     private readonly BridgeSession session;
     private readonly JsonObject schema;
-    public StrictTool(McpServerTool inner, BridgeSession session, JsonObject schema) : base(inner)
+    private readonly Action<JsonObject>? validate;
+    public StrictTool(McpServerTool inner, BridgeSession session, JsonObject schema,Action<JsonObject>? validate=null) : base(inner)
     {
         this.session=session;
         this.schema=schema;
+        this.validate=validate;
         ProtocolTool.InputSchema=JsonSerializer.SerializeToElement(schema);
     }
     public override async ValueTask<CallToolResult> InvokeAsync(RequestContext<CallToolRequestParams> request,CancellationToken cancellationToken=default)
@@ -23,6 +26,11 @@ public sealed class StrictTool : DelegatingMcpServerTool
         session.AssertToolAllowed(ProtocolTool.Name);
         var arguments=request.Params?.Arguments;
         if(!Valid(arguments))throw new McpProtocolException("Invalid tool arguments.",McpErrorCode.InvalidParams);
+        if(validate is not null)
+        {
+            var data=new JsonObject();if(arguments is not null)foreach(var (key,value) in arguments)data[key]=JsonNode.Parse(value.GetRawText());
+            try{validate(data);}catch(ReferenceRejected rejected){throw new McpProtocolException(rejected.Code,McpErrorCode.InvalidParams);}
+        }
         using var admission=session.AcquireCall(request.JsonRpcRequest.Id);
         return await base.InvokeAsync(request,cancellationToken);
     }
@@ -34,19 +42,30 @@ public sealed class StrictTool : DelegatingMcpServerTool
         {
             if(arguments is null||!arguments.TryGetValue(name,out var value))return false;
             var rule=definition!.AsObject();
-            if(rule["type"]!.GetValue<string>()=="string")
+            var type=rule["type"]?.GetValue<string>()??(rule.ContainsKey("oneOf")?"object":null);
+            if(type=="string")
             {
-                if(value.ValueKind!=JsonValueKind.String||!FileArtifacts.Token(value.GetString()))return false;
+                if(!StringMatches(value,rule))return false;
             }
-            else if(rule["type"]!.GetValue<string>()=="array")
+            else if(type=="array")
             {
-                if(value.ValueKind!=JsonValueKind.Array||value.GetArrayLength() is <1 or >128)return false;
+                var min=rule["minItems"]?.GetValue<int>()??1;var max=rule["maxItems"]?.GetValue<int>()??128;
+                if(value.ValueKind!=JsonValueKind.Array||value.GetArrayLength()<min||value.GetArrayLength()>max)return false;
                 var seen=new HashSet<string>(StringComparer.Ordinal);
+                var item=rule["items"]!.AsObject();
                 foreach(var element in value.EnumerateArray())
-                    if(element.ValueKind!=JsonValueKind.String||!FileArtifacts.Token(element.GetString())||!seen.Add(element.GetString()!))return false;
+                    if(!StringMatches(element,item)||(rule["uniqueItems"]?.GetValue<bool>()==true&&!seen.Add(element.GetString()!)))return false;
             }
+            else if(type=="object"){if(value.ValueKind!=JsonValueKind.Object)return false;}
             else return false;
         }
+        return true;
+    }
+    private static bool StringMatches(JsonElement value,JsonObject rule)
+    {
+        if(value.ValueKind!=JsonValueKind.String)return false;var text=value.GetString()!;
+        if(rule["pattern"] is JsonValue pattern&&!Regex.IsMatch(text,pattern.GetValue<string>(),RegexOptions.CultureInvariant,TimeSpan.FromSeconds(1)))return false;
+        if(rule["enum"] is JsonArray options&&!options.Any(v=>v?.GetValue<string>()==text))return false;
         return true;
     }
     public static JsonObject Empty()=>new(){["type"]="object",["properties"]=new JsonObject(),["additionalProperties"]=false};

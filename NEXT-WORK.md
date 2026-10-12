@@ -8,6 +8,12 @@
 independent Python read/digest/raw-byte parity и Inspector CLI. Clean checkout
 и все CI успешны, К3 закрыт. Сейчас К4 — entity sets/local plans/copy/binding/owned
 stores с byte/schema parity, сохраняющий native worker и separate execute/verify.
+К4 локально пройден: подключены десять prepared facades, full/read-only 16/6,
+141 .NET tests, independent Python byte/schema/private envelope parity,
+312 Framework synthetic checks/63 actual artifact cases и Inspector CLI.
+Clean checkout/CI К4 прошли; К4 закрыт. Сейчас К5 — owned context/open/translation/verify
+facades и квалификация на новой собственной копии; обычный live adapter switch
+принимает пользователь по готовому пакету/rollback. Native runtime пока не менять.
 Не переносить C# native digest в Python encoding: это разные схемы.
 Product Help — `en_US`, отчёты на русском; CHECKPOINTS.md хранит текущий статус.
 Ниже историческая запись подготовки, её ожидание К0 уже закрыто.

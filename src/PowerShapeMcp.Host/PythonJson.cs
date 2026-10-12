@@ -33,6 +33,18 @@ public static class PythonJson
             });
         return text.Append('"').ToString();
     }
+    public static string Indented(JsonElement value,int level=0)
+    {
+        var pad=new string(' ',2*level);var child=new string(' ',2*(level+1));
+        return value.ValueKind switch
+        {
+            JsonValueKind.Object when !value.EnumerateObject().Any()=>"{}",
+            JsonValueKind.Array when value.GetArrayLength()==0=>"[]",
+            JsonValueKind.Object=>"{\n"+string.Join(",\n",value.EnumerateObject().Select(p=>child+Quote(p.Name)+": "+Indented(p.Value,level+1)))+"\n"+pad+"}",
+            JsonValueKind.Array=>"[\n"+string.Join(",\n",value.EnumerateArray().Select(v=>child+Indented(v,level+1)))+"\n"+pad+"]",
+            _=>Dump(value)
+        };
+    }
     private static string Number(string token)
     {
         if (!token.Contains('.') && !token.Contains('e') && !token.Contains('E')) return token;
