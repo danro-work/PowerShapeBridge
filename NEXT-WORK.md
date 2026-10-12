@@ -6,9 +6,9 @@
 и все Windows CI успешны, К2 закрыт. Сейчас К3: read-only catalog из шести tools,
 leases и direct-call mutation refusals.
 Основа К3 проверена: ObservationPolicy, canonical digests/path normalization,
-17 Python golden cases и 68 .NET tests. Продолжить ReferenceStore,
-DocumentHandleStore и candidate leases в области одного STDIO подключения,
-затем фиксированные read routes и шесть tools с negative SDK/fake-panel tests.
+17 Python golden cases, temporal stores и 85 .NET tests. Подключить ReferenceStore,
+DocumentHandleStore и CandidateStore к одному BridgeSession с единым async guard;
+добавить fixed read routes и шесть tools с negative SDK/fake-panel tests.
 Не переносить C# native digest в Python encoding: это разные схемы.
 Product Help — `en_US`, отчёты на русском; CHECKPOINTS.md хранит текущий статус.
 Ниже историческая запись подготовки, её ожидание К0 уже закрыто.
