@@ -6,20 +6,23 @@ namespace PowerShapeMcp.Tests;
 
 public sealed class OwnedSaveTargetTests
 {
-    private sealed class TargetFixture
+    internal sealed class TargetFixture
     {
         public SafetyFixture Data { get; }=new();
         public DocumentBindingStore Bindings { get; }
         public OwnedSaveTargetStore Targets { get; }
+        public BridgeSession Session { get; }
         public string Binding { get; }
         public string Id { get; }=Guid.NewGuid().ToString("N");
         public JsonObject Parameters { get; }
         public JsonObject Receipt { get; }
         public JsonObject Plan=>Receipt["target"]!.AsObject();
-        public TargetFixture()
+        public TargetFixture(bool readOnly=false,bool enabled=true)
         {
-            var copies=new WorkingCopyStore(()=>Data.Time,()=>Data.Utc);var candidates=new CandidateStore(()=>Data.Time,()=>Data.Utc);
-            Bindings=new(Data.Root,candidates,copies,()=>Data.Time,()=>Data.Utc);Targets=new(Data.Root,Bindings,()=>Data.Time,()=>Data.Utc);
+            foreach(var flag in new[]{"entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"})Data.Files.Config[flag]=true;
+            Data.Files.Config["ownedSaveTargetsExperimental"]=enabled;Data.Files.SaveConfig();
+            Session=new(Data.Files.Options(readOnly,2),()=>Data.Time,()=>Data.Utc);
+            var copies=Session.Copies;var candidates=Session.Candidates;Bindings=Session.Bindings;Targets=Session.SaveTargets;
             var copyId=Guid.NewGuid().ToString("N");var work=FileArtifacts.FixedPath(Data.Root,"workingcopies",copyId,"Working_"+copyId+".psmodel");
             var checkpoint=FileArtifacts.FixedPath(Data.Root,"workingcopies",copyId,"checkpoint","Before.psmodel");
             var hash=new string('a',64);var ownership=new JsonObject{["schemaVersion"]=2,["copyId"]=copyId,["bridgeVersion"]="0.33.0-dev",["createdUtc"]=LeaseTime.Format(Data.Utc),

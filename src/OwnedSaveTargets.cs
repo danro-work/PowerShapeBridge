@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 
 namespace PowerShapeBridge {
- // Filesystem-only foundation. No Exec/Save/Open/COM and no public recipe yet.
+ // Filesystem-only target preparation. No Exec/Save/Open/COM.
  internal static class OwnedSaveTargets {
   internal const string Qualification="Prepared owned SaveAs target only; no CAD command or later execution authorization. Source binding/receipt/files must be rechecked in one retained COM context immediately before the single SaveAs. Unknown outcomes are never replayed.";
   internal static string Folder(string root,string id) {
@@ -13,6 +13,17 @@ namespace PowerShapeBridge {
    OwnedCopies.NoReparse(path);return path;
   }
   internal static string ResultPath(string root,string id){return Path.Combine(Folder(root,id),"Result_"+id+".psmodel");}
+  internal static Dictionary<string,object> Run(string id,Dictionary<string,object> parameters) {
+   var result=new Dictionary<string,object>{{"state","owned_save_target_rejected"},{"executionEnabled",false},
+    {"cadSaveAttempted",false},{"contextChangeAttempted",false},{"geometryMutationAttempted",false},
+    {"powerShapeConnectionAttempted",false},{"qualification",Qualification}};
+   try {
+    Config config=Program.ReadConfig();
+    if(!config.IsGeneralCore||!config.ownedSaveTargetsExperimental)throw new InvalidOperationException("Experimental SaveAs targets disabled.");
+    result=Prepare(Program.Root,id,parameters);result["powerShapeConnectionAttempted"]=false;
+   }catch(Exception error){result["error"]=error.Message;result["targetId"]=id;result["localArtifactsMayExist"]=true;}
+   result["bridgeVersion"]=Program.ReleaseVersion;result["timestampUtc"]=DateTime.UtcNow.ToString("o");return result;
+  }
   internal static void NoFence(string root,string copyId) {
    string fence=OwnedTranslation.FencePath(root,copyId);OwnedCopies.NoReparse(fence);
    if(File.Exists(fence)||Directory.Exists(fence))throw new InvalidOperationException("Owned copy is fenced; inspect original journal without retry.");
@@ -70,11 +81,11 @@ namespace PowerShapeBridge {
    internal readonly OwnedCopies.OwnershipLease Copy;
    internal readonly Dictionary<string,object> Expected;
    internal readonly DateTime Expires;
-   readonly string root,id;
+   readonly string root,id;readonly bool verification;
    readonly OwnedOperationPlans.Proofs proofs=new OwnedOperationPlans.Proofs();
    OwnedDirectoryLease rootPin,parentPin,folderPin;
-   internal TargetLease(string bridgeRoot,string targetId,string sha) {
-    root=OwnedCopies.LocalPath(bridgeRoot.TrimEnd('\\','/'));id=targetId;
+   internal TargetLease(string bridgeRoot,string targetId,string sha,bool forVerification=false) {
+    root=OwnedCopies.LocalPath(bridgeRoot.TrimEnd('\\','/'));id=targetId;verification=forVerification;
     try {
      if(!EntitySets.Hex(sha,64))throw new ArgumentException("Invalid target SHA.");
      string folder=Folder(root,id);rootPin=new OwnedDirectoryLease(root);
@@ -98,15 +109,22 @@ namespace PowerShapeBridge {
      Copy=OwnedCopies.Hold(root,(string)Plan["copyId"],(string)Plan["ownershipSha256"]);
      if(!Equals(Plan["workingPath"],Copy.WorkingPath)||!Equals(Plan["checkpointPath"],Copy.CheckpointPath)||
         !Equals(Plan["workingSha256"],Copy.Inspection["workingSha256"])||!Equals(Plan["checkpointSha256"],Copy.CheckpointSha))throw new IOException("Target file dependencies differ.");
-     Copy.CheckPath((string)((Dictionary<string,object>)Expected["model"])["path"]);Recheck();
+     Copy.CheckPath((string)((Dictionary<string,object>)Expected["model"])["path"]);
+     if(verification)RecheckDependencies();else Recheck();
     }catch {Dispose();throw;}
    }
    internal void Recheck() {
-    rootPin.Recheck();parentPin.Recheck();folderPin.Recheck();Copy.Recheck();
-    EntitySets.CheckObserved(Expected,Expected,new int[0][],Expires,DateTime.UtcNow);
+    if(verification)throw new InvalidOperationException("Verification target lease cannot authorize SaveAs.");
+    RecheckDependencies();
     NoFence(root,(string)Plan["copyId"]);EmptyResult((string)Plan["resultPath"]);
     string claim=Path.Combine(Folder(root,id),"save-once.json");OwnedCopies.NoReparse(claim);
     if(File.Exists(claim)||Directory.Exists(claim))throw new InvalidOperationException("SaveAs target claimed; no replay.");
+   }
+   internal void RecheckDependencies() {
+    rootPin.Recheck();parentPin.Recheck();folderPin.Recheck();Copy.Recheck();
+    // Old execution proofs may be verified later; they never authorize another
+    // save. Fresh independent read leases are checked separately by the verifier.
+    EntitySets.CheckObserved(Expected,Expected,new int[0][],Expires,verification?EntitySets.Expiry(Plan["preparedUtc"]):DateTime.UtcNow);
    }
    public void Dispose(){if(Copy!=null)Copy.Dispose();proofs.Dispose();if(folderPin!=null)folderPin.Dispose();if(parentPin!=null)parentPin.Dispose();if(rootPin!=null)rootPin.Dispose();}
   }

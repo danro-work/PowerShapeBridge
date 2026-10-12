@@ -32,6 +32,8 @@ if (Test-Path -LiteralPath $NativeStageDirectory) { throw 'Native compatibility 
 & (Join-Path $taskRoot 'build.ps1') -OutputDirectory $NativeStageDirectory -ConfigurationPath (Join-Path $taskRoot 'config\general-owned-translations.json')
 & (Join-Path $NativeStageDirectory 'PSBridge.Worker.exe') --self-test | Tee-Object -FilePath (Join-Path $taskEvidence 'native-fixture-tests.txt')
 if ($LASTEXITCODE -ne 0) { throw 'Native synthetic fixture generation failed.' }
+& $PythonPath (Join-Path $taskRoot 'tools\audit_native_save_fixture.py') --stage $NativeStageDirectory --output (Join-Path $taskEvidence 'save-artifact-audit.json')
+if ($LASTEXITCODE -ne 0) { throw 'Independent native SaveAs artifact audit failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\native_fixture_oracle.py') --stage $NativeStageDirectory --output (Join-Path $taskEvidence 'native-oracle.json')
 if ($LASTEXITCODE -ne 0) { throw 'Native oracle generation failed.' }
 $taskNativeProject=Join-Path $taskRoot 'tools\NativeFixtureCheck\NativeFixtureCheck.csproj'
@@ -63,6 +65,8 @@ $taskFiles += @('src\document_handles.py','src\entity_sets.py','src\test_sdk_rea
 $taskFiles += @('src\test_sdk_prepared.py','src\native_fixture_oracle.py','src\generate_tool_schemas.py','src\PowerShapeMcp.Host\Schemas\prepared-tools.json','tools\NativeFixtureCheck\Program.cs','tools\NativeFixtureCheck\NativeFixtureCheck.csproj','tools\NativeFixtureCheck\packages.lock.json')
 $taskFiles += @('src\test_sdk_execution.py','src\PowerShapeMcp.Host\Schemas\execution-tools.json','src\working_copy_open.py','src\owned_translation.py')
 $taskFiles += @('src\save_target_fixture_oracle.py','src\test_save_target_fixture_oracle.py','src\OwnedDirectoryLease.cs','src\OwnedSaveTargets.cs','src\OwnedSaveTargetTests.cs')
+$taskFiles += @('src\OwnedSaveAs.cs','src\OwnedSaveAsTests.cs','src\OwnedSaveVerification.cs','src\NativeJournal.cs','src\DocumentBindings.cs','src\QueueOperations.cs','src\core_config.py','config\general-owned-save-targets.json','config\general-owned-saves.json')
+$taskFiles += @('tools\audit_native_save_fixture.py')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

@@ -1,5 +1,43 @@
 # К6 — собственный SaveAs и reopen, выполняется
 
+Текущий блок, 12 октября 2026: SDK 0.36.0-dev/native source 0.33.0-dev.
+`prepare_owned_save_as` подключён к официальному SDK, connection binding/target
+stores и единому ReferenceGate. Отдельный флаг ownedSaveTargetsExperimental;
+полный новый профиль имеет 22 tools, read-only сохраняет 6. Старый установленный
+профиль остаётся 21/6. После публикации cancellation означает неизвестный исход
+локальной подготовки, без SaveAs/retry; потерянная binding не выдаёт новый handle.
+
+Native OwnedSaveAs выполняет один FILE SAVEASPATH после двух retained-context
+guards, pinned target/source/checkpoint proofs, fixed-path/no-collision checks,
+create-once claim и durable journal. Return ещё executed_unverified/fenced.
+OwnedSaveVerification отдельно проверяет authoritative return, новые inspection/
+listing receipts, result SHA/file identity, наблюдаемые свойства/единицы,
+неизменность прежних saved files и checkpoint; только matching fence снимается
+после succeeded_verified. Повторная проверка не добавляет событие и не делает Save.
+При unknown команда не повторяется; claim остаётся и после успешной проверки.
+Native recipes gated флагом ownedSavesExperimental; config/general-owned-saves.json
+не установлен. SDK execute/verify/saved-result leases пока не подключены.
+
+Пройдены 188 .NET tests, 426 native synthetic checks, четыре независимых STDIO
+клиента, oracle regression, Inspector и 114 actual Framework artifact cases
+(95 accepted, 0 mismatches). Отдельный Python audit проверил actual native SaveAs
+raw receipts, шесть journal events, один command-start/return, retained claim,
+released matching fence и saved/protected SHA. Evidence:
+evidence/K6-save-as/native-save-and-prepare. Profile-on native staging:
+work/K6-save-routes-tests-1. Всё на opaque synthetic fixtures; live CAD К6
+не выполнялся. Clean checkout/CI этого блока ещё предстоят.
+
+Ограничения: saved working file допускает внешнего писателя по прежнему ownership
+контракту; изменение обнаруживается и оставляет unknown/fence. Pins не являются
+атомарным CreateNew внутри PowerShape SaveAs: перед командой target повторно
+проверяется в собственной уникальной папке. File Doctor/settings не меняются.
+Наблюдаемые properties и SHA не доказывают полную топологию/загрузку результата.
+Далее SDK execute/verify и savedResult lease, separately named byte-stable reopen,
+new binding, clean/CI и own live qualification. К6 не завершён; К7–К11 обязательны.
+Установленные native0.32/published K5 SDK0.35.1 и config.toml не менялись.
+
+## Предыдущий блок — filesystem foundation
+
 12 октября 2026. К5 technical pilot принят; user default SDK switch decision
 остаётся pending. Published K5 SDK0.35.1/native0.32 и пользовательский config
 не изменялись этим блоком. К6 source native0.33.0-dev собирается только в staging.

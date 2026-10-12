@@ -13,6 +13,14 @@
 квалификацию методов. При новых операциях добавляем точный источник и отдельно
 результаты испытания на собственной модели; экспериментальное не считаем принятым.
 
+В блоке native SaveAs/verifier повторно прочитаны через Product Help `en_US`:
+[File Doctor options — PowerShape 2023](https://help.autodesk.com/view/PWRS/2023/ENU/?guid=GUID-F2760D27-D1D3-4A50-ADFC-DE860E77E8A5)
+и [File Doctor error during saving](https://www.autodesk.com/support/technical/article/caas/sfdcarticles/sfdcarticles/The-file-doctor-found-the-following-problems-with-the-model-appears-during-project-saving-in-PowerShape.html).
+Save может отказать; проверки/исправления File Doctor способны менять модель.
+Native executor не меняет эти settings, не запускает repair и не повторяет
+команду. Возврат macro не является самостоятельным доказательством сохранения:
+требуются result bytes и separate fresh verifier, затем отдельный reopen.
+
 Поиск сообщения duplicate-name не нашёл документа с точным текстом ошибки.
 Guard/unique owned filename основаны на live accessibility text PowerShape:
 «Модель с таким именем: Working уже открыта», а не на предположении из Help.

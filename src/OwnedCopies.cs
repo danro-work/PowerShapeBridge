@@ -36,12 +36,12 @@ namespace PowerShapeBridge {
    string value=path.ToString();if(value.StartsWith("\\\\?\\",StringComparison.Ordinal))value=value.Substring(4);
    return LocalPath(value);
   }
-  static Dictionary<string,object> FileIdentity(FileStream file,string expected,bool singleLink) {
+  internal static Dictionary<string,object> FileIdentity(FileStream file,string expected,bool singleLink) {
    NativeInfo info;if(!GetFileInformationByHandle(file.SafeFileHandle,out info))throw new IOException("File identity unavailable.");
    if(info.IndexHigh==0&&info.IndexLow==0||info.Creation.High==0&&info.Creation.Low==0||(info.Attributes&(uint)FileAttributes.ReparsePoint)!=0||singleLink&&info.Links!=1||!string.Equals(FinalPath(file),LocalPath(expected),StringComparison.OrdinalIgnoreCase))throw new IOException("File alias/reparse/hard-link identity rejected.");
    return new Dictionary<string,object>{{"volumeSerial",info.Volume.ToString("x8")},{"fileIndex",info.IndexHigh.ToString("x8")+info.IndexLow.ToString("x8")},{"creationTime",info.Creation.High.ToString("x8")+info.Creation.Low.ToString("x8")}};
   }
-  static string Digest(FileStream file) {file.Position=0;using(var hash=SHA256.Create())return BitConverter.ToString(hash.ComputeHash(file)).Replace("-","").ToLowerInvariant();}
+  internal static string Digest(FileStream file) {file.Position=0;using(var hash=SHA256.Create())return BitConverter.ToString(hash.ComputeHash(file)).Replace("-","").ToLowerInvariant();}
   static string IdentityKey(Dictionary<string,object> record) {return (string)record["volumeSerial"]+":"+(string)record["fileIndex"];}
   static void Distinct(params Dictionary<string,object>[] values) {if(values.Select(IdentityKey).Distinct().Count()!=values.Length)throw new IOException("Source, working file and checkpoint must be independent files.");}
   static string Freeze(string path,object value) {

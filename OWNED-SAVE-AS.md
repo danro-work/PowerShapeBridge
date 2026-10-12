@@ -1,5 +1,11 @@
 # К6 — собственный SaveAs и отдельный reopen, проект контракта
 
+Реализация на 12.10.2026: SDK passive prepare и native one-save executor/
+independent verifier прошли offline checks. Native recipes включаются отдельным
+ownedSavesExperimental; SDK execute/verify/result leases и reopen пока впереди.
+Установленный runtime не обновлялся; live квалификация К6 ещё отсутствует.
+Текущее доказательство и ограничения — STATUS-K6-SAVE-AS.md.
+
 К5 technical pilot пройден; default SDK decision pending. Этот контракт начинает
 К6, но не объявляет SaveAs/reopen реализованными или квалифицированными.
 Исходный объём — MCP-DEVELOPMENT-PLAN.md, строка К6; общий MCP v1 остаётся целью.

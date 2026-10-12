@@ -17,6 +17,7 @@ public sealed class BridgeSession : IDisposable
     public OperationPlanStore Plans { get; }
     public DocumentBindingStore Bindings { get; }
     public OwnedOperationStore Owned { get; }
+    public OwnedSaveTargetStore SaveTargets { get; }
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     private readonly HashSet<string> prepared=[];
@@ -30,6 +31,7 @@ public sealed class BridgeSession : IDisposable
         References=new(clock);Documents=new(clock,utcClock);Candidates=new(clock,utcClock);
         Copies=new(clock,utcClock);Plans=new(options.BridgeRoot,Candidates,clock,utcClock);
         Bindings=new(options.BridgeRoot,Candidates,Copies,clock,utcClock);Owned=new(options.BridgeRoot,Plans,Bindings,clock,utcClock);
+        SaveTargets=new(options.BridgeRoot,Bindings,clock,utcClock);
         var config=Options.ReadConfiguration();
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
         if(!options.ReadOnly)
@@ -40,7 +42,8 @@ public sealed class BridgeSession : IDisposable
                 ("operationPlansExperimental",new[]{"prepare_operation_plan","inspect_operation_plan"}),
                 ("workingCopiesExperimental",new[]{"prepare_working_copy","inspect_working_copy"}),
                 ("documentBindingsExperimental",new[]{"bind_working_document","validate_working_document_binding"}),
-                ("ownedOperationPlansExperimental",new[]{"prepare_owned_operation","validate_owned_operation"})})
+                ("ownedOperationPlansExperimental",new[]{"prepare_owned_operation","validate_owned_operation"}),
+                ("ownedSaveTargetsExperimental",new[]{"prepare_owned_save_as"})})
                 if(config.TryGetProperty(flagName,out var enabled)&&enabled.ValueKind==System.Text.Json.JsonValueKind.True)prepared.UnionWith(names);
             foreach(var (flagName,names) in new[]{("workingCopyOpenExperimental",new[]{"open_working_copy","verify_working_copy_open"}),("ownedTranslationsExperimental",new[]{"execute_owned_translation","verify_owned_translation"})})
                 if(config.TryGetProperty(flagName,out var enabled)&&enabled.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(names);
@@ -57,6 +60,7 @@ public sealed class BridgeSession : IDisposable
     public void RevokeCadLeases(bool consumeOwned)
     {
         Documents.Clear();References.Clear();Candidates.Clear();Bindings.Clear();
+        SaveTargets.Clear();
         if(consumeOwned){Plans.Clear();Owned.Clear();}
     }
     public IDisposable AcquireCall(RequestId id)

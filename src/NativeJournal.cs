@@ -8,7 +8,7 @@ using System.Text;
 namespace PowerShapeBridge {
  // Native append-only counterpart of the local journal schema; no command execution.
  internal sealed class NativeJournal {
-  readonly string folder,id,planSha;string previous,state;int sequence;internal DateTime CommandReturnedUtc;internal int? CommandReturnCode;
+  readonly string folder,id,planSha;string previous,state;int sequence;internal DateTime CommandReturnedUtc;internal int? CommandReturnCode;internal Dictionary<string,object> CommandReturnedDetails;
   internal static Dictionary<string,object> VerifiedJson(string path,string sha,int limit) {
    if(!EntitySets.Hex(sha,64))throw new ArgumentException("Invalid artifact SHA.");OwnedCopies.NoReparse(path);byte[] bytes;
    using(var file=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read)){if(file.Length>limit)throw new IOException("Artifact size limit.");using(var memory=new MemoryStream()){file.CopyTo(memory);bytes=memory.ToArray();}}
@@ -50,7 +50,7 @@ namespace PowerShapeBridge {
     using(var file=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read)){if(file.Length>65536)throw new IOException("Journal event size limit.");using(var memory=new MemoryStream()){file.CopyTo(memory);bytes=memory.ToArray();}}
     var value=Program.Json.Deserialize<Dictionary<string,object>>(Encoding.UTF8.GetString(bytes));
     if(value==null||value.Count!=8||!Equals(value["schemaVersion"],1)||!Equals(value["operationId"],id)||!Equals(value["planSha256"],sha)||!Equals(value["sequence"],sequence)||!Equals(value["previousSha256"],previous))throw new IOException("Native journal chain differs.");
-    var eventUtc=EntitySets.Expiry(value["timestampUtc"]);var details=(Dictionary<string,object>)value["details"];Transition(state,(string)value["state"],details);state=(string)value["state"];returned|=state=="command_returned";if(state=="command_returned"){CommandReturnedUtc=eventUtc;object code;if(details.TryGetValue("returnCode",out code)){if(!(code is int))throw new IOException("Journal return code must be an integer.");CommandReturnCode=(int)code;}}using(var hash=SHA256.Create())previous=BitConverter.ToString(hash.ComputeHash(bytes)).Replace("-","").ToLowerInvariant();sequence++;
+    var eventUtc=EntitySets.Expiry(value["timestampUtc"]);var details=(Dictionary<string,object>)value["details"];Transition(state,(string)value["state"],details);state=(string)value["state"];returned|=state=="command_returned";if(state=="command_returned"){CommandReturnedUtc=eventUtc;CommandReturnedDetails=details;object code;if(details.TryGetValue("returnCode",out code)){if(!(code is int))throw new IOException("Journal return code must be an integer.");CommandReturnCode=(int)code;}}using(var hash=SHA256.Create())previous=BitConverter.ToString(hash.ComputeHash(bytes)).Replace("-","").ToLowerInvariant();sequence++;
    }
    if(!returned||!new[]{"outcome_unknown","executed_unverified","succeeded_verified"}.Contains(state))throw new IOException("Returned owned-open command required; no replay/claim allowed.");
   }
