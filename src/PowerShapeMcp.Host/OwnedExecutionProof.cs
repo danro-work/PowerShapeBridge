@@ -15,10 +15,10 @@ public static class OwnedExecutionProof
         var expiry=MinimumExpiry(result,choice);
         foreach(var (key,value) in copy)result[key]=value?.DeepClone();CopyChoice(result,choice);result["expiresUtc"]=LeaseTime.Format(expiry);return result;
     }
-    public static JsonObject VerificationParameters(JsonObject args,CandidateStore candidates,DocumentHandleStore documents,bool translation)
+    public static JsonObject VerificationParameters(JsonObject args,CandidateStore candidates,DocumentHandleStore documents,bool translation,bool save=false)
     {
-        var request=translation?"executionRequestId":"openRequestId";var sha=translation?"executionReceiptSha256":"openReceiptSha256";
-        var code=translation?"owned_translation_verification_arguments_invalid":"owned_open_verification_arguments_invalid";
+        var request=save?"saveRequestId":translation?"executionRequestId":"openRequestId";var sha=save?"saveReceiptSha256":translation?"executionReceiptSha256":"openReceiptSha256";
+        var code=save?"owned_save_verification_arguments_invalid":translation?"owned_translation_verification_arguments_invalid":"owned_open_verification_arguments_invalid";
         if(!ArtifactProof.Fields(args,request,sha,"candidateDocumentHandle","activeDocumentHandle")||!FileArtifacts.Token(Text(args,sha,code),64))throw new ReferenceRejected(code);
         foreach(var key in new[]{request,"candidateDocumentHandle","activeDocumentHandle"})if(!FileArtifacts.Token(Text(args,key,code)))throw new ReferenceRejected(code);
         var result=candidates.DocumentParameters(Text(args,"candidateDocumentHandle",code));var choice=documents.Consume(Text(args,"activeDocumentHandle",code));

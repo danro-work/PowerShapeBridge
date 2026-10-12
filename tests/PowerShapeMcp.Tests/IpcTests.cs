@@ -32,9 +32,11 @@ public sealed class IpcTests
     public async Task ClaimedTimeoutOrCancellationNeverRepeatsOrDeletesProcessing(bool cancel)
     {
         var fixture = new Fixture(); fixture.Write("PSBridge.Worker.exe", "fake");
-        // Cancellation is triggered after claim, so give that branch a separate
-        // deadline; a loaded runner must not turn it into the timeout scenario.
-        using var ipc = new BridgeIpc(fixture.Options(seconds: cancel ? 5 : .2)); using var token = new CancellationTokenSource();
+        // This case tests a *claimed* timeout/cancellation. Give publication and
+        // the fake claim enough time on loaded CI; a 200ms fsync budget instead
+        // intermittently tested pre-submission timeout. DeadlineTests separately
+        // covers expiration before publication and while waiting for the gate.
+        using var ipc = new BridgeIpc(fixture.Options(seconds: 5)); using var token = new CancellationTokenSource();
         var task = ipc.SubmitAsync("recipe.prepare",new JsonObject(),token.Token);
         var request = await fixture.WaitRequest();
         File.Move(request,request+".processing");

@@ -10,7 +10,7 @@
 | К3 | Пройден | SDK 0.33.0-dev: clean checkout, 98 .NET tests, independent Python parity/Inspector; все CI успешны |
 | К4 | Пройден | SDK 0.34.0-dev full/read-only 16/6; clean checkout/CI, 141 .NET, 312 native/63 artifact cases |
 | К5 | Технически пройден, user decision pending | SDK0.35.1/native0.32 clean/CI/deploy/live unique OPEN + one SOLID/independent audit passed; 162 .NET/320 native/78 artifacts; K5-SDK-SWITCH.md, default switch ещё не принят |
-| К6 | Выполняется | SDK passive prepare + native one SaveAs/separate verifier: clean checkout/4 Windows CI 47a64e5 passed; 188 .NET/432 native/116 Python, 116 artifacts, independent save audit; SDK execution/result leases/reopen/live ещё впереди. STATUS-K6-SAVE-AS.md |
+| К6 | Выполняется | SDK0.36.1 prepare/execute/verify + saved-result leases: 212 .NET/432 native/124 artifacts, пять STDIO/Inspector passed offline; clean/CI нового SDK-блока, reopen/new binding/live впереди. Предыдущий native блок clean/4CI 47a64e5 passed. STATUS-K6-SAVE-AS.md |
 | К7 | Не начато | Interrupted recovery и fault matrix |
 | К8 | Не начато | Общие transforms и organization |
 | К9 | Не начато | Planes/intersections/exchange/observation |

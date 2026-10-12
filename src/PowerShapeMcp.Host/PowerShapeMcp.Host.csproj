@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <Version>0.36.0-dev</Version>
+    <Version>0.36.1-dev</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ModelContextProtocol" Version="[2.2.0]" />

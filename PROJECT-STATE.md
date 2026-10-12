@@ -1,5 +1,14 @@
 # PowerShape Bridge — состояние для продолжения
 
+К6 SDK0.36.1-dev: execute_owned_save_as/verify_owned_save_as подключены,
+typed savedResultHandle с minimum TTL/raw proof/journal/file validation.
+212 .NET/432 native, 124 artifacts (0 mismatches), пять STDIO клиентов/
+Inspector passed offline; evidence/K6-save-as/sdk-saved-results-full.
+Full save profile 24/readonly 6; runtime0.32/published K5 SDK0.35.1/config
+не менялись. Clean checkout/CI нового SDK-блока впереди, затем qualified
+saved-byte clone/reopen/new binding и own live К6. К6–К11 не завершены;
+STATUS-K6-SAVE-AS.md. Далее история предыдущих блоков.
+
 К6: SDK0.36.0-dev prepare_owned_save_as зарегистрирован; native0.33.0-dev
 one-use SaveAs и separate verifier реализованы с gated recipes. 188 .NET/
 432 native synthetic, 116 artifacts (0 mismatches), четыре STDIO клиента/

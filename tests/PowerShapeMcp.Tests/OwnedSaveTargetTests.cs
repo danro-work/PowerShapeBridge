@@ -17,10 +17,11 @@ public sealed class OwnedSaveTargetTests
         public JsonObject Parameters { get; }
         public JsonObject Receipt { get; }
         public JsonObject Plan=>Receipt["target"]!.AsObject();
-        public TargetFixture(bool readOnly=false,bool enabled=true)
+        public TargetFixture(bool readOnly=false,bool enabled=true,bool saves=false)
         {
             foreach(var flag in new[]{"entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"})Data.Files.Config[flag]=true;
             Data.Files.Config["ownedSaveTargetsExperimental"]=enabled;Data.Files.SaveConfig();
+            Data.Files.Config["ownedSavesExperimental"]=saves;Data.Files.SaveConfig();
             Session=new(Data.Files.Options(readOnly,2),()=>Data.Time,()=>Data.Utc);
             var copies=Session.Copies;var candidates=Session.Candidates;Bindings=Session.Bindings;Targets=Session.SaveTargets;
             var copyId=Guid.NewGuid().ToString("N");var work=FileArtifacts.FixedPath(Data.Root,"workingcopies",copyId,"Working_"+copyId+".psmodel");

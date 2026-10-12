@@ -92,6 +92,10 @@ public sealed class OwnedSaveTargetStore(string root,DocumentBindingStore bindin
         CheckUnclaimed(plan);
         return new(){["targetId"]=lease.Id,["targetSha256"]=lease.Sha};
     }
+    public JsonObject Consume(string handle)
+    {
+        var parameters=ValidationParameters(handle);targets.Remove(handle);return parameters;
+    }
     private void CheckUnclaimed(JsonObject plan)
     {
         var id=plan["targetId"]!.GetValue<string>();

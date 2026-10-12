@@ -18,6 +18,7 @@ foreach(var node in oracle["cases"]!.AsArray())
             case "packet":new OwnedOperationStore(root,new OperationPlanStore(root,new()),new DocumentBindingStore(root,new(),new())).Receipt(receipt);break;
             case "execution":OwnedExecutionProof.TranslationReceipt(root,receipt,item["parameters"]!.AsObject());break;
             case "save_target":new OwnedSaveTargetStore(root,new DocumentBindingStore(root,new(),new())).VerifyReceipt(receipt);break;
+            case "saved_result":new OwnedSavedResultStore(root,new OwnedSaveTargetStore(root,new DocumentBindingStore(root,new(),new())),new()).VerifyReceipt(receipt,item["parameters"]!.AsObject());break;
             default:throw new InvalidDataException("Unknown fixed fixture kind.");
         }
         actual=true;

@@ -1,5 +1,12 @@
 # К6 — собственный SaveAs и отдельный reopen, проект контракта
 
+SDK0.36.1-dev: первые три инструмента таблицы (prepare/execute/verify SaveAs)
+реализованы и проверены offline. Verify выдаёт typed savedResultHandle только
+по checked native terminal proof; никакая read reference не становится edit
+authorization. Handle закрепляет verificationRequestId/raw SHA, expires до
+300s и не продлевается. Три reopen инструмента ниже пока не реализованы;
+live qualification К6 ещё впереди. STATUS-K6-SAVE-AS.md.
+
 Реализация на 12.10.2026: SDK passive prepare и native one-save executor/
 independent verifier прошли offline checks. Native recipes включаются отдельным
 ownedSavesExperimental; SDK execute/verify/result leases и reopen пока впереди.

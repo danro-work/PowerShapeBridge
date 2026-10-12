@@ -25,7 +25,7 @@ namespace PowerShapeBridge {
    internal Dictionary<string,object> Window(){return (Dictionary<string,object>)((IList)Listing["windows"])[0];}
   }
   internal sealed class Case {
-   internal readonly OwnedOperationPlanTests.Fixture Fixture=new OwnedOperationPlanTests.Fixture(true);
+   internal readonly OwnedOperationPlanTests.Fixture Fixture=new OwnedOperationPlanTests.Fixture(true,true);
    internal readonly Dictionary<string,object> Parameters,Target;internal readonly string TargetId,CopyId,ResultPath,Checkpoint,WorkingSha,CheckpointSha;
    internal Case() {
     TargetId=Guid.NewGuid().ToString("N");var prepared=OwnedSaveTargets.Prepare(Fixture.Root,TargetId,new Dictionary<string,object>{{"bindingId",Fixture.BindingId},{"bindingSha256",Fixture.Parameters["bindingSha256"]}});
@@ -80,6 +80,9 @@ namespace PowerShapeBridge {
    check(Equals(verified["state"],"owned_save_as_verified_observed")&&verifiedContext.Calls==1&&!File.Exists(verifiedCase.Fence)&&File.Exists(verifiedCase.Claim)&&verifiedCase.Protected());
    string terminalPath=Path.Combine(verifiedCase.Fixture.Root,"operations",(string)executed["operationId"],"000005.json"),terminalSha=Program.Hash(terminalPath);
    check(Equals(OwnedSaveVerification.Verify(verifiedCase.Fixture.Root,proof,verifiedContext)["state"],"owned_save_as_verified_observed")&&Program.Hash(terminalPath)==terminalSha&&verifiedContext.Calls==1);
+   string verifiedId=Guid.NewGuid().ToString("N");verified["bridgeRequestId"]=verifiedId;
+   string verifiedSha=NativeJournal.Freeze(Path.Combine(verifiedCase.Fixture.Root,"responses",verifiedId+".json"),verified);
+   NativeJournal.Freeze(Path.Combine(verifiedCase.Fixture.Root,"saved-result-fixture.json"),new Dictionary<string,object>{{"verificationRequestId",verifiedId},{"verificationReceiptSha256",verifiedSha},{"parameters",proof}});
    var afterVerifyRetry=verifiedCase.Context();check(Equals(verifiedCase.Execute(afterVerifyRetry)["state"],"owned_save_as_rejected_before_change")&&afterVerifyRetry.Calls==0);
    foreach(string fault in new[]{"stale_read","wrong_window_choice","changed_result","wrong_units","foreign_process","changed_document","wrong_fence","missing_fence","partial_journal","forged_result_sha"}) {
     var test=new Case();var fake=test.Context();var execution=test.Execute(fake);var verification=Proof(test,execution,fake);

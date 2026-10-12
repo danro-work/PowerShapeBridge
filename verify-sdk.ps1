@@ -41,6 +41,8 @@ $taskNativeProject=Join-Path $taskRoot 'tools\NativeFixtureCheck\NativeFixtureCh
 if ($LASTEXITCODE -ne 0) { throw 'Native checker locked restore failed.' }
 & $DotnetPath run --no-restore --configuration Release --project $taskNativeProject -- (Join-Path $taskEvidence 'native-oracle.json') (Join-Path $taskEvidence 'native-compatibility.json')
 if ($LASTEXITCODE -ne 0) { throw 'Native/Python/SDK artifact compatibility differs.' }
+& $PythonPath (Join-Path $taskRoot 'src\test_sdk_saved_result_stdio.py') --dotnet $DotnetPath --host $taskHost --stage $NativeStageDirectory --evidence $taskEvidence
+if ($LASTEXITCODE -ne 0) { throw 'Independent saved-result SDK STDIO failed.' }
 $taskFixture = Join-Path $taskRoot ('work\K2-inspector-'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
@@ -67,6 +69,8 @@ $taskFiles += @('src\test_sdk_execution.py','src\PowerShapeMcp.Host\Schemas\exec
 $taskFiles += @('src\save_target_fixture_oracle.py','src\test_save_target_fixture_oracle.py','src\OwnedDirectoryLease.cs','src\OwnedSaveTargets.cs','src\OwnedSaveTargetTests.cs')
 $taskFiles += @('src\OwnedSaveAs.cs','src\OwnedSaveAsTests.cs','src\OwnedSaveVerification.cs','src\NativeJournal.cs','src\DocumentBindings.cs','src\QueueOperations.cs','src\core_config.py','config\general-owned-save-targets.json','config\general-owned-saves.json')
 $taskFiles += @('tools\audit_native_save_fixture.py')
+$taskFiles += @('src\saved_result_fixture_oracle.py')
+$taskFiles += @('src\test_sdk_saved_result_stdio.py','src\OwnedOperationPlanTests.cs')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

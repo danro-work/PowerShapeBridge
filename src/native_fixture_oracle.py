@@ -9,6 +9,7 @@ from document_bindings import DocumentBindingStore
 from owned_operation_plans import OwnedOperationStore
 from owned_translation import execution_receipt
 from save_target_fixture_oracle import verify as verify_save_target
+from saved_result_fixture_oracle import verify as verify_saved_result
 
 
 def generate(stage, target):
@@ -94,6 +95,30 @@ def generate(stage, target):
                 except (OSError, ValueError, TypeError, KeyError):
                     accepted = False
                 cases.append({'kind': 'save_target', 'root': str(root), 'receipt': variant, 'accepted': accepted})
+    saved_cases = []
+    for path in sorted((stage / 'work').glob('owned-operation-self-test-*/saved-result-fixture.json')):
+        root = path.parent
+        proof = json.loads(path.read_text(encoding='utf-8-sig'))
+        receipt = json.loads((root / 'responses' / (proof['verificationRequestId'] + '.json')).read_text(encoding='utf-8-sig'))
+        variants = [receipt]
+        for field, value in [('copyFenceReleased', False), ('noCommandReplay', False), ('cadSaveAttempted', True),
+                             ('targetSha256', 'f' * 64), ('saveReceiptSha256', 'f' * 64), ('recordedJournalState', 'executed_unverified')]:
+            changed = copy.deepcopy(receipt)
+            changed[field] = value
+            variants.append(changed)
+        changed = copy.deepcopy(receipt)
+        changed['savedResult']['length'] = True
+        variants.append(changed)
+        for variant in variants:
+            try:
+                verify_saved_result(root, variant, proof['parameters'])
+                accepted = True
+            except (OSError, ValueError, TypeError, KeyError):
+                accepted = False
+            saved_cases.append({'kind': 'saved_result', 'root': str(root), 'receipt': variant, 'parameters': proof['parameters'], 'accepted': accepted})
+    if not any(case['accepted'] for case in saved_cases):
+        raise AssertionError('Actual Framework verified saved-result coverage is missing.')
+    cases.extend(saved_cases)
     Path(target).parent.mkdir(parents=True, exist_ok=True)
     Path(target).write_text(json.dumps({'stage': str(stage), 'cases': cases}, indent=2, ensure_ascii=False), encoding='utf-8')
     print('Generated Python oracle for %d actual Framework artifact cases.' % len(cases))

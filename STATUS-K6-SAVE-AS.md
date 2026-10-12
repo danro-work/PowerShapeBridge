@@ -1,5 +1,34 @@
 # К6 — собственный SaveAs и reopen, выполняется
 
+Текущий SDK-блок, 12 октября 2026: source SDK0.36.1-dev. Зарегистрированы
+execute_owned_save_as и verify_owned_save_as по ownedSavesExperimental; full
+save profile 24/read-only 6, прежний установленный профиль 21/6. Execute
+consumes target и отзывает CAD leases до IPC; error/timeout/cancellation после
+публикации не разрешает повторный SaveAs. Свежий verifier выдаёт savedResultHandle
+через OwnedSavedResultStore только после original response/plan/claim/journal,
+authoritative return, terminal evidence и saved-byte checks. Handle connection-
+scoped, maximum/minimum dependency TTL до 300s, без продления проверкой; raw
+verification receipt SHA закреплён. Native physical directory/file identity
+повторно проверяется перед дальнейшим clone/open; это не разрешение изменения
+модели и не доказательство топологии. Повторная свежая verification сохраняет
+первый terminal journal/evidence и не добавляет Save или новый event.
+
+Пройдены 212 .NET tests (24 новых store/official MCP pipe cases), 432 native
+synthetic, 124 actual Framework artifact cases (98 accepted, 0 mismatches),
+пять независимых SDK STDIO клиентов и Inspector. Новый external STDIO сценарий
+использует actual Framework saved-result artifacts и fake verifier reply;
+подтверждены 24/6 catalog, exact schemas, one-use document choice и неизменный
+native journal. Evidence: evidence/K6-save-as/sdk-saved-results-full;
+полный sdk-verification.json passed. Loaded-runner claimed timeout test отделён
+от 200ms pre-publication fsync race; production timeout/IPC не изменён.
+Native Save fixtures получили полный inventory для SDK read admission.
+
+Clean checkout/Windows CI этого нового SDK-блока ещё предстоят. Reopen/new
+binding и live qualification К6 не выполнены. Native0.32/published K5 SDK0.35.1/
+config.toml не менялись; default switch decision pending. К6–К11 остаются целью.
+
+## Предыдущий блок — native SaveAs и SDK preparation
+
 Текущий блок, 12 октября 2026: SDK 0.36.0-dev/native source 0.33.0-dev.
 `prepare_owned_save_as` подключён к официальному SDK, connection binding/target
 stores и единому ReferenceGate. Отдельный флаг ownedSaveTargetsExperimental;
