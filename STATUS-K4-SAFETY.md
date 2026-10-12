@@ -1,7 +1,10 @@
 # К4 — подготовка и доказательства
 
-12 октября 2026. Локальная проверка пройдена; clean checkout/Windows CI ещё
-ожидаются. SDK-host 0.34.0-dev, native runtime 0.31.0 не менялся.
+12 октября 2026. Локальная проверка и чистый экспорт commit
+e3d8b6936b05976ae44e061b8d4babd61fd734c2 прошли; К4 закрыт.
+[SDK CI PR](https://github.com/danro-work/PowerShapeBridge/actions/runs/38249296757)
+и [SDK CI push](https://github.com/danro-work/PowerShapeBridge/actions/runs/38249281978),
+оба native baseline CI успешны. SDK-host 0.34.0-dev, native runtime 0.31.0 не менялся.
 General catalog содержит 16 tools, отдельный read-only — 6 (5 без candidates).
 Open/activation/translation/verify endpoints квалифицируются на К5.
 
@@ -46,9 +49,11 @@ verify-sdk.ps1 создаёт fresh native stage (отказывается ис�
 существующий), затем запускает только reviewed --self-test без COM/UI.
 Повторный ручной запуск требует нового -NativeStageDirectory. CI собирает
 в новом checkout и сохраняет artifact SDK-verification.
-Обычный native build/deployment скрипт не изменён, second panel/worker не запускались.
+Обычный native build/deployment скрипт не изменён; дополнительный CAD executor
+или панель не запускались. Staging worker запускался только с --self-test,
+где synthetic fake contexts не подключаются к PowerShape.
 
-К4 закрывается после clean checkout и CI. После этого К5 переносит remaining
+К4 закрыт после clean checkout и CI. К5 переносит remaining
 context/open/execute/verify facade, доказывает one-use native execution на новом
 owned scenario и готовит решение пользователя о default live adapter switch.
 Общий v1 по-прежнему включает К6–К11; технологический модуль отдельно.

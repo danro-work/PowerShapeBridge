@@ -11,7 +11,7 @@ stores с byte/schema parity, сохраняющий native worker и separate e
 К4 локально пройден: подключены десять prepared facades, full/read-only 16/6,
 141 .NET tests, independent Python byte/schema/private envelope parity,
 312 Framework synthetic checks/63 actual artifact cases и Inspector CLI.
-Следом clean checkout/CI К4, затем К5 — owned context/open/translation/verify
+Clean checkout/CI К4 прошли; К4 закрыт. Сейчас К5 — owned context/open/translation/verify
 facades и квалификация на новой собственной копии; обычный live adapter switch
 принимает пользователь по готовому пакету/rollback. Native runtime пока не менять.
 Не переносить C# native digest в Python encoding: это разные схемы.
