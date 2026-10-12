@@ -6,7 +6,8 @@ K5 SDK0.35.1 не менялись. OwnedSaveTargets/OwnedDirectoryLease/OwnedSa
 fixed new result path, reservation/native directory pin, exact receipt+dependency
 SHA, minimum TTL, no overwrite/claim/fence/replay. 177 .NET/349 native synthetic
 и 86 actual artifact cases (0 mismatches), four STDIO clients/oracle tests/Inspector
-пройдены; полный regression passed. Clean checkout/CI нового блока ещё впереди.
+пройдены; полный regression и clean checkout 2e93bf0 passed. Windows baseline
+jobs успешны; SDK CI jobs PR #7 ещё выполняются. PR #7 stacked на К5 PR #6.
 STATUS-K6-SAVE-AS.md; evidence/K6-save-as. К6 executor/verifiers/reopen/public
 tools ещё впереди. К5 user default connection decision pending; config не менялся.
 

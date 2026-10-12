@@ -2,7 +2,8 @@
 
 К6 source native0.33.0-dev: filesystem target + pinned directories + SDK target
 store реализованы. Runtime0.32/published K5 SDK/config unchanged. Полный
-evidence/K6-save-as/verified-targets passed. Сохранить блок в Git, проверить clean/CI, затем passive
+evidence/K6-save-as/verified-targets и clean 2e93bf0 passed. Блок сохранён в Git/PR #7;
+SDK CI ещё выполняется, baseline jobs успешны. Далее passive
 prepare facade/flag и native one-use SaveAs/independent verifier/reopen/new binding.
 STATUS-K6-SAVE-AS.md. Подготовка target не авторизует команду, COM guard обязателен.
 

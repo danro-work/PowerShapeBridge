@@ -40,7 +40,9 @@ oracle добавлены. 86 actual artifact cases теперь дают 0 mism
 Полный final regression пройден: four independent STDIO clients, четыре
 type-sensitive Python oracle tests и Inspector CLI также passed;
 evidence/K6-save-as/verified-targets/sdk-verification.json. Clean checkout/CI
-этого нового блока ещё впереди.
+этого нового блока: clean checkout 2e93bf0 полностью passed,
+work/K6-target-clean/evidence/K6-target-clean. Оба Windows baseline jobs
+успешны, SDK jobs PR #7 ещё выполняются. PR #7 stacked на К5 PR #6.
 
 ## Следующий блок
 
