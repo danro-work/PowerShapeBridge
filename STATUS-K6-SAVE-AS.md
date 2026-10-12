@@ -40,8 +40,12 @@ native verification fixture, до artifact/STDIO qualification. Failed evidence
 сохранён в GitHub. Добавлены точный first-verifier diagnostic и synthetic read
 timestamp offset20ms, чтобы быстрый Framework UtcNow tick не совпадал с return.
 Это тестовый clock сценарий; production fresh-receipt guard не менялся.
-Targeted native35 passed; новый CI ожидается. Clean4a230a6 baseline passed,
-SDK ещё выполняется в work/c6o/evidence/K6-reopen-execution-clean.
+Targeted native35 passed. На commitef999f380c6cbc3d206723816c785a6e8fab27ea
+все четыре Windows CI 38311201581/38311201635/38311208536/38311208393 passed,
+SDK log проверен. Clean4a230a6 baseline и SDK/seven STDIO/Inspector passed:
+work/c6o/evidence/K1-baseline и work/c6o/evidence/K6-reopen-execution-clean.
+Все118 recorded source/binary SHA совпадают с clean files. Изменение ef999f3
+только fixture clock/diagnostic и docs; production code квалифицирован4a230a6.
 Следом clean/CI и own live SaveAs→reopen→fresh binding К6 после актуальных
 process/document/ownership reads. Installed runtime/config не менялись.
 К6 не завершён; весь объём К7–К11 сохраняется.

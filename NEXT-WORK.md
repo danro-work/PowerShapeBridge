@@ -3,8 +3,9 @@
 Текущий блок К6: SDK0.36.3/native source0.33 SavedAs→prepared clone→one-use
 guarded saved reopen→separate verification/new binding реализован offline.
 239 .NET/514 native/171 artifacts (0 mismatches), seven external STDIO/Inspector
-passed; evidence/K6-save-as/reopen-execution-full. Далее clean/CI нового блока,
-staged idle deployment и own live К6. До live fresh process/active model/windows/
+passed; evidence/K6-save-as/reopen-execution-full. Clean4a230a6 baseline/SDK и
+четыре Windows CI ef999f3 passed; STATUS-K6-SAVE-AS.md. Далее staged idle
+deployment и own live К6. До live fresh process/active model/windows/
 queue/ownership/saved-byte checks; прежние PID/window numbers и transient handles
 не использовать. Default SDK switch decision всё ещё pending, config.toml не менять.
 Historic source proof используется только independent verifier; expired intent

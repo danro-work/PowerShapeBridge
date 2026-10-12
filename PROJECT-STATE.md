@@ -23,7 +23,14 @@ Commit4a230a6: оба baseline CI и один SDK CI passed; второй SDK CI
 native fixture на первой verification. Добавлены диагностический receipt и
 20ms offset synthetic read timestamps для coarse Framework clock ticks;
 production freshness guard строго сохраняется. Targeted native35 passed после
-правки; повторный CI ещё ожидается. Clean4a230a6 baseline passed, SDK выполняется.
+правки. Commitef999f3: все четыре Windows CI 38311201581/38311201635/
+38311208536/38311208393 passed; SDK log подтверждён. Clean4a230a6 baseline и
+полный SDK/seven STDIO regression passed: work/c6o/evidence/K1-baseline и
+work/c6o/evidence/K6-reopen-execution-clean; все118 source/binary SHA совпадают
+с clean files. Тестовый clock fix не меняет production source. Свежие passive
+reads: native0.32 panel24012, PowerShape17304, пять окон, Test_Block_P2 active,
+own Working_b3d... присутствует; connected Python adapter всё ещё0.31 loaded,
+переход default MCP на SDK не выполнялся. IDs/handles перед live перечитать.
 Live К6 ещё не выполнялся; К6–К11 остаются
 целью. Installed runtime/published K5 SDK/config этим блоком не менялись.
 Ниже история предыдущих блоков.
