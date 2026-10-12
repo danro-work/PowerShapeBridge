@@ -12,8 +12,13 @@ foreach(var node in oracle["cases"]!.AsArray())
     var receipt=item["receipt"]!.AsObject();var expected=item["accepted"]!.GetValue<bool>();var actual=false;string? error=null;
     try
     {
-        if(item["kind"]!.GetValue<string>()=="binding")new DocumentBindingStore(root,new(),new()).VerifyReceipt(receipt);
-        else new OwnedOperationStore(root,new OperationPlanStore(root,new()),new DocumentBindingStore(root,new(),new())).Receipt(receipt);
+        switch(item["kind"]!.GetValue<string>())
+        {
+            case "binding":new DocumentBindingStore(root,new(),new()).VerifyReceipt(receipt);break;
+            case "packet":new OwnedOperationStore(root,new OperationPlanStore(root,new()),new DocumentBindingStore(root,new(),new())).Receipt(receipt);break;
+            case "execution":OwnedExecutionProof.TranslationReceipt(root,receipt,item["parameters"]!.AsObject());break;
+            default:throw new InvalidDataException("Unknown fixed fixture kind.");
+        }
         actual=true;
     }
     catch(Exception ex)when(ex is ReferenceRejected or IOException or InvalidDataException or System.Text.Json.JsonException or InvalidOperationException or KeyNotFoundException){error=ex.Message;}

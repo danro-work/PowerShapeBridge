@@ -1,5 +1,31 @@
 # Дальнейшая работа
 
+К5 technical pilot/clean/CI/deployment/independent audit пройдены; user default
+switch decision pending. K5-SDK-SWITCH.md содержит proposed full + read-only
+config и rollback. До ответа config.toml не менять. Если пользователь разрешит,
+точечно обновить две MCP sections, backup/TOML/startup check, затем проверить
+actual connected adapterVersion после reload; config write сам не доказывает reload.
+Новый собственный b3d16256be1a4848bdbf15f6160a0567 остаётся открытым с известным
+unsaved X+1 и неизменённым saved Working/checkpoint; original Test_Block_P2 активен.
+К6 — новый SaveAs target/saved bytes/separate reopen на этой собственной копии;
+перед любыми командами fresh model/queue/process/ownership proofs, handles не переносить.
+OWNED-SAVE-AS.md начинает контракт/порядок К6: prepare/execute/independent verify,
+отдельный byte-identical uniquely named reopen alias/new binding. Native/SDK code
+К6 пока отсутствует; отдельно квалифицировать clone сохранённого занятого result,
+не ослаблять общий source-copy FileShare.Read guard.
+Не повторять старый unknown OPEN 6ed.../copy 5fef..., не менять его journal/claim.
+
+К5 live pilot нашёл duplicate-name dialog и heartbeat sharing error.
+Source исправлен: SDK 0.35.1-dev, native 0.32.0; runtime пока 0.31.0.
+Полный evidence/K5-owned/collision-fix passed. Проверить необходимые baseline/
+deployment preflight, сохранить код/PR и подготовить rollback-aware native update
+при idle queue. Затем новый уникально названный owned scenario. Исходный OPEN
+6ed9d4106d054b28a05e8ab0b59c5811 не повторять; journal/claim неизвестного исхода
+сохранить. Copy 5fef10809eb44904ade27e2ca843a8b9 не использовать для нового OPEN.
+После user OK четыре старых окна/original baseline подтверждены fresh read;
+геометрический executor не запускался. Новые helper scripts tools/qualify_sdk_owned.py
+и tools/prepare_k5_seed.py требуют отдельного явного запуска, не входят в CI.
+
 12 октября: К0 принят пользователем, разработка до К11 авторизована.
 К1 пройден локально и в Windows CI. К2 локально пройден: SDK-host/fake-panel,
 45 .NET tests, independent STDIO/Python journal parity и Inspector; clean checkout
@@ -14,6 +40,14 @@ stores с byte/schema parity, сохраняющий native worker и separate e
 Clean checkout/CI К4 прошли; К4 закрыт. Сейчас К5 — owned context/open/translation/verify
 facades и квалификация на новой собственной копии; обычный live adapter switch
 принимает пользователь по готовому пакету/rollback. Native runtime пока не менять.
+К5 SDK 0.35.0-dev: пять context/open/execute/verify endpoints подключены,
+general/read-only 21/6. 159 .NET, four STDIO clients, 312 Framework synthetic,
+78 actual artifact cases и Inspector прошли. Новый read-only SDK прошёл passive
+live pilot через существующую панель; native/runtime/CAD не менялись.
+Следующий блок: clean checkout/Windows CI, затем новый manifest-owned copy/open/
+one SOLID translation/independent verification scenario. Непосредственно перед
+командами повторить свежие process/queue/model checks: прошлые PID/handles не актуальны.
+Не повторять P2.29 OPEN/intents и не трогать чужие/квалификационные модели.
 Не переносить C# native digest в Python encoding: это разные схемы.
 Product Help — `en_US`, отчёты на русском; CHECKPOINTS.md хранит текущий статус.
 Ниже историческая запись подготовки, её ожидание К0 уже закрыто.

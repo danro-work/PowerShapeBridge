@@ -1,0 +1,156 @@
+[
+  {
+    "name": "activate_document",
+    "description": "Activate one already-open model using its unconsumed documentHandle from list_documents in the same connection. Rechecks the full native window listing in the worker immediately before one Sel_Window Front command. Does not open files, save/close models or issue geometry commands. Unknown outcome must not be retried automatically. May bring a CAD window to the front; unavailable in read-only mode.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "documentHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "documentHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "verify_working_copy_open",
+    "description": "Verify a returned owned-copy open without replay, using its original native openRequestId/receipt SHA and fresh candidateDocumentHandle plus one-use activeDocumentHandle. Worker checks plan/claim/journal, independently issued receipts, two same-COM model reads, ownership/checkpoint and preserved original saved files/windows. Successful verification appends succeeded_verified with actual evidence references and issues a fresh workingCopyHandle, including after reconnect. Supports the original owned-open window only; no open, save, close, activation, selection or geometry commands. Native WINDOW.ID may renumber during open and is not persistent.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "openRequestId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "candidateDocumentHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "activeDocumentHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "openReceiptSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "openRequestId",
+        "openReceiptSha256",
+        "candidateDocumentHandle",
+        "activeDocumentHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "open_working_copy",
+    "description": "Experimental context-changing operation: open only an owned saved Working.psmodel in exactly one new model window. Requires this connection's workingCopyHandle, fresh candidateDocumentHandle and a one-use activeDocumentHandle from list_documents. Worker rechecks the current model/windows, copy/checkpoint and fixed parameters immediately before FILE OPENPATH / fixed PATHNAME / ACCEPT. Native durable plan/journal and per-copy open claim forbid replay. No save, close, entity selection, screenshot or geometry commands. Existing windows/files must be preserved; empty entity selection and ASCII installation path without spaces/quotes required. After any unknown outcome inspect operation_result/documents/files, never retry. New model becomes active; old CAD references are revoked. Read-only excludes this tool.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "workingCopyHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "candidateDocumentHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "activeDocumentHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "workingCopyHandle",
+        "candidateDocumentHandle",
+        "activeDocumentHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "execute_owned_translation",
+    "description": "Experimental explicit edit of one SOLID in an already active owned working copy. Consume this connection's ownedOperationHandle, repeat its guard in the retained executor COM context, then call direct TranslateItem once in world/document raw mm. No save, selection or inverse. Returns executed_unverified; the copy remains fenced until independent verify_owned_translation. Never retry an unknown outcome.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "ownedOperationHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "ownedOperationHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "verify_owned_translation",
+    "description": "Independently check an already returned owned translation by execution receipt ID/SHA and fresh same-connection candidate/active document choices. No CAD command. On observed success append succeeded_verified and release only this execution's copy fence; interrupted command or mismatch remains fenced. No save, inverse or replay.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "executionRequestId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "executionReceiptSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "candidateDocumentHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "activeDocumentHandle": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      },
+      "required": [
+        "executionRequestId",
+        "executionReceiptSha256",
+        "candidateDocumentHandle",
+        "activeDocumentHandle"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  }
+]

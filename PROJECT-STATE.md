@@ -1,5 +1,40 @@
 # PowerShape Bridge — состояние для продолжения
 
+К5 технически квалифицирован: native 0.32.0 установлен и SDK 0.35.1-dev
+published/full-readonly 21/6 проверен. Clean baseline/SDK и четыре Windows CI
+cf863d2 пройдены. После backup-aware idle deploy 28 protected hashes совпали.
+Новая own copy b3d16256be1a4848bdbf15f6160a0567/open
+b95be76a673041cf87a8285fbdb1c3b6/translation
+d8129739753d4de9ab77c6d6ef9345a2 прошла один OPEN + один SOLID world/raw mm X+1,
+separate fresh verification и независимый raw artifact audit; journals по 6
+events succeeded_verified, matching fence released. Source/checkpoint/working
+saved bytes не менялись; original Test_Block_P2 снова активен. Сейчас пять окон,
+новая Working_b3d... остаётся открытой с известным unsaved translation для К6.
+Никаких save/close/inverse не было. Старый OPEN 6ed... сохраняется unknown,
+claim/journal не изменены. K5-SDK-SWITCH.md — готовый review/rollback пакет;
+запрошено решение пользователя по default переходу Python → SDK + отдельный
+read-only server. Config.toml пока не менялся. К5 ожидает это решение,
+К6–К11 обязательны. К6 начат проектом OWNED-SAVE-AS.md с Autodesk sources:
+typed prepared target/one SaveAs/separate verify/unique saved-byte reopen/new
+binding. Реализации и live qualification К6 пока нет. Далее история предыдущих блоков.
+
+Предшествующий К5 блок: SDK source 0.35.1-dev, native source/staging 0.32.0;
+установленный native всё ещё 0.31.0. Live OPEN на НОВОЙ copy
+5fef10809eb44904ade27e2ca843a8b9/request 6ed9d4106d054b28a05e8ab0b59c5811
+остановлен timeout: PowerShape показал «Working уже открыта». Три native
+events до command_started; command_returned нет. Перенос/save/close не отправлены,
+повторов/удаления claim/перезаписи журнала не было. Пользователь сам снял dialog.
+Fresh readonly read: четыре исходных окна, Test_Block_P2 активен, source saved
+bytes/наблюдаемая геометрия неизменны. OPEN остаётся unknown.
+Исправления: unique schema2 working filename с совместимостью schema1,
+duplicate-name refusal до OPEN и advisory heartbeat file-sharing/publication.
+Последнее исправляет показанную пользователем ошибку WritePanelStatus/File.Replace;
+это не ошибка launcher. Полный SDK check пройден: 162 .NET, four STDIO clients,
+320 native synthetic, 78 artifact cases, Inspector; evidence/K5-owned/collision-fix.
+Staged deployment и новый owned live scenario ещё впереди. STATUS-K5-OWNED.md.
+Clean checkout и все четыре Windows CI исходного блока 8996eb7/PR #6 прошли.
+К5 не закрыт; К6–К11 обязательны. Ниже история предшествующих блоков.
+
 12 октября 2026: пользователь принял MCP-DEVELOPMENT-PLAN.md и матрицу,
 авторизовал автономную разработку до К11 и разрешил Product Help `en_US`.
 К0 закрыт. К1 локально пройден: clean checkout, 312 C# и 114 Python,
@@ -23,6 +58,20 @@ synthetic tests и 63 Framework artifact cases C#/Python compatibility прош�
 Inspector CLI прошёл; все проверки без CAD. Evidence/K4-safety/full.
 Clean checkout и все Windows CI К4 прошли, К4 закрыт. К5 начат: remaining
 context/open/execute/verify facades, новый owned scenario и native proofs.
+К5 SDK 0.35.0-dev: пять context/open/execute/verify facades подключены;
+full general/read-only catalog 21/6. 159 .NET tests, four independent STDIO clients,
+312 native synthetic checks, 78 actual artifact cases (0 mismatches) и Inspector
+прошли. Новый read-only SDK прошёл passive pilot через установленную панель:
+fresh process/queue/deployment proof, документы и активная модель прочитаны.
+Open/activation/save/geometry/screenshot не выполнялись; native runtime неизменён.
+Evidence/K5-owned/final и live; STATUS-K5-OWNED.md. К5 ещё не закрыт: clean
+checkout/CI, новый owned live scenario и решение пользователя по default switch.
+Начальная proof-часть К5 перенесена: one-use active document choice,
+minimum expiry и raw open/translation receipt checks. Return=1 допускает
+только executed_unverified с fence; independent verifier требует отдельного
+succeeded_verified/noCommandReplay/fenceReleased. 146 .NET tests прошли;
+evidence/K5-owned/K5-proof.trx. Proof helpers сами ничего не исполняют,
+не удаляют fence/claim и не обращаются к COM; их five fixed facades подключены выше.
 Execute/open/activation endpoints и live
 переключение — на К5; native runtime 0.31.0 не изменён. STATUS-K4-SAFETY.md.
 Текущие контрольные точки — CHECKPOINTS.md. SDK-host собран и проверен без CAD;

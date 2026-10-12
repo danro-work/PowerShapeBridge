@@ -1,0 +1,14 @@
+# Reviewable K5 proposal; this file does not change the user's Codex settings.
+[mcp_servers.powershape_bridge]
+command = 'C:\Program Files\dotnet\dotnet.exe'
+args = ['D:\ChatGPT\PowerShapeBridge\PS_Bridge\work\K5-sdk-runtime\PowerShapeMcp.Host.dll', '--bridge-root', 'D:\ChatGPT\PowerShapeBridge\PS_Bridge\releases\P2.6', '--timeout', '90']
+enabled = true
+startup_timeout_sec = 20
+tool_timeout_sec = 120
+
+[mcp_servers.powershape_readonly]
+command = 'C:\Program Files\dotnet\dotnet.exe'
+args = ['D:\ChatGPT\PowerShapeBridge\PS_Bridge\work\K5-sdk-runtime\PowerShapeMcp.Host.dll', '--bridge-root', 'D:\ChatGPT\PowerShapeBridge\PS_Bridge\releases\P2.6', '--timeout', '90', '--read-only']
+enabled = true
+startup_timeout_sec = 20
+tool_timeout_sec = 120

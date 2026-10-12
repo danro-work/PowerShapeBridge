@@ -20,6 +20,7 @@ public sealed class BridgeSession : IDisposable
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     private readonly HashSet<string> prepared=[];
+    private readonly HashSet<string> execution=[];
     private readonly object admissionGate=new();
     private readonly HashSet<RequestId> pending=[];
 
@@ -33,6 +34,7 @@ public sealed class BridgeSession : IDisposable
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
         if(!options.ReadOnly)
         {
+            execution.Add("activate_document");
             foreach(var (flagName,names) in new[]{
                 ("entitySetsExperimental",new[]{"prepare_entity_set","validate_entity_set"}),
                 ("operationPlansExperimental",new[]{"prepare_operation_plan","inspect_operation_plan"}),
@@ -40,15 +42,23 @@ public sealed class BridgeSession : IDisposable
                 ("documentBindingsExperimental",new[]{"bind_working_document","validate_working_document_binding"}),
                 ("ownedOperationPlansExperimental",new[]{"prepare_owned_operation","validate_owned_operation"})})
                 if(config.TryGetProperty(flagName,out var enabled)&&enabled.ValueKind==System.Text.Json.JsonValueKind.True)prepared.UnionWith(names);
+            foreach(var (flagName,names) in new[]{("workingCopyOpenExperimental",new[]{"open_working_copy","verify_working_copy_open"}),("ownedTranslationsExperimental",new[]{"execute_owned_translation","verify_owned_translation"})})
+                if(config.TryGetProperty(flagName,out var enabled)&&enabled.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(names);
         }
     }
     public void AssertToolAllowed(string name)
     {
         if(name is "bridge_status" or "operation_result" or "list_documents" or "inspect_active_model" or "resolve_entity_references" ||
-            name=="inspect_entity_candidates"&&CandidatesEnabled||prepared.Contains(name))return;
+            name=="inspect_entity_candidates"&&CandidatesEnabled||prepared.Contains(name)||execution.Contains(name))return;
         throw new McpProtocolException("Tool is unavailable in this server/mode.",McpErrorCode.InvalidParams);
     }
     public bool PreparedEnabled(string name)=>prepared.Contains(name);
+    public bool ExecutionEnabled(string name)=>execution.Contains(name);
+    public void RevokeCadLeases(bool consumeOwned)
+    {
+        Documents.Clear();References.Clear();Candidates.Clear();Bindings.Clear();
+        if(consumeOwned){Plans.Clear();Owned.Clear();}
+    }
     public IDisposable AcquireCall(RequestId id)
     {
         lock(admissionGate)
@@ -66,20 +76,20 @@ public sealed class BridgeSession : IDisposable
         {
             ["adapterVersion"] = HostOptions.Version, ["bridgeRoot"] = Options.BridgeRoot,
             ["configurationPresent"] = true, ["panelLiveness"] = "not_verified",
-            ["geometryMutations"] = "disabled", ["transport"] = "stdio",
+            ["geometryMutations"] = ExecutionEnabled("execute_owned_translation")?"experimental_owned_solid_translation_only":"disabled", ["transport"] = "stdio",
             ["serverMode"] = Options.ReadOnly ? "read_only" : "general_core",
             ["configurationProfile"] = "general-v1", ["entitySets"] = CandidatesEnabled?"experimental_observations_only":"disabled", ["operationPlans"] = PreparedEnabled("prepare_operation_plan")?"experimental_local_only_execution_disabled":"disabled",
-            ["workingCopies"] = PreparedEnabled("prepare_working_copy")?"experimental_saved_disk_bytes_only":"disabled", ["documentBindings"] = PreparedEnabled("bind_working_document")?"experimental_passive_owned_active_document":"disabled", ["workingCopyOpen"] = "disabled",
-            ["ownedOperationPlans"] = PreparedEnabled("prepare_owned_operation")?"experimental_coupled_guard_execution_disabled":"disabled", ["ownedTranslations"] = "disabled",
+            ["workingCopies"] = PreparedEnabled("prepare_working_copy")?"experimental_saved_disk_bytes_only":"disabled", ["documentBindings"] = PreparedEnabled("bind_working_document")?"experimental_passive_owned_active_document":"disabled", ["workingCopyOpen"] = ExecutionEnabled("open_working_copy")?"experimental_owned_new_window_only":"disabled",
+            ["ownedOperationPlans"] = PreparedEnabled("prepare_owned_operation")?"experimental_coupled_guard_execution_disabled":"disabled", ["ownedTranslations"] = ExecutionEnabled("execute_owned_translation")?"experimental_one_owned_solid_independent_verification":"disabled",
             ["maintenance"] = File.Exists(FileArtifacts.FixedPath(Options.BridgeRoot, "maintenance.json")),
             ["referenceScope"] = "ephemeral_read_observations; not accepted by mutation tools",
-            ["documentChoice"] = "disabled", ["expectedProject"] = null, ["captureViewport"] = false,
+            ["documentChoice"] = ExecutionEnabled("activate_document")?"enabled":"disabled", ["expectedProject"] = null, ["captureViewport"] = false,
             ["workerTimeoutSeconds"] = config.GetProperty("operationTimeoutSeconds").GetInt32()
         };
         foreach (var (file, key) in new[] { ("deployment-current.json", "installedDeployment"), ("panel-status.json", "lastPanelReport"), ("worker-stage.json", "lastWorkerStage") })
         {
             if (!File.Exists(FileArtifacts.FixedPath(Options.BridgeRoot, "reports", file))) continue;
-            try { result[key] = JsonNode.Parse(FileArtifacts.ReadJson(Options.BridgeRoot, Path.Combine("reports", file), 1000000).GetRawText()); }
+            try { result[key] = JsonNode.Parse(FileArtifacts.ReadAdvisoryReport(Options.BridgeRoot,file).GetRawText()); }
             catch (Exception ex) when (ex is IOException or System.Text.Json.JsonException) { result[key] = null; }
         }
         return result;

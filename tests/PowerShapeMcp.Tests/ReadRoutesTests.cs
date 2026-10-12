@@ -69,7 +69,7 @@ public sealed class ReadRoutesTests
     [Theory]
     [InlineData(true,true,6)]
     [InlineData(true,false,5)]
-    [InlineData(false,true,8)]
+    [InlineData(false,true,9)]
     public async Task ExplicitCatalogAndEveryMutationRefuseBeforeQueue(bool readOnly,bool candidates,int count)
     {
         await using var connection=await Connection.Create(readOnly,candidates);
@@ -80,7 +80,8 @@ public sealed class ReadRoutesTests
                     "model_snapshot","select_entities","save_as","screenshot","execute_command"})
             await Assert.ThrowsAsync<McpProtocolException>(()=>connection.Client.CallToolAsync(name,new Dictionary<string,object?>{["command"]="DELETE"}).AsTask());
         Assert.False(Directory.Exists(Path.Combine(connection.Fixture.Root,"requests")));
-        Assert.Throws<McpProtocolException>(()=>connection.Session.AssertToolAllowed("activate_document"));
+        if(readOnly)Assert.Throws<McpProtocolException>(()=>connection.Session.AssertToolAllowed("activate_document"));
+        else connection.Session.AssertToolAllowed("activate_document");
     }
 
     [Fact]

@@ -37,6 +37,34 @@ class Panel:
             value = copy.deepcopy(self.source)
             value['timestampUtc'] = stamp
             return value
+        if recipe == 'list_documents':
+            return dict(state='documents_listed_verified', timestampUtc=stamp,
+                documents=[dict(modelId=9, windowNumber=4, activationSupported=True)])
+        if recipe == 'activate_document':
+            return dict(state='document_active_verified', contextChangeAttempted=True, geometryMutationAttempted=False)
+        if recipe == 'open_working_copy':
+            plan = dict(parameters, operationId=identity, operation='open_working_copy', geometryExecutionEnabled=False)
+            sha = freeze(self.root / 'copyopenplans' / (identity + '.json'), plan)
+            return dict(state='working_copy_opened_observed', operationId=identity, planSha256=sha, plan=plan,
+                copyId=parameters['copyId'], ownershipSha256=parameters['ownershipSha256'],
+                contextChangeAttempted=True, geometryMutationAttempted=False, cadSaveAttempted=False)
+        if recipe == 'verify_working_copy_open':
+            plan = json.loads((self.root / 'copyopenplans' / (parameters['openRequestId'] + '.json')).read_text())
+            return dict(state='owned_open_verified_observed', openOperationId=parameters['openRequestId'],
+                openReceiptSha256=parameters['openReceiptSha256'], expiresUtc=parameters['expiresUtc'],
+                copyId=plan['copyId'], ownershipSha256=plan['ownershipSha256'], recordedJournalState='succeeded_verified',
+                timestampUtc=stamp, contextChangeAttempted=False, geometryMutationAttempted=False)
+        if recipe == 'execute_owned_translation':
+            plan = dict(parameters, operationId=identity, operation='translate_owned_solid', executionEnabled=True)
+            sha = freeze(self.root / 'ownedexecutions' / (identity + '.json'), plan)
+            return dict(state='owned_translation_executed_unverified', operationId=identity, planSha256=sha, plan=plan,
+                geometryMutationAttempted=True, contextChangeAttempted=False, cadSaveAttempted=False,
+                returnCode=1, copyFenced=True, recordedJournalState='executed_unverified')
+        if recipe == 'verify_owned_translation':
+            return dict(state='owned_translation_verified_observed', executionOperationId=parameters['executionRequestId'],
+                executionReceiptSha256=parameters['executionReceiptSha256'], recordedJournalState='succeeded_verified',
+                copyFenceReleased=True, noCommandReplay=True, geometryMutationAttempted=False,
+                contextChangeAttempted=False, cadSaveAttempted=False)
         if recipe == 'prepare_entity_set':
             sha = freeze(self.root / 'entitysets' / (identity + '.json'), parameters)
             return dict(state='entity_set_prepared_observed', entitySetId=identity, entitySetSha256=sha, expiresUtc=parameters['expiresUtc'])
@@ -103,13 +131,13 @@ class Panel:
 
 def equivalent(expected, actual, mapping, key=None):
     handles = {'candidateDocumentHandle', 'candidateEntityHandle', 'entitySetHandle', 'operationPlanHandle',
-               'workingCopyHandle', 'workingDocumentBindingHandle', 'ownedOperationHandle'}
+               'workingCopyHandle', 'workingDocumentBindingHandle', 'ownedOperationHandle', 'documentHandle'}
     if key in handles:
         if expected not in mapping:
             assert len(actual) == 32
             mapping[expected] = actual
         assert mapping[expected] == actual
-    elif key in {'candidateLifetimeSeconds', 'workingCopyLifetimeSeconds', 'bindingLifetimeSeconds', 'ownedOperationLifetimeSeconds'}:
+    elif key in {'candidateLifetimeSeconds', 'workingCopyLifetimeSeconds', 'bindingLifetimeSeconds', 'ownedOperationLifetimeSeconds', 'documentHandleLifetimeSeconds'}:
         assert abs(expected - actual) <= 1, (key, expected, actual)
     elif isinstance(expected, dict):
         assert set(expected) == set(actual), (set(expected) - set(actual), set(actual) - set(expected))
@@ -124,14 +152,18 @@ def equivalent(expected, actual, mapping, key=None):
 
 
 def checks(args):
+    execution = getattr(args, 'execution', False)
+    prefix = 'execution' if execution else 'prepared'
     evidence = Path(args.evidence).resolve()
     unique = uuid.uuid4().hex
     root = evidence / ('prepared-sdk-' + unique)
     old_root = evidence / ('prepared-python-' + unique)
     root.mkdir(parents=True)
     old_root.mkdir()
-    settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-operation-plans.json').read_text())
-    for folder in ('responses', 'entitysets', 'documentbindings', 'ownedoperations'):
+    profile = 'general-owned-translations.json' if execution else 'general-owned-operation-plans.json'
+    settings = json.loads((Path(__file__).parents[1] / 'config' / profile).read_text())
+    folders = ('responses', 'entitysets', 'documentbindings', 'ownedoperations', 'copyopenplans', 'ownedexecutions')
+    for folder in folders:
         (root / folder).mkdir()
         (old_root / folder).mkdir()
     for directory in (root, old_root):
@@ -154,7 +186,7 @@ def checks(args):
         before = len(panel.calls)
         result = client.call(sequence, 'tools/call', {'name': name, 'arguments': inputs})['result']
         assert not result['isError'], result
-        for folder in ('responses', 'entitysets', 'documentbindings', 'ownedoperations'):
+        for folder in folders:
             for path in (root / folder).glob('*.json'):
                 shutil.copyfile(path, old_root / folder / path.name)
         for directory in (root / 'operations').glob('*'):
@@ -191,8 +223,8 @@ def checks(args):
     try:
         init(client)
         tools = client.call(2, 'tools/list')['result']['tools']
-        assert len(tools) == 16
-        assert set(t['name'] for t in legacy.tools) - set(t['name'] for t in tools) == {'activate_document', 'open_working_copy', 'verify_working_copy_open'}
+        assert len(tools) == (21 if execution else 19)
+        assert set(t['name'] for t in legacy.tools) == set(t['name'] for t in tools)
         for tool in tools:
             schema = copy.deepcopy(tool['inputSchema'])
             for value in schema.get('properties', {}).values():
@@ -217,15 +249,46 @@ def checks(args):
         before = path.read_bytes()
         both('validate_owned_operation', {'ownedOperationHandle': packet['ownedOperationHandle']}, {'ownedOperationHandle': old_packet['ownedOperationHandle']})
         assert path.read_bytes() == before
-        assert all(request['arguments']['recipeId'] not in {'activate_document', 'execute_owned_translation', 'open_working_copy'} for request in panel.calls)
+        if execution:
+            executed, _ = both('execute_owned_translation', {'ownedOperationHandle': packet['ownedOperationHandle']}, {'ownedOperationHandle': old_packet['ownedOperationHandle']})
+            assert executed['recordedJournalState'] == 'executed_unverified' and executed['copyFenced']
+            queued = len(panel.calls)
+            rejected = client.call(sequence, 'tools/call', {'name': 'execute_owned_translation', 'arguments': {'ownedOperationHandle': packet['ownedOperationHandle']}})['result']
+            sequence += 1
+            assert rejected['isError'] and rejected['structuredContent']['state'] == 'owned_translation_rejected_before_change'
+            assert len(panel.calls) == queued
+            fresh, old_fresh = both('inspect_entity_candidates', {})
+            listing, old_listing = both('list_documents', {})
+            execution_sha = hashlib.sha256((root / 'responses' / (executed['operationId'] + '.json')).read_bytes()).hexdigest()
+            both('verify_owned_translation', dict(executionRequestId=executed['operationId'], executionReceiptSha256=execution_sha,
+                    candidateDocumentHandle=fresh['candidateDocumentHandle'], activeDocumentHandle=listing['documents'][0]['documentHandle']),
+                dict(executionRequestId=executed['operationId'], executionReceiptSha256=execution_sha,
+                    candidateDocumentHandle=old_fresh['candidateDocumentHandle'], activeDocumentHandle=old_listing['documents'][0]['documentHandle']))
+            listing, old_listing = both('list_documents', {})
+            opened, _ = both('open_working_copy', dict(workingCopyHandle=working['workingCopyHandle'], candidateDocumentHandle=fresh['candidateDocumentHandle'], activeDocumentHandle=listing['documents'][0]['documentHandle']),
+                dict(workingCopyHandle=old_working['workingCopyHandle'], candidateDocumentHandle=old_fresh['candidateDocumentHandle'], activeDocumentHandle=old_listing['documents'][0]['documentHandle']))
+            fresh, old_fresh = both('inspect_entity_candidates', {})
+            listing, old_listing = both('list_documents', {})
+            open_sha = hashlib.sha256((root / 'responses' / (opened['operationId'] + '.json')).read_bytes()).hexdigest()
+            verified, _ = both('verify_working_copy_open', dict(openRequestId=opened['operationId'], openReceiptSha256=open_sha,
+                    candidateDocumentHandle=fresh['candidateDocumentHandle'], activeDocumentHandle=listing['documents'][0]['documentHandle']),
+                dict(openRequestId=opened['operationId'], openReceiptSha256=open_sha,
+                    candidateDocumentHandle=old_fresh['candidateDocumentHandle'], activeDocumentHandle=old_listing['documents'][0]['documentHandle']))
+            assert verified['recordedJournalState'] == 'succeeded_verified' and verified['workingCopyHandle']
+            listing, old_listing = both('list_documents', {})
+            both('activate_document', {'documentHandle': listing['documents'][0]['documentHandle']}, {'documentHandle': old_listing['documents'][0]['documentHandle']})
+            assert sum(request['arguments']['recipeId'] == 'execute_owned_translation' for request in panel.calls) == 1
+            assert sum(request['arguments']['recipeId'] == 'open_working_copy' for request in panel.calls) == 1
+        else:
+            assert all(request['arguments']['recipeId'] not in {'activate_document', 'execute_owned_translation', 'open_working_copy'} for request in panel.calls)
         assert not (root / 'captures').exists()
     finally:
         client.close()
         panel.close()
-        (evidence / 'prepared-stdio-transcript.json').write_text(json.dumps(client.transcript, ensure_ascii=False, indent=2), encoding='utf-8')
-        (evidence / 'prepared-stdio-stderr.txt').write_text(''.join(client.logs), encoding='utf-8')
-        (evidence / 'prepared-fake-panel.json').write_text(json.dumps({'requests': panel.calls, 'errors': panel.errors}, indent=2), encoding='utf-8')
-    print('PASS: 10 prepared SDK/Python facades, exact constraints/private envelopes, byte-identical local plan/journal, native raw hashes and passive dependency validation. No CAD.')
+        (evidence / (prefix + '-stdio-transcript.json')).write_text(json.dumps(client.transcript, ensure_ascii=False, indent=2), encoding='utf-8')
+        (evidence / (prefix + '-stdio-stderr.txt')).write_text(''.join(client.logs), encoding='utf-8')
+        (evidence / (prefix + '-fake-panel.json')).write_text(json.dumps({'requests': panel.calls, 'errors': panel.errors}, indent=2), encoding='utf-8')
+    print('PASS: SDK/Python ' + prefix + ' facade parity, exact constraints/private envelopes, local plan/journal bytes and native raw hashes. Fake panel only; no CAD.')
 
 
 if __name__ == '__main__':

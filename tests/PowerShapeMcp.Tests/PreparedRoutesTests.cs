@@ -52,7 +52,7 @@ public sealed class PreparedRoutesTests
     private static JsonObject Read(CallToolResult value)=>JsonNode.Parse(value.StructuredContent!.Value.GetRawText())!.AsObject();
 
     [Theory]
-    [InlineData(false,16)]
+    [InlineData(false,17)]
     [InlineData(true,6)]
     public async Task PreparedCatalogIsExplicitAndSeparateFromReadonly(bool readOnly,int expected)
     {

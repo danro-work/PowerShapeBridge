@@ -9,8 +9,8 @@
 | К2 | Пройден | STATUS-K2-SDK.md: clean checkout, 45 .NET tests, STDIO/Python journal parity, Inspector; все Windows CI успешны |
 | К3 | Пройден | SDK 0.33.0-dev: clean checkout, 98 .NET tests, independent Python parity/Inspector; все CI успешны |
 | К4 | Пройден | SDK 0.34.0-dev full/read-only 16/6; clean checkout/CI, 141 .NET, 312 native/63 artifact cases |
-| К5 | Выполняется | Паритет owned open/translation; готовый пакет и решение о live переключении |
-| К6 | Не начато | SaveAs результата, saved bytes и отдельный reopen |
+| К5 | Технически пройден, user decision pending | SDK0.35.1/native0.32 clean/CI/deploy/live unique OPEN + one SOLID/independent audit passed; 162 .NET/320 native/78 artifacts; K5-SDK-SWITCH.md, default switch ещё не принят |
+| К6 | Подготовка контракта | OWNED-SAVE-AS.md: typed owned SaveAs/result/reopen design, Autodesk sources; code/live qualification ещё не выполнены |
 | К7 | Не начато | Interrupted recovery и fault matrix |
 | К8 | Не начато | Общие transforms и organization |
 | К9 | Не начато | Planes/intersections/exchange/observation |

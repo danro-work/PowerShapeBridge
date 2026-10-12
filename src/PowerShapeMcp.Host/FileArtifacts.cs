@@ -24,11 +24,27 @@ public static class FileArtifacts
     public static byte[] ReadBytes(string root, string relative, int limit)
     {
         using var stream = new FileStream(FixedPath(root, relative), FileMode.Open, FileAccess.Read, FileShare.Read);
+        return ReadBounded(stream,limit);
+    }
+    private static byte[] ReadBounded(FileStream stream,int limit)
+    {
         if (stream.Length > limit) throw new InvalidDataException("Artifact exceeds size limit.");
         var bytes = new byte[checked((int)stream.Length)];
         stream.ReadExactly(bytes);
         if (stream.ReadByte() != -1) throw new InvalidDataException("Artifact grew during read.");
         return bytes;
+    }
+
+    internal static FileStream OpenAdvisoryReport(string root,string name)
+    {
+        if(name is not ("panel-status.json" or "worker-stage.json" or "deployment-current.json"))throw new InvalidDataException("Unknown fixed advisory report.");
+        return new FileStream(FixedPath(root,"reports",name),FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete);
+    }
+    public static JsonElement ReadAdvisoryReport(string root,string name)
+    {
+        // These reports are diagnostics, never proof/lease authority. Permit atomic
+        // publisher replacement while this stream retains the original file bytes.
+        using var stream=OpenAdvisoryReport(root,name);return Parse(ReadBounded(stream,1000000));
     }
 
     public static JsonElement Parse(byte[] bytes)
