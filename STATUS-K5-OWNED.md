@@ -1,6 +1,26 @@
 # К5 — исполнение и независимая проверка, выполняется
 
-Текущий блок: SDK source 0.35.1-dev / native source/staging 0.32.0.
+Техническая квалификация К5 пройдена; ожидается решение пользователя по
+default adapter switch. Пакет — K5-SDK-SWITCH.md/config/codex-sdk-example.toml.
+Native 0.32.0 установлен штатным idle/hash/backup-aware deploy; SDK 0.35.1-dev
+published в work/K5-sdk-runtime, оба каталога 21/6 отдельно проверены по STDIO.
+Все четыре Windows CI cf863d2, clean baseline/SDK passed. Backup native:
+work/general-deployment-backup-20261012-152231. Protected before/after: 28 hashes.
+
+Новый успешный live scenario: copy b3d16256be1a4848bdbf15f6160a0567,
+OPEN b95be76a673041cf87a8285fbdb1c3b6, translation
+d8129739753d4de9ab77c6d6ef9345a2. Один OPEN, одна world/raw mm X+1 SOLID
+translation, separate fresh verifiers; оба journals succeeded_verified/6 events,
+matching fence release. Независимый saved artifact audit прошёл: original raw
+receipt/proof SHA, native request envelopes, journals и saved bytes совпали.
+Test_Block_P2 снова активен; пять модельных окон. Новая own Working_b3d... открыта
+с известным несохранённым переносом для К6. Source/checkpoint/working saved bytes
+не изменены, save/close/inverse не было. Старый unknown OPEN ниже остаётся unknown.
+Evidence: deployment, native32-readonly, unique-owned-live/qualification.json и
+independent-audit.json; package-manifest.json. До человеческого решения прежний
+Python powershape_bridge в config.toml не менялся.
+
+Предшествующий блок: SDK source 0.35.1-dev / native source/staging 0.32.0.
 Установленный native остаётся 0.31.0; default adapter switch не выполнен.
 К5 ещё не принят. Чистый checkout 8996eb7 и все четыре Windows CI PR #6
 прошли для SDK 0.35.0-dev. Live SDK pilot обнаружил два реальных дефекта:

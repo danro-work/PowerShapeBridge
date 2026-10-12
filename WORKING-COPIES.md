@@ -8,7 +8,8 @@
 Native open guard до claim/journal/COM OPEN отвергает имя, уже присутствующее
 в свежем window listing (case-insensitive), даже если путь другой. Исходный
 OPEN, вызвавший dialog «Working уже открыта», остаётся unknown и не повторяется.
-Установленный runtime пока 0.31.0; новый layout ещё не квалифицирован live.
+Native 0.32.0 установлен; новый schema2 layout квалифицирован live на copy
+b3d16256be1a4848bdbf15f6160a0567 с separate OPEN/translation verification.
 
 P2.31, 12 октября 2026: runtime 0.31.0, каталог 21/read-only 6. Первый общий executor переносит один SOLID в manifest-owned копии: два guard-прохода в удерживаемой COM-паре, один TranslateItem, постоянный intent claim, copy fence и отдельная independent verification. Live X +1 и отдельный X −1 подтверждены; наблюдения собственной копии восстановлены, Test_Block_P2 снова активен, четыре окна и protected saved hashes сохранены. Save/open/close/selection/screenshot не выполнялись. OWNED-TRANSLATION.md и STATUS-P2.31-EXECUTOR.md; ниже история предыдущих блоков. MCP v1 не завершён.
 

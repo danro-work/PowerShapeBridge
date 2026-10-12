@@ -1,6 +1,22 @@
 # PowerShape Bridge — состояние для продолжения
 
-Текущий К5 блок: SDK source 0.35.1-dev, native source/staging 0.32.0;
+К5 технически квалифицирован: native 0.32.0 установлен и SDK 0.35.1-dev
+published/full-readonly 21/6 проверен. Clean baseline/SDK и четыре Windows CI
+cf863d2 пройдены. После backup-aware idle deploy 28 protected hashes совпали.
+Новая own copy b3d16256be1a4848bdbf15f6160a0567/open
+b95be76a673041cf87a8285fbdb1c3b6/translation
+d8129739753d4de9ab77c6d6ef9345a2 прошла один OPEN + один SOLID world/raw mm X+1,
+separate fresh verification и независимый raw artifact audit; journals по 6
+events succeeded_verified, matching fence released. Source/checkpoint/working
+saved bytes не менялись; original Test_Block_P2 снова активен. Сейчас пять окон,
+новая Working_b3d... остаётся открытой с известным unsaved translation для К6.
+Никаких save/close/inverse не было. Старый OPEN 6ed... сохраняется unknown,
+claim/journal не изменены. K5-SDK-SWITCH.md — готовый review/rollback пакет;
+запрошено решение пользователя по default переходу Python → SDK + отдельный
+read-only server. Config.toml пока не менялся. К5 ожидает это решение,
+К6–К11 обязательны. Далее сохранена история предыдущих блоков.
+
+Предшествующий К5 блок: SDK source 0.35.1-dev, native source/staging 0.32.0;
 установленный native всё ещё 0.31.0. Live OPEN на НОВОЙ copy
 5fef10809eb44904ade27e2ca843a8b9/request 6ed9d4106d054b28a05e8ab0b59c5811
 остановлен timeout: PowerShape показал «Working уже открыта». Три native

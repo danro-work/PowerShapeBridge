@@ -1,5 +1,16 @@
 # Дальнейшая работа
 
+К5 technical pilot/clean/CI/deployment/independent audit пройдены; user default
+switch decision pending. K5-SDK-SWITCH.md содержит proposed full + read-only
+config и rollback. До ответа config.toml не менять. Если пользователь разрешит,
+точечно обновить две MCP sections, backup/TOML/startup check, затем проверить
+actual connected adapterVersion после reload; config write сам не доказывает reload.
+Новый собственный b3d16256be1a4848bdbf15f6160a0567 остаётся открытым с известным
+unsaved X+1 и неизменённым saved Working/checkpoint; original Test_Block_P2 активен.
+К6 — новый SaveAs target/saved bytes/separate reopen на этой собственной копии;
+перед любыми командами fresh model/queue/process/ownership proofs, handles не переносить.
+Не повторять старый unknown OPEN 6ed.../copy 5fef..., не менять его journal/claim.
+
 К5 live pilot нашёл duplicate-name dialog и heartbeat sharing error.
 Source исправлен: SDK 0.35.1-dev, native 0.32.0; runtime пока 0.31.0.
 Полный evidence/K5-owned/collision-fix passed. Проверить необходимые baseline/
