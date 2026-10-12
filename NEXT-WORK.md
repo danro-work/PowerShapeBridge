@@ -4,8 +4,8 @@
 connection-scoped savedResult lease, отдельно квалифицированный clone занятого
 saved result, own uniquely named reopen/new binding. Native one-save executor/
 fresh verifier и SDK passive prepare уже реализованы; 188 .NET/432 native,
-114 artifact cases и independent native save audit passed offline. Сначала
-clean checkout/CI текущего блока; затем закончить SDK routes/proofs и reopen.
+116 artifact cases и independent native save audit passed offline. Clean checkout
+47a64e5 baseline/SDK и все четыре Windows CI прошли; далее SDK routes/proofs и reopen.
 Runtime0.32/published SDK0.35.1/config не менялись, default switch pending.
 К6 не завершён; дальнейший объём К7–К11 сохраняется. Перед live новые process/
 document/model/ownership checks. STATUS-K6-SAVE-AS.md.

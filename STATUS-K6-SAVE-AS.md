@@ -19,13 +19,19 @@ Native recipes gated флагом ownedSavesExperimental; config/general-owned-s
 не установлен. SDK execute/verify/saved-result leases пока не подключены.
 
 Пройдены 188 .NET tests, 432 native synthetic checks, четыре независимых STDIO
-клиента, oracle regression, Inspector и 114 actual Framework artifact cases
-(95 accepted, 0 mismatches). Отдельный Python audit проверил actual native SaveAs
+клиента, oracle regression, Inspector и 116 actual Framework artifact cases
+(97 accepted, 0 mismatches). Отдельный Python audit проверил actual native SaveAs
 raw receipts, шесть journal events, один command-start/return, retained claim,
 released matching fence и saved/protected SHA. Evidence:
-evidence/K6-save-as/native-save-and-prepare. Profile-on native staging:
+Первоначальный прогон: evidence/K6-save-as/native-save-and-prepare. Profile-on native staging:
 work/K6-save-routes-tests-1. Всё на opaque synthetic fixtures; live CAD К6
-не выполнялся. Clean checkout/CI этого блока ещё предстоят.
+не выполнялся. Clean checkout 47a64e57deeb696094b336bf694af5786d2bff38 прошёл
+baseline и полный SDK regression, включая integrated native save audit:
+work/K6-save-clean/evidence/K1-baseline и evidence/K6-save-clean. В baseline
+116 Python checks, MCP protocol/junction/deployment plan passed. Все четыре
+Windows CI этого коммита прошли (push/PR baseline и SDK): runs 38282681431,
+38282687324, 38282681422, 38282687389. Matching active/model/window identity
+проверяется отдельно; неправильное имя/рассогласованный active listing дают unknown.
 
 Ограничения: saved working file допускает внешнего писателя по прежнему ownership
 контракту; изменение обнаруживается и оставляет unknown/fence. Pins не являются

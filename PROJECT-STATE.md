@@ -2,12 +2,13 @@
 
 К6: SDK0.36.0-dev prepare_owned_save_as зарегистрирован; native0.33.0-dev
 one-use SaveAs и separate verifier реализованы с gated recipes. 188 .NET/
-432 native synthetic, 114 artifacts (0 mismatches), четыре STDIO клиента/
+432 native synthetic, 116 artifacts (0 mismatches), четыре STDIO клиента/
 Inspector и independent native saved-byte/journal audit passed. Всё offline;
 установленные native0.32/published K5 SDK0.35.1/config.toml не менялись.
 SDK execution/verifier/saved-result leases, reopen/new binding и live К6 ещё
-впереди; clean checkout/CI текущего блока ожидаются. STATUS-K6-SAVE-AS.md;
-evidence/K6-save-as/native-save-and-prepare. К5 switch decision pending;
+впереди; clean checkout baseline/SDK 47a64e5 и все четыре Windows CI passed.
+STATUS-K6-SAVE-AS.md; work/K6-save-clean/evidence/K6-save-clean и K1-baseline.
+К5 switch decision pending;
 К6–К11 не завершены. Ниже сохранена история предшествующих блоков.
 
 К6 filesystem/SDK passive target foundation реализована, без новых CAD-команд
