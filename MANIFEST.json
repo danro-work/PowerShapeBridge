@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "createdUtc": "2026-10-09T09:20:57.0759272Z",
+  "purpose": "PowerShape Bridge local project handoff",
+  "sourceProject": "D:\\ChatGPT\\PowerShapeBridge\\PS_Bridge",
+  "cadActionsPerformed": false,
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "bytes": 5318,
+      "sha256": "7dea7f2cc86d229a55baafbf6423a44b4f88bd0be1aeeddc59957f424d947e02"
+    },
+    {
+      "path": "evidence\\P2.22\\component-deployment-manifest.json",
+      "bytes": 2444,
+      "sha256": "cf005b3af4a62258ca38f57d0f3214ab0056e87960cc8b6c1f89ccee1a9428d0"
+    },
+    {
+      "path": "evidence\\P2.22\\final-mcp-check.json",
+      "bytes": 32532,
+      "sha256": "8569b3d1e5d0777bf12dfd2b3bd25195f94443a5e37c7d16f6f16b04082739e8"
+    },
+    {
+      "path": "evidence\\P2.22\\independent-audit.json",
+      "bytes": 6832,
+      "sha256": "ecaa07fdfcd9b01176f63568f54243a364fae57bdea4d76d0979167427082876"
+    },
+    {
+      "path": "evidence\\P2.22\\PowerShapeBridge-P2.22-source.zip",
+      "bytes": 173029,
+      "sha256": "cec523f76ea17b790be40892791eeb4544060447c280cc8ee9ea36de3d9d9914"
+    },
+    {
+      "path": "evidence\\P2.22\\qualification.json",
+      "bytes": 173272,
+      "sha256": "947e9c8f2f0b424cc74056f4d90cdcae02fe2b3223348173cd8aaee12cf60809"
+    },
+    {
+      "path": "NEW-CHAT-PROMPT.md",
+      "bytes": 2298,
+      "sha256": "502283c0d0f132fd42abf98726daafc4d4e4f7ae127b16afd5b3f97b4e0f714a"
+    },
+    {
+      "path": "NEXT-WORK.md",
+      "bytes": 3070,
+      "sha256": "fdc4fe87c34931bcd3609d0f0bb68963c460e7ebe6ad70d2fde1d49302b742bd"
+    },
+    {
+      "path": "PROJECT-STATE.md",
+      "bytes": 7843,
+      "sha256": "86ea029c3db67ebf1f37c380c0cf2d077d51d3272a18f9b915f63c164cd4f511"
+    },
+    {
+      "path": "reference\\ARCHITECTURE.md",
+      "bytes": 9536,
+      "sha256": "b4bbe4e49768c35b24476fab3005b2f52b8c98b58f6dcedb7efd2af664500412"
+    },
+    {
+      "path": "reference\\DOCUMENT-CHOICE.md",
+      "bytes": 6915,
+      "sha256": "6f23aa54f22b2aa8b5016b3e020b023ba6c35c263e9f93973d8eab7ce930b39d"
+    },
+    {
+      "path": "reference\\MCP-V1-CONTRACT.md",
+      "bytes": 9400,
+      "sha256": "17228110f1d7528f1ed8886a9158be4300e201860b65206cea721b77e7535141"
+    },
+    {
+      "path": "reference\\READ-REFERENCES.md",
+      "bytes": 9749,
+      "sha256": "c7fd283b454edad02d8b93a2976dca69ea21a1678f4cd8c7aaab4a654b569547"
+    },
+    {
+      "path": "reference\\README.md",
+      "bytes": 8570,
+      "sha256": "4832f861af969e19e99fe30f138faa459be2f64103ef38716e2895484cbd320b"
+    },
+    {
+      "path": "reference\\ROADMAP.md",
+      "bytes": 4933,
+      "sha256": "65dd619bf84b97891413477de547011133b279afd2802d8bf6cd3c79791265e9"
+    },
+    {
+      "path": "reference\\STATUS-P2.21.md",
+      "bytes": 6345,
+      "sha256": "69b201378881a777f0d7424e9449eb22037bdbf4e1f86444c97e434a73cff6d6"
+    },
+    {
+      "path": "reference\\STATUS-P2.22.md",
+      "bytes": 4823,
+      "sha256": "31f9660f6f2579d80c8355c3820e05ddac39d219952b50e6a421bfdbc952ff87"
+    },
+    {
+      "path": "START-HERE.md",
+      "bytes": 2700,
+      "sha256": "4a7820a5e2ee144cc4c004cf3e1864630bd04b706d0f856436d24a961e9091fa"
+    }
+  ]
+}
