@@ -1,6 +1,13 @@
 using System.Text.Json.Nodes;
 using PowerShapeMcp;
 
+if(args.Length==4&&args[0]=="--recovery-inspect")
+{
+    var recoveryRoot=Path.GetFullPath(args[1]);var recoveryOutput=Path.GetFullPath(args[3]);
+    var inspected=new RecoveryInspection(recoveryRoot).Read(args[2],TimeSpan.FromSeconds(30));
+    Directory.CreateDirectory(Path.GetDirectoryName(recoveryOutput)!);File.WriteAllText(recoveryOutput,inspected.ToJsonString(new(){WriteIndented=true}));
+    Console.WriteLine($"Recovery recorded inspection: {inspected["state"]}; {inspected["assessment"]}; no CAD, artifact repair or replay.");return inspected["state"]?.GetValue<string>()=="recovery_inspected_recorded"?0:1;
+}
 if(args.Length!=2)throw new ArgumentException("Provide oracle JSON and result path.");
 var oracle=JsonNode.Parse(File.ReadAllText(args[0]))!.AsObject();
 var stage=Path.GetFullPath(oracle["stage"]!.GetValue<string>());

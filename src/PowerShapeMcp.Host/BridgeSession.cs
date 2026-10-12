@@ -22,6 +22,7 @@ public sealed class BridgeSession : IDisposable
     public OwnedReopenStore Reopens { get; }
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
+    public bool RecoveryInspectionEnabled { get; }
     private readonly HashSet<string> prepared=[];
     private readonly HashSet<string> execution=[];
     private readonly object admissionGate=new();
@@ -38,6 +39,7 @@ public sealed class BridgeSession : IDisposable
         Reopens=new(options.BridgeRoot,SavedResults,clock,utcClock);
         var config=Options.ReadConfiguration();
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
+        RecoveryInspectionEnabled=config.TryGetProperty("recoveryInspectionExperimental",out var recoveryFlag)&&recoveryFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         if(!options.ReadOnly)
         {
             execution.Add("activate_document");
@@ -57,7 +59,7 @@ public sealed class BridgeSession : IDisposable
     public void AssertToolAllowed(string name)
     {
         if(name is "bridge_status" or "operation_result" or "list_documents" or "inspect_active_model" or "resolve_entity_references" ||
-            name=="inspect_entity_candidates"&&CandidatesEnabled||prepared.Contains(name)||execution.Contains(name))return;
+            name=="inspect_entity_candidates"&&CandidatesEnabled||name=="inspect_operation_recovery"&&RecoveryInspectionEnabled||prepared.Contains(name)||execution.Contains(name))return;
         throw new McpProtocolException("Tool is unavailable in this server/mode.",McpErrorCode.InvalidParams);
     }
     public bool PreparedEnabled(string name)=>prepared.Contains(name);
@@ -93,6 +95,7 @@ public sealed class BridgeSession : IDisposable
             ["ownedOperationPlans"] = PreparedEnabled("prepare_owned_operation")?"experimental_coupled_guard_execution_disabled":"disabled", ["ownedTranslations"] = ExecutionEnabled("execute_owned_translation")?"experimental_one_owned_solid_independent_verification":"disabled",
             ["ownedSaveTargets"] = PreparedEnabled("prepare_owned_save_as")?"experimental_new_fixed_file_target":"disabled", ["ownedSaves"] = ExecutionEnabled("execute_owned_save_as")?"experimental_one_save_separate_verification":"disabled",
             ["ownedSavedReopen"] = ExecutionEnabled("execute_owned_saved_reopen")?"experimental_one_guarded_open_separate_verification_new_binding":"disabled",
+            ["recoveryInspection"] = RecoveryInspectionEnabled?"experimental_recorded_artifacts_only_no_execution_authority":"disabled",
             ["maintenance"] = File.Exists(FileArtifacts.FixedPath(Options.BridgeRoot, "maintenance.json")),
             ["referenceScope"] = "ephemeral_read_observations; not accepted by mutation tools",
             ["documentChoice"] = ExecutionEnabled("activate_document")?"enabled":"disabled", ["expectedProject"] = null, ["captureViewport"] = false,

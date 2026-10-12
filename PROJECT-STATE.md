@@ -1,5 +1,35 @@
 # PowerShape Bridge — состояние для продолжения
 
+K7 draft PR8 создан/прикреплён; source SDK0.37.0-dev. Исправлен structured отказ
+oversized recovery plan; clean code5da2c04 прошёл262 .NET tests. Новый внешний
+src/test_sdk_recovery_stdio.py: шесть full/read-only successful reads, extra
+command refusal, unchanged artifacts/no requests. Добавлен в verify-sdk (8 STDIO).
+71 protected files double-SHA/size совпали после actual unknown inspection.
+Clean baselinee6b6588 и full SDK5da2c04 passed:262 .NET/514 native/171 artifacts,
+seven прежних STDIO/Inspector;123 recorded source/binary SHA matched. Восьмой
+script отдельно passed на clean DLL. Actual unknown eventCount3/tail SHA/plan
+SHA/claim content совпали с recorded inspection; old command не повторялся.
+Все четыре CI блокаdaba4db passed:38316661689/38316666225 baseline,
+38316661779/38316666329 SDK; actual SDK log262 tests/171 artifacts/eight STDIO
+scripts (six recovery cases)/Inspector подтверждён. Runtime/
+CAD/default config не менялись; K6 Apply permission pending; K7 только первый
+reader block, outcome-resolution/checkpoint recovery/fault matrix ещё впереди.
+
+К7 independent reader начат, пока K6 installation permission pending. Source
+SDK0.37.0-dev: inspect_operation_recovery, RecoveryInspection/RecoveryTools,
+explicit recoveryInspectionExperimental profile28/7, без флага27/6 unchanged.
+No CAD/IPC/writes; raw journal/plan/ownership/claim/fence и double saved-byte
+checks дают recorded assessment, никогда execution/replay/current-CAD success.
+Старый actual unknown6ed... прочитан, started_without_authoritative_return;
+claim/журнал не менялись.19 domain/3 protocol recovery tests, полный261 .NET
+passed, Inspector readonly7 checked; полный SDK regression passed261 .NET/
+514 native/171 artifacts/seven STDIO. Clean/CI этого блока ещё ожидаются.
+RECOVERY-INSPECTION.md/evidence/K7-recovery. Outcome-resolution journal,
+checkpoint recovery и complete fault matrix ещё впереди; К7 не завершён.
+K6 package/staging/default config не изменены этим блоком; approval question
+установки остаётся pending, Apply/live pilot не выполнять до ответа.
+
+
 К6 live package готов: work/K6-native-live, published work/K6-sdk-runtime
 STDIO/status/catalog27/6 checked. Plan-only deployment создан, protected71
 files double-SHA snapshot закреплён. Автоматическая проверка сначала отклонила

@@ -22,6 +22,8 @@ $taskHost = Join-Path $taskRoot 'src\PowerShapeMcp.Host\bin\Release\net10.0\Powe
 if ($LASTEXITCODE -ne 0) { throw 'Independent STDIO parity failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_readonly.py') --dotnet $DotnetPath --host $taskHost --evidence $taskEvidence
 if ($LASTEXITCODE -ne 0) { throw 'Independent read-only parity failed.' }
+& $PythonPath (Join-Path $taskRoot 'src\test_sdk_recovery_stdio.py') --dotnet $DotnetPath --host $taskHost --evidence $taskEvidence
+if ($LASTEXITCODE -ne 0) { throw 'Independent recovery inspection failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_prepared.py') --dotnet $DotnetPath --host $taskHost --evidence $taskEvidence
 if ($LASTEXITCODE -ne 0) { throw 'Independent prepared parity failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_execution.py') --dotnet $DotnetPath --host $taskHost --evidence $taskEvidence
@@ -78,6 +80,8 @@ $taskFiles += @('src\test_sdk_saved_result_stdio.py','src\OwnedOperationPlanTest
 $taskFiles += @('src\saved_reopen_fixture_oracle.py','src\OwnedSavedSource.cs','src\OwnedSavedReopen.cs','src\OwnedSavedReopenTests.cs','config\general-owned-saved-reopen.json','build.ps1')
 $taskFiles += @('src\SavedReopenObservation.cs','src\OwnedSavedReopenLease.cs','src\OwnedSavedReopenExecution.cs','src\OwnedSavedReopenVerification.cs','src\OwnedSavedReopenExecutionTests.cs','src\saved_reopen_verification_oracle.py','src\WorkingCopyOpen.cs','src\OwnedOpenVerification.cs')
 $taskFiles += @('src\test_sdk_reopen_verification_stdio.py')
+$taskFiles += @('config\general-recovery-inspection.json')
+$taskFiles += @('src\test_sdk_recovery_stdio.py')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

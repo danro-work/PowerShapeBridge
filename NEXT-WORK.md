@@ -1,5 +1,21 @@
 # Дальнейшая работа
 
+K7 PR8: clean SDK5da2c04 passed262 .NET/514 native/171 artifacts; все четыре
+CI daba4db passed, включая eighth external recovery STDIO script.123 hashes
+matched; independent six-case full/RO tool reads passed, protected71 files и
+old unknown journal/plan/claim unchanged. Следом отдельный К7
+outcome-resolution contract и complete fault matrix; checkpoint recovery требует
+отдельно принятого сценария. Не выдавать reader за завершение всей К7.
+
+K6 apply approval остаётся pending; опубликованный SDK0.36.3 package и native
+staging0.33 не пересобирать поверх без необходимости. Независимый source SDK
+0.37.0-dev recovery inspection реализован; RECOVERY-INSPECTION.md. Завершить
+общий regression, commit/clean/CI в отдельной stacked feat/recovery-inspection.
+Reader не разрешает unknown и не заменяет К7 outcome-resolution/checkpoint
+recovery/fault matrix. После установки К6 по ответу — fresh process/queue/context,
+own live SaveAs→reopen→binding→independent audit. Цель К6–К11 сохраняется.
+
+
 Текущий блок К6: SDK0.36.3/native source0.33 SavedAs→prepared clone→one-use
 guarded saved reopen→separate verification/new binding реализован offline.
 239 .NET/514 native/171 artifacts (0 mismatches), seven external STDIO/Inspector
