@@ -21,6 +21,10 @@ def audit(stage):
     cases = []
     for plan_path in sorted(stage.glob('work/owned-operation-self-test-*/saveexecutions/*.json')):
         root = plan_path.parent.parent
+        # Fault fixtures can intentionally change a formerly verified file or
+        # add a later fence. Audit the explicit retained golden native scenario.
+        if not (root / 'saved-result-fixture.json').exists():
+            continue
         plan = read(plan_path)
         operation_id = plan_path.stem
         journal = journal_events(root, operation_id)

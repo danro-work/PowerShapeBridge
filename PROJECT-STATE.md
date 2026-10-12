@@ -1,5 +1,22 @@
 # PowerShape Bridge — состояние для продолжения
 
+К6 SDK0.36.2-dev: prepare_owned_saved_reopen реализован и зарегистрирован через
+OwnedSaveTools.Create/ToolCatalog. Native OwnedSavedSource/OwnedSavedReopen
+создают новую readonly seed, Working_<id> и отдельный readonly Before checkpoint
+из независимо проверенного SaveAs result. Двойные SHA и physical identity checks
+удерживаются вокруг clone; общий OwnedCopies source FileShare.Read не ослаблен.
+Connection-scoped ownedReopenHandle имеет minimum source TTL и отзывается при
+CAD-context revocation. Новый opt-in профиль general-owned-saved-reopen: 25/6.
+227 .NET/479 native/142 actual artifacts (110 accepted, 0 mismatches), пять
+прежних STDIO clients и новый STDIO scenario с actual filesystem-only native
+prepare прошли; Inspector 25-tool profile checked. evidence/K6-save-as/
+reopen-preparation-full. Первый loaded concurrent run: один прежний route test
+failed; isolated diagnostic и sequential full regression passed. Fixture timeout
+5s, production deadlines не менялись. Текущий новый код ещё ожидает clean/CI.
+Guarded execute/verify saved reopen, fresh binding и live К6 ещё впереди;
+К6–К11 не завершены. Runtime0.32/published K5 SDK/config не менялись.
+Ниже история предшествующих блоков.
+
 К6 SDK0.36.1-dev: execute_owned_save_as/verify_owned_save_as подключены,
 typed savedResultHandle с minimum TTL/raw proof/journal/file validation.
 212 .NET/432 native, 124 artifacts (0 mismatches), пять STDIO клиентов/

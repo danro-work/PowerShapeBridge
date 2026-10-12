@@ -10,6 +10,38 @@ namespace PowerShapeMcp;
 [McpServerToolType]
 public sealed class OwnedSaveTools(BridgeSession session)
 {
+    [McpServerTool(Name="prepare_owned_saved_reopen",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false),Description("Create a NEW owned disk working copy and separate read-only checkpoint from this connection's independently verified savedResultHandle. Checks source bytes and physical identity in the native worker; no OPEN, activation, SaveAs, geometry or CAD connection. Returns a short-lived prepared copy handle, not a document binding. Unavailable in read-only mode.")]
+    public async Task<CallToolResult> PrepareOwnedSavedReopen([Description("Fresh independently verified saved result handle in this connection.")]string savedResultHandle,CancellationToken cancellationToken)
+    {
+        const string name="prepare_owned_saved_reopen";session.AssertToolAllowed(name);
+        var timer=Stopwatch.StartNew();var acquired=false;var submitted=false;string? request=null;
+        try
+        {
+            if(!await session.ReferenceGate.WaitAsync(session.Options.Timeout,cancellationToken))return DiagnosticTools.Result(Failure("queue_timeout_before_submission",false),true);
+            acquired=true;
+            if(cancellationToken.IsCancellationRequested)return DiagnosticTools.Result(Failure("cancelled_before_submission",false),true);
+            if(File.Exists(FileArtifacts.FixedPath(session.Options.BridgeRoot,"maintenance.json")))return DiagnosticTools.Result(Failure("maintenance_before_submission",false),true);
+            var parameters=session.Reopens.PrepareParameters(savedResultHandle);submitted=true;
+            var data=await session.Ipc.SubmitAsync("recipe.prepare",new(){["recipeId"]=name,["parameters"]=parameters},cancellationToken,session.Options.Timeout-timer.Elapsed);
+            request=data["bridgeRequestId"]?.GetValue<string>();
+            if(cancellationToken.IsCancellationRequested||timer.Elapsed>=session.Options.Timeout)
+            {session.Reopens.Clear();var unknown=Failure(cancellationToken.IsCancellationRequested?"cancelled_outcome_unknown":"timeout_outcome_unknown",true);unknown["bridgeRequestId"]=request;return DiagnosticTools.Result(unknown,true);}
+            if(data["state"]?.GetValue<string>()!="owned_saved_reopen_prepared_files")
+            {data["retryAllowed"]=false;data["localArtifactsMayExist"]=!BeforeSubmission(data["state"]?.GetValue<string>());return DiagnosticTools.Result(data,true);}
+            data=session.Reopens.Issue(data,parameters,savedResultHandle);
+            if(cancellationToken.IsCancellationRequested||timer.Elapsed>=session.Options.Timeout)
+            {session.Reopens.Revoke(data["ownedReopenHandle"]!.GetValue<string>());var unknown=Failure(cancellationToken.IsCancellationRequested?"cancelled_outcome_unknown":"timeout_outcome_unknown",true);unknown["bridgeRequestId"]=request;return DiagnosticTools.Result(unknown,true);}
+            return DiagnosticTools.Result(data);
+        }
+        catch(OperationCanceledException)when(cancellationToken.IsCancellationRequested){return DiagnosticTools.Result(Failure(submitted?"cancelled_outcome_unknown":"cancelled_before_submission",submitted),true);}
+        catch(Exception error)when(error is ReferenceRejected or IOException or UnauthorizedAccessException or InvalidDataException or System.Text.Json.JsonException or InvalidOperationException or KeyNotFoundException)
+        {
+            if(acquired)session.Reopens.Clear();var data=Failure("owned_saved_reopen_preparation_rejected",submitted);
+            data["error"]=new JsonObject{["code"]=error is ReferenceRejected rejected?rejected.Code:"saved_reopen_proof_unavailable",["message"]=error.Message};
+            if(request is not null)data["bridgeRequestId"]=request;return DiagnosticTools.Result(data,true);
+        }
+        finally{if(acquired)session.ReferenceGate.Release();}
+    }
     [McpServerTool(Name="prepare_owned_save_as",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false),Description("Reserve a NEW immutable owned SaveAs target from this connection's working document binding. Pins native file/directory/proof dependencies; no CAD connection, SaveAs, activation or geometry command. Preparing does not authorize a later save; unavailable in read-only mode.")]
     public async Task<CallToolResult> PrepareOwnedSaveAs([Description("Fresh working document binding handle in this connection.")]string workingDocumentBindingHandle,CancellationToken cancellationToken)
     {

@@ -34,7 +34,7 @@ public sealed class OwnedSaveExecutionRoutesTests
         internal async Task<string> Execute()
         {
             var handle=Data.Issue();var call=Client.CallToolAsync("execute_owned_save_as",new Dictionary<string,object?>{["ownedSaveAsHandle"]=handle}).AsTask();var (id,parameters)=await Claim("execute_owned_save_as");
-            Assert.Equal(Data.Id,parameters["targetId"]!.GetValue<string>());Assert.Equal(2,parameters.Count);Saved.Execute(id);var response=await call;Assert.False(response.IsError);return handle;
+            Assert.Equal(Data.Id,parameters["targetId"]!.GetValue<string>());Assert.Equal(2,parameters.Count);Saved.Execute(id);var response=await call;Assert.False(response.IsError,Read(response).ToJsonString());return handle;
         }
         public async ValueTask DisposeAsync(){await Client.DisposeAsync();stop.Cancel();await server.DisposeAsync();try{await run;}catch(OperationCanceledException){}Data.Session.Dispose();stop.Dispose();}
     }

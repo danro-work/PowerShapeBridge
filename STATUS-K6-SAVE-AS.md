@@ -1,5 +1,35 @@
 # К6 — собственный SaveAs и reopen, выполняется
 
+Блок saved-byte preparation: SDK0.36.2-dev, native source0.33.0-dev.
+`prepare_owned_saved_reopen(savedResultHandle)` создаёт новые собственные файлы
+через тот же IPC и filesystem-only native recipe; не открывает/сохраняет CAD.
+OwnedSavedSource закрепляет исходные raw receipts, target/ownership/checkpoint,
+authoritative terminal journal, saved native file identity и двойной SHA.
+Result read допускает существующего писателя, запрещает удаление; изменение
+данных вокруг копирования отклоняется. Это point-in-time byte stability, не
+exclusive writer lock. Затем closed readonly DiskReopen seed передаётся в
+неизменённый strict OwnedCopies.Create; Working и checkpoint имеют отдельные
+native identities. Reservation/частичные файлы при отказе сохраняются, без
+повтора/overwrite. SDK перепроверяет source chain, plan, copies, fixed paths,
+readonly, ownership и minimum saved lease TTL; новый handle не является binding.
+Флаг ownedSavedReopenExperimental зависит от ownedSaves/workingCopyOpen.
+Новый полный opt-in профиль 25 tools; readonly остаётся 6.
+
+227 .NET и 479 native synthetic checks passed, 142 actual Framework artifacts:
+110 accepted, 0 Python/SDK mismatches. Старые пять external STDIO scenarios и
+новый шестой проверены; шестой вызывает только filesystem-only prepare в
+изолированном native fixture, read/verifier ответы синтетические. Actual source,
+seed/working/checkpoint hashes совпадают, readonly сохранён, native journal
+не меняется; никакого COM/live CAD. Inspector подтвердил новый 25-tool profile.
+Evidence: evidence/K6-save-as/reopen-preparation-full. Первое параллельное
+испытание имело один old Save route failure; diagnostic isolated pass и full
+sequential regression 227/227. Test-only fake durable-reply budget 5s;
+production timeouts не изменены. Clean/CI нового блока ещё ожидаются.
+Guarded OPEN, separate fresh content/units verifier/new binding и live К6
+ещё не выполнены. Установленные runtime/config не менялись.
+
+## Предыдущий блок — SaveAs executor и saved-result leases
+
 Текущий SDK-блок, 12 октября 2026: source SDK0.36.1-dev. Зарегистрированы
 execute_owned_save_as и verify_owned_save_as по ownedSavesExperimental; full
 save profile 24/read-only 6, прежний установленный профиль 21/6. Execute

@@ -17,12 +17,15 @@ public sealed class OwnedSaveTargetTests
         public JsonObject Parameters { get; }
         public JsonObject Receipt { get; }
         public JsonObject Plan=>Receipt["target"]!.AsObject();
-        public TargetFixture(bool readOnly=false,bool enabled=true,bool saves=false)
+        public TargetFixture(bool readOnly=false,bool enabled=true,bool saves=false,bool reopen=false)
         {
             foreach(var flag in new[]{"entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"})Data.Files.Config[flag]=true;
             Data.Files.Config["ownedSaveTargetsExperimental"]=enabled;Data.Files.SaveConfig();
             Data.Files.Config["ownedSavesExperimental"]=saves;Data.Files.SaveConfig();
-            Session=new(Data.Files.Options(readOnly,2),()=>Data.Time,()=>Data.Utc);
+            if(reopen){Data.Files.Config["workingCopyOpenExperimental"]=true;Data.Files.Config["ownedSavedReopenExperimental"]=true;Data.Files.SaveConfig();}
+            // Fake replies fsync complete durable plans/journals. Allow a loaded
+            // runner to finish those writes; dedicated DeadlineTests cover timing.
+            Session=new(Data.Files.Options(readOnly,5),()=>Data.Time,()=>Data.Utc);
             var copies=Session.Copies;var candidates=Session.Candidates;Bindings=Session.Bindings;Targets=Session.SaveTargets;
             var copyId=Guid.NewGuid().ToString("N");var work=FileArtifacts.FixedPath(Data.Root,"workingcopies",copyId,"Working_"+copyId+".psmodel");
             var checkpoint=FileArtifacts.FixedPath(Data.Root,"workingcopies",copyId,"checkpoint","Before.psmodel");

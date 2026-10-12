@@ -1,5 +1,20 @@
 # Дальнейшая работа
 
+Текущий блок К6: saved-byte clone/preparation готов, SDK0.36.2/native source0.33.
+Следом qualified one-use execute_owned_saved_reopen, fresh context choice,
+guarded OPEN нового Working_<id>, separate content/units/files verifier и новая
+binding с новыми наблюдениями/IDs. Prepared handle не открывает модель и не
+разрешает edits. Перед OPEN повторно закрепить raw reopen/source/seed/copy proofs
+и physical identities; использовать existing WorkingCopyOpen guards/one execution
+lane, сохранить прежние окна и неизвестный старый OPEN. 227 .NET/479 native/
+142 actual artifacts и six STDIO scenarios passed offline; evidence/K6-save-as/
+reopen-preparation-full. Сначала clean checkout/CI нового блока. Runtime0.32/
+published K5 SDK/config unchanged, default switch decision pending.
+После полной offline qualification — own live К6 только с fresh ownership/
+process/model/context checks. К6–К11 остаются обязательной целью.
+
+Ниже история предыдущих блоков.
+
 Текущий следующий блок К6: native byte-stable own saved-result clone и отдельно named reopen intent,
 guarded OPEN, independent content/units/file checks и new binding. Не ослаблять
 общий source-copy FileShare.Read; clone занятого saved result имеет отдельный

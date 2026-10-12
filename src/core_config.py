@@ -19,6 +19,9 @@ def general_core(settings):
     translations = settings.get('ownedTranslationsExperimental', False)
     save_targets = settings.get('ownedSaveTargetsExperimental', False)
     saves = settings.get('ownedSavesExperimental', False)
+    reopens = settings.get('ownedSavedReopenExperimental', False)
+    if type(reopens) is not bool or reopens and (profile != 'general-v1' or saves is not True or opens is not True):
+        raise ValueError('Experimental saved reopen requires owned SaveAs and owned copy open')
     if type(saves) is not bool or saves and (profile != 'general-v1' or save_targets is not True):
         raise ValueError('Experimental SaveAs execution requires prepared owned targets')
     if type(save_targets) is not bool or save_targets and (profile != 'general-v1' or bindings is not True or copies is not True or experimental is not True):

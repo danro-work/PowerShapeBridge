@@ -133,4 +133,9 @@ public sealed class OwnedSavedResultStore(string root,OwnedSaveTargetStore targe
         var receipt=RawResponse(lease.Request,lease.Sha);VerifyReceipt(receipt,lease.Parameters);
         return new(){["verificationRequestId"]=lease.Request,["verificationReceiptSha256"]=lease.Sha};
     }
+    public double Remaining(string handle)
+    {
+        Parameters(handle);
+        return saved[handle].Expires-now();
+    }
 }

@@ -5,6 +5,8 @@ import datetime
 import hashlib
 import json
 from pathlib import Path
+import shutil
+import subprocess
 import threading
 import time
 
@@ -16,7 +18,7 @@ def read(path):
 
 
 class Panel:
-    def __init__(self, root, metadata):
+    def __init__(self, root, metadata, native_prepare_worker=None):
         self.root = root
         self.meta = metadata
         self.receipt = read(root / 'responses' / (metadata['verificationRequestId'] + '.json'))
@@ -29,6 +31,9 @@ class Panel:
         self.stop = threading.Event()
         (root / 'requests').mkdir(exist_ok=True)
         (root / 'PSBridge.Worker.exe').write_text('Opaque marker; never executed.', encoding='utf-8')
+        self.native_prepare_worker = native_prepare_worker
+        if native_prepare_worker:
+            shutil.copyfile(native_prepare_worker, root / 'PSBridge.Worker.exe')
         self.thread = threading.Thread(target=self.run, daemon=True)
         self.thread.start()
 
@@ -46,7 +51,14 @@ class Panel:
                     recipe = request['arguments']['recipeId']
                     parameters = request['arguments']['parameters']
                     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
-                    if recipe in ('inspect_active_model', 'list_documents'):
+                    if recipe == 'prepare_owned_saved_reopen':
+                        # Run ONLY the filesystem-only recipe in this isolated
+                        # fixture root. No live runtime, panel or COM attachment.
+                        assert self.native_prepare_worker and set(parameters) == {'verificationRequestId', 'verificationReceiptSha256'}
+                        child = subprocess.run([str(self.root / 'PSBridge.Worker.exe'), '--mcp-operation', path.stem], capture_output=True, timeout=20, check=True)
+                        result = json.loads(child.stdout.decode('utf-8-sig'))
+                        assert result['powerShapeConnectionAttempted'] is False
+                    elif recipe in ('inspect_active_model', 'list_documents'):
                         assert parameters == {}
                         result = copy.deepcopy(self.inspection if recipe == 'inspect_active_model' else self.listing)
                     else:
@@ -75,11 +87,11 @@ def checks(args):
     markers = list(stage.glob('work/owned-operation-self-test-*/saved-result-fixture.json'))
     assert len(markers) == 1
     root = markers[0].parent
-    settings = read(Path(__file__).resolve().parents[1] / 'config/general-owned-saves.json')
+    settings = read(Path(__file__).resolve().parents[1] / ('config/general-owned-saved-reopen.json' if args.reopen else 'config/general-owned-saves.json'))
     (root / 'bridge.config.json').write_text(json.dumps(settings), encoding='utf-8')
     metadata = read(markers[0])
     before = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in root.glob('operations/*/*.json')}
-    panel = Panel(root, metadata)
+    panel = Panel(root, metadata, stage / 'PSBridge.Worker.exe' if args.reopen else None)
     client = Client([args.dotnet, str(Path(args.host).resolve()), '--bridge-root', str(root)])
     readonly = Client([args.dotnet, str(Path(args.host).resolve()), '--bridge-root', str(root), '--read-only'])
     try:
@@ -87,10 +99,12 @@ def checks(args):
             assert 'result' in peer.call(1, 'initialize', {'protocolVersion': '2025-11-25', 'capabilities': {}, 'clientInfo': {'name': 'saved-result-independent', 'version': '1'}})
             peer.notify('notifications/initialized')
         tools = client.call(2, 'tools/list')['result']['tools']
-        assert len(tools) == 24
+        assert len(tools) == (25 if args.reopen else 24)
         by_name = {tool['name']: tool for tool in tools}
         shapes = {'prepare_owned_save_as': ['workingDocumentBindingHandle'], 'execute_owned_save_as': ['ownedSaveAsHandle'],
                   'verify_owned_save_as': ['saveRequestId', 'saveReceiptSha256', 'candidateDocumentHandle', 'activeDocumentHandle']}
+        if args.reopen:
+            shapes['prepare_owned_saved_reopen'] = ['savedResultHandle']
         for name, required in shapes.items():
             schema = by_name[name]['inputSchema']
             assert schema['required'] == required and set(schema['properties']) == set(required) and schema['additionalProperties'] is False
@@ -115,23 +129,37 @@ def checks(args):
         assert 'workingDocumentBindingHandle' not in saved
         replay_choice = client.call(7, 'tools/call', {'name': 'verify_owned_save_as', 'arguments': arguments})['result']
         assert replay_choice['isError'] and panel.calls == ['inspect_active_model', 'list_documents', 'verify_owned_save_as']
+        prepared = None
+        if args.reopen:
+            prepared = client.call(8, 'tools/call', {'name': 'prepare_owned_saved_reopen', 'arguments': {'savedResultHandle': saved['savedResultHandle']}}, timeout=30)['result']
+            assert not prepared['isError'], prepared
+            prepared = prepared['structuredContent']
+            assert prepared['state'] == 'owned_saved_reopen_prepared_files' and len(prepared['ownedReopenHandle']) == 32
+            assert prepared['powerShapeConnectionAttempted'] is False and 'workingDocumentBindingHandle' not in prepared
+            plan = prepared['reopen']
+            paths = [plan['seed']['path'], plan['workingPath'], plan['checkpointPath']]
+            assert all(hashlib.sha256(Path(path).read_bytes()).hexdigest() == saved['savedResult']['sha256'] for path in paths)
+            assert Path(paths[0]).stat().st_file_attributes & 1 and Path(paths[2]).stat().st_file_attributes & 1
+            assert not (root / 'operations' / prepared['reopenId']).exists()
+            assert panel.calls == ['inspect_active_model', 'list_documents', 'verify_owned_save_as', 'prepare_owned_saved_reopen']
         assert not panel.errors, panel.errors
         assert all(hashlib.sha256(path.read_bytes()).hexdigest() == digest for path, digest in before.items())
         evidence = Path(args.evidence).resolve()
         evidence.mkdir(parents=True, exist_ok=True)
-        (evidence / 'sdk-saved-result-stdio.json').write_text(json.dumps({'state': 'passed', 'scope': 'Official SDK STDIO and fake verifier on actual Framework saved-result artifacts; no live CAD',
-            'fullCatalog': 24, 'readOnlyCatalog': 6, 'cadConnectionAttempted': False, 'runtimeDeploymentPerformed': False,
-            'nativeFixtureRoot': str(root), 'nativeRecipes': panel.calls, 'journalUnchanged': True, 'savedResult': saved, 'transcript': client.transcript}, indent=2), encoding='utf-8')
+        (evidence / ('sdk-saved-reopen-stdio.json' if args.reopen else 'sdk-saved-result-stdio.json')).write_text(json.dumps({'state': 'passed', 'scope': 'Official SDK STDIO, fake read/verifier replies and actual filesystem-only Framework preparation in an isolated fixture; no live CAD' if args.reopen else 'Official SDK STDIO and fake verifier on actual Framework saved-result artifacts; no live CAD',
+            'fullCatalog': len(tools), 'readOnlyCatalog': 6, 'cadConnectionAttempted': False, 'runtimeDeploymentPerformed': False,
+            'nativeFixtureRoot': str(root), 'nativeRecipes': panel.calls, 'journalUnchanged': True, 'savedResult': saved, 'preparedReopen': prepared, 'transcript': client.transcript}, indent=2), encoding='utf-8')
     finally:
         client.close()
         readonly.close()
         panel.stop.set()
         panel.thread.join(timeout=3)
-    print('PASS: SDK saved-result STDIO, 24/6 catalogs, exact schemas, fresh proofs, one-use choice and unchanged journal; no CAD.')
+    print('PASS: SDK saved-result STDIO, %d/6 catalogs, exact schemas, fresh proofs, one-use choice and unchanged journal%s; no CAD.' % (len(tools), ', actual native filesystem-only reopen preparation' if args.reopen else ''))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     for name in ('dotnet', 'host', 'stage', 'evidence'):
         parser.add_argument('--' + name, required=True)
+    parser.add_argument('--reopen', action='store_true')
     checks(parser.parse_args())
