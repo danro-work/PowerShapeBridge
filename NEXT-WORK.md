@@ -2,7 +2,9 @@
 
 Инфраструктура разработки, 12 октября: Git/gh и dotnet-mcp-builder установлены,
 локальный репозиторий main подготовлен. Следующие действия инфраструктуры:
-завершить отдельный gh login, задать выбранный remote и настроить ветки/PR.
+GitHub Codex/gh login и credential helper проверены; выбран публичный
+danro-work/PowerShapeBridge. Следом публикация исходной базы и сверка SHA,
+затем работа через ветки/PR.
 Локальный автор задан по профилю danro-work с GitHub noreply; текущая база
 подготовлена как исходный локальный commit. Для нового C# MCP-адаптера:
 .NET 10 SDK + закреплённый ModelContextProtocol, затем Inspector и C# tooling.

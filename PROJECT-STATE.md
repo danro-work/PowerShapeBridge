@@ -5,10 +5,12 @@
 Git for Windows 2.55.0.windows.5 / Credential Manager 2.9.1 / gh 2.102.0.
 Локальный Git инициализирован на main; добавлены .gitignore/.gitattributes,
 исходники/контракты отделены от локального runtime, CAD и raw evidence без удаления.
-Подключение GitHub в Codex проверено для danro-work; локальный gh требует отдельного
-завершения browser login. Локальный автор — подтверждённый GitHub login danro-work
+Подключение GitHub в Codex и локальный gh проверены для danro-work; auth setup-git
+выполнен в пользовательском Windows-контексте (sandbox keyring изолирован).
+Локальный автор — подтверждённый GitHub login danro-work
 и ID-based noreply; начальный локальный commit текущей базы подготовлен,
-его SHA сохраняется в receipt. Remote пока не выбран пользователем.
+его SHA сохраняется в receipt. Пользователь выбрал публичный
+danro-work/PowerShapeBridge; публикация и сверка веток отражаются в receipt.
 Разбор двух чатов и инвентарь среды — DEVELOPMENT-TOOLS.md; receipt —
 reports/tooling-setup-2026-10-12.json. Modern .NET SDK не установлен;
 новый C# MCP-host по навыку рекомендуется отдельно от существующего Framework STA-worker.
