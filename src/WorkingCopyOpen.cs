@@ -13,7 +13,7 @@ namespace PowerShapeBridge {
   internal interface IContext : IDisposable {
    Dictionary<string,object> Windows();Dictionary<string,object> Observation();void ConfirmDocument();void Open(string path);
   }
-  sealed class ComContext : IContext {
+  internal sealed class ComContext : IContext {
    object application,document;bool opened,rebound;
    internal ComContext(Config config){try{application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("Active model required before open.");document=ps.ActiveDocument;ConfirmDocument();}catch{Dispose();throw;}}
    public Dictionary<string,object> Windows(){return DocumentSession.ReadStable(application);}
@@ -56,23 +56,25 @@ namespace PowerShapeBridge {
     using(var file=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.ReadWrite)){if(file.Length>1073741824)throw new IOException("Saved document hash limit.");using(var hash=SHA256.Create())result[path]=BitConverter.ToString(hash.ComputeHash(file)).Replace("-","").ToLowerInvariant();}
    }return result;
   }
-  internal static Dictionary<string,object> Execute(string root,string id,Dictionary<string,object> args,Dictionary<string,object> listing,Dictionary<string,object> expected,IContext context) {
+  internal static Dictionary<string,object> Execute(string root,string id,Dictionary<string,object> args,Dictionary<string,object> listing,Dictionary<string,object> expected,IContext context,Dictionary<string,object> savedReopen=null,Action sourceCheck=null,Action<Dictionary<string,object>> contentCheck=null) {
    var result=new Dictionary<string,object>{{"state","working_copy_open_rejected"},{"operationId",id},{"bridgeVersion",Program.ReleaseVersion},{"timestampUtc",DateTime.UtcNow.ToString("o")},{"geometryMutationAttempted",false},{"cadSaveAttempted",false},{"contextChangeAttempted",false},{"retryAllowed",false},{"qualification",Qualification}};
    NativeJournal journal=null;bool attempted=false;
    try {
     ValidateParameters(args);if(!EntitySets.Hex(id,32))throw new ArgumentException("Invalid open request identity.");
     using(var lease=OwnedCopies.Hold(root,(string)args["copyId"],(string)args["ownershipSha256"])) {
      string claim=Path.Combine(Path.GetDirectoryName(lease.WorkingPath),"open-once.json");if(File.Exists(claim))throw new InvalidOperationException("Owned copy has an earlier open claim; inspect journal, never replay.");CommandPath(lease.WorkingPath);
-     CheckBefore(args,listing,expected,context,lease.WorkingPath);lease.Recheck();var saved=SavedHashes(listing);result["before"]=listing;result["savedFileHashesBefore"]=saved;result["copyId"]=args["copyId"];result["ownershipSha256"]=args["ownershipSha256"];result["workingPath"]=lease.WorkingPath;
-     string planPath=Path.Combine(root,"copyopenplans",id+".json");Directory.CreateDirectory(Path.GetDirectoryName(planPath));var plan=new Dictionary<string,object>(args){{"schemaVersion",1},{"operationId",id},{"operation","open_working_copy"},{"bridgeVersion",Program.ReleaseVersion},{"createdUtc",DateTime.UtcNow.ToString("o")},{"geometryExecutionEnabled",false},{"workingPath",lease.WorkingPath}};string sha=NativeJournal.Freeze(planPath,plan);result["planSha256"]=sha;result["plan"]=plan;
-     journal=new NativeJournal(root,id,sha);journal.Append("prepared",new Dictionary<string,object>{{"operation","open_working_copy"},{"contextChangeAttempted",false}});
+     if(sourceCheck!=null)sourceCheck();CheckBefore(args,listing,expected,context,lease.WorkingPath);lease.Recheck();var saved=SavedHashes(listing);result["before"]=listing;result["savedFileHashesBefore"]=saved;result["copyId"]=args["copyId"];result["ownershipSha256"]=args["ownershipSha256"];result["workingPath"]=lease.WorkingPath;
+     string planPath=Path.Combine(root,"copyopenplans",id+".json");Directory.CreateDirectory(Path.GetDirectoryName(planPath));var plan=new Dictionary<string,object>(args){{"schemaVersion",1},{"operationId",id},{"operation",savedReopen==null?"open_working_copy":"open_owned_saved_result"},{"bridgeVersion",Program.ReleaseVersion},{"createdUtc",DateTime.UtcNow.ToString("o")},{"geometryExecutionEnabled",false},{"workingPath",lease.WorkingPath}};
+     if(savedReopen!=null){OwnedSavedReopenLease.Validate(savedReopen);foreach(var field in savedReopen)plan.Add(field.Key,field.Value);}
+     string sha=NativeJournal.Freeze(planPath,plan);result["planSha256"]=sha;result["plan"]=plan;
+     journal=new NativeJournal(root,id,sha);journal.Append("prepared",new Dictionary<string,object>{{"operation",plan["operation"]},{"contextChangeAttempted",false}});
      NativeJournal.Freeze(claim,new{operationId=id,planSha256=sha,copyId=args["copyId"],ownershipSha256=args["ownershipSha256"],automaticReplayForbidden=true});journal.Append("execution_claimed",new Dictionary<string,object>{{"nativeRequestId",id},{"copyId",args["copyId"]}});
      CheckBefore(args,listing,expected,context,lease.WorkingPath);lease.Recheck();journal.Append("command_started",new Dictionary<string,object>{{"commandSequence","FILE OPENPATH / fixed PATHNAME / ACCEPT"},{"contextChangeAttempted",true}});
-     context.ConfirmDocument();if(DateTime.UtcNow>=EntitySets.Expiry(args["expiresUtc"])||DocumentBindings.WindowDigest(context.Windows())!=DocumentBindings.WindowDigest(listing))throw new InvalidOperationException("Context/expiry changed immediately before open.");
+     context.ConfirmDocument();if(sourceCheck!=null)sourceCheck();if(DateTime.UtcNow>=EntitySets.Expiry(args["expiresUtc"])||DocumentBindings.WindowDigest(context.Windows())!=DocumentBindings.WindowDigest(listing))throw new InvalidOperationException("Context/expiry changed immediately before open.");
      attempted=true;result["contextChangeAttempted"]=true;context.Open(lease.WorkingPath);journal.Append("command_returned",new Dictionary<string,object>{{"nativeRequestId",id}});
      var after=context.Windows();var target=CheckAfter(listing,after,lease.WorkingPath);var observation=context.Observation();EntitySets.Inventory(observation);var data=Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(observation));var model=(Dictionary<string,object>)data["model"];
      if(!Equals(model["id"],target["modelId"])||!Equals(model["name"],target["modelName"])||!string.Equals(OwnedCopies.LocalPath((string)model["path"]),lease.WorkingPath,StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("Opened model read differs from new window.");
-     lease.Recheck();var afterHashes=SavedHashes(listing);if(saved.Count!=afterHashes.Count||saved.Any(x=>!afterHashes.ContainsKey(x.Key)||afterHashes[x.Key]!=x.Value))throw new IOException("An existing saved file changed during open.");context.ConfirmDocument();if(DocumentBindings.WindowDigest(context.Windows())!=DocumentBindings.WindowDigest(after))throw new InvalidOperationException("Window context changed during postcondition read.");
+     if(contentCheck!=null)contentCheck(observation);if(sourceCheck!=null)sourceCheck();lease.Recheck();var afterHashes=SavedHashes(listing);if(saved.Count!=afterHashes.Count||saved.Any(x=>!afterHashes.ContainsKey(x.Key)||afterHashes[x.Key]!=x.Value))throw new IOException("An existing saved file changed during open.");context.ConfirmDocument();if(DocumentBindings.WindowDigest(context.Windows())!=DocumentBindings.WindowDigest(after))throw new InvalidOperationException("Window context changed during postcondition read.");
      result["after"]=after;result["openedWindow"]=target;result["inspection"]=observation;result["savedFilesUnchanged"]=true;result["workingSha256"]=lease.Inspection["workingSha256"];result["checkpointVerified"]=true;result["state"]="working_copy_opened_observed";
      journal.Append("executed_unverified",new Dictionary<string,object>{{"ownedModelId",target["modelId"]},{"sameWorkerPostconditionsPassed",true},{"independentVerificationRequired",true}});result["recordedJournalState"]=journal.State;return result;
     }

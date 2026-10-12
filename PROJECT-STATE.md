@@ -1,5 +1,28 @@
 # PowerShape Bridge — состояние для продолжения
 
+К6 SDK0.36.3-dev/native source0.33.0-dev: execute_owned_saved_reopen и
+verify_owned_saved_reopen реализованы и подключены через OwnedSavedReopenTools/
+ToolCatalog. Prepared intent, saved raw provenance, seed/copy/checkpoint и native
+physical identities закреплены до/после единственного OPEN. План имеет отдельную
+operation=open_owned_saved_result; прежний generic verifier её не принимает.
+Execute consume/revoke до IPC; unknown никогда не replay/save/close. Separate
+fresh verifier проверяет authoritative return, прежние окна/файлы, raw units и
+наблюдаемое content multiset без переноса entity IDs. Absolute/relative tolerance
+1e-9 применяется к доступным geometry/workplane measurements; raw units/metadata
+строгие. Сейчас только qualified world context, missing fields остаются missing;
+это не full topology. Исторический source proof разрешён только verifier, не OPEN.
+Успешный verifier создаёт НОВЫЙ immutable passive binding из свежего inspection;
+SDK выдаёт minimum TTL workingCopy/binding handles, текущие IDs и source leases.
+Новый opt-in full profile 27/readonly6. 239 .NET/514 native/171 actual artifacts
+(133 accepted, 0 mismatches), семь external STDIO scenarios и Inspector прошли
+offline; evidence/K6-save-as/reopen-execution-full. Один первый fake IPC тест
+поймал неатомарный ответ fixture; publication .pending→.json исправлена, оба
+SDK routes затем прошли. Первый native test отказал из-за завышенного fixture
+expiry; test clip к prepared expiry исправлен, production guard сохранился.
+Clean/CI нового блока ещё ожидаются. Live К6 ещё не выполнялся; К6–К11 остаются
+целью. Installed runtime/published K5 SDK/config этим блоком не менялись.
+Ниже история предыдущих блоков.
+
 К6 SDK0.36.2-dev: prepare_owned_saved_reopen реализован и зарегистрирован через
 OwnedSaveTools.Create/ToolCatalog. Native OwnedSavedSource/OwnedSavedReopen
 создают новую readonly seed, Working_<id> и отдельный readonly Before checkpoint

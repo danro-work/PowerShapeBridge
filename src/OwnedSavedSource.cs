@@ -12,6 +12,7 @@ namespace PowerShapeBridge {
   internal readonly FileStream File;
   internal readonly DateTime Expires;
   readonly string root,saveId;
+  readonly bool historical;
   readonly OwnedOperationPlans.Proofs proofs=new OwnedOperationPlans.Proofs();
   internal static void Validate(Dictionary<string,object> args) {
    if(args.Count!=2||!args.ContainsKey("verificationRequestId")||!EntitySets.Hex(args["verificationRequestId"],32)||
@@ -24,7 +25,8 @@ namespace PowerShapeBridge {
     var record=item as Dictionary<string,object>;if(record==null||record.Count!=2||!EntitySets.Hex(record["requestId"],32)||!EntitySets.Hex(record["sha256"],64))throw new IOException("Invalid saved-result evidence reference.");return record;
    }).ToArray();
   }
-  internal OwnedSavedSource(string bridgeRoot,Dictionary<string,object> args) {
+  internal OwnedSavedSource(string bridgeRoot,Dictionary<string,object> args,bool historicalProof=false) {
+   historical=historicalProof;
    root=OwnedCopies.LocalPath(bridgeRoot.TrimEnd('\\','/'));
    try {
     Validate(args);string verification=(string)args["verificationRequestId"];
@@ -35,7 +37,7 @@ namespace PowerShapeBridge {
        Verified.ContainsKey("bridgeRequestId")&&!Equals(Verified["bridgeRequestId"],verification))throw new IOException("Independent saved-result receipt required.");
     DateTime issued=EntitySets.Expiry(Verified["timestampUtc"]),expiry=EntitySets.Expiry(Verified["expiresUtc"]);
     Expires=expiry<issued.AddSeconds(300)?expiry:issued.AddSeconds(300);
-    if(issued>DateTime.UtcNow.AddSeconds(5)||Expires<=DateTime.UtcNow||expiry<issued)throw new InvalidOperationException("Saved-result verification expired.");
+    if(issued>DateTime.UtcNow.AddSeconds(5)||!historical&&Expires<=DateTime.UtcNow||expiry<issued)throw new InvalidOperationException("Saved-result verification expired.");
     saveId=(string)Verified["saveOperationId"];var original=proofs.Json(Artifact("responses",saveId),(string)Verified["saveReceiptSha256"],16777216);
     if(!Equals(original["operationId"],saveId)||!new[]{"owned_save_as_executed_unverified","owned_save_as_outcome_unknown"}.Contains((string)original["state"])||
        !Equals(original["cadSaveAttempted"],true)||!Equals(original["contextChangeAttempted"],true)||!Equals(original["geometryMutationAttempted"],false)||!Equals(original["saveCommandReturned"],true))throw new IOException("Returned original SaveAs proof required.");
@@ -72,7 +74,7 @@ namespace PowerShapeBridge {
   }
   internal void Recheck() {
    Target.RecheckDependencies();OwnedSaveTargets.NoFence(root,(string)Plan["copyId"]);
-   if(DateTime.UtcNow>=Expires)throw new InvalidOperationException("Saved-result verification expired during clone.");
+   if(!historical&&DateTime.UtcNow>=Expires)throw new InvalidOperationException("Saved-result verification expired during clone.");
    string path=(string)Plan["resultPath"];OwnedCopies.NoReparse(path);
    if(!(Saved["length"] is int||Saved["length"] is long)||Convert.ToInt64(Saved["length"])<1||Convert.ToInt64(Saved["length"])>1073741824||
       File.Length!=Convert.ToInt64(Saved["length"])||EntitySets.Canonical(OwnedCopies.FileIdentity(File,path,true))!=EntitySets.Canonical(Saved["fileIdentity"])||

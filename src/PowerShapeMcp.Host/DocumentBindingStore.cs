@@ -27,10 +27,16 @@ public sealed class DocumentBindingStore(string root,CandidateStore candidates,W
         if(parameters is not null&&parameters.Any(p=>!JsonNode.DeepEquals(plan[p.Key],p.Value)))throw new ReferenceRejected("document_binding_source_identity_differs");
         return plan;
     }
-    public JsonObject Issue(JsonObject result,JsonObject parameters,string document,string copy)
+    public JsonObject Issue(JsonObject result,JsonObject parameters,string document,string copy,DateTimeOffset? verifiedExpiry=null)
     {
         if(result["state"]?.GetValue<string>()!="working_document_bound_observed"||result["bridgeRequestId"]?.GetValue<string>()!=result["bindingId"]?.GetValue<string>())throw new ReferenceRejected("document_binding_native_receipt_invalid");
-        if(!JsonNode.DeepEquals(PrepareParameters(document,copy),parameters))throw new ReferenceRejected("document_binding_source_identity_differs");
+        var source=PrepareParameters(document,copy);var expectedSource=source.DeepClone().AsObject();
+        if(verifiedExpiry is { } minimum)
+        {
+            if(minimum>LeaseTime.Parse(ArtifactProof.String(source,"expiresUtc","document_binding_source_identity_differs"),"document_binding_source_identity_differs"))throw new ReferenceRejected("document_binding_verified_expiry_extended");
+            expectedSource["expiresUtc"]=LeaseTime.Format(minimum);
+        }
+        if(!JsonNode.DeepEquals(expectedSource,parameters))throw new ReferenceRejected("document_binding_source_identity_differs");
         var plan=VerifyReceipt(result,parameters);
         var expiry=LeaseTime.Parse(ArtifactProof.String(plan,"expiresUtc","document_binding_time_invalid_or_expired"),"document_binding_time_invalid_or_expired");
         var seconds=(expiry-LeaseTime.PythonPrecision(utcNow())).TotalSeconds;
@@ -38,7 +44,7 @@ public sealed class DocumentBindingStore(string root,CandidateStore candidates,W
         seconds=Math.Min(seconds,Math.Min(candidates.DocumentRemaining(document),copies.Remaining(copy)));
         if(seconds<=0)throw new ReferenceRejected("document_binding_source_expired");
         if(bindings.Count>=128)Clear();var handle=Guid.NewGuid().ToString("N");
-        bindings[handle]=new(now()+seconds,document,copy,parameters.DeepClone().AsObject(),new(){["bindingId"]=result["bindingId"]!.DeepClone(),["bindingSha256"]=result["bindingSha256"]!.DeepClone()});
+        bindings[handle]=new(now()+seconds,document,copy,source,new(){["bindingId"]=result["bindingId"]!.DeepClone(),["bindingSha256"]=result["bindingSha256"]!.DeepClone()});
         var issued=result.DeepClone().AsObject();issued["workingDocumentBindingHandle"]=handle;issued["bindingLifetimeSeconds"]=(int)seconds;return issued;
     }
     public JsonObject ValidationParameters(string handle)

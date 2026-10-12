@@ -11,6 +11,7 @@ from owned_translation import execution_receipt
 from save_target_fixture_oracle import verify as verify_save_target
 from saved_result_fixture_oracle import verify as verify_saved_result
 from saved_reopen_fixture_oracle import verify as verify_saved_reopen
+from saved_reopen_verification_oracle import verify as verify_saved_reopen_verification
 
 
 def generate(stage, target):
@@ -143,6 +144,27 @@ def generate(stage, target):
     if not any(case['accepted'] for case in reopen_cases):
         raise AssertionError('Actual Framework prepared saved-result reopen coverage is missing.')
     cases.extend(reopen_cases)
+    verified_reopen_cases = []
+    for path in sorted((stage / 'work').glob('owned-operation-self-test-*/saved-reopen-fixture.json')):
+        root = path.parent
+        proof = json.loads(path.read_text(encoding='utf-8-sig'))
+        receipt = json.loads((root / 'responses' / (proof['verificationRequestId'] + '.json')).read_text(encoding='utf-8-sig'))
+        variants = [receipt]
+        for key, value in [('noCommandReplay', False), ('observableContentChecked', False), ('cadSaveAttempted', True),
+                           ('bindingSha256', 'f' * 64), ('sourceSavedResultSha256', 'f' * 64), ('recordedJournalState', 'executed_unverified')]:
+            changed = copy.deepcopy(receipt)
+            changed[key] = value
+            variants.append(changed)
+        for variant in variants:
+            try:
+                verify_saved_reopen_verification(root, variant, proof['parameters'])
+                accepted = True
+            except (OSError, ValueError, TypeError, KeyError):
+                accepted = False
+            verified_reopen_cases.append({'kind': 'saved_reopen_verified', 'root': str(root), 'receipt': variant, 'parameters': proof['parameters'], 'accepted': accepted})
+    if not any(case['accepted'] for case in verified_reopen_cases):
+        raise AssertionError('Actual Framework independent saved-reopen verification coverage is missing.')
+    cases.extend(verified_reopen_cases)
     Path(target).parent.mkdir(parents=True, exist_ok=True)
     Path(target).write_text(json.dumps({'stage': str(stage), 'cases': cases}, indent=2, ensure_ascii=False), encoding='utf-8')
     print('Generated Python oracle for %d actual Framework artifact cases.' % len(cases))

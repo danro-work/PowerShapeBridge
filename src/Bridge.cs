@@ -707,6 +707,7 @@ namespace PowerShapeBridge
             count += OwnedSaveTargetTests.Run();
             count += OwnedSaveAsTests.Run();
             count += OwnedSavedReopenTests.Run();
+            count += OwnedSavedReopenExecutionTests.Run();
             Action<bool> check = ok => { if (!ok) throw new Exception("Self-test failed at " + count); count++; };
             string statusRoot=Path.Combine(Program.Root,"work","status-self-test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(statusRoot);
             string statusPath=Path.Combine(statusRoot,"panel-status.json"),statusTemporary=statusPath+".tmp";File.WriteAllText(statusPath,"old");File.WriteAllText(statusTemporary,"new");

@@ -10,7 +10,7 @@ public sealed class OwnedReopenStore(string root,OwnedSavedResultStore saved,Fun
 {
     private readonly Func<double> now=clock??(()=> (double)Stopwatch.GetTimestamp()/Stopwatch.Frequency);
     private readonly Func<DateTimeOffset> utcNow=utcClock??(()=>DateTimeOffset.UtcNow);
-    private sealed record Lease(string Id,string Sha,JsonObject Source,double Expires);
+    private sealed record Lease(string Id,string Sha,JsonObject Source,double Expires,DateTimeOffset UtcExpires);
     private readonly Dictionary<string,Lease> handles=[];
     public void Clear()=>handles.Clear();
     private static string Text(JsonObject value,string key)=>ArtifactProof.String(value,key,"saved_reopen_proof_invalid");
@@ -82,7 +82,8 @@ public sealed class OwnedReopenStore(string root,OwnedSavedResultStore saved,Fun
         remaining=Math.Min(remaining,saved.Remaining(savedHandle));
         Require(remaining>0&&remaining<=300,"saved_reopen_expired");
         foreach(var token in handles.Where(p=>p.Value.Expires<=now()).Select(p=>p.Key).ToArray())handles.Remove(token);
-        if(handles.Count>=128)Clear();var handle=Guid.NewGuid().ToString("N");handles[handle]=new(Text(plan,"reopenId"),Text(result,"reopenSha256"),parameters.DeepClone().AsObject(),now()+remaining);
+        var utcExpiry=LeaseTime.PythonPrecision(utcNow()).AddSeconds(remaining);var preparedExpiry=LeaseTime.Parse(Text(plan,"expiresUtc"),"saved_reopen_expired");if(preparedExpiry<utcExpiry)utcExpiry=preparedExpiry;
+        if(handles.Count>=128)Clear();var handle=Guid.NewGuid().ToString("N");handles[handle]=new(Text(plan,"reopenId"),Text(result,"reopenSha256"),parameters.DeepClone().AsObject(),now()+remaining,utcExpiry);
         var output=result.DeepClone().AsObject();output["ownedReopenHandle"]=handle;output["reopenLifetimeSeconds"]=(int)remaining;return output;
     }
     public JsonObject Parameters(string handle)
@@ -92,6 +93,12 @@ public sealed class OwnedReopenStore(string root,OwnedSavedResultStore saved,Fun
         Unclaimed(plan);return new(){["reopenId"]=lease.Id,["reopenSha256"]=lease.Sha};
     }
     public void Revoke(string handle)=>handles.Remove(handle);
+    public JsonObject Consume(string handle)
+    {
+        var parameters=Parameters(handle);handles.Remove(handle);return parameters;
+    }
+    public double Remaining(string handle){Parameters(handle);return handles[handle].Expires-now();}
+    public DateTimeOffset ExpiresUtc(string handle){Parameters(handle);return handles[handle].UtcExpires;}
     private void Unclaimed(JsonObject plan)
     {
         var copy=Text(plan,"copyId");foreach(var name in new[]{"open-once.json","mutation-fence.json"})

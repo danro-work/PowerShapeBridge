@@ -1,18 +1,19 @@
 # К6 — собственный SaveAs и отдельный reopen, проект контракта
 
-SDK0.36.2-dev: первые четыре инструмента таблицы (prepare/execute/verify SaveAs,
-prepare saved reopen)
+SDK0.36.3-dev: все шесть инструментов таблицы (prepare/execute/verify SaveAs,
+prepare/execute/verify saved reopen)
 реализованы и проверены offline. Verify выдаёт typed savedResultHandle только
 по checked native terminal proof; никакая read reference не становится edit
 authorization. Handle закрепляет verificationRequestId/raw SHA, expires до
 300s и не продлевается. Prepare создаёт closed readonly seed, новую Working
 copy и отдельный readonly checkpoint; ownedReopenHandle сохраняет minimum TTL
-source lease. Execute/verify saved reopen ниже пока не реализованы;
+source lease. Execute/verify saved reopen реализованы offline; успешный verifier
+выдаёт новую current-document binding, old entity IDs не переиспользуются;
 live qualification К6 ещё впереди. STATUS-K6-SAVE-AS.md.
 
 Реализация на 12.10.2026: SDK/native SaveAs и saved-byte preparation прошли
 offline checks. Native recipes включаются ownedSavesExperimental и отдельным
-ownedSavedReopenExperimental; guarded OPEN/new binding пока впереди.
+ownedSavedReopenExperimental; guarded OPEN/new binding проверены только offline.
 Установленный runtime не обновлялся; live квалификация К6 ещё отсутствует.
 Текущее доказательство и ограничения — STATUS-K6-SAVE-AS.md.
 
@@ -85,6 +86,10 @@ source reader. Seed, Working_<id> и Before checkpoint — разные физи
 
 После OPEN нужны fresh references/new binding, состав/координаты/единицы модели,
 explicit numeric tolerances и независимые original/result/checkpoint hashes.
+Реализованный comparator требует qualified world/empty selection context,
+использует abs/relative1e-9 только для доступных geometry/workplane measurements,
+сохраняет строгие raw units/metadata и сравнивает multiset без native IDs.
+Missing поля не считаются полным геометрическим доказательством.
 Нативные IDs/ссылки из предыдущего документа не переиспользуются. Bounds/COG/
 area/volume сами по себе не доказывают полную топологическую эквивалентность.
 Сохранить старые окна; owned result/reopen остаются открытыми для квалификации,

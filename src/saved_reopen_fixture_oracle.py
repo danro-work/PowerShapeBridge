@@ -19,7 +19,7 @@ def identity(value):
         require(isinstance(value[key], str) and re.fullmatch('[0-9a-f]{%d}' % count, value[key]))
 
 
-def verify(root, receipt):
+def verify(root, receipt, unclaimed=True):
     ident = receipt['reopenId']
     require(isinstance(ident, str) and re.fullmatch('[0-9a-f]{32}', ident))
     plan = file_value(root / 'savedreopens' / ident / 'reopen.json', receipt['reopenSha256'])
@@ -59,4 +59,6 @@ def verify(root, receipt):
     for path in paths:
         require(path.stat().st_size == length and hashlib.sha256(path.read_bytes()).hexdigest() == digest)
     require(paths[0].stat().st_file_attributes & 1 and paths[2].stat().st_file_attributes & 1)
-    require(not (copy / 'mutation-fence.json').exists() and not (copy / 'open-once.json').exists())
+    require(not (copy / 'mutation-fence.json').exists())
+    if unclaimed:
+        require(not (copy / 'open-once.json').exists())

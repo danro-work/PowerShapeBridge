@@ -50,7 +50,7 @@ public sealed class BridgeSession : IDisposable
                 ("ownedSaveTargetsExperimental",new[]{"prepare_owned_save_as"}),
                 ("ownedSavedReopenExperimental",new[]{"prepare_owned_saved_reopen"})})
                 if(config.TryGetProperty(flagName,out var enabled)&&enabled.ValueKind==System.Text.Json.JsonValueKind.True)prepared.UnionWith(names);
-            foreach(var (flagName,names) in new[]{("workingCopyOpenExperimental",new[]{"open_working_copy","verify_working_copy_open"}),("ownedTranslationsExperimental",new[]{"execute_owned_translation","verify_owned_translation"}),("ownedSavesExperimental",new[]{"execute_owned_save_as","verify_owned_save_as"})})
+            foreach(var (flagName,names) in new[]{("workingCopyOpenExperimental",new[]{"open_working_copy","verify_working_copy_open"}),("ownedTranslationsExperimental",new[]{"execute_owned_translation","verify_owned_translation"}),("ownedSavesExperimental",new[]{"execute_owned_save_as","verify_owned_save_as"}),("ownedSavedReopenExperimental",new[]{"execute_owned_saved_reopen","verify_owned_saved_reopen"})})
                 if(config.TryGetProperty(flagName,out var enabled)&&enabled.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(names);
         }
     }
@@ -92,7 +92,7 @@ public sealed class BridgeSession : IDisposable
             ["workingCopies"] = PreparedEnabled("prepare_working_copy")?"experimental_saved_disk_bytes_only":"disabled", ["documentBindings"] = PreparedEnabled("bind_working_document")?"experimental_passive_owned_active_document":"disabled", ["workingCopyOpen"] = ExecutionEnabled("open_working_copy")?"experimental_owned_new_window_only":"disabled",
             ["ownedOperationPlans"] = PreparedEnabled("prepare_owned_operation")?"experimental_coupled_guard_execution_disabled":"disabled", ["ownedTranslations"] = ExecutionEnabled("execute_owned_translation")?"experimental_one_owned_solid_independent_verification":"disabled",
             ["ownedSaveTargets"] = PreparedEnabled("prepare_owned_save_as")?"experimental_new_fixed_file_target":"disabled", ["ownedSaves"] = ExecutionEnabled("execute_owned_save_as")?"experimental_one_save_separate_verification":"disabled",
-            ["ownedSavedReopen"] = PreparedEnabled("prepare_owned_saved_reopen")?"experimental_saved_byte_copy_preparation_only":"disabled",
+            ["ownedSavedReopen"] = ExecutionEnabled("execute_owned_saved_reopen")?"experimental_one_guarded_open_separate_verification_new_binding":"disabled",
             ["maintenance"] = File.Exists(FileArtifacts.FixedPath(Options.BridgeRoot, "maintenance.json")),
             ["referenceScope"] = "ephemeral_read_observations; not accepted by mutation tools",
             ["documentChoice"] = ExecutionEnabled("activate_document")?"enabled":"disabled", ["expectedProject"] = null, ["captureViewport"] = false,

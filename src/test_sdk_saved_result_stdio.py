@@ -99,12 +99,14 @@ def checks(args):
             assert 'result' in peer.call(1, 'initialize', {'protocolVersion': '2025-11-25', 'capabilities': {}, 'clientInfo': {'name': 'saved-result-independent', 'version': '1'}})
             peer.notify('notifications/initialized')
         tools = client.call(2, 'tools/list')['result']['tools']
-        assert len(tools) == (25 if args.reopen else 24)
+        assert len(tools) == (27 if args.reopen else 24)
         by_name = {tool['name']: tool for tool in tools}
         shapes = {'prepare_owned_save_as': ['workingDocumentBindingHandle'], 'execute_owned_save_as': ['ownedSaveAsHandle'],
                   'verify_owned_save_as': ['saveRequestId', 'saveReceiptSha256', 'candidateDocumentHandle', 'activeDocumentHandle']}
         if args.reopen:
             shapes['prepare_owned_saved_reopen'] = ['savedResultHandle']
+            shapes['execute_owned_saved_reopen'] = ['ownedReopenHandle', 'candidateDocumentHandle', 'activeDocumentHandle']
+            shapes['verify_owned_saved_reopen'] = ['reopenRequestId', 'reopenReceiptSha256', 'candidateDocumentHandle', 'activeDocumentHandle']
         for name, required in shapes.items():
             schema = by_name[name]['inputSchema']
             assert schema['required'] == required and set(schema['properties']) == set(required) and schema['additionalProperties'] is False

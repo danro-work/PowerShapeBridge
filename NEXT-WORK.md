@@ -1,5 +1,19 @@
 # Дальнейшая работа
 
+Текущий блок К6: SDK0.36.3/native source0.33 SavedAs→prepared clone→one-use
+guarded saved reopen→separate verification/new binding реализован offline.
+239 .NET/514 native/171 artifacts (0 mismatches), seven external STDIO/Inspector
+passed; evidence/K6-save-as/reopen-execution-full. Далее clean/CI нового блока,
+staged idle deployment и own live К6. До live fresh process/active model/windows/
+queue/ownership/saved-byte checks; прежние PID/window numbers и transient handles
+не использовать. Default SDK switch decision всё ещё pending, config.toml не менять.
+Historic source proof используется только independent verifier; expired intent
+не replay. Content: strict metadata/raw units, available world measurements с
+abs/relative1e-9, native IDs новых документов не сопоставляются, missing fields
+не доказывают topology. После К6 весь принятый объём К7–К11 остаётся обязательным.
+
+Ниже история предыдущих блоков.
+
 Текущий блок К6: saved-byte clone/preparation готов, SDK0.36.2/native source0.33.
 Следом qualified one-use execute_owned_saved_reopen, fresh context choice,
 guarded OPEN нового Working_<id>, separate content/units/files verifier и новая

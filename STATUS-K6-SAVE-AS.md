@@ -1,5 +1,46 @@
 # К6 — собственный SaveAs и reopen, выполняется
 
+13 октября 2026, SDK0.36.3-dev/native source0.33.0-dev: полный offline reopen
+flow реализован. Два новых official SDK tools зарегистрированы через
+OwnedSavedReopenTools.Create в ToolCatalog; full opt-in profile27/read-only6.
+Native lease закрепляет original SaveAs verification/journal/provenance,
+readonly seed и отдельную рабочую/checkpoint копии с физическими identities,
+directory reservations/no-reparse и double-SHA. Execute использует прежний
+retained WorkingCopyOpen guard с дополнительным immutable provenance в plan,
+operation=open_owned_saved_result и проверками source непосредственно вокруг
+OPEN. Старый generic verifier принимает только open_working_copy и не обходит
+новую проверку сохранённого содержимого. Claim и journal сохраняются при unknown,
+команда не повторяется автоматически; fresh intent handle consume/revoke до IPC.
+
+Separate verifier требует отдельные read receipts после authoritative return,
+сохранение прежних окон/файлов и новую active identity. Entity native IDs между
+документами не сопоставляются. Проверяются metadata/состав и доступные raw world
+measurements/workplanes multiset; numeric absolute/relative tolerance1e-9,
+raw units/metadata строгие. Missing geometry остаётся missing; full topology
+не подтверждается. Сейчас qualified world/empty-selection context, локальный
+active workplane отклоняется. Historic source validation применяется только для
+separate verification; истёкший prepared intent не разрешает OPEN. Verifier
+записывает новый binding из текущего inspection и retained document. SDK
+проверяет original/terminal raw receipts/claim/file/evidence/binding и выдаёт
+новые connection-scoped copy/binding handles с minimum TTL; old IDs не наследуются.
+Fresh re-verification оставляет первый terminal journal и создаёт новый binding.
+
+Offline evidence: 239 .NET tests, 514 native checks, 171 actual Framework
+artifact cases (133 accepted, zero Python/SDK mismatches), семь external STDIO
+scenarios и Inspector. Новый отдельный STDIO scenario использует original/
+terminal actual native reopen proof и synthetic fresh read/verifier/binding;
+новый document ID500/entity IDs1005/1008/1010, once choice, неизменный journal.
+Все synthetic, без COM/CAD/deployment. evidence/K6-save-as/reopen-execution-full.
+Первый fake IPC response был опубликован неатомарно и rejected; fixture теперь
+использует .pending→.json, оба official pipe tests прошли. Native fixture сначала
+завышал expiry, guard отказал до команды; fixture ограничен prepared expiry.
+Production guards/deadlines не ослаблены. Clean/CI этого блока ещё ожидаются.
+Следом clean/CI и own live SaveAs→reopen→fresh binding К6 после актуальных
+process/document/ownership reads. Installed runtime/config не менялись.
+К6 не завершён; весь объём К7–К11 сохраняется.
+
+## Предыдущий блок — saved-byte preparation
+
 Блок saved-byte preparation: SDK0.36.2-dev, native source0.33.0-dev.
 `prepare_owned_saved_reopen(savedResultHandle)` создаёт новые собственные файлы
 через тот же IPC и filesystem-only native recipe; не открывает/сохраняет CAD.
