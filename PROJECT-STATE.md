@@ -1,5 +1,20 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 independent reader начат, пока K6 installation permission pending. Source
+SDK0.37.0-dev: inspect_operation_recovery, RecoveryInspection/RecoveryTools,
+explicit recoveryInspectionExperimental profile28/7, без флага27/6 unchanged.
+No CAD/IPC/writes; raw journal/plan/ownership/claim/fence и double saved-byte
+checks дают recorded assessment, никогда execution/replay/current-CAD success.
+Старый actual unknown6ed... прочитан, started_without_authoritative_return;
+claim/журнал не менялись.19 domain/3 protocol recovery tests, полный261 .NET
+passed, Inspector readonly7 checked; полный SDK regression passed261 .NET/
+514 native/171 artifacts/seven STDIO. Clean/CI этого блока ещё ожидаются.
+RECOVERY-INSPECTION.md/evidence/K7-recovery. Outcome-resolution journal,
+checkpoint recovery и complete fault matrix ещё впереди; К7 не завершён.
+K6 package/staging/default config не изменены этим блоком; approval question
+установки остаётся pending, Apply/live pilot не выполнять до ответа.
+
+
 К6 live package готов: work/K6-native-live, published work/K6-sdk-runtime
 STDIO/status/catalog27/6 checked. Plan-only deployment создан, protected71
 files double-SHA snapshot закреплён. Автоматическая проверка сначала отклонила
