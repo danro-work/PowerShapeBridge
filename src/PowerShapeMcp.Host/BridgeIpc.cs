@@ -4,14 +4,14 @@ using System.Text.Json.Nodes;
 
 namespace PowerShapeMcp;
 
-// Fixed IPC seam, deliberately separate from SDK and native COM. K2 has no public queue tool.
+// Fixed IPC seam, deliberately separate from SDK and native COM. Public tools use fixed recipe mappings.
 public sealed class BridgeIpc(HostOptions options) : IDisposable
 {
     private readonly SemaphoreSlim submission = new(1, 1);
     private int pending;
     private static readonly HashSet<string> Operations = ["model.snapshot", "disk.verify", "baseline.activate", "translation.prepare", "translation.execute", "recipe.prepare", "recipe.execute"];
 
-    public async Task<JsonObject> SubmitAsync(string operation, JsonObject? arguments, CancellationToken cancellationToken = default)
+    public async Task<JsonObject> SubmitAsync(string operation, JsonObject? arguments, CancellationToken cancellationToken = default, TimeSpan? remainingBudget = null)
     {
         if (!Operations.Contains(operation)) throw new ArgumentException("Unknown fixed queue operation.");
         if (Interlocked.Increment(ref pending) > 8)
@@ -20,6 +20,7 @@ public sealed class BridgeIpc(HostOptions options) : IDisposable
             return State("too_many_pending_calls");
         }
         var timer = Stopwatch.StartNew();
+        var timeout=remainingBudget is { } budget&&budget<options.Timeout?budget:options.Timeout;
         var acquired = false;
         string? request = null, temporary = null, token = null;
         try
@@ -27,10 +28,10 @@ public sealed class BridgeIpc(HostOptions options) : IDisposable
             while (!(acquired = await submission.WaitAsync(TimeSpan.FromMilliseconds(25), CancellationToken.None)))
             {
                 if (cancellationToken.IsCancellationRequested) return State("cancelled_before_submission");
-                if (timer.Elapsed >= options.Timeout) return State("queue_timeout_before_submission");
+                if (timer.Elapsed >= timeout) return State("queue_timeout_before_submission");
             }
             if (cancellationToken.IsCancellationRequested) return State("cancelled_before_submission");
-            if (timer.Elapsed >= options.Timeout) return State("queue_timeout_before_submission");
+            if (timer.Elapsed >= timeout) return State("queue_timeout_before_submission");
             if (Maintenance()) return State("maintenance_before_submission");
             if (!File.Exists(FileArtifacts.FixedPath(options.BridgeRoot, "PSBridge.Worker.exe"))) return State("failed", error: "Bridge worker is missing at the configured root.");
             Directory.CreateDirectory(FileArtifacts.FixedPath(options.BridgeRoot, "requests"));
@@ -47,10 +48,10 @@ public sealed class BridgeIpc(HostOptions options) : IDisposable
             }
             if (cancellationToken.IsCancellationRequested) return State("cancelled_before_submission");
             if (Maintenance()) return State("maintenance_before_submission");
-            if (timer.Elapsed >= options.Timeout) return State("queue_timeout_before_submission");
+            if (timer.Elapsed >= timeout) return State("queue_timeout_before_submission");
             File.Move(temporary, request);
             temporary = null;
-            while (timer.Elapsed < options.Timeout)
+            while (timer.Elapsed < timeout)
             {
                 if (cancellationToken.IsCancellationRequested) return State("cancelled_outcome_unknown", token, "Cancellation does not stop a claimed PowerShape operation.");
                 if (File.Exists(response))

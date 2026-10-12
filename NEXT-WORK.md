@@ -3,8 +3,12 @@
 12 октября: К0 принят пользователем, разработка до К11 авторизована.
 К1 пройден локально и в Windows CI. К2 локально пройден: SDK-host/fake-panel,
 45 .NET tests, independent STDIO/Python journal parity и Inspector; clean checkout
-и все Windows CI успешны, К2 закрыт. Сейчас К3: read-only catalog из шести tools,
-leases и direct-call mutation refusals.
+и все Windows CI успешны, К2 закрыт. К3 локально пройден: SDK 0.33.0-dev,
+шесть read-only tools, temporal stores/единый async guard, 98 .NET tests,
+independent Python read/digest/raw-byte parity и Inspector CLI. Clean checkout
+и все CI успешны, К3 закрыт. Сейчас К4 — entity sets/local plans/copy/binding/owned
+stores с byte/schema parity, сохраняющий native worker и separate execute/verify.
+Не переносить C# native digest в Python encoding: это разные схемы.
 Product Help — `en_US`, отчёты на русском; CHECKPOINTS.md хранит текущий статус.
 Ниже историческая запись подготовки, её ожидание К0 уже закрыто.
 

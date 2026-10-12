@@ -7,8 +7,15 @@ MCP-протокол, junction и deployment plan; оба Windows CI успеш�
 STATUS-K1-BASELINE.md. К2 локально пройден: новый net10.0 SDK-host 0.32.0-dev,
 два diagnostic tools, 45 .NET tests, independent STDIO/journal parity и Inspector.
 STATUS-K2-SDK.md. К2 прошёл clean checkout и все Windows CI; К2 закрыт.
-К3 выполняется. Runtime остаётся 0.31.0, live переключения нет.
-Текущие контрольные точки — CHECKPOINTS.md. Современный host пока не собран;
+К3 локально пройден: SDK 0.33.0-dev, шесть read-only tools current general
+профиля (пять без experimental candidates), connection-scoped temporal stores,
+единый async read guard, admission максимум 8/duplicate ID refusal, общий
+deadline с ожиданием gate. 98 .NET tests, independent Python STDIO/read lease/
+digest/raw-byte parity и Inspector CLI прошли без CAD. Clean checkout и все
+Windows CI успешны; К3 закрыт, К4 начат. STATUS-K3-READONLY.md.
+Native runtime 0.31.0 не изменён,
+live адаптер не переключался; mutation tools в новом host пока отсутствуют.
+Текущие контрольные точки — CHECKPOINTS.md. SDK-host собран и проверен без CAD;
 последняя CAD-квалификация остаётся P2.31. Runtime/CAD не изменялись.
 Ниже сохранён журнал подготовки; его ожидание согласования К0 уже закрыто.
 

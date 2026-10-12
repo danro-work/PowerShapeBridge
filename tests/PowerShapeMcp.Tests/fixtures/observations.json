@@ -1,0 +1,769 @@
+[
+  {
+    "name": "baseline",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.0
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "9ff26882ed99a347bafd3e57762a91edcde91bf115e604f717c49a7df8934013"
+  },
+  {
+    "name": "path-0",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": ""
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.0
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "."
+    },
+    "identitySha256": "bae6d389b2fa55dcf463e66ee9de4c0e0a733d1cc44ac8977cf07bdee7ee90c1",
+    "observedPropertiesSha256": "9ff26882ed99a347bafd3e57762a91edcde91bf115e604f717c49a7df8934013"
+  },
+  {
+    "name": "path-1",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/./folder/../part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.0
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "9ff26882ed99a347bafd3e57762a91edcde91bf115e604f717c49a7df8934013"
+  },
+  {
+    "name": "path-2",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:Parts/../Part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.0
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:part.psmodel"
+    },
+    "identitySha256": "18648891ae2ecbe65152e26c4629a44686a47992f15f473ffccefae2f3f503c9",
+    "observedPropertiesSha256": "9ff26882ed99a347bafd3e57762a91edcde91bf115e604f717c49a7df8934013"
+  },
+  {
+    "name": "path-3",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "\\\\server\\share\\folder\\..\\Part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.0
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "\\\\server\\share\\part.psmodel"
+    },
+    "identitySha256": "f3595652bc92870d284df63049229954912ac11eddb6fc489cc73c48b4b34380",
+    "observedPropertiesSha256": "9ff26882ed99a347bafd3e57762a91edcde91bf115e604f717c49a7df8934013"
+  },
+  {
+    "name": "path-4",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "\\Parts\\..\\Part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.0
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "\\part.psmodel"
+    },
+    "identitySha256": "38a45a17eea74482c46501ded1de354d084fcbf33610d841e8c9f65fbe912e7f",
+    "observedPropertiesSha256": "9ff26882ed99a347bafd3e57762a91edcde91bf115e604f717c49a7df8934013"
+  },
+  {
+    "name": "float-0",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.0
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "9ff26882ed99a347bafd3e57762a91edcde91bf115e604f717c49a7df8934013"
+  },
+  {
+    "name": "float-1",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": -0.0
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "bb77a09486eb731b2e40a6e1e2baa5f2dbc3e8182ea85c51d344a552d2a8de3b"
+  },
+  {
+    "name": "float-2",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1e-06
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "f787de082862ca75ae9b74555c926dea7b82a554683045a164e6144c6c7d3090"
+  },
+  {
+    "name": "float-3",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1e+16
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "68576f7c41abda67998566d5819c0ccb38151a72a925b594bf423d48d202e45a"
+  },
+  {
+    "name": "float-4",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1000000000000000.0
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "75a4fcbbd45974c8b8f8fa32befa44c56a394ae1f4736cc4c778d0584032baef"
+  },
+  {
+    "name": "float-5",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.2345e-07
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "93bd9a9acf1202c8488d458e72a401b942053866e2a626cb46b85b3a714bf755"
+  },
+  {
+    "name": "float-6",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 0.0001
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "3a4efb63552cc772990e635d2ae11425ad7ed10c8412e4f7455848b22ea2f1e9"
+  },
+  {
+    "name": "float-7",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.2345e+20
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "6c6bde4923cc2b048f402bc285a217eb981b219ec5c3abb74f28ed843cf5a008"
+  },
+  {
+    "name": "unicode-keys-and-values",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Тело 😀  \t\"\\",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.0,
+            "😀": 2,
+            "": 3,
+            "a": 4
+          }
+        }
+      ],
+      "entityCount": 1,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "2a0b4a6fac1c19329d0f9c077e0c6a5a4618d143e8dae9671f1f4e4b75677626"
+  },
+  {
+    "name": "empty-inventory",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [],
+      "entityCount": 0,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "18c9bd4b4cc91c17b141a0a72454a5f6686a20fc3018d64e64fb63d5845d7155"
+  },
+  {
+    "name": "unsorted-inventory",
+    "snapshot": {
+      "state": "succeeded_verified",
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "model": {
+        "id": 9,
+        "name": "Part",
+        "path": "D:/Parts/part.psmodel"
+      },
+      "entities": [
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 5,
+          "type": "SOLID",
+          "name": "Body",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.0
+          }
+        },
+        {
+          "nativeTypeCode": 40,
+          "nativeId": 4,
+          "type": "SOLID",
+          "name": "Second",
+          "levelNumber": 0,
+          "geometry": {
+            "volumeRaw": 1.0
+          }
+        }
+      ],
+      "entityCount": 2,
+      "lengthUnitsRaw": "mm",
+      "lengthUnitFactorRaw": 1,
+      "contextBefore": [
+        0,
+        0
+      ],
+      "workplanes": [],
+      "bridgeRequestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "identity": {
+      "processId": 100,
+      "processStartedUtc": "2026-10-09T08:00:00Z",
+      "windowsSessionId": 1,
+      "modelId": 9,
+      "modelName": "Part",
+      "modelPath": "d:\\parts\\part.psmodel"
+    },
+    "identitySha256": "c60e727a2c4aae42e66d9cffe088e440ffe5b15abc46d9b249accf4f4065895e",
+    "observedPropertiesSha256": "5b009cd906e92ebdc22048914e8951264975d9eb3e3a98273b6c78d36544b5ba"
+  }
+]

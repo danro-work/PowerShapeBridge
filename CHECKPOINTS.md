@@ -7,8 +7,8 @@
 | К0 | Принято пользователем | План принят к работе до К11; Product Help `en_US` разрешён |
 | К1 | Пройден | STATUS-K1-BASELINE.md: clean checkout, 312 C#, 114 Python; оба GitHub Windows CI успешны |
 | К2 | Пройден | STATUS-K2-SDK.md: clean checkout, 45 .NET tests, STDIO/Python journal parity, Inspector; все Windows CI успешны |
-| К3 | Выполняется | Шесть read-only tools, handles и запреты прямых мутационных вызовов |
-| К4 | Не начато | Перенос safety stores с byte/hash parity |
+| К3 | Пройден | SDK 0.33.0-dev: clean checkout, 98 .NET tests, independent Python parity/Inspector; все CI успешны |
+| К4 | Выполняется | Перенос safety stores с byte/hash parity; CAD execution остаётся на К5 |
 | К5 | Не начато | Паритет owned open/translation; решение о live переключении |
 | К6 | Не начато | SaveAs результата, saved bytes и отдельный reopen |
 | К7 | Не начато | Interrupted recovery и fault matrix |

@@ -1,5 +1,5 @@
 using System.Globalization;
-using System.Text.Encodings.Web;
+using System.Text;
 using System.Text.Json;
 
 namespace PowerShapeMcp;
@@ -8,16 +8,31 @@ namespace PowerShapeMcp;
 // Never use this to compute a native receipt hash: hash the original bytes.
 public static class PythonJson
 {
-    private static readonly JsonSerializerOptions Strings = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
     public static string Dump(JsonElement value) => value.ValueKind switch
     {
-        JsonValueKind.Object => "{" + string.Join(", ", value.EnumerateObject().Select(p => JsonSerializer.Serialize(p.Name, Strings) + ": " + Dump(p.Value))) + "}",
+        JsonValueKind.Object => "{" + string.Join(", ", value.EnumerateObject().Select(p => Quote(p.Name) + ": " + Dump(p.Value))) + "}",
         JsonValueKind.Array => "[" + string.Join(", ", value.EnumerateArray().Select(Dump)) + "]",
-        JsonValueKind.String => JsonSerializer.Serialize(value.GetString(), Strings),
+        JsonValueKind.String => Quote(value.GetString()!),
         JsonValueKind.Number => Number(value.GetRawText()),
         JsonValueKind.True => "true", JsonValueKind.False => "false", JsonValueKind.Null => "null",
         _ => throw new InvalidDataException("operation_journal_details_invalid")
     };
+    public static string Quote(string value)
+    {
+        // Python ensure_ascii=False preserves valid non-BMP and U+2028/U+2029.
+        // Default .NET JSON encoders may escape them even in UnsafeRelaxed mode.
+        _ = new UTF8Encoding(false, true).GetByteCount(value);
+        var text = new StringBuilder("\"");
+        foreach (var c in value)
+            text.Append(c switch
+            {
+                '"' => "\\\"", '\\' => "\\\\", '\b' => "\\b", '\f' => "\\f",
+                '\n' => "\\n", '\r' => "\\r", '\t' => "\\t",
+                < ' ' => "\\u" + ((int)c).ToString("x4", CultureInfo.InvariantCulture),
+                _ => c.ToString()
+            });
+        return text.Append('"').ToString();
+    }
     private static string Number(string token)
     {
         if (!token.Contains('.') && !token.Contains('e') && !token.Contains('E')) return token;

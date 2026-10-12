@@ -38,29 +38,7 @@ public sealed class DiagnosticTools(BridgeSession session)
     {
         var methods = new DiagnosticTools(session);
         // Explicit allowlist. Neither assembly scanning nor SDK hints enforce our mode policy.
-        return [new StrictDiagnosticTool(McpServerTool.Create(methods.Status), false),
-                new StrictDiagnosticTool(McpServerTool.Create(methods.OperationResult), true)];
-    }
-
-    private sealed class StrictDiagnosticTool : DelegatingMcpServerTool
-    {
-        private readonly bool hasIdentity;
-        public StrictDiagnosticTool(McpServerTool inner, bool hasIdentity) : base(inner)
-        {
-            this.hasIdentity = hasIdentity;
-            // Fixed public schema is kept separate from native receipt identifiers.
-            ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(hasIdentity
-                ? new JsonObject { ["type"] = "object", ["properties"] = new JsonObject { ["operationId"] = new JsonObject { ["type"] = "string", ["pattern"] = "^[0-9a-f]{32}$", ["description"] = IdentityDescription } }, ["required"] = new JsonArray("operationId"), ["additionalProperties"] = false }
-                : new JsonObject { ["type"] = "object", ["properties"] = new JsonObject(), ["additionalProperties"] = false });
-        }
-
-        public override ValueTask<CallToolResult> InvokeAsync(RequestContext<CallToolRequestParams> request, CancellationToken cancellationToken = default)
-        {
-            var args = request.Params?.Arguments;
-            if (hasIdentity ? args is null || args.Count != 1 || !args.TryGetValue("operationId", out var id) ||
-                id.ValueKind != JsonValueKind.String || !FileArtifacts.Token(id.GetString()) : args?.Count > 0)
-                throw new McpProtocolException("Invalid tool arguments.", McpErrorCode.InvalidParams);
-            return base.InvokeAsync(request, cancellationToken);
-        }
+        return [new StrictTool(McpServerTool.Create(methods.Status),session,StrictTool.Empty()),
+                new StrictTool(McpServerTool.Create(methods.OperationResult),session,StrictTool.Token("operationId",IdentityDescription))];
     }
 }
