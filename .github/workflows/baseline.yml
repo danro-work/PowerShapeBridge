@@ -1,0 +1,28 @@
+name: Windows baseline without CAD
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Build and verify isolated baseline
+        shell: pwsh
+        run: ./verify-baseline.ps1 -PythonPath (Get-Command python.exe).Source
+      - name: Preserve verification evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: K1-baseline
+          path: evidence/K1-baseline
+          if-no-files-found: error
