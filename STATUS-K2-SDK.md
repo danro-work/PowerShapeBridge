@@ -1,6 +1,10 @@
 # К2 — минимальный MCP SDK-хост
 
-12 октября 2026. Локальная проверка пройдена; Windows CI ещё ожидается.
+12 октября 2026. Локальная проверка и чистый экспорт commit
+`4edc4a67d2bd6e1765fb90ec4627282991c46e7a` пройдены.
+Windows SDK CI успешны для [PR](https://github.com/danro-work/PowerShapeBridge/actions/runs/38237320994)
+и [push](https://github.com/danro-work/PowerShapeBridge/actions/runs/38237314469);
+baseline также прошёл в обоих запусках. К2 закрыт.
 Версия нового host `0.32.0-dev`; установленный Framework worker остаётся `0.31.0`.
 Установка/подключение нового live адаптера не выполнялись.
 

@@ -6,7 +6,8 @@
 MCP-протокол, junction и deployment plan; оба Windows CI успешны, К1 закрыт.
 STATUS-K1-BASELINE.md. К2 локально пройден: новый net10.0 SDK-host 0.32.0-dev,
 два diagnostic tools, 45 .NET tests, independent STDIO/journal parity и Inspector.
-STATUS-K2-SDK.md. CI К2 ожидается; runtime остаётся 0.31.0, live переключения нет.
+STATUS-K2-SDK.md. К2 прошёл clean checkout и все Windows CI; К2 закрыт.
+К3 выполняется. Runtime остаётся 0.31.0, live переключения нет.
 Текущие контрольные точки — CHECKPOINTS.md. Современный host пока не собран;
 последняя CAD-квалификация остаётся P2.31. Runtime/CAD не изменялись.
 Ниже сохранён журнал подготовки; его ожидание согласования К0 уже закрыто.
