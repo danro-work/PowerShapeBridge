@@ -24,7 +24,14 @@ seed/working/checkpoint hashes совпадают, readonly сохранён, na
 Evidence: evidence/K6-save-as/reopen-preparation-full. Первое параллельное
 испытание имело один old Save route failure; diagnostic isolated pass и full
 sequential regression 227/227. Test-only fake durable-reply budget 5s;
-production timeouts не изменены. Clean/CI нового блока ещё ожидаются.
+production timeouts не изменены. Clean checkout commit4f4c75b5fa82169250cd7c52a89be82f07da9af4
+прошёл baseline и полный SDK regression: work/c6r/evidence/K1-baseline и
+work/c6r/evidence/K6-reopen-clean. Все recorded source/binary SHA совпали с
+clean files. В основном checkout 17 source files имеют другие CRLF/LF; после
+нормализации только line endings содержимое совпадает, code diff к commit пуст.
+Raw source hashes из разных checkout не приравниваются. Четыре Windows CI
+38306083440/38306083491/38306091138/38306091149 passed; SDK log подтвердил
+227 .NET/479 native/142 artifacts и actual filesystem-only STDIO preparation.
 Guarded OPEN, separate fresh content/units verifier/new binding и live К6
 ещё не выполнены. Установленные runtime/config не менялись.
 

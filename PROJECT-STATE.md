@@ -12,7 +12,12 @@ CAD-context revocation. Новый opt-in профиль general-owned-saved-reo
 prepare прошли; Inspector 25-tool profile checked. evidence/K6-save-as/
 reopen-preparation-full. Первый loaded concurrent run: один прежний route test
 failed; isolated diagnostic и sequential full regression passed. Fixture timeout
-5s, production deadlines не менялись. Текущий новый код ещё ожидает clean/CI.
+5s, production deadlines не менялись. Commit4f4c75b прошёл clean baseline/SDK
+в work/c6r (evidence/K1-baseline и evidence/K6-reopen-clean); source/binary SHA
+receipt совпадают с файлами clean checkout. 17 source files в основном checkout
+отличаются только CRLF/LF; raw hashes этих файлов не объявляются одинаковыми.
+Все четыре Windows CI 38306083440/38306083491/
+38306091138/38306091149 завершены success; actual SDK CI log проверен.
 Guarded execute/verify saved reopen, fresh binding и live К6 ещё впереди;
 К6–К11 не завершены. Runtime0.32/published K5 SDK/config не менялись.
 Ниже история предшествующих блоков.

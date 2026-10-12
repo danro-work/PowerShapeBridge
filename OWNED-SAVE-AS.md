@@ -78,7 +78,7 @@ fixed owned path и отдельными native file IDs; его saved bytes п�
 общий source-copy guard. Для saved-result clone необходим отдельный явно
 квалифицированный byte-stability/ownership контракт. Он реализован отдельно:
 held saved physical identity с FileShare.ReadWrite без delete, двойной SHA вокруг
-create-once clone, readonly DiskReopen seed и неизменённый strict OwnCopies
+create-once clone, readonly DiskReopen seed и неизменённый strict OwnedCopies
 source reader. Seed, Working_<id> и Before checkpoint — разные физические файлы
 с одинаковым SHA. Открывать планируется новый Working_<id>; seed/checkpoint
 сохраняются закрытыми. Это не exclusive writer lock и не разрешение OPEN.

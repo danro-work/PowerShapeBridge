@@ -8,10 +8,17 @@ binding с новыми наблюдениями/IDs. Prepared handle не от�
 и physical identities; использовать existing WorkingCopyOpen guards/one execution
 lane, сохранить прежние окна и неизвестный старый OPEN. 227 .NET/479 native/
 142 actual artifacts и six STDIO scenarios passed offline; evidence/K6-save-as/
-reopen-preparation-full. Сначала clean checkout/CI нового блока. Runtime0.32/
+reopen-preparation-full. Commit4f4c75b clean baseline/SDK и четыре Windows CI
+passed; work/c6r/evidence/K6-reopen-clean, STATUS-K6-SAVE-AS.md. Runtime0.32/
 published K5 SDK/config unchanged, default switch decision pending.
 После полной offline qualification — own live К6 только с fresh ownership/
 process/model/context checks. К6–К11 остаются обязательной целью.
+
+При fresh reopen verifier не сравнивать native entity IDs разных документов
+как устойчивую идентичность: OwnedSaveAs.Content закрепляет IDs для SaveAs того
+же документа, а reopened model требует отдельной проверки наблюдаемых состава/
+координат/единиц и новых references. Двойной byte SHA подтверждает файлы, а не
+полную топологию; старые native IDs/handles не переносить в новую binding.
 
 Ниже история предыдущих блоков.
 
