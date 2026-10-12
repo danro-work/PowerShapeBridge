@@ -1,5 +1,17 @@
 # PowerShape Bridge — состояние для продолжения
 
+К6 live package готов: work/K6-native-live, published work/K6-sdk-runtime
+STDIO/status/catalog27/6 checked. Plan-only deployment создан, protected71
+files double-SHA snapshot закреплён. Автоматическая проверка сначала отклонила
+скрипт как risk runtime/panel change; plan-only после проверки !Apply/exit0
+разрешён. Apply не запускался, отдельное разрешение пользователя запрошено
+и ожидается. Native installed0.32/connected Python0.31/default config unchanged.
+K6-LIVE-DEPLOYMENT.md описывает exact package/plan/rollback/own live pilot.
+work/k6_live_qualification.py подготовлен/syntax checked, НЕ выполнен. После
+ответа перепроверить plan/process/queue/protected hashes, затем apply и own
+SaveAs→reopen→new binding→independent audit. Старые handles не использовать.
+
+
 К6 SDK0.36.3-dev/native source0.33.0-dev: execute_owned_saved_reopen и
 verify_owned_saved_reopen реализованы и подключены через OwnedSavedReopenTools/
 ToolCatalog. Prepared intent, saved raw provenance, seed/copy/checkpoint и native
