@@ -26,6 +26,27 @@ class CoreConfiguration(unittest.TestCase):
                 with self.subTest(key=key, value=value), self.assertRaises(ValueError):
                     general_core({**self.settings, key: value})
 
+    def test_save_flags_require_boolean_and_owned_dependencies(self):
+        for key in ('ownedSaveTargetsExperimental', 'ownedSavesExperimental'):
+            for value in (True, 'true', 1, None):
+                with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                    general_core({**self.settings, key: value})
+        prepared = {**self.settings, 'entitySetsExperimental': True,
+                    'workingCopiesExperimental': True, 'documentBindingsExperimental': True,
+                    'ownedSaveTargetsExperimental': True}
+        self.assertTrue(general_core(prepared))
+        self.assertTrue(general_core({**prepared, 'ownedSavesExperimental': True}))
+
+    def test_native_save_profile_does_not_enable_python_save_facades(self):
+        root = Path(__file__).parents[1] / 'work' / ('save-profile-test-' + uuid.uuid4().hex)
+        root.mkdir(parents=True)
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-saves.json').read_text(encoding='utf-8-sig'))
+        (root / 'bridge.config.json').write_text(json.dumps(settings))
+        names = {tool['name'] for tool in Server(root).tools}
+        self.assertFalse({'prepare_owned_save_as', 'execute_owned_save_as', 'verify_owned_save_as'} & names)
+        self.assertEqual(len(names), 21)
+        self.assertEqual(len(Server(root, read_only=True).tools), 6)
+
     def test_maintenance_refuses_queue_submission_without_cad(self):
         root = Path(__file__).parents[1] / 'work' / ('maintenance-test-' + uuid.uuid4().hex)
         root.mkdir(parents=True)

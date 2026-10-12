@@ -1,7 +1,24 @@
 # К6 — собственный SaveAs и отдельный reopen, проект контракта
 
+SDK0.36.3-dev: все шесть инструментов таблицы (prepare/execute/verify SaveAs,
+prepare/execute/verify saved reopen)
+реализованы и проверены offline. Verify выдаёт typed savedResultHandle только
+по checked native terminal proof; никакая read reference не становится edit
+authorization. Handle закрепляет verificationRequestId/raw SHA, expires до
+300s и не продлевается. Prepare создаёт closed readonly seed, новую Working
+copy и отдельный readonly checkpoint; ownedReopenHandle сохраняет minimum TTL
+source lease. Execute/verify saved reopen реализованы offline; успешный verifier
+выдаёт новую current-document binding, old entity IDs не переиспользуются;
+live qualification К6 ещё впереди. STATUS-K6-SAVE-AS.md.
+
+Реализация на 12.10.2026: SDK/native SaveAs и saved-byte preparation прошли
+offline checks. Native recipes включаются ownedSavesExperimental и отдельным
+ownedSavedReopenExperimental; guarded OPEN/new binding проверены только offline.
+Установленный runtime не обновлялся; live квалификация К6 ещё отсутствует.
+Текущее доказательство и ограничения — STATUS-K6-SAVE-AS.md.
+
 К5 technical pilot пройден; default SDK decision pending. Этот контракт начинает
-К6, но не объявляет SaveAs/reopen реализованными или квалифицированными.
+К6; offline checks не объявляют live SaveAs/reopen квалифицированными.
 Исходный объём — MCP-DEVELOPMENT-PLAN.md, строка К6; общий MCP v1 остаётся целью.
 
 ## Результат и границы
@@ -60,10 +77,19 @@ Separate verifier читает authoritative journal и независимо в�
 fixed owned path и отдельными native file IDs; его saved bytes проверяются снова
 до/после OPEN. Если active saved result занят писателем, не ослаблять существующий
 общий source-copy guard. Для saved-result clone необходим отдельный явно
-квалифицированный byte-stability/ownership контракт; он ещё не реализован.
+квалифицированный byte-stability/ownership контракт. Он реализован отдельно:
+held saved physical identity с FileShare.ReadWrite без delete, двойной SHA вокруг
+create-once clone, readonly DiskReopen seed и неизменённый strict OwnedCopies
+source reader. Seed, Working_<id> и Before checkpoint — разные физические файлы
+с одинаковым SHA. Открывать планируется новый Working_<id>; seed/checkpoint
+сохраняются закрытыми. Это не exclusive writer lock и не разрешение OPEN.
 
 После OPEN нужны fresh references/new binding, состав/координаты/единицы модели,
 explicit numeric tolerances и независимые original/result/checkpoint hashes.
+Реализованный comparator требует qualified world/empty selection context,
+использует abs/relative1e-9 только для доступных geometry/workplane measurements,
+сохраняет строгие raw units/metadata и сравнивает multiset без native IDs.
+Missing поля не считаются полным геометрическим доказательством.
 Нативные IDs/ссылки из предыдущего документа не переиспользуются. Bounds/COG/
 area/volume сами по себе не доказывают полную топологическую эквивалентность.
 Сохранить старые окна; owned result/reopen остаются открытыми для квалификации,

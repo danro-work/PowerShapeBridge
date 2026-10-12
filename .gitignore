@@ -23,6 +23,9 @@
 /ownedoperations/
 /plans/
 /surfacejobs/
+/savedresults/
+/saveexecutions/
+/savedreopens/
 /workingcopies/
 /maintenance.json
 /deployment.lock

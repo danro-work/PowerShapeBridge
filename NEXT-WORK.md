@@ -1,5 +1,73 @@
 # Дальнейшая работа
 
+Текущий блок К6: SDK0.36.3/native source0.33 SavedAs→prepared clone→one-use
+guarded saved reopen→separate verification/new binding реализован offline.
+239 .NET/514 native/171 artifacts (0 mismatches), seven external STDIO/Inspector
+passed; evidence/K6-save-as/reopen-execution-full. Clean4a230a6 baseline/SDK и
+четыре Windows CI ef999f3 passed; STATUS-K6-SAVE-AS.md. Далее staged idle
+deployment и own live К6. До live fresh process/active model/windows/
+queue/ownership/saved-byte checks; прежние PID/window numbers и transient handles
+не использовать. Default SDK switch decision всё ещё pending, config.toml не менять.
+Historic source proof используется только independent verifier; expired intent
+не replay. Content: strict metadata/raw units, available world measurements с
+abs/relative1e-9, native IDs новых документов не сопоставляются, missing fields
+не доказывают topology. После К6 весь принятый объём К7–К11 остаётся обязательным.
+
+Ниже история предыдущих блоков.
+
+Текущий блок К6: saved-byte clone/preparation готов, SDK0.36.2/native source0.33.
+Следом qualified one-use execute_owned_saved_reopen, fresh context choice,
+guarded OPEN нового Working_<id>, separate content/units/files verifier и новая
+binding с новыми наблюдениями/IDs. Prepared handle не открывает модель и не
+разрешает edits. Перед OPEN повторно закрепить raw reopen/source/seed/copy proofs
+и physical identities; использовать existing WorkingCopyOpen guards/one execution
+lane, сохранить прежние окна и неизвестный старый OPEN. 227 .NET/479 native/
+142 actual artifacts и six STDIO scenarios passed offline; evidence/K6-save-as/
+reopen-preparation-full. Commit4f4c75b clean baseline/SDK и четыре Windows CI
+passed; work/c6r/evidence/K6-reopen-clean, STATUS-K6-SAVE-AS.md. Runtime0.32/
+published K5 SDK/config unchanged, default switch decision pending.
+После полной offline qualification — own live К6 только с fresh ownership/
+process/model/context checks. К6–К11 остаются обязательной целью.
+
+При fresh reopen verifier не сравнивать native entity IDs разных документов
+как устойчивую идентичность: OwnedSaveAs.Content закрепляет IDs для SaveAs того
+же документа, а reopened model требует отдельной проверки наблюдаемых состава/
+координат/единиц и новых references. Двойной byte SHA подтверждает файлы, а не
+полную топологию; старые native IDs/handles не переносить в новую binding.
+
+Ниже история предыдущих блоков.
+
+Текущий следующий блок К6: native byte-stable own saved-result clone и отдельно named reopen intent,
+guarded OPEN, independent content/units/file checks и new binding. Не ослаблять
+общий source-copy FileShare.Read; clone занятого saved result имеет отдельный
+qualified contract. SDK execute/verify/savedResult leases уже реализованы:
+212 .NET/432 native/124 artifacts, пять STDIO/Inspector passed offline;
+clean baseline/SDK aeeeb43 и все четыре Windows CI успешны. Для Framework tests
+использовать короткие staging paths (успешный clean work/n1), без повторного
+использования частично созданного NativeStageDirectory.
+Runtime0.32/published K5/config unchanged; default decision pending. Own live К6
+только после fresh process/model/context/ownership checks. К6–К11 обязательны.
+
+Текущий следующий блок К6: SDK execute_owned_save_as/verify_owned_save_as,
+connection-scoped savedResult lease, отдельно квалифицированный clone занятого
+saved result, own uniquely named reopen/new binding. Native one-save executor/
+fresh verifier и SDK passive prepare уже реализованы; 188 .NET/432 native,
+116 artifact cases и independent native save audit passed offline. Clean checkout
+47a64e5 baseline/SDK и все четыре Windows CI прошли; далее SDK routes/proofs и reopen.
+Runtime0.32/published SDK0.35.1/config не менялись, default switch pending.
+К6 не завершён; дальнейший объём К7–К11 сохраняется. Перед live новые process/
+document/model/ownership checks. STATUS-K6-SAVE-AS.md.
+
+Ниже история предшествующих блоков; формулировки «ещё отсутствует» относятся
+к моменту записи и не заменяют текущий статус выше.
+
+К6 source native0.33.0-dev: filesystem target + pinned directories + SDK target
+store реализованы. Runtime0.32/published K5 SDK/config unchanged. Полный
+evidence/K6-save-as/verified-targets и clean 2e93bf0 passed. Блок сохранён в Git/PR #7;
+SDK CI ещё выполняется, baseline jobs успешны. Далее passive
+prepare facade/flag и native one-use SaveAs/independent verifier/reopen/new binding.
+STATUS-K6-SAVE-AS.md. Подготовка target не авторизует команду, COM guard обязателен.
+
 К5 technical pilot/clean/CI/deployment/independent audit пройдены; user default
 switch decision pending. K5-SDK-SWITCH.md содержит proposed full + read-only
 config и rollback. До ответа config.toml не менять. Если пользователь разрешит,

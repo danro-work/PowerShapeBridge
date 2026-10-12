@@ -40,6 +40,9 @@ namespace PowerShapeBridge
         public bool workingCopyOpenExperimental { get; set; }
         public bool ownedOperationPlansExperimental { get; set; }
         public bool ownedTranslationsExperimental { get; set; }
+        public bool ownedSaveTargetsExperimental { get; set; }
+        public bool ownedSavesExperimental { get; set; }
+        public bool ownedSavedReopenExperimental { get; set; }
         public bool IsGeneralCore { get { return coreProfile == "general-v1"; } }
         public bool CoreTransportEnabled { get { return IsGeneralCore || (mcpMutationsPanel && recipeOperationsPanel); } }
         public string qualificationOperationId { get; set; }
@@ -59,6 +62,9 @@ namespace PowerShapeBridge
             if(workingCopyOpenExperimental&&(!IsGeneralCore||!workingCopiesExperimental||!entitySetsExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned open requires general core, working copies, candidates and bindings.");
             if(ownedOperationPlansExperimental&&(!IsGeneralCore||!operationPlansExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Coupled plans require general core, plans, sets, copies and bindings.");
             if(ownedTranslationsExperimental&&(!IsGeneralCore||!ownedOperationPlansExperimental))throw new ArgumentException("Owned translations require general coupled plans.");
+            if(ownedSaveTargetsExperimental&&(!IsGeneralCore||!documentBindingsExperimental||!workingCopiesExperimental||!entitySetsExperimental))throw new ArgumentException("Owned SaveAs targets require general copies, candidates and bindings.");
+            if(ownedSavesExperimental&&(!IsGeneralCore||!ownedSaveTargetsExperimental))throw new ArgumentException("Owned SaveAs execution requires prepared owned targets.");
+            if(ownedSavedReopenExperimental&&(!IsGeneralCore||!ownedSavesExperimental||!workingCopyOpenExperimental))throw new ArgumentException("Saved reopen requires owned SaveAs and owned copy open.");
             if (IsGeneralCore) {
                 if (captureViewport || translationTestPanel || checkpointTestPanel || parameterizedTranslationPanel || diskVerificationPanel || mcpMutationsPanel || recipeOperationsPanel ||
                     !string.IsNullOrEmpty(expectedProject) || !string.IsNullOrEmpty(sourceStep) || !string.IsNullOrEmpty(protectedProject) || !string.IsNullOrEmpty(qualificationOperationId) ||
@@ -77,7 +83,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.32.0";
+        public const string ReleaseVersion = "0.33.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -698,6 +704,10 @@ namespace PowerShapeBridge
             count += WorkingCopyOpen.SelfTest();
             count += OwnedOperationPlanTests.Run();
             count += OwnedTranslationTests.Run();
+            count += OwnedSaveTargetTests.Run();
+            count += OwnedSaveAsTests.Run();
+            count += OwnedSavedReopenTests.Run();
+            count += OwnedSavedReopenExecutionTests.Run();
             Action<bool> check = ok => { if (!ok) throw new Exception("Self-test failed at " + count); count++; };
             string statusRoot=Path.Combine(Program.Root,"work","status-self-test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(statusRoot);
             string statusPath=Path.Combine(statusRoot,"panel-status.json"),statusTemporary=statusPath+".tmp";File.WriteAllText(statusPath,"old");File.WriteAllText(statusTemporary,"new");

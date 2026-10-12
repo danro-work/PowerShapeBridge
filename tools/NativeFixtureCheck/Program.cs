@@ -17,6 +17,10 @@ foreach(var node in oracle["cases"]!.AsArray())
             case "binding":new DocumentBindingStore(root,new(),new()).VerifyReceipt(receipt);break;
             case "packet":new OwnedOperationStore(root,new OperationPlanStore(root,new()),new DocumentBindingStore(root,new(),new())).Receipt(receipt);break;
             case "execution":OwnedExecutionProof.TranslationReceipt(root,receipt,item["parameters"]!.AsObject());break;
+            case "save_target":new OwnedSaveTargetStore(root,new DocumentBindingStore(root,new(),new())).VerifyReceipt(receipt);break;
+            case "saved_result":new OwnedSavedResultStore(root,new OwnedSaveTargetStore(root,new DocumentBindingStore(root,new(),new())),new()).VerifyReceipt(receipt,item["parameters"]!.AsObject());break;
+            case "saved_reopen":new OwnedReopenStore(root,new OwnedSavedResultStore(root,new OwnedSaveTargetStore(root,new DocumentBindingStore(root,new(),new())),new())).VerifyReceipt(receipt);break;
+            case "saved_reopen_verified":using(var session=new BridgeSession(new(root,TimeSpan.FromSeconds(30),false)))OwnedReopenProof.Verification(session,receipt,item["parameters"]!.AsObject());break;
             default:throw new InvalidDataException("Unknown fixed fixture kind.");
         }
         actual=true;

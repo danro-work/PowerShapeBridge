@@ -1,5 +1,108 @@
 # PowerShape Bridge — состояние для продолжения
 
+К6 live package готов: work/K6-native-live, published work/K6-sdk-runtime
+STDIO/status/catalog27/6 checked. Plan-only deployment создан, protected71
+files double-SHA snapshot закреплён. Автоматическая проверка сначала отклонила
+скрипт как risk runtime/panel change; plan-only после проверки !Apply/exit0
+разрешён. Apply не запускался, отдельное разрешение пользователя запрошено
+и ожидается. Native installed0.32/connected Python0.31/default config unchanged.
+K6-LIVE-DEPLOYMENT.md описывает exact package/plan/rollback/own live pilot.
+work/k6_live_qualification.py подготовлен/syntax checked, НЕ выполнен. После
+ответа перепроверить plan/process/queue/protected hashes, затем apply и own
+SaveAs→reopen→new binding→independent audit. Старые handles не использовать.
+
+
+К6 SDK0.36.3-dev/native source0.33.0-dev: execute_owned_saved_reopen и
+verify_owned_saved_reopen реализованы и подключены через OwnedSavedReopenTools/
+ToolCatalog. Prepared intent, saved raw provenance, seed/copy/checkpoint и native
+physical identities закреплены до/после единственного OPEN. План имеет отдельную
+operation=open_owned_saved_result; прежний generic verifier её не принимает.
+Execute consume/revoke до IPC; unknown никогда не replay/save/close. Separate
+fresh verifier проверяет authoritative return, прежние окна/файлы, raw units и
+наблюдаемое content multiset без переноса entity IDs. Absolute/relative tolerance
+1e-9 применяется к доступным geometry/workplane measurements; raw units/metadata
+строгие. Сейчас только qualified world context, missing fields остаются missing;
+это не full topology. Исторический source proof разрешён только verifier, не OPEN.
+Успешный verifier создаёт НОВЫЙ immutable passive binding из свежего inspection;
+SDK выдаёт minimum TTL workingCopy/binding handles, текущие IDs и source leases.
+Новый opt-in full profile 27/readonly6. 239 .NET/514 native/171 actual artifacts
+(133 accepted, 0 mismatches), семь external STDIO scenarios и Inspector прошли
+offline; evidence/K6-save-as/reopen-execution-full. Один первый fake IPC тест
+поймал неатомарный ответ fixture; publication .pending→.json исправлена, оба
+SDK routes затем прошли. Первый native test отказал из-за завышенного fixture
+expiry; test clip к prepared expiry исправлен, production guard сохранился.
+Commit4a230a6: оба baseline CI и один SDK CI passed; второй SDK CI failed в
+native fixture на первой verification. Добавлены диагностический receipt и
+20ms offset synthetic read timestamps для coarse Framework clock ticks;
+production freshness guard строго сохраняется. Targeted native35 passed после
+правки. Commitef999f3: все четыре Windows CI 38311201581/38311201635/
+38311208536/38311208393 passed; SDK log подтверждён. Clean4a230a6 baseline и
+полный SDK/seven STDIO regression passed: work/c6o/evidence/K1-baseline и
+work/c6o/evidence/K6-reopen-execution-clean; все118 source/binary SHA совпадают
+с clean files. Тестовый clock fix не меняет production source. Свежие passive
+reads: native0.32 panel24012, PowerShape17304, пять окон, Test_Block_P2 active,
+own Working_b3d... присутствует; connected Python adapter всё ещё0.31 loaded,
+переход default MCP на SDK не выполнялся. IDs/handles перед live перечитать.
+Live К6 ещё не выполнялся; К6–К11 остаются
+целью. Installed runtime/published K5 SDK/config этим блоком не менялись.
+Ниже история предыдущих блоков.
+
+К6 SDK0.36.2-dev: prepare_owned_saved_reopen реализован и зарегистрирован через
+OwnedSaveTools.Create/ToolCatalog. Native OwnedSavedSource/OwnedSavedReopen
+создают новую readonly seed, Working_<id> и отдельный readonly Before checkpoint
+из независимо проверенного SaveAs result. Двойные SHA и physical identity checks
+удерживаются вокруг clone; общий OwnedCopies source FileShare.Read не ослаблен.
+Connection-scoped ownedReopenHandle имеет minimum source TTL и отзывается при
+CAD-context revocation. Новый opt-in профиль general-owned-saved-reopen: 25/6.
+227 .NET/479 native/142 actual artifacts (110 accepted, 0 mismatches), пять
+прежних STDIO clients и новый STDIO scenario с actual filesystem-only native
+prepare прошли; Inspector 25-tool profile checked. evidence/K6-save-as/
+reopen-preparation-full. Первый loaded concurrent run: один прежний route test
+failed; isolated diagnostic и sequential full regression passed. Fixture timeout
+5s, production deadlines не менялись. Commit4f4c75b прошёл clean baseline/SDK
+в work/c6r (evidence/K1-baseline и evidence/K6-reopen-clean); source/binary SHA
+receipt совпадают с файлами clean checkout. 17 source files в основном checkout
+отличаются только CRLF/LF; raw hashes этих файлов не объявляются одинаковыми.
+Все четыре Windows CI 38306083440/38306083491/
+38306091138/38306091149 завершены success; actual SDK CI log проверен.
+Guarded execute/verify saved reopen, fresh binding и live К6 ещё впереди;
+К6–К11 не завершены. Runtime0.32/published K5 SDK/config не менялись.
+Ниже история предшествующих блоков.
+
+К6 SDK0.36.1-dev: execute_owned_save_as/verify_owned_save_as подключены,
+typed savedResultHandle с minimum TTL/raw proof/journal/file validation.
+212 .NET/432 native, 124 artifacts (0 mismatches), пять STDIO клиентов/
+Inspector passed offline; evidence/K6-save-as/sdk-saved-results-full.
+Full save profile 24/readonly 6; runtime0.32/published K5 SDK0.35.1/config
+не менялись. Clean baseline/SDK checkout aeeeb43 и все четыре Windows CI passed;
+доказательства: work/K6-sdk-save-clean/evidence/K6-sdk-save-clean-short и
+K1-baseline. Длинный первый test staging сохранён failed, новый work/n1 passed.
+Далее qualified
+saved-byte clone/reopen/new binding и own live К6. К6–К11 не завершены;
+STATUS-K6-SAVE-AS.md. Далее история предыдущих блоков.
+
+К6: SDK0.36.0-dev prepare_owned_save_as зарегистрирован; native0.33.0-dev
+one-use SaveAs и separate verifier реализованы с gated recipes. 188 .NET/
+432 native synthetic, 116 artifacts (0 mismatches), четыре STDIO клиента/
+Inspector и independent native saved-byte/journal audit passed. Всё offline;
+установленные native0.32/published K5 SDK0.35.1/config.toml не менялись.
+SDK execution/verifier/saved-result leases, reopen/new binding и live К6 ещё
+впереди; clean checkout baseline/SDK 47a64e5 и все четыре Windows CI passed.
+STATUS-K6-SAVE-AS.md; work/K6-save-clean/evidence/K6-save-clean и K1-baseline.
+К5 switch decision pending;
+К6–К11 не завершены. Ниже сохранена история предшествующих блоков.
+
+К6 filesystem/SDK passive target foundation реализована, без новых CAD-команд
+и public endpoints. Source native0.33.0-dev, установленный native0.32.0/published
+K5 SDK0.35.1 не менялись. OwnedSaveTargets/OwnedDirectoryLease/OwnedSaveTargetStore:
+fixed new result path, reservation/native directory pin, exact receipt+dependency
+SHA, minimum TTL, no overwrite/claim/fence/replay. 177 .NET/349 native synthetic
+и 86 actual artifact cases (0 mismatches), four STDIO clients/oracle tests/Inspector
+пройдены; полный regression и clean checkout 2e93bf0 passed. Windows baseline
+jobs успешны; SDK CI jobs PR #7 ещё выполняются. PR #7 stacked на К5 PR #6.
+STATUS-K6-SAVE-AS.md; evidence/K6-save-as. К6 executor/verifiers/reopen/public
+tools ещё впереди. К5 user default connection decision pending; config не менялся.
+
 К5 технически квалифицирован: native 0.32.0 установлен и SDK 0.35.1-dev
 published/full-readonly 21/6 проверен. Clean baseline/SDK и четыре Windows CI
 cf863d2 пройдены. После backup-aware idle deploy 28 protected hashes совпали.
@@ -16,7 +119,7 @@ claim/journal не изменены. K5-SDK-SWITCH.md — готовый review/
 read-only server. Config.toml пока не менялся. К5 ожидает это решение,
 К6–К11 обязательны. К6 начат проектом OWNED-SAVE-AS.md с Autodesk sources:
 typed prepared target/one SaveAs/separate verify/unique saved-byte reopen/new
-binding. Реализации и live qualification К6 пока нет. Далее история предыдущих блоков.
+binding. Foundation добавлена выше; live qualification К6 пока нет. Далее история предыдущих блоков.
 
 Предшествующий К5 блок: SDK source 0.35.1-dev, native source/staging 0.32.0;
 установленный native всё ещё 0.31.0. Live OPEN на НОВОЙ copy

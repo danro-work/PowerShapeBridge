@@ -16,7 +16,7 @@ namespace PowerShapeBridge {
   }
   internal sealed class Fixture {
    internal string Root,Working,SourceId,SetId,PlanId,BindingId;internal Dictionary<string,object> Snapshot,Listing,Plan,Parameters;internal string[] ProofPaths;
-   internal Fixture(bool measured=false) {
+   internal Fixture(bool measured=false,bool completeInventory=false) {
     Root=Path.Combine(Program.Root,"work","owned-operation-self-test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Root);
     foreach(string dir in new[]{"responses","entitysets","operationplans"})Directory.CreateDirectory(Path.Combine(Root,dir));
     string source=Path.Combine(Root,"Source.psmodel");File.WriteAllText(source,"Opaque synthetic saved fixture; no CAD.");string copyId=Guid.NewGuid().ToString("N");var copy=OwnedCopies.Create(Root,copyId,source,Program.Hash(source));var ownership=(Dictionary<string,object>)copy["ownership"];Working=(string)((Dictionary<string,object>)ownership["working"])["path"];
@@ -25,6 +25,7 @@ namespace PowerShapeBridge {
     var window=new Dictionary<string,object>{{"windowNumber",1},{"nativeWindowId",3},{"type","Model"},{"selectedRaw",1},{"modelId",9},{"modelName","Working"},{"modelPath",Working}};
     Listing=new Dictionary<string,object>{{"processId",1},{"processStartedUtc",Snapshot["processStartedUtc"]},{"windowsSessionId",1},{"windowCount",1},{"windows",new[]{window}},{"activeWindow",window}};
     Snapshot["entities"]=new[]{new Dictionary<string,object>{{"nativeTypeCode",40},{"nativeId",5}},new Dictionary<string,object>{{"nativeTypeCode",21},{"nativeId",8}},new Dictionary<string,object>{{"nativeTypeCode",59},{"nativeId",10}}};Snapshot["entityCount"]=3;
+    if(completeInventory)foreach(var entity in (Dictionary<string,object>[])Snapshot["entities"]){int type=(int)entity["nativeTypeCode"];entity["type"]=type==40?"SOLID":type==21?"SURFACE":"COMPCURVE";entity["name"]="Synthetic_"+type;entity["levelNumber"]=0;}
     if(measured){Snapshot["lengthUnitsRaw"]="mm";Snapshot["lengthUnitNameRaw"]="mm";Snapshot["lengthUnitFactorRaw"]=1;((Dictionary<string,object>[])Snapshot["entities"])[0]["geometry"]=new Dictionary<string,object>{{"cogRaw",new[]{0,0,10}},{"volumeRaw",0.8},{"areaRaw",2400},{"surfaces",6},{"lengthUnitsRaw","mm"},{"coordinateFrame","world"}};}
     SourceId=Guid.NewGuid().ToString("N");Snapshot["bridgeRequestId"]=SourceId;string sourcePath=Path.Combine(Root,"responses",SourceId+".json"),sourceSha=NativeJournal.Freeze(sourcePath,Snapshot);string expiry=DateTime.UtcNow.AddSeconds(200).ToString("o");
     BindingId=Guid.NewGuid().ToString("N");var binding=DocumentBindings.Prepare(Root,BindingId,new Dictionary<string,object>{{"copyId",copyId},{"ownershipSha256",copy["ownershipSha256"]},{"inspectionRequestId",SourceId},{"inspectionSha256",sourceSha},{"expiresUtc",expiry}},Snapshot,NewContext(),new Dictionary<string,object>());

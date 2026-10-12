@@ -8,7 +8,8 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace PowerShapeBridge {
- // Passive binding only. No Exec, selection, activation, open, save or geometry executor.
+ // Binding preparation/validation are passive. The retained COM context also
+ // exposes explicit methods used only by separately guarded mutation executors.
  public static class DocumentBindings {
   public const string Qualification="Observed active owned document binding only. One retained COM application/document and file leases during this check; no later edit authorization, continuous lifecycle tracking or full topology identity. Execution remains disabled.";
   internal interface IContext : IDisposable {
@@ -16,7 +17,7 @@ namespace PowerShapeBridge {
    Dictionary<string,object> Observation();
    void ConfirmDocument();
   }
-  internal sealed class ComContext : OwnedTranslation.IContext {
+  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext {
    object application,document;
    internal ComContext(Config config) {
     try {application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("No active model document.");document=ps.ActiveDocument;ConfirmDocument();}
@@ -29,6 +30,7 @@ namespace PowerShapeBridge {
    }
    public double[] Bounds(int composite){ConfirmDocument();dynamic doc=document;return TranslationTest.Bounds(doc.GetItemBoundingBox(composite,false));}
    public int Translate(int composite,double[] vector){ConfirmDocument();dynamic doc=document;return Program.StrictInt(doc.TranslateItem(composite,vector[0],vector[1],vector[2]));}
+   public void SaveAs(string path){ConfirmDocument();WorkingCopyOpen.CommandPath(path);dynamic ps=application;ps.Exec("FILE SAVEASPATH "+path);}
    public void ConfirmDocument() {
     dynamic ps=application;if(Convert.ToBoolean(ps.Busy())||!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("Active COM document unavailable/busy.");
     object current=null;IntPtr retained=IntPtr.Zero,active=IntPtr.Zero;

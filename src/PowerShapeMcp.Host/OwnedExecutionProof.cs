@@ -15,14 +15,23 @@ public static class OwnedExecutionProof
         var expiry=MinimumExpiry(result,choice);
         foreach(var (key,value) in copy)result[key]=value?.DeepClone();CopyChoice(result,choice);result["expiresUtc"]=LeaseTime.Format(expiry);return result;
     }
-    public static JsonObject VerificationParameters(JsonObject args,CandidateStore candidates,DocumentHandleStore documents,bool translation)
+    public static JsonObject VerificationParameters(JsonObject args,CandidateStore candidates,DocumentHandleStore documents,bool translation,bool save=false,bool reopen=false)
     {
-        var request=translation?"executionRequestId":"openRequestId";var sha=translation?"executionReceiptSha256":"openReceiptSha256";
-        var code=translation?"owned_translation_verification_arguments_invalid":"owned_open_verification_arguments_invalid";
+        var request=reopen?"reopenRequestId":save?"saveRequestId":translation?"executionRequestId":"openRequestId";var sha=reopen?"reopenReceiptSha256":save?"saveReceiptSha256":translation?"executionReceiptSha256":"openReceiptSha256";
+        var code=save?"owned_save_verification_arguments_invalid":translation?"owned_translation_verification_arguments_invalid":"owned_open_verification_arguments_invalid";
         if(!ArtifactProof.Fields(args,request,sha,"candidateDocumentHandle","activeDocumentHandle")||!FileArtifacts.Token(Text(args,sha,code),64))throw new ReferenceRejected(code);
         foreach(var key in new[]{request,"candidateDocumentHandle","activeDocumentHandle"})if(!FileArtifacts.Token(Text(args,key,code)))throw new ReferenceRejected(code);
         var result=candidates.DocumentParameters(Text(args,"candidateDocumentHandle",code));var choice=documents.Consume(Text(args,"activeDocumentHandle",code));
         var expiry=MinimumExpiry(result,choice);CopyChoice(result,choice);result["expiresUtc"]=LeaseTime.Format(expiry);result[request]=args[request]!.DeepClone();result[sha]=args[sha]!.DeepClone();return result;
+    }
+    public static JsonObject SavedReopenParameters(JsonObject args,CandidateStore candidates,OwnedReopenStore reopens,DocumentHandleStore documents)
+    {
+        ValidateTokens(args,"saved_reopen_arguments_invalid","ownedReopenHandle","candidateDocumentHandle","activeDocumentHandle");
+        var result=candidates.DocumentParameters(Text(args,"candidateDocumentHandle","saved_reopen_arguments_invalid"));
+        var handle=Text(args,"ownedReopenHandle","saved_reopen_arguments_invalid");var preparedExpiry=reopens.ExpiresUtc(handle);
+        var copy=reopens.Consume(handle);var choice=documents.Consume(Text(args,"activeDocumentHandle","saved_reopen_arguments_invalid"));
+        var expiry=MinimumExpiry(result,choice);if(preparedExpiry<expiry)expiry=preparedExpiry;
+        foreach(var field in copy)result[field.Key]=field.Value!.DeepClone();CopyChoice(result,choice);result["expiresUtc"]=LeaseTime.Format(expiry);return result;
     }
     public static void OpenReceipt(string root,JsonObject result,JsonObject parameters)
     {
