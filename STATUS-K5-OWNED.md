@@ -1,8 +1,10 @@
 # К5 — исполнение и независимая проверка, выполняется
 
-12 октября 2026. SDK public catalog пока остаётся 0.34.0-dev/general 16,
-read-only 6; native runtime 0.31.0 не менялся. К5 не завершён, live switch
-не выполнялся, никаких новых CAD-команд/GUI не было.
+12 октября 2026. SDK 0.35.0-dev: full general/read-only catalog 21/6.
+Native runtime 0.31.0 не менялся. К5 не завершён; default live switch
+не выполнялся. Новый SDK прошёл passive read-only pilot на существующей панели:
+свежие process/queue/deployment checks, list_documents, inspect_active_model и
+inspect_entity_candidates. Open/activation/save/geometry/screenshot не выполнялись.
 
 Перенесён OwnedExecutionProof: open parameters потребляют document choice
 после проверки candidate/copy leases; expiry — минимум dependent choices.
@@ -13,15 +15,26 @@ recorded executed_unverified не становятся succeeded_verified авт
 Отдельный verification result требует succeeded_verified, noCommandReplay,
 fenceReleased и отсутствие geometry/context/save mutation.
 
-Эти функции не содержат COM, исполнения/повтора команды, fence removal или
-MCP attributes. Их регистрация/исполнение остаётся следующим блоком.
-Проверки: 146 .NET tests passed, 0 failed, 0 skipped;
-evidence/K5-owned/K5-proof.trx. Пять новых tests проверяют one-use open choice
-и отказ bool/non-success/unfenced/already-verified execution receipts.
+ExecutionTools регистрирует пять fixed facades по experimental flags и server
+mode: activate_document, open_working_copy, verify_working_copy_open,
+execute_owned_translation, verify_owned_translation. Все недоступны в read-only.
+Общий ReferenceGate/deadline, один IPC lane и private recipe.prepare envelopes;
+CAD leases потребляются до публикации команды, disk ownership остаётся отдельно.
+Unknown/cancellation/lost reply никогда не вызывает replay/inverse/Undo; claimed
+request сохраняется. Verifier не исполняет геометрию. Native verifier отвечает
+за authoritative journal и снятие только matching fence после независимых proofs.
 
-До закрытия К5 нужны five context/open/execute/verify facades, consume/revoke
-и unknown/no-replay/fence parity через SDK/fake-panel; независимые Python/native
-proof checks; свежие process/session/queue/model данные и новый owned scenario
+Проверки: 159 .NET tests passed, 0 failed, 0 skipped; четыре независимых STDIO
+clients, точные схемы и SDK/Python private envelopes/receipt parity. 312 Framework
+synthetic checks, 78 actual artifact cases (65 accepted, 13 rejected, 0 mismatches)
+и Inspector CLI прошли. Native oracle включает original execution receipts,
+unknown receipts и bool/unfenced/SHA/state tamper variants. Evidence:
+evidence/K5-owned/final/sdk-verification.json, sdk-tests.trx,
+native-compatibility.json; live/readonly-live-preflight.json.
+В ходе полного запуска устранена гонка synthetic cancellation test: deadline
+для отмены после claim отделён от короткого timeout test. Production IPC не менялся.
+
+До закрытия К5 нужны clean checkout/CI нового блока и новый owned live scenario
 без повторения P2.29 OPEN/старых intents. Live adapter switch принимается
 пользователем по готовому review package и rollback, как требует принятый план.
 К6–К11 остаются полным последующим объёмом общего MCP v1.

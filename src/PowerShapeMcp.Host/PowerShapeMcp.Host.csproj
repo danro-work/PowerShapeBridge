@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <Version>0.34.0-dev</Version>
+    <Version>0.35.0-dev</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ModelContextProtocol" Version="[2.2.0]" />
@@ -14,5 +14,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Schemas/prepared-tools.json" LogicalName="prepared-tools.json" />
+    <EmbeddedResource Include="Schemas/execution-tools.json" LogicalName="execution-tools.json" />
   </ItemGroup>
 </Project>

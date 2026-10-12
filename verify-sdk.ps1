@@ -24,6 +24,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Independent STDIO parity failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'Independent read-only parity failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_prepared.py') --dotnet $DotnetPath --host $taskHost --evidence $taskEvidence
 if ($LASTEXITCODE -ne 0) { throw 'Independent prepared parity failed.' }
+& $PythonPath (Join-Path $taskRoot 'src\test_sdk_execution.py') --dotnet $DotnetPath --host $taskHost --evidence $taskEvidence
+if ($LASTEXITCODE -ne 0) { throw 'Independent execution facade parity failed.' }
 if (Test-Path -LiteralPath $NativeStageDirectory) { throw 'Native compatibility requires a fresh stage, not old fixture artifacts.' }
 & (Join-Path $taskRoot 'build.ps1') -OutputDirectory $NativeStageDirectory -ConfigurationPath (Join-Path $taskRoot 'config\general-owned-translations.json')
 & (Join-Path $NativeStageDirectory 'PSBridge.Worker.exe') --self-test | Tee-Object -FilePath (Join-Path $taskEvidence 'native-fixture-tests.txt')
@@ -57,6 +59,7 @@ $taskFiles += @(Get-ChildItem -LiteralPath (Join-Path $taskRoot 'src\PowerShapeM
 $taskFiles += @('src\mcp_server.py','src\operation_plans.py','src\entity_references.py','src\PowerShapeMcp.Host\bin\Release\net10.0\PowerShapeMcp.Host.dll','src\PowerShapeMcp.Host\bin\Release\net10.0\PowerShapeMcp.Host.deps.json','src\PowerShapeMcp.Host\bin\Release\net10.0\PowerShapeMcp.Host.runtimeconfig.json')
 $taskFiles += @('src\document_handles.py','src\entity_sets.py','src\test_sdk_readonly.py','src\generate_observation_fixtures.py','tests\PowerShapeMcp.Tests\fixtures\observations.json')
 $taskFiles += @('src\test_sdk_prepared.py','src\native_fixture_oracle.py','src\generate_tool_schemas.py','src\PowerShapeMcp.Host\Schemas\prepared-tools.json','tools\NativeFixtureCheck\Program.cs','tools\NativeFixtureCheck\NativeFixtureCheck.csproj','tools\NativeFixtureCheck\packages.lock.json')
+$taskFiles += @('src\test_sdk_execution.py','src\PowerShapeMcp.Host\Schemas\execution-tools.json','src\working_copy_open.py','src\owned_translation.py')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

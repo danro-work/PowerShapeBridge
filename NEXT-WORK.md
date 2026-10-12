@@ -14,11 +14,14 @@ stores с byte/schema parity, сохраняющий native worker и separate e
 Clean checkout/CI К4 прошли; К4 закрыт. Сейчас К5 — owned context/open/translation/verify
 facades и квалификация на новой собственной копии; обычный live adapter switch
 принимает пользователь по готовому пакету/rollback. Native runtime пока не менять.
-Начало К5: OwnedExecutionProof и пять новых tests (итого 146) пройдены.
-Продолжить five endpoints: activate_document, open_working_copy,
-verify_working_copy_open, execute_owned_translation, verify_owned_translation.
-Сначала fixed envelopes/consume/revoke/unknown/fence паритет на fake-panel,
-потом свежий passive runtime/process/queue/model preflight и собственный сценарий.
+К5 SDK 0.35.0-dev: пять context/open/execute/verify endpoints подключены,
+general/read-only 21/6. 159 .NET, four STDIO clients, 312 Framework synthetic,
+78 actual artifact cases и Inspector прошли. Новый read-only SDK прошёл passive
+live pilot через существующую панель; native/runtime/CAD не менялись.
+Следующий блок: clean checkout/Windows CI, затем новый manifest-owned copy/open/
+one SOLID translation/independent verification scenario. Непосредственно перед
+командами повторить свежие process/queue/model checks: прошлые PID/handles не актуальны.
+Не повторять P2.29 OPEN/intents и не трогать чужие/квалификационные модели.
 Не переносить C# native digest в Python encoding: это разные схемы.
 Product Help — `en_US`, отчёты на русском; CHECKPOINTS.md хранит текущий статус.
 Ниже историческая запись подготовки, её ожидание К0 уже закрыто.

@@ -23,12 +23,20 @@ synthetic tests и 63 Framework artifact cases C#/Python compatibility прош�
 Inspector CLI прошёл; все проверки без CAD. Evidence/K4-safety/full.
 Clean checkout и все Windows CI К4 прошли, К4 закрыт. К5 начат: remaining
 context/open/execute/verify facades, новый owned scenario и native proofs.
+К5 SDK 0.35.0-dev: пять context/open/execute/verify facades подключены;
+full general/read-only catalog 21/6. 159 .NET tests, four independent STDIO clients,
+312 native synthetic checks, 78 actual artifact cases (0 mismatches) и Inspector
+прошли. Новый read-only SDK прошёл passive pilot через установленную панель:
+fresh process/queue/deployment proof, документы и активная модель прочитаны.
+Open/activation/save/geometry/screenshot не выполнялись; native runtime неизменён.
+Evidence/K5-owned/final и live; STATUS-K5-OWNED.md. К5 ещё не закрыт: clean
+checkout/CI, новый owned live scenario и решение пользователя по default switch.
 Начальная proof-часть К5 перенесена: one-use active document choice,
 minimum expiry и raw open/translation receipt checks. Return=1 допускает
 только executed_unverified с fence; independent verifier требует отдельного
 succeeded_verified/noCommandReplay/fenceReleased. 146 .NET tests прошли;
-evidence/K5-owned/K5-proof.trx. Эти функции не зарегистрированы как SDK tools,
-ничего не исполняют, не удаляют fence/claim и не обращаются к COM.
+evidence/K5-owned/K5-proof.trx. Proof helpers сами ничего не исполняют,
+не удаляют fence/claim и не обращаются к COM; их five fixed facades подключены выше.
 Execute/open/activation endpoints и live
 переключение — на К5; native runtime 0.31.0 не изменён. STATUS-K4-SAFETY.md.
 Текущие контрольные точки — CHECKPOINTS.md. SDK-host собран и проверен без CAD;
