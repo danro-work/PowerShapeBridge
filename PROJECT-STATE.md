@@ -14,9 +14,9 @@ U+2028/U+2029 и порядок Unicode keys. Реализованы read refere
 document handles, candidate leases и Python-precision lease time с synthetic
 expiry/cross-client/document/no-revival tests. Stores пока не подключены к SDK
 session/IPC routes; шесть tools и независимый end-to-end parity остаются впереди.
-публичный SDK-каталог по-прежнему состоит из двух diagnostic tools.
+Публичный SDK-каталог по-прежнему состоит из двух diagnostic tools.
 Runtime остаётся 0.31.0, live переключения нет. STATUS-K3-READONLY.md.
-Текущие контрольные точки — CHECKPOINTS.md. Современный host пока не собран;
+Текущие контрольные точки — CHECKPOINTS.md. SDK-host собран и проверен без CAD;
 последняя CAD-квалификация остаётся P2.31. Runtime/CAD не изменялись.
 Ниже сохранён журнал подготовки; его ожидание согласования К0 уже закрыто.
 
