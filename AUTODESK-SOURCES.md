@@ -7,6 +7,7 @@
 |---|---|---|
 | [How to automate PowerMill and PowerShape using API libraries](https://www.autodesk.com/support/technical/article/caas/sfdcarticles/sfdcarticles/How-to-automate-Powermill-using-Api-libraries.html), Autodesk Product Help, прочитан 12.10.2026 | Autodesk описывает приложения с .NET Framework 4.8 и свои API-библиотеки | Существующий Framework STA-worker сохраняем; новый .NET MCP-host связываем через IPC |
 | [Opening a model — PowerShape 2023](https://help.autodesk.com/view/PWRS/2023/ENU/?guid=GUID-EC8A3F76-6087-499E-BD11-8022DDBA82FD), Product Help `en_US`, прочитан 12.10.2026 | Новый модельный документ открывается в отдельном окне; до 20 одновременно открытых моделей; read-only модель требует нового имени при Save As | К5 проверяет новое окно и сохранность прежних; К6 будет проверять отдельный saved target/reopen |
+| [Saving a model — PowerShape 2023](https://help.autodesk.com/view/PWRS/2023/ENU/?guid=GUID-2001724D-8A62-4887-ABA4-75494643C3B2), Product Help `en_US`, прочитан 12.10.2026 | Save может перезаписать текущую модель, новое имя Save As защищает прежнюю; существующее имя может привести к overwrite; File Doctor может показать dialog | К6 OWNED-SAVE-AS.md: new owned target/no overwrite/no global settings changes; unknown/dialog без retry |
 
 Источник не доказывает невозможность COM из .NET 10 и не заменяет живую
 квалификацию методов. При новых операциях добавляем точный источник и отдельно

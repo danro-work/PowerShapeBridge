@@ -9,6 +9,10 @@ actual connected adapterVersion после reload; config write сам не до
 unsaved X+1 и неизменённым saved Working/checkpoint; original Test_Block_P2 активен.
 К6 — новый SaveAs target/saved bytes/separate reopen на этой собственной копии;
 перед любыми командами fresh model/queue/process/ownership proofs, handles не переносить.
+OWNED-SAVE-AS.md начинает контракт/порядок К6: prepare/execute/independent verify,
+отдельный byte-identical uniquely named reopen alias/new binding. Native/SDK code
+К6 пока отсутствует; отдельно квалифицировать clone сохранённого занятого result,
+не ослаблять общий source-copy FileShare.Read guard.
 Не повторять старый unknown OPEN 6ed.../copy 5fef..., не менять его journal/claim.
 
 К5 live pilot нашёл duplicate-name dialog и heartbeat sharing error.

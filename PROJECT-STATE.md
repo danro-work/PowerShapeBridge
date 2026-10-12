@@ -14,7 +14,9 @@ saved bytes не менялись; original Test_Block_P2 снова актив�
 claim/journal не изменены. K5-SDK-SWITCH.md — готовый review/rollback пакет;
 запрошено решение пользователя по default переходу Python → SDK + отдельный
 read-only server. Config.toml пока не менялся. К5 ожидает это решение,
-К6–К11 обязательны. Далее сохранена история предыдущих блоков.
+К6–К11 обязательны. К6 начат проектом OWNED-SAVE-AS.md с Autodesk sources:
+typed prepared target/one SaveAs/separate verify/unique saved-byte reopen/new
+binding. Реализации и live qualification К6 пока нет. Далее история предыдущих блоков.
 
 Предшествующий К5 блок: SDK source 0.35.1-dev, native source/staging 0.32.0;
 установленный native всё ещё 0.31.0. Live OPEN на НОВОЙ copy
