@@ -38,4 +38,14 @@ public sealed class Fixture
         }
         throw new TimeoutException("Fake panel did not receive a request.");
     }
+    public async Task<string> ClaimRequest()
+    {
+        var request=await WaitRequest();
+        var deadline=DateTime.UtcNow.AddSeconds(5);
+        while(true)
+        {
+            try{File.Move(request,request+".processing");return request;}
+            catch(IOException)when(DateTime.UtcNow<deadline){await Task.Delay(10);}
+        }
+    }
 }

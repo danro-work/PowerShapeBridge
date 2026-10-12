@@ -74,7 +74,7 @@ def checks(args):
         assert hello['result']['protocolVersion'] == '2025-11-25', hello
         c.notify('notifications/initialized')
         tools = c.call(2, 'tools/list')['result']['tools']
-        assert sorted(t['name'] for t in tools) == ['bridge_status', 'operation_result']
+        assert sorted(t['name'] for t in tools) == sorted(t['name'] for t in legacy.tools)
         for tool in tools:
             schema = json.loads(json.dumps(tool['inputSchema']))
             for value in schema.get('properties', {}).values():
@@ -125,7 +125,7 @@ def checks(args):
         (Path(args.evidence) / 'stdio-transcript.json').write_text(json.dumps(c.transcript, indent=2, ensure_ascii=False), encoding='utf-8')
         (Path(args.evidence) / 'stdio-stderr.txt').write_text(''.join(c.logs), encoding='utf-8')
     assert any('Json' in line or 'JSON' in line for line in c.logs), c.logs
-    print('PASS: real SDK STDIO, exact two-tool schemas, strict arguments, malformed-frame recovery, Python journal byte/hash parity and interrupted no-retry evidence. No CAD.')
+    print('PASS: real SDK STDIO, exact read-only schema constraints, strict arguments, malformed-frame recovery, Python journal byte/hash parity and interrupted no-retry evidence. No CAD.')
 
 
 if __name__ == '__main__':
