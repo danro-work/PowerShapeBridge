@@ -1,11 +1,13 @@
 param(
     [string]$StagingDirectory = (Join-Path $PSScriptRoot 'work\P2.27-copies'),
-    [string]$EvidencePath = (Join-Path $PSScriptRoot 'evidence\P2.27-copies\junction-preflight.json')
+    [string]$EvidencePath = (Join-Path $PSScriptRoot 'evidence\P2.27-copies\junction-preflight.json'),
+    [switch]$OfflineFixtures
 )
 $ErrorActionPreference = 'Stop'
 $stage = [IO.Path]::GetFullPath($StagingDirectory)
 if (!$stage.StartsWith((Join-Path $PSScriptRoot 'work')+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Only staging may run this file test.' }
-if (@(Get-Process -Name PSBridge.Worker -ErrorAction SilentlyContinue).Count -gt 0) { throw 'A worker is active.' }
+if ($OfflineFixtures -and !(Test-Path -LiteralPath (Join-Path $PSScriptRoot 'releases\P2.6\.baseline-fixture'))) { throw 'Offline file tests require the isolated baseline runtime.' }
+if (!$OfflineFixtures -and @(Get-Process -Name PSBridge.Worker -ErrorAction SilentlyContinue).Count -gt 0) { throw 'A worker is active.' }
 if (@(Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'releases\P2.6\requests') -File | Where-Object { $_.Name -match '\.json$|\.processing$' }).Count -gt 0) { throw 'Runtime queue is pending.' }
 $fixture = Join-Path $PSScriptRoot ('work\copy-path-test-'+[guid]::NewGuid().ToString('N'))
 $real = Join-Path $fixture 'real'

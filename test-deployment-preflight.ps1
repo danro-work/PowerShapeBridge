@@ -1,12 +1,23 @@
 param(
     [string]$StagingDirectory = (Join-Path $PSScriptRoot 'work\P2.31-executor'),
-    [string]$EvidencePath = (Join-Path $PSScriptRoot 'evidence\P2.31-executor\deployment-preflight.json')
+    [string]$EvidencePath = (Join-Path $PSScriptRoot 'evidence\P2.31-executor\deployment-preflight.json'),
+    [switch]$OfflineFixtures
 )
 $ErrorActionPreference = 'Stop'
 $taskStage = [IO.Path]::GetFullPath($StagingDirectory)
 $taskCopy = Join-Path $PSScriptRoot ('work\deployment-preflight-'+[guid]::NewGuid().ToString('N'))
 $taskEvidence = [IO.Path]::GetFullPath($EvidencePath)
 $taskRuntimeConfig = Join-Path $PSScriptRoot 'releases\P2.6\bridge.config.json'
+if ($OfflineFixtures) {
+    if (!(Test-Path -LiteralPath (Join-Path $PSScriptRoot 'releases\P2.6\.baseline-fixture'))) { throw 'Offline process fixtures require the isolated baseline runtime.' }
+    # Scoped to this test and its plan-only child. Production deployment is unchanged.
+    function Get-Process {
+        param([string]$Name, [int]$Id, $ErrorAction)
+        if ($Name -in @('PSBridge','PSBridge.Worker')) { return }
+        if ($Id -eq $PID) { return Microsoft.PowerShell.Management\Get-Process -Id $Id }
+        throw 'Unexpected process query in offline preflight.'
+    }
+}
 $taskRuntimeHash = (Get-FileHash -LiteralPath $taskRuntimeConfig).Hash
 New-Item -ItemType Directory -Path $taskCopy | Out-Null
 $taskManifest = Get-Content -LiteralPath (Join-Path $taskStage 'build-manifest.json') -Raw | ConvertFrom-Json

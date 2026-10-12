@@ -2,7 +2,10 @@
 
 12 октября 2026: пользователь принял MCP-DEVELOPMENT-PLAN.md и матрицу,
 авторизовал автономную разработку до К11 и разрешил Product Help `en_US`.
-К0 закрыт. К1 выполняется: чистый checkout, синтетические проверки и Windows CI.
+К0 закрыт. К1 локально пройден: clean checkout, 312 C# и 114 Python,
+MCP-протокол, junction и deployment plan; оба Windows CI успешны, К1 закрыт.
+STATUS-K1-BASELINE.md. К2 начат: net10.0 проекты и NuGet restore,
+SDK tools/protocol/fake-panel ещё не приняты.
 Текущие контрольные точки — CHECKPOINTS.md. Современный host пока не собран;
 последняя CAD-квалификация остаётся P2.31. Runtime/CAD не изменялись.
 Ниже сохранён журнал подготовки; его ожидание согласования К0 уже закрыто.
