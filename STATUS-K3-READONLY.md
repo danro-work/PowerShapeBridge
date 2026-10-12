@@ -1,7 +1,10 @@
 # К3 — SDK-сервер чтения
 
-12 октября 2026. Локальные проверки пройдены; clean checkout/Windows CI ещё
-ожидаются. Новый host `0.33.0-dev`, native runtime остаётся `0.31.0`.
+12 октября 2026. Локальные проверки и чистый экспорт commit
+`4667058cfeb5e336706814151f65b92351b41910` пройдены; К3 закрыт.
+[SDK CI PR](https://github.com/danro-work/PowerShapeBridge/actions/runs/38243780070),
+[SDK CI push](https://github.com/danro-work/PowerShapeBridge/actions/runs/38243773627)
+и оба native baseline CI успешны. Новый host `0.33.0-dev`, native runtime остаётся `0.31.0`.
 Живое подключение/переключение адаптера и изменения CAD не выполнялись.
 
 Публичный каталог текущего general-profile содержит шесть tools:

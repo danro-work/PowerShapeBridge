@@ -11,8 +11,9 @@ STATUS-K2-SDK.md. К2 прошёл clean checkout и все Windows CI; К2 за
 профиля (пять без experimental candidates), connection-scoped temporal stores,
 единый async read guard, admission максимум 8/duplicate ID refusal, общий
 deadline с ожиданием gate. 98 .NET tests, independent Python STDIO/read lease/
-digest/raw-byte parity и Inspector CLI прошли без CAD. Clean checkout/CI К3
-ещё ожидаются. STATUS-K3-READONLY.md. Native runtime 0.31.0 не изменён,
+digest/raw-byte parity и Inspector CLI прошли без CAD. Clean checkout и все
+Windows CI успешны; К3 закрыт, К4 начат. STATUS-K3-READONLY.md.
+Native runtime 0.31.0 не изменён,
 live адаптер не переключался; mutation tools в новом host пока отсутствуют.
 Текущие контрольные точки — CHECKPOINTS.md. SDK-host собран и проверен без CAD;
 последняя CAD-квалификация остаётся P2.31. Runtime/CAD не изменялись.

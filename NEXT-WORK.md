@@ -5,8 +5,8 @@
 45 .NET tests, independent STDIO/Python journal parity и Inspector; clean checkout
 и все Windows CI успешны, К2 закрыт. К3 локально пройден: SDK 0.33.0-dev,
 шесть read-only tools, temporal stores/единый async guard, 98 .NET tests,
-independent Python read/digest/raw-byte parity и Inspector CLI. Сейчас clean
-checkout и CI К3; после них К4 — entity sets/local plans/copy/binding/owned
+independent Python read/digest/raw-byte parity и Inspector CLI. Clean checkout
+и все CI успешны, К3 закрыт. Сейчас К4 — entity sets/local plans/copy/binding/owned
 stores с byte/schema parity, сохраняющий native worker и separate execute/verify.
 Не переносить C# native digest в Python encoding: это разные схемы.
 Product Help — `en_US`, отчёты на русском; CHECKPOINTS.md хранит текущий статус.
