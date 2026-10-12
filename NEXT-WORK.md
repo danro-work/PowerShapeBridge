@@ -3,8 +3,9 @@
 Инфраструктура разработки, 12 октября: Git/gh и dotnet-mcp-builder установлены,
 локальный репозиторий main подготовлен. Следующие действия инфраструктуры:
 GitHub Codex/gh login и credential helper проверены; выбран публичный
-danro-work/PowerShapeBridge. Следом публикация исходной базы и сверка SHA,
-затем работа через ветки/PR.
+danro-work/PowerShapeBridge создан, исходная база опубликована и SHA сверены.
+Далее работа через ветки/PR: установить .NET 10 SDK и подготовить отдельный
+C# STDIO-хост с первыми инструментами диагностики/чтения и тестами fake-panel.
 Локальный автор задан по профилю danro-work с GitHub noreply; текущая база
 подготовлена как исходный локальный commit. Для нового C# MCP-адаптера:
 .NET 10 SDK + закреплённый ModelContextProtocol, затем Inspector и C# tooling.
