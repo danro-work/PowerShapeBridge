@@ -62,12 +62,13 @@ public sealed class RecoveryInspectionTests
         Assert.Equal(assessment,result["assessment"]!.GetValue<string>());Assert.True(result["claimPresent"]!.GetValue<bool>());Assert.False(result["executionAuthorized"]!.GetValue<bool>());
     }
     [Theory]
-    [InlineData("ambiguous_plan")][InlineData("bad_plan_sha")][InlineData("claim_other")][InlineData("missing_claim")][InlineData("partial_journal")][InlineData("foreign_fence")]
+    [InlineData("ambiguous_plan")][InlineData("bad_plan_sha")][InlineData("claim_other")][InlineData("missing_claim")][InlineData("partial_journal")][InlineData("foreign_fence")][InlineData("oversized_plan")]
     public void InvalidDependenciesCannotProduceRecoveryAuthority(string fault)
     {
         var fixture=new RecoveryFixture(2);
         if(fault=="ambiguous_plan")fixture.Files.Write("saveexecutions/"+fixture.Id+".json","{}");
         if(fault=="bad_plan_sha")File.AppendAllText(FileArtifacts.FixedPath(fixture.Files.Root,"copyopenplans",fixture.Id+".json")," ");
+        if(fault=="oversized_plan")File.AppendAllText(FileArtifacts.FixedPath(fixture.Files.Root,"copyopenplans",fixture.Id+".json"),new string(' ',65537));
         if(fault=="claim_other")fixture.Files.Write("workingcopies/"+fixture.Copy+"/open-once.json",new JsonObject{["operationId"]=Guid.NewGuid().ToString("N")}.ToJsonString());
         if(fault=="missing_claim")File.Delete(FileArtifacts.FixedPath(fixture.Files.Root,"workingcopies",fixture.Copy,"open-once.json"));
         if(fault=="partial_journal")File.AppendAllText(FileArtifacts.FixedPath(fixture.Files.Root,"operations",fixture.Id,"000002.json"),"{");

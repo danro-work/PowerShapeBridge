@@ -115,7 +115,7 @@ public sealed class RecoveryInspection(string root)
             return output;
         }
         catch(OperationCanceledException)when(cancellationToken.IsCancellationRequested){output["state"]="recovery_inspection_cancelled";output["errorCode"]="cancelled_read_only_inspection";return output;}
-        catch(Exception error)when(error is ReferenceRejected or IOException or UnauthorizedAccessException or System.Text.Json.JsonException or InvalidOperationException or KeyNotFoundException)
+        catch(Exception error)when(error is ReferenceRejected or IOException or InvalidDataException or UnauthorizedAccessException or System.Text.Json.JsonException or InvalidOperationException or KeyNotFoundException)
         {output["state"]="recovery_inspection_unavailable";output["errorCode"]=error is ReferenceRejected rejected?rejected.Code:"recovery_artifact_unreadable";output["error"]=error.Message;return output;}
     }
 }
