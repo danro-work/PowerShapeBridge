@@ -1,5 +1,16 @@
 # Дальнейшая работа
 
+К5 live pilot нашёл duplicate-name dialog и heartbeat sharing error.
+Source исправлен: SDK 0.35.1-dev, native 0.32.0; runtime пока 0.31.0.
+Полный evidence/K5-owned/collision-fix passed. Проверить необходимые baseline/
+deployment preflight, сохранить код/PR и подготовить rollback-aware native update
+при idle queue. Затем новый уникально названный owned scenario. Исходный OPEN
+6ed9d4106d054b28a05e8ab0b59c5811 не повторять; journal/claim неизвестного исхода
+сохранить. Copy 5fef10809eb44904ade27e2ca843a8b9 не использовать для нового OPEN.
+После user OK четыре старых окна/original baseline подтверждены fresh read;
+геометрический executor не запускался. Новые helper scripts tools/qualify_sdk_owned.py
+и tools/prepare_k5_seed.py требуют отдельного явного запуска, не входят в CI.
+
 12 октября: К0 принят пользователем, разработка до К11 авторизована.
 К1 пройден локально и в Windows CI. К2 локально пройден: SDK-host/fake-panel,
 45 .NET tests, independent STDIO/Python journal parity и Inspector; clean checkout

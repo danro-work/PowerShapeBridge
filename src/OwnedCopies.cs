@@ -60,7 +60,12 @@ namespace PowerShapeBridge {
   public static void ValidateHandle(Dictionary<string,object> args) {
    if(args.Count!=2||!args.ContainsKey("copyId")||!EntitySets.Hex(args["copyId"],32)||!args.ContainsKey("ownershipSha256")||!EntitySets.Hex(args["ownershipSha256"],64))throw new ArgumentException("Invalid working-copy handle parameters.");
   }
-  public static Dictionary<string,object> Create(string root,string id,string sourcePath,string expectedSha) {
+  internal static string WorkingName(string id,int schemaVersion) {
+   if(!EntitySets.Hex(id,32)||!new[]{1,2}.Contains(schemaVersion))throw new ArgumentException("Unsupported owned layout.");
+   return schemaVersion==1?"Working.psmodel":"Working_"+id+".psmodel";
+  }
+  public static Dictionary<string,object> Create(string root,string id,string sourcePath,string expectedSha,int schemaVersion=2) {
+   string workingName=WorkingName(id,schemaVersion);
    ValidatePrepare(new Dictionary<string,object>{{"sourcePath",sourcePath},{"sourceSha256",expectedSha}});
    sourcePath=LocalPath(sourcePath);NoReparse(sourcePath);string folder=Folder(root,id);
    if(Directory.Exists(folder)||File.Exists(folder))throw new IOException("Working-copy identity already exists; never overwrite or retry it.");
@@ -76,14 +81,14 @@ namespace PowerShapeBridge {
     Directory.CreateDirectory(folder);NoReparse(folder);
     if(Directory.GetFileSystemEntries(folder).Length!=0)throw new IOException("Working-copy directory is not empty.");
     string checkpointFolder=Path.Combine(folder,"checkpoint");Directory.CreateDirectory(checkpointFolder);NoReparse(checkpointFolder);
-    string working=Path.Combine(folder,"Working.psmodel"),checkpoint=Path.Combine(checkpointFolder,"Before.psmodel");
+    string working=Path.Combine(folder,workingName),checkpoint=Path.Combine(checkpointFolder,"Before.psmodel");
     using(var work=new FileStream(working,FileMode.CreateNew,FileAccess.ReadWrite,FileShare.None))using(var before=new FileStream(checkpoint,FileMode.CreateNew,FileAccess.ReadWrite,FileShare.None)) {
      var workIdentity=FileIdentity(work,working,true);var checkpointIdentity=FileIdentity(before,checkpoint,true);Distinct(sourceIdentity,workIdentity,checkpointIdentity);
      byte[] buffer=new byte[65536];int size;long written=0;
      while((size=source.Read(buffer,0,buffer.Length))>0){work.Write(buffer,0,size);before.Write(buffer,0,size);written+=size;if(written>MaximumBytes)throw new IOException("Source exceeded copy limit.");}
      work.Flush(true);before.Flush(true);
      if(written!=length||source.Length!=length||Digest(source)!=expectedSha||Digest(work)!=expectedSha||Digest(before)!=expectedSha)throw new IOException("Copy bytes differ from locked source.");
-     var manifest=new Dictionary<string,object>{{"schemaVersion",1},{"copyId",id},{"bridgeVersion",Program.ReleaseVersion},{"createdUtc",DateTime.UtcNow.ToString("o")},{"scope","saved_disk_bytes_only"},{"executionEnabled",false},
+     var manifest=new Dictionary<string,object>{{"schemaVersion",schemaVersion},{"copyId",id},{"bridgeVersion",Program.ReleaseVersion},{"createdUtc",DateTime.UtcNow.ToString("o")},{"scope","saved_disk_bytes_only"},{"executionEnabled",false},
       {"source",new Dictionary<string,object>{{"path",sourcePath},{"sha256",expectedSha},{"length",length},{"fileIdentity",sourceIdentity}}},
       {"working",new Dictionary<string,object>{{"path",working},{"initialSha256",expectedSha},{"length",length},{"fileIdentity",workIdentity}}},
       {"checkpoint",new Dictionary<string,object>{{"path",checkpoint},{"sha256",expectedSha},{"length",length},{"fileIdentity",checkpointIdentity}}}};
@@ -104,7 +109,7 @@ namespace PowerShapeBridge {
    }
    using(var digest=SHA256.Create())if(BitConverter.ToString(digest.ComputeHash(bytes)).Replace("-","").ToLowerInvariant()!=sha)throw new IOException("Ownership receipt changed.");
    var manifest=Program.Json.Deserialize<Dictionary<string,object>>(Encoding.UTF8.GetString(bytes));
-   if(manifest==null||manifest.Count!=9||!Equals(manifest["schemaVersion"],1)||!Equals(manifest["copyId"],id)||!Equals(manifest["scope"],"saved_disk_bytes_only")||!Equals(manifest["executionEnabled"],false))throw new IOException("Invalid ownership receipt.");
+   if(manifest==null||manifest.Count!=9||!(Equals(manifest["schemaVersion"],1)||Equals(manifest["schemaVersion"],2))||!Equals(manifest["copyId"],id)||!Equals(manifest["scope"],"saved_disk_bytes_only")||!Equals(manifest["executionEnabled"],false))throw new IOException("Invalid ownership receipt.");
    return manifest;
   }
   static Dictionary<string,object> Record(Dictionary<string,object> manifest,string field) {
@@ -136,7 +141,7 @@ namespace PowerShapeBridge {
    var lease=new OwnershipLease();
    try {
    string folder=Folder(root,id);var manifest=ReadOwnership(root,id,sha,out lease.Receipt);var source=Record(manifest,"source");var working=Record(manifest,"working");var checkpoint=Record(manifest,"checkpoint");
-   string workingPath=Path.Combine(folder,"Working.psmodel"),checkpointPath=Path.Combine(folder,"checkpoint","Before.psmodel");
+   string workingPath=Path.Combine(folder,WorkingName(id,(int)manifest["schemaVersion"])),checkpointPath=Path.Combine(folder,"checkpoint","Before.psmodel");
    if(!Equals(source["sha256"],checkpoint["sha256"])||!Equals(source["sha256"],working["initialSha256"])||Convert.ToInt64(source["length"])!=Convert.ToInt64(checkpoint["length"])||Convert.ToInt64(source["length"])!=Convert.ToInt64(working["length"]))throw new IOException("Initial source/checkpoint/copy bytes differ.");
    if(!string.Equals((string)working["path"],workingPath,StringComparison.OrdinalIgnoreCase)||!string.Equals((string)checkpoint["path"],checkpointPath,StringComparison.OrdinalIgnoreCase))throw new IOException("Owned file path differs from fixed layout.");
    NoReparse(workingPath);NoReparse(checkpointPath);
@@ -181,6 +186,10 @@ namespace PowerShapeBridge {
    string source=Path.Combine(root,"Source.psmodel");File.WriteAllText(source,"Opaque saved disk fixture, not a CAD model.");string sourceSha=Program.Hash(source);string id=Guid.NewGuid().ToString("N");
    var made=Create(root,id,source,sourceSha);check(Equals(made["state"],"working_copy_prepared_disk"));string sha=(string)made["ownershipSha256"];
    var manifest=(Dictionary<string,object>)made["ownership"];string work=(string)Record(manifest,"working")["path"],before=(string)Record(manifest,"checkpoint")["path"];
+   check(Equals(manifest["schemaVersion"],2)&&Path.GetFileName(work)=="Working_"+id+".psmodel");
+   string legacyId=Guid.NewGuid().ToString("N");var legacy=Create(root,legacyId,source,sourceSha,1);string legacyWork=(string)Record((Dictionary<string,object>)legacy["ownership"],"working")["path"];
+   check(Path.GetFileName(legacyWork)=="Working.psmodel");CheckTarget(root,legacyId,(string)legacy["ownershipSha256"],legacyWork);count++;
+   rejects(()=>Create(root,Guid.NewGuid().ToString("N"),source,sourceSha,3));
    check(Program.Hash(work)==sourceSha&&Program.Hash(before)==sourceSha&&Program.Hash(source)==sourceSha);
    CheckTarget(root,id,sha,work);count++;
    foreach(string target in new[]{source,before,Path.Combine(root,"Unowned.psmodel")})rejects(()=>CheckTarget(root,id,sha,target));

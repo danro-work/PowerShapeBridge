@@ -77,7 +77,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.31.0";
+        public const string ReleaseVersion = "0.32.0";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -175,6 +175,18 @@ namespace PowerShapeBridge
         {
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) using (var sha = SHA256.Create())
                 return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+        }
+        internal static bool PublishPanelStatus(string temporary,string path)
+        {
+            try { if(File.Exists(path))File.Replace(temporary,path,null);else File.Move(temporary,path);return true; }
+            catch(IOException error) {
+                // External readers may deny deletion briefly. Keep the last complete
+                // heartbeat and let the next timer publish a fresh one; never turn a
+                // status-file collision into a CAD retry or an application dialog.
+                if(!new[]{32,33,1175,1176}.Contains(error.HResult&0xffff))throw;
+                try { File.Delete(temporary); } catch(IOException) { }
+                return false;
+            }
         }
         public static object[] ArrayValues(object raw)
         {
@@ -607,7 +619,7 @@ namespace PowerShapeBridge
                 Config config=Program.ReadConfig();
                 File.WriteAllText(temporary,Program.Json.Serialize(new{version=Program.ReleaseVersion,processId=process.Id,processStartedUtc=process.StartTime.ToUniversalTime().ToString("o"),windowsSessionId=process.SessionId,timestampUtc=DateTime.UtcNow.ToString("o"),bridgeRoot=Program.Root,configurationProfile=config.IsGeneralCore?"general-v1":"legacy_fixture",configurationSha256=Program.Hash(Path.Combine(Program.Root,"bridge.config.json")),acceptingRequests=incoming.Checked,workerIdle=run.Enabled}),new UTF8Encoding(false));
             }
-            if(File.Exists(path))File.Replace(temporary,path,null);else File.Move(temporary,path);
+            Program.PublishPanelStatus(temporary,path);
         }
         private async Task<string> Execute(string operation = "--probe")
         {
@@ -687,6 +699,10 @@ namespace PowerShapeBridge
             count += OwnedOperationPlanTests.Run();
             count += OwnedTranslationTests.Run();
             Action<bool> check = ok => { if (!ok) throw new Exception("Self-test failed at " + count); count++; };
+            string statusRoot=Path.Combine(Program.Root,"work","status-self-test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(statusRoot);
+            string statusPath=Path.Combine(statusRoot,"panel-status.json"),statusTemporary=statusPath+".tmp";File.WriteAllText(statusPath,"old");File.WriteAllText(statusTemporary,"new");
+            using(var reader=new FileStream(statusPath,FileMode.Open,FileAccess.Read,FileShare.Read))check(!Program.PublishPanelStatus(statusTemporary,statusPath)&&File.ReadAllText(statusPath)=="old"&&!File.Exists(statusTemporary));
+            File.WriteAllText(statusTemporary,"new");check(Program.PublishPanelStatus(statusTemporary,statusPath)&&File.ReadAllText(statusPath)=="new");
             check(Program.StrictInt(0) == 0);
             var levelReader=new TransientLevelReader();check(SurfaceSectionJob.ReadLevelState(levelReader,102)==1&&levelReader.Attempts==3);
             bool rejected = false; try { Program.StrictInt("invalid"); } catch (FormatException) { rejected = true; } check(rejected);

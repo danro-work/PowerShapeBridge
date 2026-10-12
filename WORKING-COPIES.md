@@ -1,5 +1,15 @@
 # Сохранённые рабочие копии — экспериментальный контракт P2.27
 
+К5, 12 октября 2026: source/staging native 0.32.0 создаёт ownership schema 2:
+`workingcopies/copyId/Working_copyId.psmodel`, где copyId — 32 lowercase hex.
+Имя уникально для каждой новой копии. Schema 1 с `Working.psmodel` продолжает
+проверяться по прежнему фиксированному layout; существующие files/manifests
+не переименовываются. Checkpoint остаётся `checkpoint/Before.psmodel`.
+Native open guard до claim/journal/COM OPEN отвергает имя, уже присутствующее
+в свежем window listing (case-insensitive), даже если путь другой. Исходный
+OPEN, вызвавший dialog «Working уже открыта», остаётся unknown и не повторяется.
+Установленный runtime пока 0.31.0; новый layout ещё не квалифицирован live.
+
 P2.31, 12 октября 2026: runtime 0.31.0, каталог 21/read-only 6. Первый общий executor переносит один SOLID в manifest-owned копии: два guard-прохода в удерживаемой COM-паре, один TranslateItem, постоянный intent claim, copy fence и отдельная independent verification. Live X +1 и отдельный X −1 подтверждены; наблюдения собственной копии восстановлены, Test_Block_P2 снова активен, четыре окна и protected saved hashes сохранены. Save/open/close/selection/screenshot не выполнялись. OWNED-TRANSLATION.md и STATUS-P2.31-EXECUTOR.md; ниже история предыдущих блоков. MCP v1 не завершён.
 
 9 октября 2026. Runtime 0.27.0. Подготовка/проверка файлов и предикат владения целевым
@@ -29,7 +39,8 @@ device/UNC, относительные/неоднозначные пути, syml
 
 Из одного удерживаемого источника создаются два новых файла:
 
-- workingcopies/copyId/Working.psmodel — будущая рабочая модель;
+- workingcopies/copyId/Working_copyId.psmodel — будущая рабочая модель schema 2;
+- прежний workingcopies/copyId/Working.psmodel — совместимый layout schema 1;
 - workingcopies/copyId/checkpoint/Before.psmodel — независимый исходный checkpoint.
 
 CreateNew, разные native file IDs, собственные файловые данные, fsync обоих файлов;

@@ -89,7 +89,7 @@ public sealed class BridgeSession : IDisposable
         foreach (var (file, key) in new[] { ("deployment-current.json", "installedDeployment"), ("panel-status.json", "lastPanelReport"), ("worker-stage.json", "lastWorkerStage") })
         {
             if (!File.Exists(FileArtifacts.FixedPath(Options.BridgeRoot, "reports", file))) continue;
-            try { result[key] = JsonNode.Parse(FileArtifacts.ReadJson(Options.BridgeRoot, Path.Combine("reports", file), 1000000).GetRawText()); }
+            try { result[key] = JsonNode.Parse(FileArtifacts.ReadAdvisoryReport(Options.BridgeRoot,file).GetRawText()); }
             catch (Exception ex) when (ex is IOException or System.Text.Json.JsonException) { result[key] = null; }
         }
         return result;

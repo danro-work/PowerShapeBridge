@@ -1,5 +1,22 @@
 # PowerShape Bridge — состояние для продолжения
 
+Текущий К5 блок: SDK source 0.35.1-dev, native source/staging 0.32.0;
+установленный native всё ещё 0.31.0. Live OPEN на НОВОЙ copy
+5fef10809eb44904ade27e2ca843a8b9/request 6ed9d4106d054b28a05e8ab0b59c5811
+остановлен timeout: PowerShape показал «Working уже открыта». Три native
+events до command_started; command_returned нет. Перенос/save/close не отправлены,
+повторов/удаления claim/перезаписи журнала не было. Пользователь сам снял dialog.
+Fresh readonly read: четыре исходных окна, Test_Block_P2 активен, source saved
+bytes/наблюдаемая геометрия неизменны. OPEN остаётся unknown.
+Исправления: unique schema2 working filename с совместимостью schema1,
+duplicate-name refusal до OPEN и advisory heartbeat file-sharing/publication.
+Последнее исправляет показанную пользователем ошибку WritePanelStatus/File.Replace;
+это не ошибка launcher. Полный SDK check пройден: 162 .NET, four STDIO clients,
+320 native synthetic, 78 artifact cases, Inspector; evidence/K5-owned/collision-fix.
+Staged deployment и новый owned live scenario ещё впереди. STATUS-K5-OWNED.md.
+Clean checkout и все четыре Windows CI исходного блока 8996eb7/PR #6 прошли.
+К5 не закрыт; К6–К11 обязательны. Ниже история предшествующих блоков.
+
 12 октября 2026: пользователь принял MCP-DEVELOPMENT-PLAN.md и матрицу,
 авторизовал автономную разработку до К11 и разрешил Product Help `en_US`.
 К0 закрыт. К1 локально пройден: clean checkout, 312 C# и 114 Python,

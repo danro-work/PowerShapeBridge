@@ -34,14 +34,14 @@ class Client:
         self.stdout_thread.start()
         self.stderr_thread.start()
 
-    def call(self, identity, method, params=None):
+    def call(self, identity, method, params=None, timeout=10):
         data = {'jsonrpc': '2.0', 'id': identity, 'method': method}
         if params is not None:
             data['params'] = params
         self.process.stdin.write(json.dumps(data).encode('utf-8') + b'\n')
         self.process.stdin.flush()
         for _ in range(32):
-            result = self.frames.get(timeout=10)
+            result = self.frames.get(timeout=timeout)
             if isinstance(result, Exception):
                 raise result
             if result.get('id') == identity:
