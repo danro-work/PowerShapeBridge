@@ -16,4 +16,7 @@
     </PackageReference>
     <ProjectReference Include="../../src/PowerShapeMcp.Host/PowerShapeMcp.Host.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="fixtures/observations.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
