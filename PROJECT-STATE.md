@@ -1,5 +1,14 @@
 # PowerShape Bridge — состояние для продолжения
 
+Квалифицированное исправление К6 directory separator: native/legacy source
+0.33.2-dev, SDK0.37.2-dev unchanged, commit5fea662/draft PR11 attached.
+Full local292 SDK/520 native/171 artifacts0 mismatch/STDIO/Inspector/25 fault
+cells audit passed;134 hashes matched; все четыре exact-head Windows CI passed.
+STATUS-K6-DIRECTORY-FIX.md. Concrete staging work/K6-native-directory-live
+0.33.2 и plan-only work/K6-directory-deployment-plan.json подготовлены, K6
+immutable SDK0.36.3 actual27/6 catalogs и hashes checked. Runtime0.33.0-dev
+не менялся; новое Apply пока не разрешено. К6–К11 остаются незавершёнными.
+
 К6 live попытка, 13 октября: own copy b3d... активирована свежим выбором,
 наблюдения К5 X+1 совпали; new binding создана. prepare SaveAs22ee98... отклонён
 из-за trailing-separator directory identity mismatch. Ни SaveAs, ни reopen

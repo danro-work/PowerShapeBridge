@@ -1,5 +1,13 @@
 # Дальнейшая работа
 
+К6 directory fix0.33.2-dev qualified (292/520/171/25,134 hashes,four CI),
+draft PR11. Пакет work/K6-native-directory-live и plan-only prepared; runtime
+0.33.0-dev остаётся. Следующая live точка: согласованная установка0.33.2 с
+backup/restart, fresh process/queue/own context, НОВЫЙ SaveAs/reopen intent.
+Старый pilot остановлен до SaveAs, own Working_b3d... остаётся активной;
+71 protected files unchanged. STATUS-K6-DIRECTORY-FIX.md. Пока установка
+ожидает ответа, продолжать независимую offline К7 SDK transport matrix.
+
 13 октября 2026: Bridge0.33.0-dev установлен по явному разрешению пользователя;
 backup/installed SHA, одна панель, idle queue, неизменность CAD reads и 71 files
 независимо проверены. STATUS-K6-DEPLOYMENT-033.md. Повторный Apply не нужен.
