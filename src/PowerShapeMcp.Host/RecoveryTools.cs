@@ -8,7 +8,7 @@ namespace PowerShapeMcp;
 [McpServerToolType]
 public sealed class RecoveryTools(BridgeSession session)
 {
-    [McpServerTool(Name="inspect_operation_recovery",ReadOnly=true,Destructive=false,Idempotent=true,OpenWorld=false),Description("Inspect one recorded owned operation's journal, plan, claim/fence and current saved working/checkpoint bytes. Distinguishes missing authoritative return, non-success code, changed protected files and historical verification. Never resolves unknown from disk alone, grants execution, retries commands, contacts CAD, rewrites journals or removes claims/fences. Enabled only by recoveryInspectionExperimental; available in the separate read-only server.")]
+    [McpServerTool(Name="inspect_operation_recovery",ReadOnly=true,Destructive=false,Idempotent=true,OpenWorld=false),Description("Inspect one recorded owned operation's journal, plan, claim/fence and saved working/checkpoint bytes, or a legacy activation receipt and opaque once marker. Legacy activation has no authoritative command-return proof; paths within it are not opened. Never resolves unknown from disk alone, grants execution, retries commands, contacts CAD, rewrites journals or removes claims/fences. Enabled only by recoveryInspectionExperimental; available in the separate read-only server.")]
     public async Task<CallToolResult> Inspect([Description("Lowercase 32-hex original owned operation ID; never a path or command.")]string operationId,CancellationToken cancellationToken)
     {
         session.AssertToolAllowed("inspect_operation_recovery");var timer=Stopwatch.StartNew();bool acquired=false;

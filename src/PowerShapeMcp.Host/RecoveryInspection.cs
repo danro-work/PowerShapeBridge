@@ -21,7 +21,9 @@ public sealed class RecoveryInspection(string root)
         {
             void Deadline(){cancellationToken.ThrowIfCancellationRequested();if(timer.Elapsed>=budget)throw new ReferenceRejected("recovery_inspection_deadline");}
             Deadline();var read=new OperationJournal(root).Read(operationId);Require(read["state"]?.GetValue<string>()=="operation_receipt_read"&&read["receipt"] is JsonObject,"recovery_journal_unavailable");
-            var journal=read["receipt"]!.AsObject();Require(journal["events"] is JsonArray,"recovery_legacy_journal_unsupported");output["journal"]=journal.DeepClone();output["journalSha256"]=journal["journalSha256"]?.DeepClone();
+            var journal=read["receipt"]!.AsObject();
+            if(journal["events"] is not JsonArray)return ReadLegacyActivation(operationId,read,journal,output,Deadline);
+            output["journal"]=journal.DeepClone();output["journalSha256"]=journal["journalSha256"]?.DeepClone();
             var plans=PlanFolders.Select(folder=>(Folder:folder,Path:FileArtifacts.FixedPath(root,folder,operationId+".json"))).Where(p=>File.Exists(p.Path)||Directory.Exists(p.Path)).ToArray();
             Require(plans.Length==1,"recovery_plan_missing_or_ambiguous");Deadline();
             var planRaw=FileArtifacts.ReadBytes(root,Path.GetRelativePath(root,plans[0].Path),65536);var planSha=FileArtifacts.Sha256(planRaw);
@@ -118,5 +120,37 @@ public sealed class RecoveryInspection(string root)
         catch(OperationCanceledException)when(cancellationToken.IsCancellationRequested){output["state"]="recovery_inspection_cancelled";output["errorCode"]="cancelled_read_only_inspection";return output;}
         catch(Exception error)when(error is ReferenceRejected or IOException or InvalidDataException or UnauthorizedAccessException or System.Text.Json.JsonException or InvalidOperationException or KeyNotFoundException)
         {output["state"]="recovery_inspection_unavailable";output["errorCode"]=error is ReferenceRejected rejected?rejected.Code:"recovery_artifact_unreadable";output["error"]=error.Message;return output;}
+    }
+
+    private JsonObject ReadLegacyActivation(string id,JsonObject original,JsonObject receipt,JsonObject output,Action deadline)
+    {
+        var state=Text(receipt,"state");var phase=Text(receipt,"phase");
+        Require(Text(receipt,"operationId")==id&&ArtifactProof.Boolean(receipt["geometryMutationAttempted"],false)
+            &&receipt["contextChangeAttempted"] is JsonValue attempted&&attempted.TryGetValue<bool>(out _),"recovery_legacy_activation_invalid");
+        Require((phase=="before_activate"&&state=="context_change_outcome_pending")
+            ||(phase=="completed"&&state=="document_active_verified")
+            ||(phase=="stopped"&&state is "context_change_outcome_unknown" or "rejected_before_context_change"),"recovery_legacy_activation_state_invalid");
+        Require(!receipt.ContainsKey("cadSaveAttempted")||ArtifactProof.Boolean(receipt["cadSaveAttempted"],false),"recovery_legacy_activation_save_invalid");
+        Require(DateTimeOffset.TryParse(Text(receipt,"updatedUtc"),System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.RoundtripKind,out _),"recovery_legacy_activation_time_invalid");
+        var once=FileArtifacts.FixedPath(root,"operations",id+".once");var temporary=FileArtifacts.FixedPath(root,"operations",id+".json.tmp");
+        Require(!Directory.Exists(once)&&!Directory.Exists(temporary),"recovery_legacy_activation_marker_invalid");
+        bool claimed=File.Exists(once),partial=File.Exists(temporary);
+        if(claimed)Require(FileArtifacts.ReadBytes(root,Path.GetRelativePath(root,once),64).Length==0,"recovery_legacy_activation_claim_invalid");
+        Require(phase=="stopped"&&!ArtifactProof.Boolean(receipt["contextChangeAttempted"],true)||claimed,"recovery_legacy_activation_claim_missing");
+        output["operation"]="activate_document";output["journalFormat"]="legacy_single_receipt";
+        output["journal"]=receipt.DeepClone();output["journalSha256"]=original["receiptSha256"]!.DeepClone();
+        output["claimPresent"]=claimed;output["temporaryPublicationPresent"]=partial;
+        output["activationAttemptRecorded"]=receipt["contextChangeAttempted"]!.DeepClone();
+        output["commandStartedRecorded"]=false;output["commandReturnedRecorded"]=false;
+        output["authoritativeSuccessReturnRecorded"]=false;output["currentContextChecked"]=false;
+        output["savedFilesChecked"]=false;output["checkpointRestoreAuthorized"]=false;
+        output["assessment"]=partial?"legacy_activation_partial_publication":phase=="completed"?"legacy_activation_historical_observation_requires_fresh_context":
+            phase=="before_activate"||ArtifactProof.Boolean(receipt["contextChangeAttempted"],true)?"legacy_activation_without_authoritative_return":"legacy_activation_recorded_rejection";
+        output["outcome"]="not_resolved_by_recorded_inspection";
+        output["qualification"]="Legacy activation receipt/opaque once marker only; no append-only command-return proof. Saved-file paths in the receipt are data and are not opened. No current CAD verification, journal repair, replay, inverse or checkpoint restore authority.";
+        deadline();Require(JsonNode.DeepEquals(original,new OperationJournal(root).Read(id))&&claimed==File.Exists(once)&&partial==File.Exists(temporary),"recovery_legacy_activation_changed_during_inspection");
+        if(claimed)Require(FileArtifacts.ReadBytes(root,Path.GetRelativePath(root,once),64).Length==0,"recovery_legacy_activation_claim_invalid");
+        return output;
     }
 }
