@@ -1,5 +1,17 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 recovered OPEN: source SDK0.38.1/native0.33.5, installed0.33.3 unchanged.
+Six native recovery→OPEN→independent verifier/binding scenarios passed with fake
+CAD; independent253 artifact hash audit passed. Focused19 SDK/full362 .NET passed.
+Full runner session88319 completed PASS in evidence/K7-recovered-open/sdk-full,
+stage work/K7-recovered-open-sdk-full:362/531/1750 mismatch/32 SDK/25 faults/
+20 activation/40 legacy STDIO/16 checkpoint/6 recovered OPEN/Inspector.
+STATUS-K7-RECOVERED-OPEN.md.
+Original unknown journal/claims retained; only successful NEW copy receives
+current binding. This is native/SDK proof compatibility, not complete wire/live
+acceptance. Remaining cancellation/reparse/publication/whole recovered route,
+separately accepted live recovery and К8–К11 remain. PR20/source d5c32c26 four CI passed.
+
 Current К7 checkpoint filesystem feature: SDK0.38/native0.33.5 source, installed
 0.33.3/default config/CAD unchanged. Two fixed general-only tools, one-use intent,
 NEW saved-byte working copy, original unknown/artifacts retained.18 SDK tests,

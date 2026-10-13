@@ -48,4 +48,13 @@ public sealed class CheckpointRecoveryTests
         if(fault=="claim_changed")data.Files.Write("checkpointrecoveries/"+data.Intent+".copy-once.json","{}");
         Assert.Throws<ReferenceRejected>(()=>data.Session.CheckpointRecoveries.CheckCreated(result,parameters));
     }
+    [Fact]
+    public void RehashedMaterializationWithIncompleteOriginalInventoryCannotIssueWorkingLease()
+    {
+        var data=new CheckpointRecoveryFixture();var parameters=data.Session.CheckpointRecoveries.Consume(data.Issue());var id=Guid.NewGuid().ToString("N");var result=data.Materialize(id);
+        var proofPath=FileArtifacts.FixedPath(data.Files.Root,"checkpointcopyplans",id+".result.json");var proof=JsonNode.Parse(File.ReadAllText(proofPath))!.AsObject();
+        proof["originalArtifactHashes"]=new JsonObject();data.Files.Write(Path.GetRelativePath(data.Files.Root,proofPath),proof.ToJsonString());
+        result["originalArtifactHashes"]=new JsonObject();result["materializationProofSha256"]=FileArtifacts.Sha256(File.ReadAllBytes(proofPath));
+        var error=Assert.Throws<ReferenceRejected>(()=>data.Session.CheckpointRecoveries.CheckCreated(result,parameters));Assert.Equal("checkpoint_copy_origin_hashes_incomplete",error.Code);
+    }
 }
