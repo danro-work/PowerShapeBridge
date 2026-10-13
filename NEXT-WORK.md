@@ -1,5 +1,13 @@
 # Дальнейшая работа
 
+0.33.3 model-ID fix qualified294/531/175/25 иfour CI; final stage
+work/K6-native-model-id-live2 (первую live stage не применять), plan-only
+work/K6-model-id-deployment-plan.json. STATUS-K6-MODEL-ID-FIX.md.
+Ждать согласие новой установки; then fresh process/queue/source/protection.
+Новый client/evidence только verify original SaveAs59f5a399... с fresh reads,
+не execute SaveAs. Только terminal verified позволит NEW saved reopen intent,
+один OPEN/new binding/independent audit. Claim/fence нельзя удалять вручную.
+
 Installed0.33.2-dev по разрешению, backup/one panel/read protection verified.
 Live SaveAs59f5a399... outcome_unknown из-за ложного требования old modelId:
 same native window, новый own Result_f238... active;71 protected hashes match.

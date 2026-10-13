@@ -44,7 +44,11 @@ namespace PowerShapeBridge {
    if(active==null||!active.ContainsKey("modelPath")||!string.Equals(OwnedCopies.LocalPath((string)active["modelPath"]),target,StringComparison.OrdinalIgnoreCase)||!Equals(active["selectedRaw"],1))throw new InvalidOperationException("SaveAs target is not active.");
    var originals=previous.Where(window=>window.ContainsKey("modelPath")&&string.Equals(OwnedCopies.LocalPath((string)window["modelPath"]),working,StringComparison.OrdinalIgnoreCase)).ToArray();
    if(originals.Length!=1)throw new InvalidOperationException("SaveAs source window ambiguous.");
-   foreach(string key in new[]{"windowNumber","nativeWindowId","type","modelId"})if(!originals[0].ContainsKey(key)||!active.ContainsKey(key)||!Equals(originals[0][key],active[key]))throw new InvalidOperationException("SaveAs retained window identity changed.");
+   // SAVEASPATH may assign a new model ID while retaining the COM object and
+   // model window. A model ID is checked against post-save observations below.
+   foreach(string key in new[]{"windowNumber","nativeWindowId","type"})if(!originals[0].ContainsKey(key)||!active.ContainsKey(key)||!Equals(originals[0][key],active[key]))throw new InvalidOperationException("SaveAs retained window identity changed.");
+   if(!active.ContainsKey("modelId")||!(active["modelId"] is int)||(int)active["modelId"]<=0||current.Count(value=>value.ContainsKey("modelId")&&Equals(value["modelId"],active["modelId"]))!=1||
+      current.Any(value=>value.ContainsKey("modelPath")&&string.Equals(OwnedCopies.LocalPath((string)value["modelPath"]),working,StringComparison.OrdinalIgnoreCase)))throw new InvalidOperationException("SaveAs current model identity ambiguous.");
    foreach(var window in previous) {
     if(ReferenceEquals(window,originals[0]))continue;
     if(current.Count(value=>WindowKey(window)==WindowKey(value))!=1)throw new InvalidOperationException("Unrelated SaveAs window changed.");
@@ -53,6 +57,12 @@ namespace PowerShapeBridge {
    if(targets.Length!=1||EntitySets.Canonical(targets[0])!=EntitySets.Canonical(active)||
       !active.ContainsKey("modelName")||!string.Equals(active["modelName"] as string,Path.GetFileNameWithoutExtension(target),StringComparison.OrdinalIgnoreCase)||
       current.Select(window=>window["nativeWindowId"]).Distinct().Count()!=current.Length)throw new InvalidOperationException("SaveAs target window listing/model identity ambiguous.");
+  }
+  internal static void CheckSavedModel(Dictionary<string,object> model,Dictionary<string,object> listing) {
+   var active=listing.ContainsKey("activeWindow")?listing["activeWindow"] as Dictionary<string,object>:null;
+   if(model==null||active==null||!model.ContainsKey("id")||!(model["id"] is int)||(int)model["id"]<=0||
+      !active.ContainsKey("modelId")||!Equals(model["id"],active["modelId"])||!model.ContainsKey("name")||!active.ContainsKey("modelName")||!Equals(model["name"],active["modelName"])||
+      !model.ContainsKey("path")||!active.ContainsKey("modelPath")||!string.Equals(OwnedCopies.LocalPath((string)model["path"]),OwnedCopies.LocalPath((string)active["modelPath"]),StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("SaveAs post-save model observation changed.");
   }
   internal static Dictionary<string,object> Execute(string root,string id,Dictionary<string,object> parameters,IContext context) {
    var result=new Dictionary<string,object>{{"state","owned_save_as_rejected_before_change"},{"operationId",id},{"bridgeVersion",Program.ReleaseVersion},
@@ -95,7 +105,8 @@ namespace PowerShapeBridge {
       if(!string.Equals(OwnedCopies.LocalPath((string)model["path"]),path,StringComparison.OrdinalIgnoreCase)||Content(fresh)!=Content(target.Expected))throw new InvalidOperationException("SaveAs observable content/units changed.");
       context.ConfirmDocument();result["afterModel"]=model;
      }
-     CheckAfterWindows(windows,context.Windows(),target.Copy.WorkingPath,path);target.RecheckDependencies();
+     var afterWindows=context.Windows();CheckSavedModel((Dictionary<string,object>)result["afterModel"],afterWindows);
+     CheckAfterWindows(windows,afterWindows,target.Copy.WorkingPath,path);target.RecheckDependencies();
      if(saved.Any(pair=>Program.Hash(pair.Key)!=pair.Value)||EntitySets.Canonical(SavedProof(path))!=EntitySets.Canonical(file))throw new IOException("Saved/protected files changed after SaveAs.");
      result["commandCalls"]=1;result["savedFilesUnchanged"]=true;result["copyFenced"]=true;result["state"]="owned_save_as_executed_unverified";
      journal.Append("executed_unverified",new Dictionary<string,object>{{"independentVerificationRequired",true},{"savedResultSha256",file["sha256"]}});

@@ -1,5 +1,21 @@
 # PowerShape Bridge — состояние для продолжения
 
+Квалифицирован native/legacy0.33.3 model-ID fix, source341951a/draft PR13.
+Full294/531/175(0 mismatch)/STDIO/Inspector/25 fault audit passed,134 hashes
+matched;four exact-head Windows CI passed. STATUS-K6-MODEL-ID-FIX.md.
+Final immutable staging work/K6-native-model-id-live2 и plan-only prepared;
+unchanged K6 SDK0.36.3 actual27/6/package hashes checked. Apply0.33.3 не запускать
+до ответа на отдельное согласование. Installed0.33.2 работает, owned result
+Result_f238... active, SaveAs59f5a399... outcome_unknown/claim/fence retained.
+После установки нужен separate original SaveAs verification, не новая SaveAs.
+
+Current source branch fix/save-as-model-identity: native/legacy0.33.3-dev,
+SDK0.37.2 unchanged. Same window сохраняется, новый SaveAs model ID принимается
+лишь с strict current model observation/unique ID/fresh original-return proof.
+Regression old guard отказал; new source full qualification выполняется
+evidence/K6-model-id-fix/sdk-full (294 .NET passed). STATUS-K6-MODEL-ID-FIX.md.
+Installed0.33.2 остаётся; live SaveAs59f5a399... unknown, claim/fence retained.
+
 13 октября: пользователь разрешил0.33.2-dev, установка succeeded +independent
 18 installed/backup SHA,71 protected files, one new panel23584 confirmed.
 STATUS-K6-DEPLOYMENT-0332.md. Новый live К6 SaveAs59f5a399... вызван один раз,

@@ -46,6 +46,8 @@ namespace PowerShapeBridge {
       if(!Equals(active["windowNumber"],args["windowNumber"])||!Equals(active["modelId"],args["modelId"])||!Equals(model["id"],active["modelId"])||!Equals(model["name"],active["modelName"])||!string.Equals(OwnedCopies.LocalPath((string)model["path"]),path,StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("Verification choice is not the saved result.");
       foreach(string key in new[]{"processId","processStartedUtc","windowsSessionId"})if(!Equals(expected[key],listing[key])||!Equals(expected[key],target.Expected[key]))throw new InvalidOperationException("SaveAs verification process identity changed.");
       OwnedSaveAs.CheckAfterWindows(before,listing,target.Copy.WorkingPath,path);
+      if(!receipt.ContainsKey("afterModel"))throw new InvalidOperationException("Original post-SaveAs model observation required.");
+      OwnedSaveAs.CheckSavedModel(receipt["afterModel"] as Dictionary<string,object>,listing);
       if(OwnedSaveAs.Content(expected)!=OwnedSaveAs.Content(target.Expected))throw new InvalidOperationException("Saved observable content/units differs from before SaveAs.");
       string windowsSha=DocumentBindings.WindowDigest(listing),fence=OwnedTranslation.FencePath(root,(string)plan["copyId"]);bool fenced=File.Exists(fence);
       if(fenced) {
