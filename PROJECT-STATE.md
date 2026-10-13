@@ -1,5 +1,13 @@
 # PowerShape Bridge — состояние для продолжения
 
+К8 independent DMT reader:27 .NET cases and10 Framework full-data controls/5
+refusals passed. Official Autodesk pinned LFS fixtures/hashes/license included;
+float/double/normals/16-32 bit index boundary, full truncation matrix, strict
+bounded decode. DMT-READER-CONTRACT.md and STATUS-K8-DMT-READER.md. Historical
+header in MM without flag remains units unknown; no CAD/world/convention/topology
+qualification or public MCP route. PR35 all four CI passed, native531 passed.
+Runtime/READY K7/CAD unchanged; K7 approval pending. Next guarded export/settings,
+mesh verification/live convention and full remaining K8-K11.
 К8 owned geometry export targets:30 isolated native cases/478 independent hashes
 passed, work/K8-geometry-export-targets-final. Fixed DMT path, pinned disabled
 binding/set/owner/checkpoint/directory lease; complete-return rotation proof chain
