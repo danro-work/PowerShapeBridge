@@ -1,5 +1,13 @@
 # Дальнейшая работа
 
+Current К7 activation/native0.33.4 SDK0.37.4: full session39854 completed,
+evidence/K7-activation/sdk-qualified passed330/531/1750 mismatch/32 SDK/
+25 native faults/20 activation rows/STDIO/Inspector;143 hashes matched. Failed
+session26921 retained, isolated IPC44347 passed. STATUS-K7-ACTIVATION.md. Далее source
+branch/PR и exact-head CI; installed0.33.3 не обновлять автоматически.
+Далее interrupted publication matrix, legacy activation recovery observation,
+accepted checkpoint recovery into a NEW owned working copy; К8–К11 сохраняются.
+
 К7 SDK transport:12 focused +28 combined matrix/audit passed; full326/531/
 1750-mismatch/28 SDK/25 native/STDIO/Inspector passed. Four negative checks passed,
 138 recorded source/binary hashes matched. Full/negative sessions45385/75958 completed.

@@ -83,7 +83,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.33.3-dev";
+        public const string ReleaseVersion = "0.33.4-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -97,7 +97,7 @@ namespace PowerShapeBridge
         {
             // GUI applications launched from Explorer have no console handle.
             // Configure console encoding only in worker/CLI modes.
-            bool cli = (args.Length==2&&args[0]=="--mcp-operation") || (args.Length == 1 && (args[0] == "--component-info" || args[0] == "--probe" || args[0] == "--self-test" || args[0] == "--recovery-fault-test" || args[0] == "--translation-test" || args[0] == "--checkpoint-test" || args[0] == "--prepare-translation" || args[0] == "--execute-translation" || args[0] == "--verify-disk"));
+            bool cli = (args.Length==2&&args[0]=="--mcp-operation") || (args.Length == 1 && (args[0] == "--component-info" || args[0] == "--probe" || args[0] == "--self-test" || args[0] == "--recovery-fault-test" || args[0] == "--activation-fault-test" || args[0] == "--translation-test" || args[0] == "--checkpoint-test" || args[0] == "--prepare-translation" || args[0] == "--execute-translation" || args[0] == "--verify-disk"));
             if (cli) Console.OutputEncoding = new UTF8Encoding(false);
             if(args.Length==1&&args[0]=="--component-info") {
                 try {
@@ -106,6 +106,9 @@ namespace PowerShapeBridge
             }
             if(args.Length==1&&args[0]=="--recovery-fault-test") {
                 try{RecoveryFaultTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.Message);return 3;}
+            }
+            if(args.Length==1&&args[0]=="--activation-fault-test") {
+                try{ActivationFaultTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.Message);return 3;}
             }
             if (args.Length == 1 && args[0] == "--self-test")
             {

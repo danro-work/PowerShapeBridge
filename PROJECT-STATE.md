@@ -1,5 +1,16 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 current activation block: source native/legacy0.33.4, SDK0.37.4. Installed
+0.33.3/default config/CAD unchanged. Native20 activation rows+110-hash independent
+audit и marker refusal passed; SDK32 rows/681 hashes/four negative checks passed.
+First full330 had one subsecond IPC fixture failure; timing collection isolation
+preserves original budgets,12 IPC tests passed. Corrected full qualification
+в evidence/K7-activation/sdk-qualified passed330/531/1750 mismatch/32 SDK/
+25 native faults/20 activation rows/STDIO/Inspector;143 source/binary SHA matched.
+STATUS-K7-ACTIVATION.md. Source exact-head CI ещё требуется.
+PR17/source483a3d6 four CI passed; actual CI28-row artifact checked. Полная К7
+и К8–К11 ещё не завершены, legacy activation journal/recovery limits сохранены.
+
 К7 current transport block:12 new rows passed, combined matrix28/28 +independent
 599 artifact hashes passed; .NET326/326. Full runner с preserved archives в
 evidence/K7-sdk-lost-reply/sdk-full passed326/531/175(0 mismatch)/28 SDK rows/
