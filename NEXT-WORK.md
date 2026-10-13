@@ -1,5 +1,15 @@
 # Дальнейшая работа
 
+К8 passive measurement provider: documented SurfacePoints/CurvePointData
+retained COM getter methods +strict guard/decoder,28 fake cases/280 protected
+file hashes passed. Native regression76791 passed531 checks. No live getter
+qualification/public queue/MCP route/solid face provider/fence release yet.
+STATUS-K8-ROTATION-MEASUREMENTS.md. Passive installed MCP fresh read confirmed
+Test_Block_P2/17304/23.2.2/one SOLID, context0/0; not mutation authority.
+PR30/be7995de four CI passed. Runtime/READY K7 unchanged; K7 approval pending.
+Next immutable measurement receipt/independent verifier/solid provider/live
+qualification after approval/SDK/faults/saved result andfull K8-K11.
+
 К8 rotation sample reference predicate:21 domain cases passed; shared C#6
 Framework2 analytic controls/no-op refusal passed. Pinned anchors/identity,
 explicit points vsdirections, paired bbox exact onlysigned permutations,
