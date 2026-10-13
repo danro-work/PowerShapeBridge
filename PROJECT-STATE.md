@@ -1,5 +1,15 @@
 # PowerShape Bridge — состояние для продолжения
 
+Current К6: original SaveAs59f... и new owned OPEN45ddd3... native terminal
+succeeded_verified без replay. Native binding cbf... создана, но SDK0.37.3
+не выдал scoped binding из-за forward/backslash path equality. Active own
+Working_d5... model280011427, six windows; никаких повторов/close/restore.
+Source SDK0.37.4 branch fix/reopen-current-model-path: semantic path compare,
+positive raw-preservation/negative different-path tests;16 focused+STDIO passed,
+full298 .NET passed/native suite running. STATUS-K6-REOPEN-PATH.md. Native
+0.33.3/default config unchanged; next side SDK ONLY verify existing OPEN45...
+then new binding+final audit. Goal К6–К11 остаётся full scope.
+
 Current installed0.33.3-dev verified/backup work/general-deployment-backup-
 20261013-074123/one panel7124. Original SaveAs59f5a399... independently verified
 fb7d6f55...: journal succeeded_verified/fence released by verifier/no replay.

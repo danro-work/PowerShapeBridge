@@ -44,11 +44,12 @@ internal sealed class SavedReopenFixture
         // never recreates a response under the executor's polling filename.
         OriginalSha=publish?Publish(id,Original):ArtifactProof.Freeze(Root,"responses/"+id+".unpublished",Original);return Original.DeepClone().AsObject();
     }
-    internal JsonObject FreshReads()
+    internal JsonObject FreshReads(bool forwardPath=false)
     {
         Data.Target.Data.Time+=10;Data.Target.Data.Utc=Data.Target.Data.Utc.AddSeconds(10);
         var snapshot=ArtifactProof.Verified(Root,"responses",Data.Saved.Parameters["inspectionRequestId"]!.GetValue<string>(),Data.Saved.Parameters["inspectionSha256"]!.GetValue<string>(),16777216);
         snapshot["model"]!["id"]=500;snapshot["model"]!["path"]=Prepared["reopen"]!["workingPath"]!.DeepClone();snapshot["model"]!["name"]=Path.GetFileNameWithoutExtension(snapshot["model"]!["path"]!.GetValue<string>());
+        if(forwardPath)snapshot["model"]!["path"]=snapshot["model"]!["path"]!.GetValue<string>().Replace('\\','/');
         foreach(var entity in snapshot["entities"]!.AsArray())entity!["nativeId"]=entity["nativeId"]!.GetValue<int>()+1000;
         var inspectionId=Guid.NewGuid().ToString("N");snapshot["bridgeRequestId"]=inspectionId;snapshot["timestampUtc"]=LeaseTime.Format(Data.Target.Data.Utc);
         var sha=ArtifactProof.Freeze(Root,"responses/"+inspectionId+".json",snapshot);var candidate=Session.Candidates.Issue(snapshot,sha)["candidateDocumentHandle"]!.GetValue<string>();

@@ -21,11 +21,17 @@ OwnedReopenStore при nested чтении raw proof этого не делал
 Source SDK0.37.3-dev: после чтения fixed file с verified SHA добавляет
 transport ID только в memory из verificationRequestId; conflicting body ID
 отклоняется. Positive missing-ID/unmodified-bytes и negative conflicting-ID
-проверки добавлены;17 focused tests passed, full qualification выполняется.
+проверки добавлены;17 focused/full296 SDK/531 native/175 artifacts0 mismatch/
+STDIO/Inspector/25 fault audit passed;134 hashes matched. Four exact-source
+e3e1fc5 CI38366357451/38366750598 baseline и38366357421/38366750799 SDK passed.
 Actual STDIO fixture теперь воспроизводит native verifier body без envelope ID.
 Native source/runtime0.33.3 и default Codex config не меняются; новая панель
 не требуется. После qualification — отдельный опубликованный side SDK client,
 fresh original SaveAs re-verification и NEW saved-reopen intent/copy.
+
+Qualified side SDK0.37.3 позволил один new owned OPEN и native verifier
+succeeded_verified, но выдача SDK binding отказала из-за slash format.
+STATUS-K6-REOPEN-PATH.md. No replay/restart/cleanup; active own Working_d5...
 
 evidence/K6-model-id-fix/live-qualification/ и
 evidence/K6-reopen-receipt-fix/red/focused/sdk-full. К6 ещё не закрыт.
