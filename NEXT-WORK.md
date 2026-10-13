@@ -1,5 +1,13 @@
 # Дальнейшая работа
 
+Full verification session19181 completed PASS, evidence/K8-owned-rotation-plans/sdk-full,
+stage work/K8-owned-rotation-sdk-full:403/531/1750 mismatch/32/25/20/40/22/
+6/7/6/15/rotation STDIO/Inspector. Native15 cases203 hash audit passed.
+Publish qualified internal owned rotation guard/CI. Then SDK scoped packet/native
+transport interoperability, executor/verifier/faults/saved result. No rotation tool
+execution yet; K7 live apply/OPEN still requires direct human approval.
+STATUS-K8-OWNED-ROTATION-PREP.md; PR25/dab9a6bf four CI passed.
+
 Publish PR25 clean-checkout fixture fix +reference rotation geometry/type-library
 reader. Full403 .NET/10 geometry/clean STDIO passed. SDK CI previous9addbb8 failed
 at missing work parent, fixed without relaxing assertions. Recheck exact new head CI.
