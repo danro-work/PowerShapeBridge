@@ -1,5 +1,31 @@
 # PowerShape Bridge — состояние для продолжения
 
+Квалифицированное исправление К6 directory separator: native/legacy source
+0.33.2-dev, SDK0.37.2-dev unchanged, commit5fea662/draft PR11 attached.
+Full local292 SDK/520 native/171 artifacts0 mismatch/STDIO/Inspector/25 fault
+cells audit passed;134 hashes matched; все четыре exact-head Windows CI passed.
+STATUS-K6-DIRECTORY-FIX.md. Concrete staging work/K6-native-directory-live
+0.33.2 и plan-only work/K6-directory-deployment-plan.json подготовлены, K6
+immutable SDK0.36.3 actual27/6 catalogs и hashes checked. Runtime0.33.0-dev
+не менялся; новое Apply пока не разрешено. К6–К11 остаются незавершёнными.
+
+К6 live попытка, 13 октября: own copy b3d... активирована свежим выбором,
+наблюдения К5 X+1 совпали; new binding создана. prepare SaveAs22ee98... отклонён
+из-за trailing-separator directory identity mismatch. Ни SaveAs, ни reopen
+не вызваны; no replay,71 protected files unchanged. Сейчас own Working_b3d...
+активна; Test_Block_P2 не изменялся. STATUS-K6-LIVE-DIRECTORY-REJECTION.md.
+Исправление и regression в fix/save-directory-trailing-separator; runtime0.33.0
+не менять до квалификации и согласования нового пакета.
+
+Текущее установленное состояние, 13 октября 2026: пользователь разрешил
+0.32 → 0.33.0-dev с backup/restart; пакет work/K6-native-live применён.
+Одна панель0.33.0-dev подтверждена heartbeat и свежими CAD reads; 18 installed/
+backup SHA и 71 protected file совпали. Initial deploy journal сохранил ошибку
+sharing violation при чтении heartbeat; independent verification установила
+успех без повторного запуска. STATUS-K6-DEPLOYMENT-033.md. Пять CAD окон и
+активная Test_Block_P2 прежние. K6 live SaveAs/reopen ещё не выполнялся;
+default SDK switch не принят. Ниже записи pending Apply относятся к истории.
+
 Current qualified K7 native core fece6ee /draft PR10 attached: native/legacy
 source0.33.1-dev, SDK0.37.2. Cleanfull292 .NET/514 native/171 artifact cases(0
 mismatch)/ten external STDIO/Inspector +separate25 native core fault cells/audit
@@ -11,7 +37,8 @@ Native ordinary-open verifier has internal fake/root seam; public contract/guard
 remain. No new MCP tool. RECOVERY-FAULT-MATRIX.md. Следом per-executor SDK
 timeout/cancel/lost wire reply и activation-context faults, затем separately
 accepted checkpoint recovery. Runtime/K6 package/CAD/default config untouched;
-K6 Apply permission pending. Полная К7–К11 не завершена. Ниже история блока.
+K6 Apply уже разрешён и independently verified; live K6 ещё впереди.
+Полная К7–К11 не завершена. Ниже история блока.
 
 Latest K7 native core fece6ee /draft PR10 attached(base PR9): native/legacy0.33.1,
 SDK0.37.2. Full local SDK passed292 .NET/514 native/171 artifacts(0 mismatch)/ten

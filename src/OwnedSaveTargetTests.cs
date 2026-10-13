@@ -10,7 +10,18 @@ namespace PowerShapeBridge {
    var fixture=new OwnedOperationPlanTests.Fixture(true);
    string pinFolder=Path.Combine(fixture.Root,"empty-pinned-directory");Directory.CreateDirectory(pinFolder);
    using(var directory=new OwnedDirectoryLease(pinFolder)){rejects(()=>Directory.Move(pinFolder,pinFolder+"-moved"));directory.Recheck();count++;}
+   // Program.Root is AppDomain.BaseDirectory, which carries a trailing separator.
+   // Equivalent spellings must retain the same directory identity and rename guard.
+   using(var directory=new OwnedDirectoryLease(pinFolder+"\\"))using(var ordinary=new OwnedDirectoryLease(pinFolder)) {
+    check(EntitySets.Canonical(directory.Identity)==EntitySets.Canonical(ordinary.Identity));
+    rejects(()=>Directory.Move(pinFolder,pinFolder+"-moved"));directory.Recheck();count++;
+   }
+   using(var directory=new OwnedDirectoryLease(pinFolder.Replace('\\','/')+"/")) {directory.Recheck();count++;}
+   rejects(()=>new OwnedDirectoryLease(pinFolder+"\\..\\empty-pinned-directory\\"));
    var parameters=new Dictionary<string,object>{{"bindingId",fixture.BindingId},{"bindingSha256",fixture.Parameters["bindingSha256"]}};
+   string trailingId=Guid.NewGuid().ToString("N");
+   var trailing=OwnedSaveTargets.Prepare(fixture.Root+"\\",trailingId,parameters);
+   using(var trailingLease=new OwnedSaveTargets.TargetLease(fixture.Root+"\\",trailingId,(string)trailing["targetSha256"])) {trailingLease.Recheck();count++;}
    string id=Guid.NewGuid().ToString("N");var result=OwnedSaveTargets.Prepare(fixture.Root,id,parameters);
    var plan=(Dictionary<string,object>)result["target"];string sha=(string)result["targetSha256"];
    string folder=OwnedSaveTargets.Folder(fixture.Root,id),target=(string)plan["resultPath"],copyId=(string)plan["copyId"];

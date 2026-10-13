@@ -1,5 +1,16 @@
 # План разработки PowerShape MCP на основе Bridge
 
+К6 live выявил ошибочный отказ directory guard до SaveAs. Исправление0.33.2-dev
+qualified full offline/four Windows CI; concrete package/plan-only prepared,
+STATUS-K6-DIRECTORY-FIX.md. Следом его согласованная установка и новый owned
+SaveAs/reopen intent; К6 ещё не закрыт. Runtime0.33.0-dev остаётся installed.
+
+Актуальная контрольная точка, 13 октября 2026: разрешённое пользователем
+обновление Bridge0.32 → 0.33.0-dev установлено с проверенным резервом и одной
+новой панелью. STATUS-K6-DEPLOYMENT-033.md; native source0.33.1-dev остаётся
+отдельным. К6 live SaveAs/reopen и полная К7–К11 ещё не завершены; следующие
+этапы и границы общего MCP v1 сохраняются. Ниже исходный план и история.
+
 12 октября 2026. **План принят пользователем: разработка до К11.** К0 закрыт;
 К1 выполняется. Для Autodesk Product Help пользователь разрешил `en_US`.
 Установка программ завершена; уведомление
