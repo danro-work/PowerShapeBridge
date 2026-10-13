@@ -1,5 +1,12 @@
 # Дальнейшая работа
 
+Installed0.33.2-dev по разрешению, backup/one panel/read protection verified.
+Live SaveAs59f5a399... outcome_unknown из-за ложного требования old modelId:
+same native window, новый own Result_f238... active;71 protected hashes match.
+Claim/fence retained. Не повторять SaveAs/OPEN и не удалять fence. Следом
+native guard fix qualification и separate verifier original SaveAs с fresh
+reads; только затем saved reopen. STATUS-K6-SAVE-MODEL-IDENTITY.md.
+
 К7 current branch feat/recovery-transport-matrix: saved-reopen SDK timeout и
 lost raw reply rows +14 fixture users passed, RECOVERY-TRANSPORT-MATRIX.md.
 Следом SDK cancellation и full per-executor coverage translation/SaveAs/OPEN,
