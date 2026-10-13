@@ -22,6 +22,7 @@ public sealed class BridgeSession : IDisposable
     public OwnedReopenStore Reopens { get; }
     public CheckpointRecoveryStore CheckpointRecoveries { get; }
     public RotationPlanStore RotationPlans { get; }
+    public OwnedRotationStore OwnedRotations { get; }
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     public bool RecoveryInspectionEnabled { get; }
@@ -43,6 +44,7 @@ public sealed class BridgeSession : IDisposable
         Reopens=new(options.BridgeRoot,SavedResults,clock,utcClock);
         CheckpointRecoveries=new(options.BridgeRoot,clock,utcClock);
         RotationPlans=new(options.BridgeRoot,Candidates,clock,utcClock);
+        OwnedRotations=new(options.BridgeRoot,RotationPlans,Bindings,clock,utcClock);
         var config=Options.ReadConfiguration();
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
         RecoveryInspectionEnabled=config.TryGetProperty("recoveryInspectionExperimental",out var recoveryFlag)&&recoveryFlag.ValueKind==System.Text.Json.JsonValueKind.True;
@@ -53,6 +55,7 @@ public sealed class BridgeSession : IDisposable
             execution.Add("activate_document");
             foreach(var (flagName,names) in new[]{
                 ("rotationPlansExperimental",new[]{"prepare_rotation_plan"}),
+                ("ownedRotationPlansExperimental",new[]{"prepare_owned_rotation"}),
                 ("entitySetsExperimental",new[]{"prepare_entity_set","validate_entity_set"}),
                 ("operationPlansExperimental",new[]{"prepare_operation_plan","inspect_operation_plan"}),
                 ("workingCopiesExperimental",new[]{"prepare_working_copy","inspect_working_copy"}),
@@ -84,6 +87,7 @@ public sealed class BridgeSession : IDisposable
     {
         Documents.Clear();References.Clear();Candidates.Clear();Bindings.Clear();
         RotationPlans.Clear();
+        OwnedRotations.Clear();
         SaveTargets.Clear();
         Reopens.Clear();
         if(consumeOwned){Plans.Clear();Owned.Clear();}
@@ -128,5 +132,5 @@ public sealed class BridgeSession : IDisposable
         }
         return result;
     }
-    public void Dispose(){RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
+    public void Dispose(){OwnedRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
 }

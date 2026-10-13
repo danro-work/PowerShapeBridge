@@ -1,5 +1,16 @@
 # PowerShape Bridge — состояние для продолжения
 
+K8 scoped owned rotation source SDK0.39.1/native+legacy0.34.0: new gated passive
+prepare_owned_rotation, native queue recipe/held guard, strict proof/TTL store.
+14 focused SDK/domain +15 actual native Receipt compatibility cases passed.
+Full session35683 completed PASS, evidence/K8-owned-rotation-sdk/sdk-full,
+stage work/K8-owned-rotation-sdk-full2;417/531/1750 mismatch/32/25/20/40/22/
+6/7/6/15/15 native-SDK/rotation STDIO/Inspector passed, recorded hashes matched.
+STATUS-K8-OWNED-ROTATION-SDK.md. PR26/3a6ff520 four CI passed.
+No RotateItem executor, installed0.33.3/READY K7 packages unchanged; K7 approval
+still pending. Next full/CI and whole native scoped Issue workflow, executor/
+verifier/faults/saved-result. Full goal throughК11 remains active.
+
 K8 internal native owned rotation preparation:15 cases203 hashes passed with fake
 contexts; passive packet/held ownership guards, no rotation/queue/MCP registration.
 STATUS-K8-OWNED-ROTATION-PREP.md. Full session19181 completed PASS in

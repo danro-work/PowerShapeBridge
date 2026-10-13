@@ -21,6 +21,9 @@ def general_core(settings):
     saves = settings.get('ownedSavesExperimental', False)
     reopens = settings.get('ownedSavedReopenExperimental', False)
     recovery = settings.get('checkpointRecoveryExperimental', False)
+    owned_rotations = settings.get('ownedRotationPlansExperimental', False)
+    if type(owned_rotations) is not bool or owned_rotations and (profile != 'general-v1' or copies is not True or bindings is not True or experimental is not True):
+        raise ValueError('Owned rotation preparation requires general sets, copies and bindings')
     if type(recovery) is not bool or recovery and (profile != 'general-v1' or copies is not True):
         raise ValueError('Checkpoint recovery requires general owned working copies')
     if type(reopens) is not bool or reopens and (profile != 'general-v1' or saves is not True or opens is not True):

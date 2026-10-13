@@ -78,4 +78,6 @@ public sealed class RotationPlanStore(string root,CandidateStore candidates,Func
         if(candidates.Context!=lease.Context||set.Context!=lease.Context)throw new ReferenceRejected("rotation_source_context_changed");
         return ArtifactProof.Verified(root,"rotationplans",lease.Id,lease.Sha,65536);
     }
+    public JsonObject ReferenceParameters(string handle){Inspect(handle);var lease=plans[handle];return new(){["rotationPlanId"]=lease.Id,["rotationPlanSha256"]=lease.Sha};}
+    public double Remaining(string handle){Inspect(handle);return plans[handle].Expires-now();}
 }
