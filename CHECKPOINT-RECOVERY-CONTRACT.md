@@ -2,7 +2,8 @@
 
 Файловая часть реализована в SDK0.38/native0.33.5 и квалифицирована offline,
 STATUS-K7-CHECKPOINT-COPY.md. Recovery-reader никогда не выдаёт разрешение на
-restore. Guarded OPEN recovered copy/live acceptance остаются следующим блоком;
+restore. Guarded OPEN recovered copy проверяется offline с fake CAD,
+STATUS-K7-RECOVERED-OPEN.md; полный MCP route/live acceptance остаются впереди;
 контракт не означает выполненную CAD квалификацию или согласие на живое испытание.
 
 Результат восстановления — новая независимая owned рабочая копия сохранённых

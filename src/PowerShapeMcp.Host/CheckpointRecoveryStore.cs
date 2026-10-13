@@ -74,6 +74,7 @@ public sealed class CheckpointRecoveryStore(string root,Func<double>? clock=null
         Require(result["state"]?.GetValue<string>()=="checkpoint_working_copy_prepared_disk"&&new[]{"geometryMutationAttempted","contextChangeAttempted","cadSaveAttempted","powerShapeConnectionAttempted","originalOutcomeResolved"}.All(key=>ArtifactProof.Boolean(result[key],false))&&ArtifactProof.Boolean(result["originalArtifactsUnchanged"],true),"checkpoint_copy_receipt_invalid");
         var id=Text(result,"copyId");Require(FileArtifacts.Token(id)&&Text(result,"bridgeRequestId")==id&&JsonNode.DeepEquals(parameters["recoveryId"],result["recoveryId"])&&JsonNode.DeepEquals(parameters["recoverySha256"],result["recoverySha256"]),"checkpoint_copy_identity_differs");
         var recovery=VerifyPlan(Text(parameters,"recoveryId"),Text(parameters,"recoverySha256"));
+        Require(id!=Text(parameters,"recoveryId")&&id!=Text(recovery["origin"]!.AsObject(),"copyId")&&id!=Text(recovery["origin"]!.AsObject(),"operationId"),"checkpoint_copy_new_identity_required");
         var creation=ArtifactProof.Verified(root,"checkpointcopyplans",id,Text(result,"creationPlanSha256"),65536);
         Require(ArtifactProof.Fields(creation,"schemaVersion","operationId","operation","recoveryId","recoverySha256","origin","checkpoint","cadExecutionEnabled","originalOutcomeResolved","createdUtc")
             &&ArtifactProof.IntegerIs(creation["schemaVersion"],1)&&ArtifactProof.Boolean(creation["cadExecutionEnabled"],false)&&ArtifactProof.Boolean(creation["originalOutcomeResolved"],false)
@@ -93,6 +94,13 @@ public sealed class CheckpointRecoveryStore(string root,Func<double>? clock=null
             &&(File.GetAttributes(Text(checkpoint,"path"))&FileAttributes.ReadOnly)!=0,"checkpoint_copy_protection_differs");
         Require(new[]{source,work,checkpoint}.Select(record=>Text(record["fileIdentity"]!.AsObject(),"volumeSerial")+":"+Text(record["fileIdentity"]!.AsObject(),"fileIndex")).Distinct().Count()==3,"checkpoint_copy_alias_invalid");
         Require(result["originalArtifactHashes"] is JsonObject,"checkpoint_copy_origin_hashes_missing");
+        var origin=recovery["origin"]!.AsObject();var originalCopy=Text(origin,"copyId");
+        var originalOwnerRaw=FileArtifacts.ReadBytes(root,Path.Combine("workingcopies",originalCopy,"ownership.json"),65536);
+        var originalOwner=JsonNode.Parse(FileArtifacts.Parse(originalOwnerRaw).GetRawText())!.AsObject();
+        var expectedPaths=new[]{FileArtifacts.FixedPath(root,Text(origin,"planFolder"),Text(origin,"operationId")+".json"),
+            FileArtifacts.FixedPath(root,"workingcopies",originalCopy,"ownership.json"),Text(recovery["checkpoint"]!.AsObject(),"path"),
+            FileArtifacts.FixedPath(root,"workingcopies",originalCopy,ArtifactProof.IntegerIs(originalOwner["schemaVersion"],1)?"Working.psmodel":"Working_"+originalCopy+".psmodel")};
+        Require(expectedPaths.All(path=>result["originalArtifactHashes"]!.AsObject().Any(pair=>ObservationPolicy.NormalizePath(pair.Key)==ObservationPolicy.NormalizePath(path))),"checkpoint_copy_origin_hashes_incomplete");
         foreach(var pair in result["originalArtifactHashes"]!.AsObject())
         {
             var path=FileArtifacts.FixedPath(root,Path.GetRelativePath(root,pair.Key));using var stream=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.ReadWrite);

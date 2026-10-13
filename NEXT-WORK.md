@@ -1,5 +1,14 @@
 # Дальнейшая работа
 
+К7 recovered OPEN fake-CAD matrix/independent audit/SDK stores: six cases253 hashes,
+focused19 and full362 .NET passed. Full verify-sdk session88319 completed PASS;
+evidence/K7-recovered-open/sdk-full, stage work/K7-recovered-open-sdk-full.
+Full362/531/1750 mismatch/32 SDK/25 native faults/20 activation/40 legacy STDIO/
+16 checkpoint/6 recovered OPEN/Inspector passed. Publish qualified source/CI.
+STATUS-K7-RECOVERED-OPEN.md. Remaining full recovered MCP route,
+cancellation/reparse/partial publication and separately accepted live scenario.
+Do not deploy automatically; installed0.33.3 unchanged; full goal toК11 active.
+
 Checkpoint copy SDK0.38/native0.33.5: full session61820 completed в
 evidence/K7-checkpoint-recovery/sdk-full;361/531/1750 mismatch/32 SDK/25 native/
 20 activation/40 legacy STDIO/16 checkpoint/audits/SDK-native creation/Inspector

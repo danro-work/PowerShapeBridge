@@ -68,6 +68,7 @@ if($LASTEXITCODE -ne 0){throw 'SDK legacy activation recovery STDIO qualificatio
 & (Join-Path $taskRoot 'verify-checkpoint-recovery.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-checkpoint') -EvidenceDirectory (Join-Path $taskEvidence 'checkpoint-recovery')
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_checkpoint_recovery_stdio.py') --dotnet $DotnetPath --host $taskHost --stage ($NativeStageDirectory+'-checkpoint') --evidence (Join-Path $taskEvidence 'checkpoint-recovery')
 if($LASTEXITCODE -ne 0){throw 'SDK/native checkpoint recovery STDIO qualification failed.'}
+& (Join-Path $taskRoot 'verify-checkpoint-recovered-open.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -StageDirectory ($NativeStageDirectory+'-recovered-open') -EvidenceDirectory (Join-Path $taskEvidence 'checkpoint-recovered-open')
 $taskFixture = Join-Path $taskRoot ('work\K2-inspector-'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
@@ -107,6 +108,7 @@ $taskFiles += @('src\audit_sdk_transport_faults.py')
 $taskFiles += @('src\DocumentSession.cs','src\ActivationFaultTests.cs','src\audit_activation_faults.py','verify-activation-faults.ps1')
 $taskFiles += @('src\test_sdk_activation_recovery_stdio.py')
 $taskFiles += @('src\CheckpointRecovery.cs','src\CheckpointRecoveryTests.cs','src\audit_checkpoint_recovery.py','src\test_sdk_checkpoint_recovery_stdio.py','verify-checkpoint-recovery.ps1','config\general-checkpoint-recovery.json')
+$taskFiles += @('src\CheckpointRecoveredOpenTests.cs','src\audit_checkpoint_recovered_open.py','verify-checkpoint-recovered-open.ps1','tools\NativeFixtureCheck\CheckpointOpenCheck.cs')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'
