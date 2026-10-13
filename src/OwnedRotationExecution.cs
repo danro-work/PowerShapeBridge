@@ -31,7 +31,7 @@ namespace PowerShapeBridge {
   static void Match(Dictionary<string,object> packet,OwnedRotationPlans.Dependencies d,OwnedCopies.OwnershipLease lease) {
    Require(EntitySets.Expiry(packet["expiresUtc"])==d.Expires&&Equals(packet["nativeObservedPropertiesSha256"],EntitySets.ObservedDigest(d.Expected))&&Equals(packet["windowContextSha256"],d.Binding["windowContextSha256"])&&Equals(packet["copyId"],d.Binding["copyId"])&&Equals(packet["ownershipSha256"],d.Binding["ownershipSha256"])&&Equals(packet["workingSha256"],lease.Inspection["workingSha256"]),"Rotation packet dependencies changed.");
   }
-  static void PreserveOthers(Dictionary<string,object> before,Dictionary<string,object> fresh,int[][] completed) {
+  internal static void PreserveOthers(Dictionary<string,object> before,Dictionary<string,object> fresh,int[][] completed) {
    var normalized=Clone(fresh);var expected=EntitySets.Inventory(before);var current=EntitySets.Inventory(normalized);
    foreach(var key in completed) {
     var original=expected.Single(e=>Equals(e["nativeTypeCode"],key[0])&&Equals(e["nativeId"],key[1]));var observed=current.Single(e=>Equals(e["nativeTypeCode"],key[0])&&Equals(e["nativeId"],key[1]));
