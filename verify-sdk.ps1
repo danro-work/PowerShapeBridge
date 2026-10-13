@@ -16,8 +16,16 @@ New-Item -ItemType Directory -Force -Path $taskEvidence | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'Locked restore failed.' }
 & $DotnetPath build $taskProject --no-restore --configuration Release
 if ($LASTEXITCODE -ne 0) { throw 'SDK build failed.' }
-& $DotnetPath test $taskProject --no-build --no-restore --configuration Release --logger 'trx;LogFileName=sdk-tests.trx' --results-directory $taskEvidence
-if ($LASTEXITCODE -ne 0) { throw 'SDK tests failed.' }
+$taskPreviousTransportEvidence = $env:PSBRIDGE_TEST_EVIDENCE
+$taskTransportEvidence = Join-Path $taskEvidence 'transport-faults'
+if (Test-Path -LiteralPath $taskTransportEvidence) { throw 'Transport fault evidence requires a fresh directory.' }
+try {
+    $env:PSBRIDGE_TEST_EVIDENCE = $taskTransportEvidence
+    & $DotnetPath test $taskProject --no-build --no-restore --configuration Release --logger 'trx;LogFileName=sdk-tests.trx' --results-directory $taskEvidence
+    if ($LASTEXITCODE -ne 0) { throw 'SDK tests failed.' }
+} finally { $env:PSBRIDGE_TEST_EVIDENCE = $taskPreviousTransportEvidence }
+& $PythonPath (Join-Path $taskRoot 'src\audit_sdk_transport_faults.py') --evidence $taskTransportEvidence --output (Join-Path $taskEvidence 'transport-fault-audit.json') --exercise-rejections
+if ($LASTEXITCODE -ne 0) { throw 'SDK transport fault evidence audit failed.' }
 $taskHost = Join-Path $taskRoot 'src\PowerShapeMcp.Host\bin\Release\net10.0\PowerShapeMcp.Host.dll'
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_stdio.py') --dotnet $DotnetPath --host $taskHost --evidence $taskEvidence
 if ($LASTEXITCODE -ne 0) { throw 'Independent STDIO parity failed.' }
@@ -89,6 +97,7 @@ $taskFiles += @('config\general-recovery-inspection.json')
 $taskFiles += @('config\general-recovery-resolution.json')
 $taskFiles += @('src\RecoveryFaultTests.cs','src\audit_recovery_fault_matrix.py','verify-recovery-faults.ps1','src\OwnedOpenVerification.cs','src\EntitySets.cs','src\OwnedTranslationTests.cs')
 $taskFiles += @('src\test_sdk_recovery_stdio.py')
+$taskFiles += @('src\audit_sdk_transport_faults.py')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

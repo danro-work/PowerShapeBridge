@@ -1,9 +1,16 @@
 # Дальнейшая работа
 
+К7 SDK transport:12 focused +28 combined matrix/audit passed; full326/531/
+1750-mismatch/28 SDK/25 native/STDIO/Inspector passed. Four negative checks passed,
+138 recorded source/binary hashes matched. Full/negative sessions45385/75958 completed.
+STATUS-K7-SDK-TRANSPORT.md. Далее отдельная ветка/PR и exact-head CI нового
+блока; затем activation-context, cancellation after native return translation/
+ordinary OPEN, additional partial publication и accepted checkpoint recovery.
+
 К7 cancellation:16 focused passed (14 transport matrix rows +2 SDK controls),
 STATUS-K7-SDK-CANCELLATION.md. Full .NET314/314 passed без skip;
-source13f1c54 опубликован, draft PR16 attached. Дождаться четырёх CI для source:
-38385716254/38385724636 baseline,38385716200/38385724496 SDK; затем оставшиеся timeout/lost reply
+source13f1c54 опубликован, draft PR16 attached. Четыре CI для source passed:
+38385716254/38385724636 baseline,38385716200/38385724496 SDK; remaining timeout/lost reply
 rows translation/SaveAs/ordinary OPEN, activation-context/partial publication и
 accepted checkpoint recovery. Local-only cancellation не означает native return.
 

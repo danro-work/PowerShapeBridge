@@ -124,6 +124,50 @@ public sealed class ExecutionRoutesTests
         Assert.Single(Directory.GetFiles(Path.Combine(connection.Data.Root,"requests")));
     }
 
+    [Theory]
+    [InlineData("execute_owned_translation","control")]
+    [InlineData("execute_owned_translation","claimed_timeout")]
+    [InlineData("execute_owned_translation","returned_reply_lost")]
+    [InlineData("execute_owned_translation","late_receipt")]
+    [InlineData("open_working_copy","control")]
+    [InlineData("open_working_copy","claimed_timeout")]
+    [InlineData("open_working_copy","returned_reply_lost")]
+    [InlineData("open_working_copy","late_receipt")]
+    public async Task OfficialSdkLostReplyPreservesOwnedExecutionEvidence(string recipe,string fault)
+    {
+        await using var connection=await Connection.Create(timeout:5);var translation=recipe=="execute_owned_translation";
+        var args=translation?new Dictionary<string,object?>{["ownedOperationHandle"]=connection.Owned}:
+            new Dictionary<string,object?>{["workingCopyHandle"]=connection.Copy,["candidateDocumentHandle"]=connection.Document,["activeDocumentHandle"]=connection.Choice()};
+        var call=connection.Client.CallToolAsync(recipe,args).AsTask();var (id,parameters)=await connection.Claim(recipe);
+        var root=connection.Data.Root;JsonObject? original=null;
+        if(fault!="claimed_timeout")original=LostReplyFixture.Return(root,id,parameters,connection.Data.BindingReceipt["binding"]!.AsObject(),translation,connection.Data.Utc);
+        if(fault=="control")LostReplyFixture.PublishOriginal(root,id);
+        var before=TransportCancellationProof.Snapshot(root);var response=await call;var data=Read(response);
+        Assert.Equal(fault!="control",response.IsError);
+        Assert.Equal(fault=="control"?translation?"owned_translation_executed_unverified":"working_copy_opened_observed":"timeout_outcome_unknown",data["state"]!.GetValue<string>());
+        Assert.Null(data["workingDocumentBindingHandle"]);TransportCancellationProof.Unchanged(root,before);
+        Assert.Throws<ReferenceRejected>(()=>connection.Session.Candidates.DocumentParameters(connection.Document));
+        if(translation)Assert.Throws<ReferenceRejected>(()=>connection.Session.Owned.ValidationParameters(connection.Owned));
+        else if(fault!="control")Assert.Throws<ReferenceRejected>(()=>connection.Session.Copies.InspectParameters(connection.Copy));
+        if(fault!="control")Assert.False(data["retryAllowed"]!.GetValue<bool>());
+        Assert.True(File.Exists(FileArtifacts.FixedPath(root,"requests",id+".json.processing")));
+        if(original is not null)
+        {
+            LostReplyFixture.OneAuthoritativeReturn(root,id);
+            var rawPath=FileArtifacts.FixedPath(root,"responses",id+(fault=="control"?".json":".unpublished"));
+            var sha=FileArtifacts.Sha256(File.ReadAllBytes(rawPath));
+            if(fault=="late_receipt")
+            {
+                LostReplyFixture.PublishOriginal(root,id);
+                Assert.Equal(sha,FileArtifacts.Sha256(File.ReadAllBytes(FileArtifacts.FixedPath(root,"responses",id+".json"))));
+                Assert.Equal("timeout_outcome_unknown",data["state"]!.GetValue<string>());
+            }
+        }
+        before=TransportCancellationProof.Snapshot(root);Assert.True((await connection.Client.CallToolAsync(recipe,args)).IsError);
+        TransportCancellationProof.Unchanged(root,before);Assert.Single(Directory.GetFiles(Path.Combine(root,"requests")));
+        TransportCancellationProof.Record(root,id,recipe,fault,data["state"]!.GetValue<string>(),before);
+    }
+
     [Fact]
     public async Task CancellationAfterClaimLeavesUnknownAndOneRequest()
     {
@@ -165,6 +209,7 @@ public sealed class ExecutionRoutesTests
         var before=TransportCancellationProof.Snapshot(connection.Data.Root);
         Assert.True((await connection.Client.CallToolAsync(recipe,args)).IsError);
         TransportCancellationProof.Unchanged(connection.Data.Root,before);
+        TransportCancellationProof.Record(connection.Data.Root,id,recipe,notify?"cancel_notified_pending":"cancel_local_pending","client_wait_cancelled",before);
     }
 
     [Fact]

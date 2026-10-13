@@ -1,5 +1,12 @@
 # К7 — SDK transport fault matrix, выполняется
 
+Current:28 combined SDK rows и independent hash/journal audit passed,
+STATUS-K7-SDK-TRANSPORT.md. Full archived-evidence qualification326/531/175
+0-mismatch/28 SDK/25 native/STDIO/Inspector и four negative auditor checks passed;
+exact-head CI нового блока ещё требуется.
+Отдельные25 native core cells не заменены SDK rows. Remaining activation/
+partial publication/checkpoint recovery и К8–К11 сохраняются.
+
 АКТУАЛЬНО,13 октября: К6 квалифицирован, STATUS-K6-QUALIFIED.md. К7 дополнен
 14 SDK cancellation rows для четырёх owned executors и activation +2 plain SDK
 controls;16 focused passed, STATUS-K7-SDK-CANCELLATION.md. Local-only cancellation

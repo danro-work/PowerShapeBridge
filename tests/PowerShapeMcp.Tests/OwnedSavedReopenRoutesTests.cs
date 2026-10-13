@@ -100,6 +100,7 @@ public sealed class OwnedSavedReopenRoutesTests
         Assert.True(replay.IsError);Assert.Single(Directory.GetFiles(Path.Combine(root,"requests")));
         foreach(var pair in before)Assert.Equal(pair.Value,Sha(pair.Key));
         Assert.Equal(protectedPaths.Order(),Directory.GetFiles(root,"*",SearchOption.AllDirectories).Order());
+        TransportCancellationProof.Record(root,id,"execute_owned_saved_reopen",effectReturned?"returned_reply_lost":"claimed_timeout",result["state"]!.GetValue<string>(),before);
     }
 
     [Theory]
@@ -121,5 +122,22 @@ public sealed class OwnedSavedReopenRoutesTests
         var before=TransportCancellationProof.Snapshot(connection.Fixture.Root);
         Assert.True((await connection.Client.CallToolAsync("execute_owned_saved_reopen",args)).IsError);
         TransportCancellationProof.Unchanged(connection.Fixture.Root,before);
+        TransportCancellationProof.Record(connection.Fixture.Root,id,"execute_owned_saved_reopen",(notify?"cancel_notified_":"cancel_local_")+(effectReturned?"returned":"pending"),"client_wait_cancelled",before);
+    }
+
+    [Fact]
+    public async Task OfficialSdkLateSavedReopenReceiptDoesNotGrantBindingOrReplay()
+    {
+        await using var connection=await Connection.Create();var args=connection.OpenArgs().ToDictionary(p=>p.Key,p=>(object?)p.Value!.GetValue<string>());
+        var call=connection.Client.CallToolAsync("execute_owned_saved_reopen",args).AsTask();var (id,parameters)=await connection.Claim("execute_owned_saved_reopen");
+        connection.Fixture.Execution(id,parameters,publish:false);var root=connection.Fixture.Root;
+        var before=TransportCancellationProof.Snapshot(root);var response=await call;var data=JsonNode.Parse(response.StructuredContent!.Value.GetRawText())!;
+        Assert.True(response.IsError);Assert.Equal("timeout_outcome_unknown",data["state"]!.GetValue<string>());Assert.Null(data["workingDocumentBindingHandle"]);
+        Assert.False(data["retryAllowed"]!.GetValue<bool>());TransportCancellationProof.Unchanged(root,before);LostReplyFixture.OneAuthoritativeReturn(root,id);
+        LostReplyFixture.PublishOriginal(root,id);Assert.Equal(connection.Fixture.OriginalSha,FileArtifacts.Sha256(File.ReadAllBytes(FileArtifacts.FixedPath(root,"responses",id+".json"))));
+        before=TransportCancellationProof.Snapshot(root);Assert.True((await connection.Client.CallToolAsync("execute_owned_saved_reopen",args)).IsError);
+        TransportCancellationProof.Unchanged(root,before);Assert.Single(Directory.GetFiles(Path.Combine(root,"requests")));
+        Assert.Equal("timeout_outcome_unknown",data["state"]!.GetValue<string>());Assert.Null(data["workingDocumentBindingHandle"]);
+        TransportCancellationProof.Record(root,id,"execute_owned_saved_reopen","late_receipt",data["state"]!.GetValue<string>(),before);
     }
 }
