@@ -1,5 +1,15 @@
 # Дальнейшая работа
 
+К8 rotation sample reference predicate:21 domain cases passed; shared C#6
+Framework2 analytic controls/no-op refusal passed. Pinned anchors/identity,
+explicit points vsdirections, paired bbox exact onlysigned permutations,
+forward/inverse envelope otherwise; tolerance overflow rejects. No CAD verifier
+or fence release yet. K8-ROTATION-MEASUREMENT-CONTRACT.md. Offline TLB measurement
+signatures obtained without CAD; solid face enumeration still unqualified.
+Full .NET regression session35217 passed439/439 without skip. PR29/f48d502d four CI passed.
+Next native measurement provider/immutable receipts/independent verifier,
+production adapter/SDK/faults/live after approval andfull K8-K11. K7 approval pending.
+
 К8 internal batch rotation executor:21 fake-context scenarios/486 independent
 artifact hashes passed, evidence/K8-owned-rotation-execution/qualified. Per-target
 started/returned/observed records, held guards, one-use claim/fence, partial-stop,

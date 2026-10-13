@@ -16,4 +16,7 @@
     <EmbeddedResource Include="Schemas/prepared-tools.json" LogicalName="prepared-tools.json" />
     <EmbeddedResource Include="Schemas/execution-tools.json" LogicalName="execution-tools.json" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../RotationSampleVerifier.cs" Link="RotationSampleVerifier.cs" />
+  </ItemGroup>
 </Project>
