@@ -1,5 +1,14 @@
 # Дальнейшая работа
 
+Full session35683 completed PASS at evidence/K8-owned-rotation-sdk/sdk-full,
+stage work/K8-owned-rotation-sdk-full2;417/531/1750 mismatch/32/25/20/40/22/
+6/7/6/15/15 native-SDK/rotation STDIO/Inspector passed.14 SDK/domain +15 native
+Receipt proofs passed; new passive prepare_owned_rotation requires feature flag.
+STATUS-K8-OWNED-ROTATION-SDK.md. Native0.34 source NOT installed; READY K7 package
+0.33.5 +SDK0.38.1 unchanged, human approval still pending. Then source/CI,
+whole native scoped packet transport, guarded rotation executor/verifier/recovery/
+saved-result; K8–К11 not complete. PR26 four CI passed.
+
 Full verification session19181 completed PASS, evidence/K8-owned-rotation-plans/sdk-full,
 stage work/K8-owned-rotation-sdk-full:403/531/1750 mismatch/32/25/20/40/22/
 6/7/6/15/rotation STDIO/Inspector. Native15 cases203 hash audit passed.

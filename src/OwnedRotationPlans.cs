@@ -52,11 +52,17 @@ namespace PowerShapeBridge {
       string path=Artifact(root,"ownedrotations",id);Directory.CreateDirectory(Path.GetDirectoryName(path));string sha=NativeJournal.Freeze(path,packet);result["ownedRotationId"]=id;result["ownedRotationSha256"]=sha;result["localArtifactsMayExist"]=true;
       var journal=new NativeJournal(root,id,sha);journal.Append("prepared",new Dictionary<string,object>{{"executionEnabled",false},{"geometryMutationAttempted",false}});
       dependencies.Check(lease,context,result);OwnedOperationPlans.Prepared(root,(string)args["rotationPlanId"],(string)args["rotationPlanSha256"],proofs);OwnedOperationPlans.Prepared(root,id,sha,proofs);lease.Recheck();context.ConfirmDocument();Require(DateTime.UtcNow<dependencies.Expires&&DocumentBindings.WindowDigest(context.Windows())==(string)dependencies.Binding["windowContextSha256"],"Rotation context/expiry changed.");
-      result["state"]="owned_rotation_prepared_observed";result["ownedRotation"]=packet;result["guardPasses"]=2;result["sameContextObservationReads"]=4;result["copyId"]=packet["copyId"];
+      result["state"]="owned_rotation_prepared_observed";result["ownedRotation"]=packet;result["expiresUtc"]=packet["expiresUtc"];result["guardPasses"]=2;result["sameContextObservationReads"]=4;result["copyId"]=packet["copyId"];
      }
     }
    }catch(Exception error){result["error"]=error.Message;}
    result["timestampUtc"]=DateTime.UtcNow.ToString("o");return result;
+  }
+  internal static Dictionary<string,object> Run(string id,Dictionary<string,object> args) {
+   try {
+    var config=Program.ReadConfig();Require(config.IsGeneralCore&&config.ownedRotationPlansExperimental,"Owned rotation preparation disabled.");Validate(args);Directory.CreateDirectory(Path.Combine(Program.Root,"operations"));
+    using(var context=new DocumentBindings.ComContext(config))return Prepare(Program.Root,id,args,context);
+   }catch(Exception error){return new Dictionary<string,object>{{"state","owned_rotation_preparation_rejected"},{"bridgeVersion",Program.ReleaseVersion},{"timestampUtc",DateTime.UtcNow.ToString("o")},{"executionEnabled",false},{"geometryMutationAttempted",false},{"contextChangeAttempted",false},{"cadSaveAttempted",false},{"error",error.Message}};}
   }
  }
 }

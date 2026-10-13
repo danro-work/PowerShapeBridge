@@ -1,0 +1,14 @@
+{
+  "coreProfile": "general-v1",
+  "expectedVersion": "23.2.2",
+  "timeoutSeconds": 20,
+  "operationTimeoutSeconds": 80,
+  "maxEntities": 10000,
+  "captureViewport": false,
+  "entitySetsExperimental": true,
+  "operationPlansExperimental": true,
+  "rotationPlansExperimental": true,
+  "workingCopiesExperimental": true,
+  "documentBindingsExperimental": true,
+  "ownedRotationPlansExperimental": true
+}
