@@ -11,6 +11,7 @@ public sealed class WorkingCopyStore(Func<double>? clock=null,Func<DateTimeOffse
     private sealed record Lease(double Expires,JsonObject Parameters);
     private readonly Dictionary<string,Lease> copies=[];
     public void Clear()=>copies.Clear();
+    public void Revoke(string handle)=>copies.Remove(handle);
     private void Purge(){var time=now();foreach(var id in copies.Where(p=>p.Value.Expires<=time).Select(p=>p.Key).ToArray())copies.Remove(id);}
     public static void ValidateSource(JsonObject args)
     {
