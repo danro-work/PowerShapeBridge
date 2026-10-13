@@ -9,7 +9,7 @@ namespace PowerShapeBridge {
  internal static class OwnedSaveAsTests {
   static Dictionary<string,object> Clone(Dictionary<string,object> value){return Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(value));}
   internal sealed class Fake : OwnedSaveAs.IContext {
-   internal Dictionary<string,object> Snapshot,Listing;internal int Calls,Reads;internal bool Throw,NoFile,WrongContent,Changed;
+   internal Dictionary<string,object> Snapshot,Listing;internal int Calls,Reads;internal bool Throw,ThrowAfter,NoFile,WrongContent,Changed;
    internal Action<int> DuringRead;internal Action<string> DuringSave;
    public Dictionary<string,object> Windows(){return Clone(Listing);}
    public Dictionary<string,object> Observation(){Reads++;if(DuringRead!=null)DuringRead(Reads);return Clone(Snapshot);}
@@ -20,6 +20,7 @@ namespace PowerShapeBridge {
     var model=(Dictionary<string,object>)Snapshot["model"];model["path"]=path;model["name"]=Path.GetFileNameWithoutExtension(path);
     var window=Window();window["modelPath"]=path;window["modelName"]=model["name"];Listing["activeWindow"]=window;
     if(WrongContent)Snapshot["lengthUnitFactorRaw"]=2;
+    if(ThrowAfter)throw new IOException("Synthetic lost SaveAs return after fake effect.");
    }
    public void Dispose(){}
    internal Dictionary<string,object> Window(){return (Dictionary<string,object>)((IList)Listing["windows"])[0];}

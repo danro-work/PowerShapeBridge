@@ -1,5 +1,12 @@
 # Дальнейшая работа
 
+Следующий К7 block native fault core:25 cells/audit passed, source native0.33.1
+legacy metadata aligned, SDK0.37.2. Дождаться native regression session86741,
+полный verify-sdk с новым separate fault stage, commit/push/PR(base PR9), clean/CI.
+RECOVERY-FAULT-MATRIX.md содержит остаток SDK per-executor transport faults и
+accepted checkpoint recovery. Не считать native core полным К7. Runtime/K6
+packages/default config не менять; pending K6 user decision остаётся.
+
 К7 resolution/history5a46c88 /draft PR9 offline qualified: clean292 .NET/514 native/
 171 artifacts/ten external STDIO/Inspector,128 hashes и все четыре CIpassed.
 Следующий обязательный блок: полная матрица lost reply/timeout/non-success/partial

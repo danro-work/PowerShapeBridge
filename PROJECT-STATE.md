@@ -1,5 +1,24 @@
 # PowerShape Bridge — состояние для продолжения
 
+Qualification native fault core:25 native cells/audit и conventional514 passed.
+Negative marker test refusedexit3/no fixtures created. Full SDK native0.33.1
+в evidence/K7-fault-matrix/sdk-full выполняется;292 .NET passed. Next commit/
+draft PR(base PR9), clean/CI. Native core всё ещё не покрывает per-executor SDK
+timeout/cancel/lost wire reply, checkpoint recovery и live. Source SDK0.37.2;
+runtime/K6 packages/default config/CAD untouched, Apply permission pending.
+
+К7 fault matrix native core начат: source native/legacy adapter0.33.1-dev,
+SDK0.37.2 unchanged. Internal ordinary-open verifier test seam/rooted receipt
+overload, public Run и fixed args/guards unchanged. Separate CLI с explicit
+isolated marker:25 fake-context cells четырёх executors (control, lost return
+after effect, lost raw response, partial journal, changed process, non-success
+plus code−1). Все25 native/independent artifact audit passed в work/kfv;
+evidence/K7-fault-matrix/qualified. Conventional native regression выполняется;
+full SDK/clean/CI ещё впереди. RECOVERY-FAULT-MATRIX.md. SDK per-executor
+transport timeout/cancel/lost wire reply и checkpoint recovery ещё НЕ покрыты.
+Runtime/K6 packages/default config/CAD unchanged; pending Apply permission
+сохраняется. GoalК11 active, К7–К11 не завершены.
+
 Текущий завершённый offline блок К7: SDK0.37.2 /5a46c88, draft PR9 attached.
 Immutable OutcomeResolutionJournal на четырёх operation-specific verifiers,
 opt-in recoveryResolutionExperimental; readonly history через existing reader,

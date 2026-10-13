@@ -9,7 +9,7 @@ namespace PowerShapeBridge {
  internal static class OwnedSavedReopenExecutionTests {
   internal static Dictionary<string,object> Clone(Dictionary<string,object> data){return Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(data));}
   internal sealed class Context : WorkingCopyOpen.IContext,DocumentBindings.IContext {
-   internal Dictionary<string,object> Snapshot,Listing;internal int Commands,Reads;internal bool Throw,ChangedContent,ChangedUnits;
+   internal Dictionary<string,object> Snapshot,Listing;internal int Commands,Reads;internal bool Throw,ThrowAfter,SuppressOpen,ChangedContent,ChangedUnits;
    internal Action<int> DuringRead;internal Action<string> DuringOpen;
    public Dictionary<string,object> Windows(){return Clone(Listing);}
    public Dictionary<string,object> Observation(){Reads++;if(DuringRead!=null)DuringRead(Reads);return Clone(Snapshot);}
@@ -17,6 +17,7 @@ namespace PowerShapeBridge {
    public void Dispose(){}
    public void Open(string path) {
     Commands++;if(DuringOpen!=null)DuringOpen(path);if(Throw)throw new IOException("Synthetic lost OPEN return.");
+    if(SuppressOpen)return;
     var previous=WorkingCopyOpen.Windows(Listing);foreach(var window in previous)window["selectedRaw"]=0;
     var model=(Dictionary<string,object>)Snapshot["model"];model["id"]=500;model["path"]=path;model["name"]=Path.GetFileNameWithoutExtension(path);
     foreach(var entity in EntitySets.Inventory(Snapshot))entity["nativeId"]=(int)entity["nativeId"]+1000;
@@ -24,6 +25,7 @@ namespace PowerShapeBridge {
     Listing["windows"]=previous.Concat(new[]{added}).ToArray();Listing["activeWindow"]=added;Listing["windowCount"]=previous.Length+1;
     if(ChangedContent)((Dictionary<string,object>)EntitySets.Inventory(Snapshot)[0]["geometry"])["volumeRaw"]=999;
     if(ChangedUnits)Snapshot["lengthUnitFactorRaw"]=2;
+    if(ThrowAfter)throw new IOException("Synthetic lost OPEN return after fake effect.");
    }
   }
   internal sealed class Case {
