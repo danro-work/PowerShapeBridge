@@ -1,5 +1,12 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 текущий offline block:14 SDK cancellation rows +2 protocol controls passed,
+STATUS-K7-SDK-CANCELLATION.md. Local client cancellation не подтверждает native
+return; explicit notifications/cancelled и server timeout проверены отдельно.
+Retained request/artifact SHA и replay rejection подтверждены. Full .NET regression
+314/314 passed без skip; native runtime/default config/CAD этим блоком не менялись.
+К6 qualified остаётся; цель доК11 active, полная К7 ещё не закрыта.
+
 АКТУАЛЬНО: К6 технически квалифицирован в CAD, STATUS-K6-QUALIFIED.md.
 Один SaveAs59f.../один OPEN45... оба terminal succeeded_verified; new binding
 065ba2cc... issued+validated. Independent34 raw/files +71 protected files audit

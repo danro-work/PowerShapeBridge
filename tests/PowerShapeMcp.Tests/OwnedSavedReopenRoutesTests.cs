@@ -15,11 +15,12 @@ public sealed class OwnedSavedReopenRoutesTests
     {
         internal readonly SavedReopenFixture Fixture=new();
         internal McpClient Client { get; private set; }=null!;
+        internal readonly TransportCancellationProof.Recorder CancellationRecorder=new();
         private readonly CancellationTokenSource stop=new(TimeSpan.FromSeconds(30));private readonly McpServer server;private readonly Task run;private readonly StreamClientTransport transport;
         private Connection()
         {
             Fixture.Data.Target.Data.Files.Write("PSBridge.Worker.exe","Opaque marker; never executed.");var input=new Pipe();var output=new Pipe();
-            server=McpServer.Create(new StreamServerTransport(input.Reader.AsStream(),output.Writer.AsStream()),new McpServerOptions{ToolCollection=[..ToolCatalog.Create(Fixture.Session)]});run=server.RunAsync(stop.Token);
+            server=McpServer.Create(new StreamServerTransport(input.Reader.AsStream(),output.Writer.AsStream()),new McpServerOptions{ToolCollection=[..CancellationRecorder.Wrap(ToolCatalog.Create(Fixture.Session))]});run=server.RunAsync(stop.Token);
             transport=new(input.Writer.AsStream(),output.Reader.AsStream());
         }
         internal static async Task<Connection> Create(){var result=new Connection();result.Client=await McpClient.CreateAsync(result.transport,cancellationToken:result.stop.Token);return result;}
@@ -99,5 +100,26 @@ public sealed class OwnedSavedReopenRoutesTests
         Assert.True(replay.IsError);Assert.Single(Directory.GetFiles(Path.Combine(root,"requests")));
         foreach(var pair in before)Assert.Equal(pair.Value,Sha(pair.Key));
         Assert.Equal(protectedPaths.Order(),Directory.GetFiles(root,"*",SearchOption.AllDirectories).Order());
+    }
+
+    [Theory]
+    [InlineData(false,false)]
+    [InlineData(false,true)]
+    [InlineData(true,false)]
+    [InlineData(true,true)]
+    public async Task OfficialSdkCancellationPreservesSavedReopenAndCannotReplay(bool effectReturned,bool notify)
+    {
+        await using var connection=await Connection.Create();
+        var args=connection.OpenArgs().ToDictionary(p=>p.Key,p=>(object?)p.Value!.GetValue<string>());
+        using var cancellation=new CancellationTokenSource();
+        var call=connection.Client.CallToolAsync("execute_owned_saved_reopen",args,cancellationToken:cancellation.Token).AsTask();
+        var (id,parameters)=await connection.Claim("execute_owned_saved_reopen");
+        if(effectReturned)connection.Fixture.Execution(id,parameters,publish:false);
+        await TransportCancellationProof.CancelClaimed(call,cancellation,connection.Fixture.Session,connection.Fixture.Root,id,connection.Client,connection.CancellationRecorder,notify);
+        Assert.Throws<ReferenceRejected>(()=>connection.Fixture.Session.Reopens.Parameters(connection.Fixture.Handle));
+        if(effectReturned)Assert.True(File.Exists(FileArtifacts.FixedPath(connection.Fixture.Root,"workingcopies",connection.Fixture.Prepared["reopen"]!["copyId"]!.GetValue<string>(),"open-once.json")));
+        var before=TransportCancellationProof.Snapshot(connection.Fixture.Root);
+        Assert.True((await connection.Client.CallToolAsync("execute_owned_saved_reopen",args)).IsError);
+        TransportCancellationProof.Unchanged(connection.Fixture.Root,before);
     }
 }

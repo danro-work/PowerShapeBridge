@@ -16,12 +16,13 @@ public sealed class OwnedSaveExecutionRoutesTests
         internal OwnedSaveTargetTests.TargetFixture Data { get; }
         internal SavedResultFixture Saved { get; }
         internal McpClient Client { get; private set; }=null!;
+        internal readonly TransportCancellationProof.Recorder CancellationRecorder=new();
         private readonly CancellationTokenSource stop=new(TimeSpan.FromSeconds(30));
         private readonly McpServer server;private readonly Task run;private readonly StreamClientTransport transport;
         private Connection(bool readOnly,bool saves)
         {
             Data=new(readOnly,saves:saves);Saved=new(Data);Data.Data.Files.Write("PSBridge.Worker.exe","Opaque fake marker; never executed.");
-            var input=new Pipe();var output=new Pipe();server=McpServer.Create(new StreamServerTransport(input.Reader.AsStream(),output.Writer.AsStream()),new McpServerOptions{ToolCollection=[..ToolCatalog.Create(Data.Session)]});
+            var input=new Pipe();var output=new Pipe();server=McpServer.Create(new StreamServerTransport(input.Reader.AsStream(),output.Writer.AsStream()),new McpServerOptions{ToolCollection=[..CancellationRecorder.Wrap(ToolCatalog.Create(Data.Session))]});
             run=server.RunAsync(stop.Token);transport=new(input.Writer.AsStream(),output.Reader.AsStream());
         }
         internal static async Task<Connection> Create(bool readOnly=false,bool saves=true){var result=new Connection(readOnly,saves);result.Client=await McpClient.CreateAsync(result.transport,cancellationToken:result.stop.Token);return result;}
@@ -107,5 +108,31 @@ public sealed class OwnedSaveExecutionRoutesTests
         Assert.Equal(connection.Data.Id,connection.Data.Targets.ValidationParameters(handle)["targetId"]!.GetValue<string>());
         connection.Data.Data.Files.Write("maintenance.json","{}");var result=Read(await new OwnedSaveTools(connection.Data.Session).ExecuteOwnedSaveAs(handle,CancellationToken.None));Assert.Equal("maintenance_before_submission",result["state"]!.GetValue<string>());
         Assert.False(Directory.Exists(Path.Combine(connection.Data.Data.Root,"requests")));
+    }
+
+    [Theory]
+    [InlineData(false,false)]
+    [InlineData(false,true)]
+    [InlineData(true,false)]
+    [InlineData(true,true)]
+    public async Task OfficialSdkCancellationPreservesSaveAndOriginalArtifacts(bool effectReturned,bool notify)
+    {
+        await using var connection=await Connection.Create();var handle=connection.Data.Issue();
+        var args=new Dictionary<string,object?>{["ownedSaveAsHandle"]=handle};
+        using var cancellation=new CancellationTokenSource();
+        var call=connection.Client.CallToolAsync("execute_owned_save_as",args,cancellationToken:cancellation.Token).AsTask();
+        var (id,_)=await connection.Claim("execute_owned_save_as");
+        if(effectReturned)ArtifactProof.Freeze(connection.Data.Data.Root,"responses/"+id+".unpublished",connection.Saved.Execute(id,publish:false));
+        await TransportCancellationProof.CancelClaimed(call,cancellation,connection.Data.Session,connection.Data.Data.Root,id,connection.Client,connection.CancellationRecorder,notify);
+        Assert.Throws<ReferenceRejected>(()=>connection.Data.Targets.ValidationParameters(handle));
+        Assert.Throws<ReferenceRejected>(()=>connection.Data.Bindings.ValidationParameters(connection.Data.Binding));
+        if(effectReturned)
+        {
+            Assert.True(File.Exists(FileArtifacts.FixedPath(connection.Data.Data.Root,"savedresults",connection.Data.Id,"save-once.json")));
+            Assert.True(File.Exists(FileArtifacts.FixedPath(connection.Data.Data.Root,"workingcopies",connection.Data.Plan["copyId"]!.GetValue<string>(),"mutation-fence.json")));
+        }
+        var before=TransportCancellationProof.Snapshot(connection.Data.Data.Root);
+        Assert.True((await connection.Client.CallToolAsync("execute_owned_save_as",args)).IsError);
+        TransportCancellationProof.Unchanged(connection.Data.Data.Root,before);
     }
 }

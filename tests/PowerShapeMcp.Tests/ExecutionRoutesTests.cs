@@ -19,15 +19,16 @@ public sealed class ExecutionRoutesTests
         public string Document { get; }
         public string Copy { get; }
         public string Owned { get; }
+        internal readonly TransportCancellationProof.Recorder CancellationRecorder=new();
         private readonly CancellationTokenSource stop=new(TimeSpan.FromSeconds(30));
         private readonly McpServer server;
         private readonly Task run;
         private readonly StreamClientTransport transport;
-        private Connection(bool readOnly,bool open,bool execute)
+        private Connection(bool readOnly,bool open,bool execute,int timeout=1)
         {
             foreach(var flag in new[]{"entitySetsExperimental","operationPlansExperimental","workingCopiesExperimental","documentBindingsExperimental","ownedOperationPlansExperimental"})Data.Files.Config[flag]=true;
             Data.Files.Config["workingCopyOpenExperimental"]=open;Data.Files.Config["ownedTranslationsExperimental"]=execute;Data.Files.SaveConfig();
-            Data.Files.Write("PSBridge.Worker.exe","Fake marker; never executed.");Session=new(Data.Files.Options(readOnly,1),()=>Data.Time,()=>Data.Utc);
+            Data.Files.Write("PSBridge.Worker.exe","Fake marker; never executed.");Session=new(Data.Files.Options(readOnly,timeout),()=>Data.Time,()=>Data.Utc);
             Document=Session.Candidates.Issue(Data.Source,Data.SourceSha)["candidateDocumentHandle"]!.GetValue<string>();
             var copyId=Data.BindingReceipt["binding"]!["copyId"]!.GetValue<string>();
             Copy=Session.Copies.Issue(new(){["state"]="working_copy_prepared_disk",["copyId"]=copyId,["bridgeRequestId"]=copyId,["ownershipSha256"]=new string('d',64),["timestampUtc"]=LeaseTime.Format(Data.Utc)})["workingCopyHandle"]!.GetValue<string>();
@@ -40,11 +41,11 @@ public sealed class ExecutionRoutesTests
             packet["nativeObservedPropertiesSha256"]=new string('e',64);packet["windowContextSha256"]=new string('f',64);packet["workingSha256"]=new string('a',64);packet["copyId"]=copyId;packet["ownershipSha256"]=new string('d',64);
             var sha=ArtifactProof.Freeze(Data.Root,"ownedoperations/"+id+".json",packet);PreparedJournal.Create(Data.Root,id,sha,Data.Utc,new(){["executionEnabled"]=false});
             Owned=Session.Owned.Issue(new(){["state"]="owned_operation_prepared_observed",["ownedOperationId"]=id,["ownedOperationSha256"]=sha,["ownedOperation"]=packet,["expiresUtc"]=packet["expiresUtc"]!.DeepClone(),["bridgeRequestId"]=id,["executionEnabled"]=false,["geometryMutationAttempted"]=false,["contextChangeAttempted"]=false,["cadSaveAttempted"]=false},parameters,planHandle,binding)["ownedOperationHandle"]!.GetValue<string>();
-            var input=new Pipe();var output=new Pipe();server=McpServer.Create(new StreamServerTransport(input.Reader.AsStream(),output.Writer.AsStream()),new McpServerOptions{ToolCollection=[..ToolCatalog.Create(Session)]});
+            var input=new Pipe();var output=new Pipe();server=McpServer.Create(new StreamServerTransport(input.Reader.AsStream(),output.Writer.AsStream()),new McpServerOptions{ToolCollection=[..CancellationRecorder.Wrap(ToolCatalog.Create(Session))]});
             run=server.RunAsync(stop.Token);transport=new(input.Writer.AsStream(),output.Reader.AsStream());
         }
-        public static async Task<Connection> Create(bool readOnly=false,bool open=true,bool execute=true)
-        {var result=new Connection(readOnly,open,execute);result.Client=await McpClient.CreateAsync(result.transport,cancellationToken:result.stop.Token);return result;}
+        public static async Task<Connection> Create(bool readOnly=false,bool open=true,bool execute=true,int timeout=1)
+        {var result=new Connection(readOnly,open,execute,timeout);result.Client=await McpClient.CreateAsync(result.transport,cancellationToken:result.stop.Token);return result;}
         public string Choice()
         {
             var issued=Session.Documents.Issue(new(){["state"]="documents_listed_verified",["bridgeRequestId"]=new string('a',32),["timestampUtc"]=LeaseTime.Format(Data.Utc),["documents"]=new JsonArray(new JsonObject{["modelId"]=9,["windowNumber"]=4,["activationSupported"]=true})},new string('b',64));
@@ -134,6 +135,36 @@ public sealed class ExecutionRoutesTests
         Assert.True(File.Exists(Path.Combine(connection.Data.Root,"requests",id+".json.processing")));
         Assert.Throws<ReferenceRejected>(()=>connection.Session.Owned.ValidationParameters(connection.Owned));
         Assert.Single(Directory.GetFiles(Path.Combine(connection.Data.Root,"requests")));
+    }
+
+    [Theory]
+    [InlineData("execute_owned_translation",false)]
+    [InlineData("execute_owned_translation",true)]
+    [InlineData("open_working_copy",false)]
+    [InlineData("open_working_copy",true)]
+    [InlineData("activate_document",false)]
+    [InlineData("activate_document",true)]
+    public async Task OfficialSdkCancellationPreservesClaimedExecutionAndCannotReplay(string recipe,bool notify)
+    {
+        await using var connection=await Connection.Create(timeout:5);
+        var choice=recipe=="execute_owned_translation"?null:connection.Choice();
+        var args=recipe switch
+        {
+            "execute_owned_translation"=>new Dictionary<string,object?>{["ownedOperationHandle"]=connection.Owned},
+            "open_working_copy"=>new Dictionary<string,object?>{["workingCopyHandle"]=connection.Copy,["candidateDocumentHandle"]=connection.Document,["activeDocumentHandle"]=choice},
+            _=>new Dictionary<string,object?>{["documentHandle"]=choice}
+        };
+        using var cancellation=new CancellationTokenSource();
+        var call=connection.Client.CallToolAsync(recipe,args,cancellationToken:cancellation.Token).AsTask();
+        var (id,_)=await connection.Claim(recipe);
+        await TransportCancellationProof.CancelClaimed(call,cancellation,connection.Session,connection.Data.Root,id,connection.Client,connection.CancellationRecorder,notify);
+        Assert.Throws<ReferenceRejected>(()=>connection.Session.Candidates.DocumentParameters(connection.Document));
+        if(recipe=="execute_owned_translation")Assert.Throws<ReferenceRejected>(()=>connection.Session.Owned.ValidationParameters(connection.Owned));
+        if(recipe=="open_working_copy")Assert.Throws<ReferenceRejected>(()=>connection.Session.Copies.InspectParameters(connection.Copy));
+        if(choice is not null)Assert.Throws<ReferenceRejected>(()=>connection.Session.Documents.Consume(choice));
+        var before=TransportCancellationProof.Snapshot(connection.Data.Root);
+        Assert.True((await connection.Client.CallToolAsync(recipe,args)).IsError);
+        TransportCancellationProof.Unchanged(connection.Data.Root,before);
     }
 
     [Fact]
