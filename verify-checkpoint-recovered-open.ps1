@@ -28,3 +28,8 @@ $taskSdkHost=Join-Path $PSScriptRoot 'src\PowerShapeMcp.Host\bin\Release\net10.0
 if($LASTEXITCODE -ne 0){throw 'Full SDK/native checkpoint wire workflow failed; preserve artifacts.'}
 & $PythonPath (Join-Path $PSScriptRoot 'src\audit_checkpoint_wire_stdio.py') --stage $StageDirectory --evidence $taskWireEvidence --output (Join-Path $EvidenceDirectory 'wire-audit.json')
 if($LASTEXITCODE -ne 0){throw 'Independent checkpoint wire artifact audit failed.'}
+$taskFilesystemEvidence=Join-Path $EvidenceDirectory 'filesystem-wire'
+& $PythonPath (Join-Path $PSScriptRoot 'src\test_sdk_checkpoint_filesystem_faults.py') --dotnet $DotnetPath --host $taskSdkHost --stage $StageDirectory --evidence $taskFilesystemEvidence
+if($LASTEXITCODE -ne 0){throw 'SDK/native interrupted-copy/reparse scenarios failed.'}
+& $PythonPath (Join-Path $PSScriptRoot 'src\audit_checkpoint_filesystem_stdio.py') --stage $StageDirectory --evidence $taskFilesystemEvidence --output (Join-Path $EvidenceDirectory 'filesystem-wire-audit.json')
+if($LASTEXITCODE -ne 0){throw 'Independent native filesystem STDIO failure audit failed.'}

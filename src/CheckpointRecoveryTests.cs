@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -10,10 +11,20 @@ namespace PowerShapeBridge {
   static void Require(bool ok,string reason){if(!ok)throw new InvalidOperationException(reason);}
   static Dictionary<string,string> Hashes(string root){return Directory.GetFiles(root,"*",SearchOption.AllDirectories).ToDictionary(path=>path,path=>Program.Hash(path));}
   static Dictionary<string,object> Copy(Dictionary<string,object> value){return Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(value));}
+  internal static string Junction(string root,string directory,string targetName) {
+   string target=Path.Combine(root,targetName),prefix=Path.GetFullPath(root).TrimEnd('\\')+"\\";
+   Require(Path.GetFullPath(directory).StartsWith(prefix,StringComparison.OrdinalIgnoreCase)&&Path.GetFullPath(target).StartsWith(prefix,StringComparison.OrdinalIgnoreCase),"Junction fixture paths outside owned root.");
+   Require(Directory.Exists(directory)&&!Directory.Exists(target)&&!File.Exists(target),"Junction fixture target exists/missing source.");
+   Directory.Move(directory,target);
+   using(var child=Process.Start(new ProcessStartInfo("cmd.exe","/d /c mklink /J \""+directory+"\" \""+target+"\""){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true})) {
+    string output=child.StandardOutput.ReadToEnd(),error=child.StandardError.ReadToEnd();Require(child.WaitForExit(10000)&&child.ExitCode==0,"Own junction fixture failed: "+output+error);
+   }
+   Require((File.GetAttributes(directory)&FileAttributes.ReparsePoint)!=0,"Junction fixture is not a reparse point.");return target;
+  }
   internal static int Run() {
    if(!File.Exists(Path.Combine(Program.Root,".checkpoint-recovery-fixture")))throw new InvalidOperationException("Explicit isolated checkpoint recovery stage required; no CAD.");
    var rows=new List<Dictionary<string,object>>();
-   foreach(string fault in new[]{"prepared_only","control","working_changed_before","expired","future_intent","checkpoint_writable","checkpoint_changed","checkpoint_replaced","checkpoint_hardlink","ownership_changed","plan_changed","busy_executor","busy_checkpoint","partial_after_claim","partial_after_copy","foreign_copy_identity"}) {
+   foreach(string fault in new[]{"prepared_only","control","working_changed_before","expired","future_intent","checkpoint_writable","checkpoint_changed","checkpoint_replaced","checkpoint_hardlink","ownership_changed","plan_changed","busy_executor","busy_checkpoint","partial_after_claim","partial_after_copy","foreign_copy_identity","checkpoint_junction","intent_junction","partial_copy_after_working_write","partial_copy_before_ownership","partial_copy_ownership_record","partial_copy_after_ownership"}) {
     string root=Path.Combine(Program.Root,"work","checkpoint-recovery-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(root);Directory.CreateDirectory(Path.Combine(root,"operations"));Directory.CreateDirectory(Path.Combine(root,"responses"));
     string source=Path.Combine(root,"Source.psmodel");File.WriteAllText(source,"Opaque checkpoint saved bytes; never CAD.");var copy=OwnedCopies.Create(root,Guid.NewGuid().ToString("N"),source,Program.Hash(source));var owner=(Dictionary<string,object>)copy["ownership"];
     string working=(string)((Dictionary<string,object>)owner["working"])["path"],checkpoint=(string)((Dictionary<string,object>)owner["checkpoint"])["path"];
@@ -41,18 +52,32 @@ namespace PowerShapeBridge {
     if(fault=="checkpoint_changed"){File.SetAttributes(checkpoint,FileAttributes.Normal);File.AppendAllText(checkpoint," Own injected corruption.");File.SetAttributes(checkpoint,FileAttributes.ReadOnly);originalProtected[checkpoint]=Program.Hash(checkpoint);}
     if(fault=="checkpoint_replaced"){var bytes=File.ReadAllBytes(checkpoint);File.SetAttributes(checkpoint,FileAttributes.Normal);File.Move(checkpoint,Path.Combine(root,"OldCheckpoint.psmodel"));File.WriteAllBytes(checkpoint,bytes);File.SetAttributes(checkpoint,FileAttributes.ReadOnly);}
     if(fault=="checkpoint_hardlink")Require(CreateHardLink(Path.Combine(root,"Alias.psmodel"),checkpoint,IntPtr.Zero),"Hardlink negative fixture creation failed.");
+    string junctionPath=null,junctionTarget=null;
+    if(fault=="checkpoint_junction"){junctionPath=Path.GetDirectoryName(checkpoint);junctionTarget=Junction(root,junctionPath,"OwnRelocatedCheckpoint");}
+    if(fault=="intent_junction"){junctionPath=Path.Combine(root,"checkpointrecoveries");junctionTarget=Junction(root,junctionPath,"OwnRelocatedIntents");}
     if(fault=="ownership_changed"){string path=Path.Combine(Path.GetDirectoryName(working),"ownership.json");File.AppendAllText(path," ");originalProtected[path]=Program.Hash(path);}
     if(fault=="plan_changed"){string path=Path.Combine(root,"copyopenplans",originId+".json");File.AppendAllText(path," ");originalProtected[path]=Program.Hash(path);}
     if(fault=="busy_executor")busy=new FileStream(Path.Combine(root,"operations","executor.lock"),FileMode.Open,FileAccess.ReadWrite,FileShare.None);
     if(fault=="busy_checkpoint")busy=new FileStream(checkpoint,FileMode.Open,FileAccess.Read,FileShare.None);
     if(fault=="foreign_copy_identity")newId=(string)copy["copyId"];
     var parameters=new Dictionary<string,object>{{"recoveryId",intentId},{"recoverySha256",intentSha}};Dictionary<string,object> result;
-    try{result=CheckpointRecovery.Create(root,newId,parameters,phase=>{if(fault=="partial_"+phase)throw new IOException("Synthetic interrupted recovery "+phase);});}finally{if(busy!=null)busy.Dispose();}
+    try{result=CheckpointRecovery.Create(root,newId,parameters,phase=>{
+     if(fault=="partial_copy_ownership_record"&&phase=="copy_before_ownership"){File.WriteAllText(Path.Combine(root,"workingcopies",newId,"ownership.json"),"{\"schemaVersion\":2,");throw new IOException("Own interrupted ownership record.");}
+     if(fault=="partial_"+phase)throw new IOException("Synthetic interrupted recovery "+phase);
+    });}finally{if(busy!=null)busy.Dispose();}
     result["bridgeRequestId"]=newId;NativeJournal.Freeze(Path.Combine(root,"responses",newId+".json"),result);
-    bool control=fault=="control"||fault=="working_changed_before",partial=fault=="partial_after_claim"||fault=="partial_after_copy";
+    bool control=fault=="control"||fault=="working_changed_before",partial=fault.StartsWith("partial_",StringComparison.Ordinal);
     Require(Equals(result["state"],control?"checkpoint_working_copy_prepared_disk":partial?"checkpoint_copy_outcome_unknown":"checkpoint_copy_rejected_before_creation"),fault+": wrong state "+Program.Json.Serialize(result));
     Require(originalProtected.All(pair=>Program.Hash(pair.Key)==pair.Value),fault+": original artifacts modified.");
     string claim=Path.Combine(root,"checkpointrecoveries",intentId+".copy-once.json");Require(File.Exists(claim)==(control||partial),fault+": claim phase differs.");
+    if(junctionPath!=null)Require(Convert.ToString(result["error"]).IndexOf("reparse",StringComparison.OrdinalIgnoreCase)>=0,"Reparse fixture failed for another reason.");
+    if(fault.StartsWith("partial_copy_",StringComparison.Ordinal)) {
+     string folder=Path.Combine(root,"workingcopies",newId),work=Path.Combine(folder,"Working_"+newId+".psmodel"),before=Path.Combine(folder,"checkpoint","Before.psmodel"),ownership=Path.Combine(folder,"ownership.json");
+     Require(new FileInfo(work).Length>0,"Interrupted working bytes missing.");
+     Require(!File.Exists(Path.Combine(root,"checkpointcopyplans",newId+".result.json")),"Interrupted copy received materialization proof.");
+     if(fault=="partial_copy_after_working_write")Require(new FileInfo(before).Length==0&&!File.Exists(ownership),"Working-write phase differs.");
+     else {Require(Program.Hash(work)==Program.Hash(checkpoint)&&Program.Hash(before)==Program.Hash(checkpoint)&&(File.GetAttributes(before)&FileAttributes.ReadOnly)!=0,"Interrupted complete byte copies differ.");Require(File.Exists(ownership)==(fault!="partial_copy_before_ownership"),"Ownership publication phase differs.");}
+    }
     if(control) {
      var recovered=(Dictionary<string,object>)result["ownership"];string work=(string)((Dictionary<string,object>)recovered["working"])["path"],before=(string)((Dictionary<string,object>)recovered["checkpoint"])["path"];
      Require(Program.Hash(work)==Program.Hash(checkpoint)&&Program.Hash(before)==Program.Hash(checkpoint)&&(File.GetAttributes(before)&FileAttributes.ReadOnly)!=0,"Recovered bytes/readonly differ.");
@@ -60,7 +85,7 @@ namespace PowerShapeBridge {
     }
     // Only test duplicate claimed intents. No automatic retry of a transient failure.
     if(control||partial){var beforeRetry=Hashes(root);var duplicate=CheckpointRecovery.Create(root,Guid.NewGuid().ToString("N"),parameters);Require(Equals(duplicate["state"],"checkpoint_copy_rejected_before_creation"),fault+": duplicate intent accepted.");var afterRetry=Hashes(root);Require(beforeRetry.Count==afterRetry.Count&&beforeRetry.All(pair=>afterRetry[pair.Key]==pair.Value),"Duplicate intent changed artifacts.");}
-    rows.Add(new Dictionary<string,object>{{"fault",fault},{"root",root},{"originId",originId},{"prepared",prepared},{"parameters",parameters},{"result",result},{"copyId",newId},{"originPlanSha256",originSha},{"protectedHashes",originalProtected},{"artifactHashes",Hashes(root)},{"cadConnectionAttempted",false}});
+    rows.Add(new Dictionary<string,object>{{"fault",fault},{"root",root},{"originId",originId},{"prepared",prepared},{"parameters",parameters},{"result",result},{"copyId",newId},{"originPlanSha256",originSha},{"protectedHashes",originalProtected},{"junctionPath",junctionPath},{"junctionTarget",junctionTarget},{"artifactHashes",Hashes(root)},{"cadConnectionAttempted",false}});
    }
    Directory.CreateDirectory(Path.Combine(Program.Root,"reports"));NativeJournal.Freeze(Path.Combine(Program.Root,"reports","checkpoint-recovery-matrix.json"),new Dictionary<string,object>{{"schema","psbridge.checkpoint-recovery-matrix.v1"},{"state","passed"},{"rows",rows},{"cadConnectionAttempted",false},{"scope","Filesystem-only protected checkpoint recovery; no OPEN, CAD or original outcome resolution"}});
    Console.WriteLine("PASS: "+rows.Count+" native checkpoint recovery cases; no CAD.");return rows.Count;

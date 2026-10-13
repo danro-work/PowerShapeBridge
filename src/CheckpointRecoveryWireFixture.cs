@@ -6,7 +6,7 @@ using System.Linq;
 namespace PowerShapeBridge {
  // Explicitly marked isolated request-driven fixture. Only fake CAD contexts.
  internal static class CheckpointRecoveryWireFixture {
-  static readonly string[] Faults={"control","lost_return_after_effect","no_effect","changed_process","partial_open_journal","wrong_verify_model","lost_reply"};
+  static readonly string[] Faults={"control","lost_return_after_effect","no_effect","changed_process","partial_open_journal","wrong_verify_model","lost_reply","checkpoint_junction","intent_junction","partial_copy_after_working_write","partial_copy_before_ownership","partial_copy_ownership_record","partial_copy_after_ownership"};
   static Dictionary<string,object> Read(string path){OwnedCopies.NoReparse(path);return Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(path));}
   static void Require(bool ok,string message){if(!ok)throw new InvalidOperationException(message);}
   static Dictionary<string,object> Clone(Dictionary<string,object> data){return OwnedSavedReopenExecutionTests.Clone(data);}
@@ -33,7 +33,17 @@ namespace PowerShapeBridge {
    var request=FileRequests.Parse(id,File.ReadAllText(Path.Combine(Program.Root,"requests",id+".json.processing")));QueueOperations.ValidateRequest(id,request);Require(Equals(request["operation"],"recipe.prepare"),"Only fixed recipes supported.");
    var envelope=(Dictionary<string,object>)request["arguments"];string recipe=(string)envelope["recipeId"];var args=(Dictionary<string,object>)envelope["parameters"];Dictionary<string,object> result;
    if(recipe=="prepare_checkpoint_recovery")result=CheckpointRecovery.Prepare(Program.Root,id,args);
-   else if(recipe=="create_checkpoint_working_copy")result=CheckpointRecovery.Create(Program.Root,id,args);
+   else if(recipe=="create_checkpoint_working_copy") {
+    string fault=(string)marker["fault"];
+    if(fault=="checkpoint_junction")CheckpointRecoveryTests.Junction(Program.Root,Path.Combine(Program.Root,"workingcopies",(string)marker["originCopyId"],"checkpoint"),"OwnRelocatedCheckpoint");
+    if(fault=="intent_junction")CheckpointRecoveryTests.Junction(Program.Root,Path.Combine(Program.Root,"checkpointrecoveries"),"OwnRelocatedIntents");
+    Action<string> interruption=null;
+    if(fault.StartsWith("partial_copy_",StringComparison.Ordinal))interruption=phase=>{
+     if(fault=="partial_copy_ownership_record"&&phase=="copy_before_ownership"){File.WriteAllText(Path.Combine(Program.Root,"workingcopies",id,"ownership.json"),"{\"schemaVersion\":2,");throw new IOException("Own interrupted ownership record.");}
+     if(fault=="partial_"+phase)throw new IOException("Own interrupted wire recovery: "+phase);
+    };
+    result=CheckpointRecovery.Create(Program.Root,id,args,interruption);
+   }
    else if(recipe=="inspect_active_model"){Require(args.Count==0,"Unexpected read parameters.");result=context.Observation();}
    else if(recipe=="list_documents") {
     Require(args.Count==0,"Unexpected listing parameters.");result=context.Windows();result["state"]="documents_listed_verified";

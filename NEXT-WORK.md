@@ -1,5 +1,14 @@
 # Дальнейшая работа
 
+Filesystem faults22 native/355 hashes +6 STDIO-native/184 hashes12 requests
+passed. Full session29587 completed PASS in evidence/K7-checkpoint-filesystem-faults/sdk-full,
+stage work/K7-checkpoint-filesystem-sdk-full;368/531/1750 mismatch/32/25/20/40/22/
+6 recovered OPEN/7 wire/6 filesystem wire/Inspector passed;167 hashes matched.
+Publish source/CI. STATUS-K7-CHECKPOINT-FILESYSTEM.md.
+Then build qualified runtime package preserving current flags, prepare deployment
+plan-only/backup and exact live checkpoint scenario; ask final required approval.
+No apply/OPEN until agreed scenario. PR23 four CI passed; installed0.33.3 unchanged.
+
 Checkpoint wire full route seven cases/413 hashes/56 requests passed, fake CAD.
 Full verify-sdk session91892 completed PASS; evidence/K7-checkpoint-wire/sdk-full,
 stage work/K7-checkpoint-wire-sdk-full.368/531/1750 mismatch/32/25/20/40/16/6/7/

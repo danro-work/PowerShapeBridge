@@ -1,5 +1,16 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 filesystem faults:22 native cases355 hashes +6 actual SDK/native queue
+failure cases184 hashes12 requests passed. Internal opt-in copy fault seam;
+standard public Create/queue parameters unchanged. STATUS-K7-CHECKPOINT-FILESYSTEM.md.
+Full session29587 completed PASS, evidence/K7-checkpoint-filesystem-faults/sdk-full,
+stage work/K7-checkpoint-filesystem-sdk-full;368/531/1750 mismatch/32/25/20/40/22/
+6 recovered OPEN/7 wire/6 filesystem wire/Inspector passed;167 hashes matched.
+PR23 four CI passed.
+Passive read native0.33.3/process17304/six windows/active Test_Block_P2 confirmed;
+CAD not changed. Next qualified source/CI +concrete separately agreed live package.
+General MCP v1/К7/К8–К11 not complete.
+
 К7 checkpoint wire: seven whole official SDK STDIO/native queue scenarios
 passed with fake CAD; independent413 hashes/56 requests audit passed.
 STATUS-K7-CHECKPOINT-WIRE.md, evidence/K7-checkpoint-wire/final +wire-audit.json.

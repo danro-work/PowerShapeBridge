@@ -65,6 +65,12 @@ namespace PowerShapeBridge {
    return schemaVersion==1?"Working.psmodel":"Working_"+id+".psmodel";
   }
   public static Dictionary<string,object> Create(string root,string id,string sourcePath,string expectedSha,int schemaVersion=2) {
+   return CreateCore(root,id,sourcePath,expectedSha,schemaVersion,null);
+  }
+  internal static Dictionary<string,object> CreateInterrupted(string root,string id,string sourcePath,string expectedSha,int schemaVersion,Action<string> interruption) {
+   return CreateCore(root,id,sourcePath,expectedSha,schemaVersion,interruption);
+  }
+  static Dictionary<string,object> CreateCore(string root,string id,string sourcePath,string expectedSha,int schemaVersion,Action<string> interruption) {
    string workingName=WorkingName(id,schemaVersion);
    ValidatePrepare(new Dictionary<string,object>{{"sourcePath",sourcePath},{"sourceSha256",expectedSha}});
    sourcePath=LocalPath(sourcePath);NoReparse(sourcePath);string folder=Folder(root,id);
@@ -84,8 +90,8 @@ namespace PowerShapeBridge {
     string working=Path.Combine(folder,workingName),checkpoint=Path.Combine(checkpointFolder,"Before.psmodel");
     using(var work=new FileStream(working,FileMode.CreateNew,FileAccess.ReadWrite,FileShare.None))using(var before=new FileStream(checkpoint,FileMode.CreateNew,FileAccess.ReadWrite,FileShare.None)) {
      var workIdentity=FileIdentity(work,working,true);var checkpointIdentity=FileIdentity(before,checkpoint,true);Distinct(sourceIdentity,workIdentity,checkpointIdentity);
-     byte[] buffer=new byte[65536];int size;long written=0;
-     while((size=source.Read(buffer,0,buffer.Length))>0){work.Write(buffer,0,size);before.Write(buffer,0,size);written+=size;if(written>MaximumBytes)throw new IOException("Source exceeded copy limit.");}
+     byte[] buffer=new byte[65536];int size;long written=0;bool interruptedPhaseOffered=false;
+     while((size=source.Read(buffer,0,buffer.Length))>0){work.Write(buffer,0,size);if(!interruptedPhaseOffered){interruptedPhaseOffered=true;if(interruption!=null)interruption("copy_after_working_write");}before.Write(buffer,0,size);written+=size;if(written>MaximumBytes)throw new IOException("Source exceeded copy limit.");}
      work.Flush(true);before.Flush(true);
      if(written!=length||source.Length!=length||Digest(source)!=expectedSha||Digest(work)!=expectedSha||Digest(before)!=expectedSha)throw new IOException("Copy bytes differ from locked source.");
      var manifest=new Dictionary<string,object>{{"schemaVersion",schemaVersion},{"copyId",id},{"bridgeVersion",Program.ReleaseVersion},{"createdUtc",DateTime.UtcNow.ToString("o")},{"scope","saved_disk_bytes_only"},{"executionEnabled",false},
@@ -94,7 +100,9 @@ namespace PowerShapeBridge {
       {"checkpoint",new Dictionary<string,object>{{"path",checkpoint},{"sha256",expectedSha},{"length",length},{"fileIdentity",checkpointIdentity}}}};
      // ReadOnly adds a filesystem guard; a future executor must still reject checkpoint paths.
      File.SetAttributes(checkpoint,FileAttributes.ReadOnly);
+     if(interruption!=null)interruption("copy_before_ownership");
      string ownershipSha=Freeze(Path.Combine(folder,"ownership.json"),manifest);
+     if(interruption!=null)interruption("copy_after_ownership");
      return new Dictionary<string,object>{{"state","working_copy_prepared_disk"},{"copyId",id},{"ownershipSha256",ownershipSha},{"ownership",manifest},{"workingFileChanged",false},{"cadMutationAttempted",false},{"powerShapeConnectionAttempted",false},{"qualification",Qualification}};
     }
    }
