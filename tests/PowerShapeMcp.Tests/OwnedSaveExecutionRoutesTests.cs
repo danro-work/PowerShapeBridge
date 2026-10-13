@@ -134,5 +134,41 @@ public sealed class OwnedSaveExecutionRoutesTests
         var before=TransportCancellationProof.Snapshot(connection.Data.Data.Root);
         Assert.True((await connection.Client.CallToolAsync("execute_owned_save_as",args)).IsError);
         TransportCancellationProof.Unchanged(connection.Data.Data.Root,before);
+        TransportCancellationProof.Record(connection.Data.Data.Root,id,"execute_owned_save_as",(notify?"cancel_notified_":"cancel_local_")+(effectReturned?"returned":"pending"),"client_wait_cancelled",before);
+    }
+
+    [Theory]
+    [InlineData("claimed_timeout")]
+    [InlineData("returned_reply_lost")]
+    [InlineData("late_receipt")]
+    public async Task OfficialSdkLostReplyPreservesSaveEvidence(string fault)
+    {
+        await using var connection=await Connection.Create();var handle=connection.Data.Issue();
+        var args=new Dictionary<string,object?>{["ownedSaveAsHandle"]=handle};
+        var call=connection.Client.CallToolAsync("execute_owned_save_as",args).AsTask();var (id,_)=await connection.Claim("execute_owned_save_as");
+        var root=connection.Data.Data.Root;
+        if(fault!="claimed_timeout")ArtifactProof.Freeze(root,"responses/"+id+".unpublished",connection.Saved.Execute(id,publish:false));
+        var before=TransportCancellationProof.Snapshot(root);var response=await call;var data=Read(response);
+        Assert.True(response.IsError);Assert.Equal("owned_save_as_outcome_unknown",data["state"]!.GetValue<string>());
+        Assert.Equal("timeout_outcome_unknown",data["nativeState"]!.GetValue<string>());
+        Assert.True(data["cadSaveMayHaveOccurred"]!.GetValue<bool>());Assert.False(data["retryAllowed"]!.GetValue<bool>());Assert.Null(data["savedResultHandle"]);
+        Assert.Throws<ReferenceRejected>(()=>connection.Data.Targets.ValidationParameters(handle));
+        Assert.True(File.Exists(FileArtifacts.FixedPath(root,"requests",id+".json.processing")));Assert.False(File.Exists(FileArtifacts.FixedPath(root,"responses",id+".json")));
+        TransportCancellationProof.Unchanged(root,before);
+        if(fault!="claimed_timeout")
+        {
+            LostReplyFixture.OneAuthoritativeReturn(root,id);
+            Assert.True(File.Exists(FileArtifacts.FixedPath(root,"savedresults",connection.Data.Id,"save-once.json")));
+            Assert.True(File.Exists(FileArtifacts.FixedPath(root,"workingcopies",connection.Data.Plan["copyId"]!.GetValue<string>(),"mutation-fence.json")));
+        }
+        if(fault=="late_receipt")
+        {
+            var raw=FileArtifacts.FixedPath(root,"responses",id+".unpublished");var sha=FileArtifacts.Sha256(File.ReadAllBytes(raw));
+            LostReplyFixture.PublishOriginal(root,id);Assert.Equal(sha,FileArtifacts.Sha256(File.ReadAllBytes(FileArtifacts.FixedPath(root,"responses",id+".json"))));
+            Assert.Equal("owned_save_as_outcome_unknown",data["state"]!.GetValue<string>());
+        }
+        before=TransportCancellationProof.Snapshot(root);Assert.True((await connection.Client.CallToolAsync("execute_owned_save_as",args)).IsError);
+        TransportCancellationProof.Unchanged(root,before);Assert.Single(Directory.GetFiles(Path.Combine(root,"requests")));
+        TransportCancellationProof.Record(root,id,"execute_owned_save_as",fault,data["state"]!.GetValue<string>(),before);
     }
 }

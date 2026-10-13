@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
@@ -40,6 +41,33 @@ internal static class TransportCancellationProof
     {
         var after=Snapshot(root);Assert.Equal(before.Keys.Order(),after.Keys.Order());
         foreach(var pair in before)Assert.Equal(pair.Value,after[pair.Key]);
+    }
+
+    internal static void Record(string root,string id,string recipe,string fault,string state,Dictionary<string,string> before)
+    {
+        Unchanged(root,before);
+        var output=Environment.GetEnvironmentVariable("PSBRIDGE_TEST_EVIDENCE");
+        if(string.IsNullOrWhiteSpace(output))return;
+        Directory.CreateDirectory(output);
+        var archive=Path.Combine(output,id,"artifacts");
+        Assert.False(Directory.Exists(archive));
+        foreach(var pair in before)
+        {
+            var destination=Path.Combine(archive,Path.GetRelativePath(root,pair.Key));
+            Directory.CreateDirectory(Path.GetDirectoryName(destination)!);File.Copy(pair.Key,destination);
+            Assert.Equal(pair.Value,Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(destination))));
+        }
+        var report=new
+        {
+            schema="psbridge.sdk-transport-fault.v1",root,artifactArchive=id+"/artifacts",requestId=id,recipe,fault,state,
+            cadConnectionAttempted=false,syntheticNativeProof=true,replayRejected=true,
+            newAuthorityGranted=false,files=before.Select(pair=>new
+            {
+                path=Path.GetRelativePath(root,pair.Key),sha256=pair.Value.ToLowerInvariant()
+            }).OrderBy(value=>value.path).ToArray()
+        };
+        using var stream=new FileStream(Path.Combine(output,id+".json"),FileMode.CreateNew,FileAccess.Write,FileShare.None);
+        JsonSerializer.Serialize(stream,report);stream.Flush(true);
     }
 
     internal static async Task CancelClaimed(Task<CallToolResult> call,

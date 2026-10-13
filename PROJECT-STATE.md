@@ -1,5 +1,15 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 current transport block:12 new rows passed, combined matrix28/28 +independent
+599 artifact hashes passed; .NET326/326. Full runner с preserved archives в
+evidence/K7-sdk-lost-reply/sdk-full passed326/531/175(0 mismatch)/28 SDK rows/
+25 native fault cells/STDIO/Inspector. Four negative auditor checks passed отдельно;
+138 recorded source/binary hashes matched. Final source CI ещё требуется.
+STATUS-K7-SDK-TRANSPORT.md. Native/runtime/default config/CAD не менялись.
+Предыдущий block8b38435/PR16 теперь four CI passed, actual SDK log checked.
+Следом activation-context/remaining cancellation-return/partial publication и
+accepted checkpoint recovery; общий MCP v1 доК11 remains active.
+
 К7 текущий offline block:14 SDK cancellation rows +2 protocol controls passed,
 STATUS-K7-SDK-CANCELLATION.md. Local client cancellation не подтверждает native
 return; explicit notifications/cancelled и server timeout проверены отдельно.
@@ -7,7 +17,7 @@ Retained request/artifact SHA и replay rejection подтверждены. Full
 314/314 passed без skip; native runtime/default config/CAD этим блоком не менялись.
 К6 qualified остаётся; цель доК11 active, полная К7 ещё не закрыта.
 Source13f1c54, branch feat/recovery-sdk-cancellation, draft PR16 attached.
-Four Windows CI запущены и ещё не объявляются passed.
+Four Windows CI passed, STATUS-K7-SDK-TRANSPORT.md; ниже история блока.
 
 АКТУАЛЬНО: К6 технически квалифицирован в CAD, STATUS-K6-QUALIFIED.md.
 Один SaveAs59f.../один OPEN45... оба terminal succeeded_verified; new binding
