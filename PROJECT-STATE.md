@@ -1,5 +1,14 @@
 # PowerShape Bridge — состояние для продолжения
 
+K8 internal native owned rotation preparation:15 cases203 hashes passed with fake
+contexts; passive packet/held ownership guards, no rotation/queue/MCP registration.
+STATUS-K8-OWNED-ROTATION-PREP.md. Full session19181 completed PASS in
+evidence/K8-owned-rotation-plans/sdk-full, stage work/K8-owned-rotation-sdk-full:
+403/531/1750 mismatch/32/25/20/40/22/6/7/6/15/rotation STDIO/Inspector.
+PR25/dab9a6bf four CI passed. Ready K7 packages/installed0.33.3/CAD unchanged;
+K7 human approval remains pending. Next SDK/native packet interoperability and
+guarded transform execution/verification/recovery, preserving full goal toК11.
+
 К8 reference geometry/API metadata: offline PowershapeNT.tlb confirms rotation
 VT_I4 angle/VT_VARIANT axis, no CAD/application creation.10 analytic geometry
 checks/full403 .NET passed, including arbitrary-angle bbox envelope counterexample.
