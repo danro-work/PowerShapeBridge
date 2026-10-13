@@ -53,6 +53,21 @@ namespace PowerShapeBridge {
    ((Dictionary<string,object>)changedModelContext.Snapshot["model"])["id"]=20;changedModelContext.Window()["modelId"]=20;
    var changedModelProof=Proof(changedModelCase,changedModelReceipt,changedModelContext);
    check(Equals(OwnedSaveVerification.Verify(changedModelCase.Fixture.Root,changedModelProof,changedModelContext)["state"],"owned_save_as_verification_rejected")&&changedModelContext.Calls==1&&File.Exists(changedModelCase.Fence)&&changedModelCase.Protected());
+   // Other documents may already have multiple views. Only the owned result
+   // must remain unambiguous; unchanged unrelated views keep their model IDs.
+   var beforeViews=Clone(newModelCase.Fixture.Listing);
+   var extraViews=new List<object>(((IList)beforeViews["windows"]).Cast<object>());
+   foreach(int number in new[]{2,3}) {
+    var view=Clone((Dictionary<string,object>)((IList)beforeViews["windows"])[0]);
+    view["windowNumber"]=number;view["nativeWindowId"]=number+70;view["selectedRaw"]=0;view["modelId"]=90;view["modelName"]="Other";view["modelPath"]=Path.Combine(newModelCase.Fixture.Root,"Other.psmodel");
+    extraViews.Add(view);
+   }
+   beforeViews["windows"]=extraViews;beforeViews["windowCount"]=3;var afterViews=Clone(beforeViews);
+   var savedView=(Dictionary<string,object>)((IList)afterViews["windows"])[0];
+   savedView["modelId"]=19;savedView["modelName"]=Path.GetFileNameWithoutExtension(newModelCase.ResultPath);savedView["modelPath"]=newModelCase.ResultPath;afterViews["activeWindow"]=savedView;
+   OwnedSaveAs.CheckAfterWindows(beforeViews,afterViews,newModelCase.Fixture.Working,newModelCase.ResultPath);count++;
+   ((Dictionary<string,object>)((IList)afterViews["windows"])[1])["modelId"]=19;
+   bool duplicateRejected=false;try{OwnedSaveAs.CheckAfterWindows(beforeViews,afterViews,newModelCase.Fixture.Working,newModelCase.ResultPath);}catch(InvalidOperationException){duplicateRejected=true;}check(duplicateRejected);
    var successful=new Case();var context=successful.Context();string id=Guid.NewGuid().ToString("N");var result=successful.Execute(context,id);
    check(Equals(result["state"],"owned_save_as_executed_unverified")&&context.Calls==1&&context.Reads==6);
    check(Equals(result["cadSaveAttempted"],true)&&Equals(result["geometryMutationAttempted"],false)&&Equals(result["saveCommandReturned"],true));

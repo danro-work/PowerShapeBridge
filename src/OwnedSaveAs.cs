@@ -47,8 +47,7 @@ namespace PowerShapeBridge {
    // SAVEASPATH may assign a new model ID while retaining the COM object and
    // model window. A model ID is checked against post-save observations below.
    foreach(string key in new[]{"windowNumber","nativeWindowId","type"})if(!originals[0].ContainsKey(key)||!active.ContainsKey(key)||!Equals(originals[0][key],active[key]))throw new InvalidOperationException("SaveAs retained window identity changed.");
-   var modelWindows=current.Where(value=>value.ContainsKey("type")&&Equals(value["type"],"Model")).ToArray();
-   if(modelWindows.Any(value=>!value.ContainsKey("modelId")||!(value["modelId"] is int)||(int)value["modelId"]<=0)||modelWindows.Select(value=>value["modelId"]).Distinct().Count()!=modelWindows.Length||
+   if(!active.ContainsKey("modelId")||!(active["modelId"] is int)||(int)active["modelId"]<=0||current.Count(value=>value.ContainsKey("modelId")&&Equals(value["modelId"],active["modelId"]))!=1||
       current.Any(value=>value.ContainsKey("modelPath")&&string.Equals(OwnedCopies.LocalPath((string)value["modelPath"]),working,StringComparison.OrdinalIgnoreCase)))throw new InvalidOperationException("SaveAs current model identity ambiguous.");
    foreach(var window in previous) {
     if(ReferenceEquals(window,originals[0]))continue;
