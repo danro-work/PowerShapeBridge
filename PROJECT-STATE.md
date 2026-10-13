@@ -1,5 +1,15 @@
 # PowerShape Bridge — состояние для продолжения
 
+К8 offline preparation while K7 live approval pending: SDK0.39.0-dev source adds
+feature-gated passive prepare_rotation_plan. No native queue/rotation executor.
+Explicit integer angles/world axis, scoped set/plan SHA/TTL; mixed40/21/59 keys,
+fractional/invalid/stale/tamper/read-only/cancel/limit rejections qualified.
+Full393 .NET +independent STDIO +previous readonly/prepared/execution parity passed.
+K8-ROTATION-PLAN-CONTRACT.md, evidence/K8-rotation-plans/sdk-qualified,
+stdio-qualified, parity-*. Native0.33.5 source/installed0.33.3 unchanged.
+READY K7 SDK package remains0.38.1; new build did not overwrite that package.
+K7-LIVE-CHECKPOINT-SCENARIO approval still pending; no Apply/OPEN. Goal throughК11 active.
+
 К7 live proposal READY, approval requested, NOT performed. Code241bc56d/PR24
 four CI passed38429476459/38429467416 baseline,38429476559/38429467454 SDK;
 actual new fault/audit CI log checked. K7-LIVE-CHECKPOINT-SCENARIO.md.

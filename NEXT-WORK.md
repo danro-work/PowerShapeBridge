@@ -1,5 +1,12 @@
 # Дальнейшая работа
 
+K8 passive rotation source SDK0.39 qualified393 .NET +STDIO +previous SDK parity;
+publish separate branch/PR/CI, preserve READY K7 packages0.38.1/0.33.5.
+K8-ROTATION-PLAN-CONTRACT.md. Native rotation executor/sign/frame/SAFEARRAY,
+fractional-angle route, independent geometry verification/recovery/saved reopen,
+general move/scale/organization still ahead. К8 not accepted; К7 live waits human.
+Do not treat automatic goal continuation as approval of pending K7 question.
+
 WAIT FOR DIRECT HUMAN APPROVAL of K7-LIVE-CHECKPOINT-SCENARIO.md before apply/live.
 Code241bc56d/PR24 four CI passed; source package/config/read-only catalogs qualified.
 Native stage work/K7-live-checkpoint-package; SDK work/K7-live-checkpoint-sdk;
