@@ -50,3 +50,9 @@ one entity. Никаких OPEN/save/selection/capture/close не выполня
 Далее exact-source qualification/CI и отдельный конкретный live checkpoint scenario
 с deployment package/backup и новым own OPEN. К7 без этой приёмки не завершён;
 К8–К11 остаются обязательными.
+
+Code241bc56d/PR24 now four CI passed38429476459/38429467416 baseline,
+38429476559/38429467454 SDK. Actual SDK log confirms new filesystem fault cases/audit.
+Qualified package/config/catalog preflight and plan-only prepared;
+K7-LIVE-CHECKPOINT-SCENARIO.md records exact source/steps/limits.
+Direct human approval requested; no runtime apply/live copy/OPEN performed.

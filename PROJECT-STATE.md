@@ -1,5 +1,18 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 live proposal READY, approval requested, NOT performed. Code241bc56d/PR24
+four CI passed38429476459/38429467416 baseline,38429476559/38429467454 SDK;
+actual new fault/audit CI log checked. K7-LIVE-CHECKPOINT-SCENARIO.md.
+Qualified native package work/K7-live-checkpoint-package copies full-tested binaries,
+preserves runtime flags +recoveryInspection/checkpoint flags; component-info passed.
+SDK work/K7-live-checkpoint-sdk DLL matches qualified DLL. Package-only catalogs/
+status/read-only gates passed, no queue/CAD. Deployment plan-only:
+work/K7-live-checkpoint-deployment-plan.json. No Apply or live copy/OPEN occurred.
+Prepared client work/K7-live-checkpoint-client.py has explicit scenario token and
+global scenario-once claim, syntax checked. Approval is pending for native0.33.3→
+0.33.5 backup/restart +NEW copy from unknown6ed checkpoint +one guarded OPEN/verify.
+Do not execute until direct human answer. Full goal throughК11 remains active.
+
 К7 filesystem faults:22 native cases355 hashes +6 actual SDK/native queue
 failure cases184 hashes12 requests passed. Internal opt-in copy fault seam;
 standard public Create/queue parameters unchanged. STATUS-K7-CHECKPOINT-FILESYSTEM.md.
