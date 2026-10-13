@@ -1,5 +1,13 @@
 # Дальнейшая работа
 
+К8 owned geometry export targets:30 isolated native cases/478 independent hashes
+passed, work/K8-geometry-export-targets-final. Fixed DMT path, pinned disabled
+binding/set/owner/checkpoint/directory lease; complete-return rotation proof chain
+and fresh source required when fenced. Unknown/partial/tamper/replay rejected.
+STATUS-K8-GEOMETRY-EXPORT-TARGETS.md. No DMT/export/selection/parser/public route,
+CAD change or fence release. PR34 four CI completed/success. K7 approval pending;
+installed runtime/READY packages unchanged. Next qualified geometry export/parser,
+rotation convention/executor/verification and full remaining K8-K11.
 К8 verifier CI clock fix:PR33 push SDK38477064300 failed at equal observation/
 command-return timestamps; PR SDK38477123747 passed. Fixture now waits actual
 UTC advancement, no future timestamp or production guard relaxation. Equal-time

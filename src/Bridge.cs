@@ -120,6 +120,10 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--checkpoint-recovered-open-test") {
                 try{CheckpointRecoveredOpenTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.Message);return 3;}
             }
+            if(args.Length==1&&args[0]=="--geometry-export-target-test") {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{OwnedGeometryExportTargetTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
             if(args.Length==1&&args[0]=="--owned-rotation-plan-test") {
                 try{OwnedRotationPlanTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
@@ -884,4 +888,3 @@ namespace PowerShapeBridge
         }
     }
 }
-
