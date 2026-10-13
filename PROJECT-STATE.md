@@ -1,5 +1,26 @@
 # PowerShape Bridge — состояние для продолжения
 
+Current qualified K7 native core fece6ee /draft PR10 attached: native/legacy
+source0.33.1-dev, SDK0.37.2. Cleanfull292 .NET/514 native/171 artifact cases(0
+mismatch)/ten external STDIO/Inspector +separate25 native core fault cells/audit
+passed в work/c7v/evidence/K7-native-fault-clean.134 recorded SHA matched; все
+четыре CI38354243685/38354422830/38354243670/38354422888 passed, SDKlog checked.
+Объём25 cells: four OWNED executors/control/lost return after fake effect/lost
+raw response/partial journal/changed process/non-success(translation0/−1).
+Native ordinary-open verifier has internal fake/root seam; public contract/guards
+remain. No new MCP tool. RECOVERY-FAULT-MATRIX.md. Следом per-executor SDK
+timeout/cancel/lost wire reply и activation-context faults, затем separately
+accepted checkpoint recovery. Runtime/K6 package/CAD/default config untouched;
+K6 Apply permission pending. Полная К7–К11 не завершена. Ниже история блока.
+
+Latest K7 native core fece6ee /draft PR10 attached(base PR9): native/legacy0.33.1,
+SDK0.37.2. Full local SDK passed292 .NET/514 native/171 artifacts(0 mismatch)/ten
+STDIO/Inspector +separate25 native fault cells/Python audit. Clean checkout в
+work/c7v/evidence/K7-native-fault-clean выполняется; exact-head CI выполняется.
+Scope four OWNED executors; SDK per-executor transport faults и activation context
+faults/accepted checkpoint recovery/live К6 остаются впереди. Runtime/K6 package/
+CAD/default config unchanged. RECOVERY-FAULT-MATRIX.md; цельК11 active.
+
 Qualification native fault core:25 native cells/audit и conventional514 passed.
 Negative marker test refusedexit3/no fixtures created. Full SDK native0.33.1
 в evidence/K7-fault-matrix/sdk-full выполняется;292 .NET passed. Next commit/

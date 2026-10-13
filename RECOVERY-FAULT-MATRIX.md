@@ -1,5 +1,25 @@
 # К7 — матрица ошибок исполнителей
 
+Итог блока: fece6ee /draft PR10 qualified. Clean full в work/c7v/evidence/
+K7-native-fault-clean passed292 .NET/514 conventional native/171 artifact cases
+(0 mismatches), ten external STDIO/Inspector +separate25 native fault cells и
+independent audit. Все134 recorded source/binary SHA matched clean files;
+evidence/K7-fault-matrix/qualified/clean-hash-audit.json. Четыре exact-head CI
+success38354243685/38354422830 baseline и38354243670/38354422888 SDK; actual
+SDK log подтвердил включение25 native rows/audit. Полная К7 всё ещё не завершена:
+per-executor SDK transport faults, activation-context coverage, дополнительные
+partial publication points и accepted checkpoint recovery остаются впереди.
+Installed runtime/K6 packages/default config/CAD не менялись. Далее — история.
+
+Qualification update: commitfece6ee отправлен, draft PR10 создан/прикреплён
+https://github.com/danro-work/PowerShapeBridge/pull/10 (base PR9). Local full SDK
+passed292 .NET/514 conventional native/171 artifact cases (0 mismatch), ten
+external STDIO/Inspector и separate25 native fault rows+Python audit.
+Evidence: evidence/K7-fault-matrix/sdk-full. Clean fece6ee выполняется в
+work/c7v/evidence/K7-native-fault-clean; exact-head CI выполняется. Activation
+context faults также требуют отдельного покрытия; эти25 cells касаются четырёх
+OWNED executors, не всех context-changing commands. К7 не завершён.
+
 Первый блок: native core faults, source native/legacy adapter0.33.1-dev,
 SDK0.37.2-dev. Ветка feat/recovery-fault-matrix от проверенного PR9/e6cc4e2.
 Runtime и immutable K6 package0.33.0/SDK0.36.3 не изменены.
