@@ -1,5 +1,19 @@
 # Дальнейшая работа
 
+К7 SDK0.37.2 original receipt sharing read-wait fix:12 targeted IPC/deadline
+passed. Сохранить final source commit, clean/full292 tests +514 native/171 artifacts/
+ten STDIO/Inspector и exact-head CI; failed clean6488 evidence не стирать.
+Все четыре CI6488 passed, но clean локально обнаружил production response lock.
+Draft PR9 связан с блоком. Затем К7 full executor fault matrix и separate accepted
+checkpoint recovery. Runtime/K6 package/default config untouched, permission pending.
+
+6488d2c /draft PR9 resolution journal/history: local full289 .NET/514 native/
+171 artifacts/ten external STDIO scenarios/Inspector passed. Завершить ongoing
+clean SDK в work/c7t (session78914) и exact-head CI, сверить recorded source/binary
+SHA, обновить PR/state. Затем К7 full executor fault matrix и checkpoint recovery
+с separately accepted scenario. Runtime/K6 packages/default config не менять;
+K6 Apply question pending. Ниже исторические записи этапа.
+
 К7 resolution: access к штатному reviewer восстановился; external reopen28/7
 passed. Full289 .NET passed, SDK/native/ten external STDIO/Inspector verification
 на fresh work/rj продолжается. Сохранить результат, commit/push/draft PR(base

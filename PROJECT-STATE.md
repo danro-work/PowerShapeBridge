@@ -1,5 +1,23 @@
 # PowerShape Bridge — состояние для продолжения
 
+Current K7 source SDK0.37.2-dev: original-receipt read poll при sharing/lock32/33
+в исходном deadline, без повторной publication/claim/CAD команды. После чтения
+проверяются cancellation/deadline; malformed response остаётся immediate unknown.
+12 controlled/old IPC/deadline tests passed. Причина: clean6488d2c full .NET
+отказал в прежнем SaveAs route (original response locked), failed evidence retained
+work/c7t/evidence/K7-resolution-clean. Все четыре CI6488d2c success; local0.37.1
+full289/514/171/ten STDIO/Inspector passed. Следом final clean/full/CI0.37.2.
+Draft PR9 attached; native source/runtime/K6 packages/CAD/default config unchanged.
+K6 permission pending; К7 fault matrix/checkpoint recovery и К8–К11 впереди.
+
+K7 resolution commit6488d2c отправлен; draft PR9 (base PR8) создан/прикреплён.
+Full local final SDK0.37.1 passed289 .NET/514 native/171 artifact cases (0 mismatch),
+ten external STDIO scenarios/Inspector. Evidence: evidence/K7-resolution-qualified.
+Clean6488d2c в work/c7t/evidence/K7-resolution-clean и exact-head CI выполняются.
+No runtime/CAD/default config changes. K6 Apply permission pending; К7 не завершён:
+full executor fault matrix и separately accepted checkpoint recovery впереди.
+Ниже история этого блока; старое ограничение reviewer больше не действует.
+
 К7 resolution continuation: source SDK0.37.1-dev / feat/recovery-resolution-journal.
 Reviewer access восстановился; pending external saved-reopen resolution28/7
 passed (actual native synthetic artifacts/fake fresh replies), new binding /

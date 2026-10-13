@@ -1,5 +1,25 @@
 # К7 — отдельные записи подтверждённого исхода
 
+Последняя правка: clean6488d2c run отказал в прежнем SaveAs route из-за sharing
+lock на original response; evidence work/c7t/evidence/K7-resolution-clean retained.
+Все четыре CI6488d2c passed38349096739/38349176382 baseline и38349096738/
+38349176171 SDK. Source SDK0.37.2-dev теперь продолжает poll того же original
+response при Win32 sharing/lock32/33 в ИСХОДНОМ budget. Request/claim/команда не
+повторяются; cancellation/timeout остаются unknown, malformed JSON/identity
+по-прежнему immediate unknown. После успешного чтения повторно проверяются
+cancel/deadline. Controlled release/timeout/cancel receipt-lock regression и
+прежние IPC/deadline cases12 passed; receipt и single claimed request сохраняются.
+Это production read-wait fix, не новый CAD executor. Далее final clean/full/CI.
+
+Qualification update: commit6488d2c сохранён и отправлен; draft stacked PR9
+https://github.com/danro-work/PowerShapeBridge/pull/9 (base PR8).
+Полный локальный SDK run passed289 .NET/514 native/171 artifacts (133 accepted,
+0 mismatches), ten external STDIO scenarios (8 scripts +2 resolution modes),
+Inspector. Evidence: evidence/K7-resolution-qualified/sdk-verification.json.
+Final source/annotations/test helper включены в этот run. Clean6488d2c в
+work/c7t/evidence/K7-resolution-clean выполняется; exact-head CI выполняется.
+Ранее usage-limit failure и незакоммиченный статус ниже относятся к истории.
+
 Продолжение: штатный reviewer снова допустил тот же test, без обхода ограничения.
 External saved-reopen resolution28/7 passed (actual synthetic native artifacts /
 fake fresh read-verifier replies), new binding и readonly history checked; command
