@@ -42,6 +42,17 @@ namespace PowerShapeBridge {
   }
   internal static int Run() {
    int count=0;Action<bool> check=value=>{if(!value)throw new Exception("Owned SaveAs synthetic test failed at "+count);count++;};
+   var newModelCase=new Case();var newModelContext=newModelCase.Context();
+   newModelContext.DuringSave=path=>{((Dictionary<string,object>)newModelContext.Snapshot["model"])["id"]=19;newModelContext.Window()["modelId"]=19;};
+   var newModelReceipt=newModelCase.Execute(newModelContext);
+   var newModelProof=Proof(newModelCase,newModelReceipt,newModelContext);
+   check(Equals(newModelReceipt["state"],"owned_save_as_executed_unverified")&&newModelContext.Calls==1);
+   check(Equals(OwnedSaveVerification.Verify(newModelCase.Fixture.Root,newModelProof,newModelContext)["state"],"owned_save_as_verified_observed")&&newModelContext.Calls==1&&newModelCase.Protected());
+   var changedModelCase=new Case();var changedModelContext=changedModelCase.Context();
+   var changedModelReceipt=changedModelCase.Execute(changedModelContext);
+   ((Dictionary<string,object>)changedModelContext.Snapshot["model"])["id"]=20;changedModelContext.Window()["modelId"]=20;
+   var changedModelProof=Proof(changedModelCase,changedModelReceipt,changedModelContext);
+   check(Equals(OwnedSaveVerification.Verify(changedModelCase.Fixture.Root,changedModelProof,changedModelContext)["state"],"owned_save_as_verification_rejected")&&changedModelContext.Calls==1&&File.Exists(changedModelCase.Fence)&&changedModelCase.Protected());
    var successful=new Case();var context=successful.Context();string id=Guid.NewGuid().ToString("N");var result=successful.Execute(context,id);
    check(Equals(result["state"],"owned_save_as_executed_unverified")&&context.Calls==1&&context.Reads==6);
    check(Equals(result["cadSaveAttempted"],true)&&Equals(result["geometryMutationAttempted"],false)&&Equals(result["saveCommandReturned"],true));
@@ -49,10 +60,12 @@ namespace PowerShapeBridge {
    check(NativeJournal.ForVerification(successful.Fixture.Root,id,(string)result["planSha256"]).State=="executed_unverified");
    var replay=successful.Context();check(Equals(successful.Execute(replay)["state"],"owned_save_as_rejected_before_change")&&replay.Calls==0);
    check(EntitySets.Canonical(OwnedSaveAs.SavedProof(successful.ResultPath))==EntitySets.Canonical(result["savedResult"]));
-   foreach(string fault in new[]{"throw","no_file","wrong_content","changed_context","wrong_window","changed_working","checkpoint_write","wrong_model_name","active_listing_mismatch"}) {
+   foreach(string fault in new[]{"throw","no_file","wrong_content","changed_context","wrong_window","changed_working","checkpoint_write","wrong_model_name","active_listing_mismatch","model_observation_mismatch","invalid_model_id"}) {
     var test=new Case();var fake=test.Context();fake.Throw=fault=="throw";fake.NoFile=fault=="no_file";fake.WrongContent=fault=="wrong_content";
     if(fault=="changed_context")fake.DuringSave=path=>fake.Changed=true;
     if(fault=="wrong_window")fake.DuringSave=path=>fake.Window()["nativeWindowId"]=77;
+    if(fault=="model_observation_mismatch")fake.DuringSave=path=>fake.Window()["modelId"]=77;
+    if(fault=="invalid_model_id")fake.DuringSave=path=>{((Dictionary<string,object>)fake.Snapshot["model"])["id"]="invalid";fake.Window()["modelId"]="invalid";};
     if(fault=="changed_working")fake.DuringSave=path=>File.AppendAllText(test.Fixture.Working,"synthetic external saved-byte change");
     if(fault=="checkpoint_write")fake.DuringSave=path=>File.AppendAllText(test.Checkpoint,"synthetic forbidden checkpoint write");
     if(fault=="wrong_model_name")fake.DuringRead=n=>{if(n==5)fake.Window()["modelName"]="Another saved document";};

@@ -19,6 +19,7 @@ try {
     & (Join-Path $taskRoot 'verify-entity-sets.ps1') -StagingDirectory $taskStage -PythonPath $PythonPath -EvidenceDirectory (Join-Path $taskEvidence 'code')
     & (Join-Path $taskRoot 'test-copy-paths.ps1') -StagingDirectory $taskStage -EvidencePath (Join-Path $taskEvidence 'junction.json') -OfflineFixtures
     & (Join-Path $taskRoot 'test-deployment-preflight.ps1') -StagingDirectory $taskStage -EvidencePath (Join-Path $taskEvidence 'deployment.json') -OfflineFixtures
+    & (Join-Path $taskRoot 'test-deployment-report.ps1') -EvidencePath (Join-Path $taskEvidence 'deployment-report.json')
     $taskPassed = $true
 } finally {
     [ordered]@{schema='psbridge.baseline.v1';startedUtc=$taskStarted;finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$taskPassed;configuration='config/general-owned-translations.json';pythonVersion=(& $PythonPath --version);cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;processInspection='synthetic empty panel/worker fixture in plan-only deployment test';stage=$taskStage} | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $taskEvidence 'baseline.json') -Encoding utf8
