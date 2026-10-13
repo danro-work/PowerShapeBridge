@@ -1,5 +1,11 @@
 # Дальнейшая работа
 
+13 октября 2026: Bridge0.33.0-dev установлен по явному разрешению пользователя;
+backup/installed SHA, одна панель, idle queue, неизменность CAD reads и 71 files
+независимо проверены. STATUS-K6-DEPLOYMENT-033.md. Повторный Apply не нужен.
+К6 owned live SaveAs/reopen ещё впереди; SDK default switch не принят.
+Исторические pending Apply ниже более не действуют.
+
 Следующий обязательный К7 block: SDK per-executor timeout/cancel/lost wire reply
 для four owned executors и activation context; сохранить actual request/receipt/
 journal/claim/fence и отсутствие command replay. Native core25 fece6ee /PR10
@@ -7,7 +13,7 @@ qualified clean292/514/171/ten STDIO/Inspector/extra25/audit +134 hashes/four CI
 Не повторять уже passed checks без нового изменения/ошибки. Далее дополнительные
 partial publication points и отдельно принятый checkpoint recovery scenario.
 Native source0.33.1, SDK0.37.2, immutable K6 package native0.33.0/SDK0.36.3 и
-installed runtime0.32 различать; pending K6 decision не считать разрешением.
+installed runtime0.33.0-dev различать; approved K6 deployment уже выполнен.
 RECOVERY-FAULT-MATRIX.md; полная цель доК11 active.
 
 fece6ee /draft PR10 native fault core:local full292/514/171/ten STDIO/Inspector

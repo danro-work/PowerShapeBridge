@@ -1,5 +1,14 @@
 # PowerShape Bridge — состояние для продолжения
 
+Текущее установленное состояние, 13 октября 2026: пользователь разрешил
+0.32 → 0.33.0-dev с backup/restart; пакет work/K6-native-live применён.
+Одна панель0.33.0-dev подтверждена heartbeat и свежими CAD reads; 18 installed/
+backup SHA и 71 protected file совпали. Initial deploy journal сохранил ошибку
+sharing violation при чтении heartbeat; independent verification установила
+успех без повторного запуска. STATUS-K6-DEPLOYMENT-033.md. Пять CAD окон и
+активная Test_Block_P2 прежние. K6 live SaveAs/reopen ещё не выполнялся;
+default SDK switch не принят. Ниже записи pending Apply относятся к истории.
+
 Current qualified K7 native core fece6ee /draft PR10 attached: native/legacy
 source0.33.1-dev, SDK0.37.2. Cleanfull292 .NET/514 native/171 artifact cases(0
 mismatch)/ten external STDIO/Inspector +separate25 native core fault cells/audit
@@ -11,7 +20,8 @@ Native ordinary-open verifier has internal fake/root seam; public contract/guard
 remain. No new MCP tool. RECOVERY-FAULT-MATRIX.md. Следом per-executor SDK
 timeout/cancel/lost wire reply и activation-context faults, затем separately
 accepted checkpoint recovery. Runtime/K6 package/CAD/default config untouched;
-K6 Apply permission pending. Полная К7–К11 не завершена. Ниже история блока.
+K6 Apply уже разрешён и independently verified; live K6 ещё впереди.
+Полная К7–К11 не завершена. Ниже история блока.
 
 Latest K7 native core fece6ee /draft PR10 attached(base PR9): native/legacy0.33.1,
 SDK0.37.2. Full local SDK passed292 .NET/514 native/171 artifacts(0 mismatch)/ten

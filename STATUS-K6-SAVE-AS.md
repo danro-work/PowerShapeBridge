@@ -1,5 +1,9 @@
 # К6 — собственный SaveAs и reopen, выполняется
 
+13 октября 2026 runtime0.33.0-dev установлен с backup/restart по разрешению
+пользователя; независимая проверка прошла, STATUS-K6-DEPLOYMENT-033.md.
+Установка и чтение не закрывают live SaveAs/reopen qualification: она впереди.
+
 13 октября 2026, SDK0.36.3-dev/native source0.33.0-dev: полный offline reopen
 flow реализован. Два новых official SDK tools зарегистрированы через
 OwnedSavedReopenTools.Create в ToolCatalog; full opt-in profile27/read-only6.
