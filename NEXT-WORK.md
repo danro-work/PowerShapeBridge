@@ -1,5 +1,25 @@
 # Дальнейшая работа
 
+WAIT FOR DIRECT HUMAN APPROVAL of K7-LIVE-CHECKPOINT-SCENARIO.md before apply/live.
+Code241bc56d/PR24 four CI passed; source package/config/read-only catalogs qualified.
+Native stage work/K7-live-checkpoint-package; SDK work/K7-live-checkpoint-sdk;
+plan-only work/K7-live-checkpoint-deployment-plan.json; prepared one-run client
+work/K7-live-checkpoint-client.py. Nothing applied/opened. User question requested
+backup/restart native0.33.3→0.33.5 and NEW copy/one OPEN from unknown6ed checkpoint.
+Upon approval recheck packages/idle queue/known panel/config/process/model/protected
+hashes, refresh plan-only if observed state drifted, then approved deployment and
+one live sequence. No repeat after unknown; preserve original unknown/claims.
+After qualified K7 live continue К8–К11; do not mark full MCP v1 complete early.
+
+Filesystem faults22 native/355 hashes +6 STDIO-native/184 hashes12 requests
+passed. Full session29587 completed PASS in evidence/K7-checkpoint-filesystem-faults/sdk-full,
+stage work/K7-checkpoint-filesystem-sdk-full;368/531/1750 mismatch/32/25/20/40/22/
+6 recovered OPEN/7 wire/6 filesystem wire/Inspector passed;167 hashes matched.
+Publish source/CI. STATUS-K7-CHECKPOINT-FILESYSTEM.md.
+Then build qualified runtime package preserving current flags, prepare deployment
+plan-only/backup and exact live checkpoint scenario; ask final required approval.
+No apply/OPEN until agreed scenario. PR23 four CI passed; installed0.33.3 unchanged.
+
 Checkpoint wire full route seven cases/413 hashes/56 requests passed, fake CAD.
 Full verify-sdk session91892 completed PASS; evidence/K7-checkpoint-wire/sdk-full,
 stage work/K7-checkpoint-wire-sdk-full.368/531/1750 mismatch/32/25/20/40/16/6/7/

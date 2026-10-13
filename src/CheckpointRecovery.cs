@@ -74,7 +74,7 @@ namespace PowerShapeBridge {
      string creationPath=Artifact(root,"checkpointcopyplans",id);Directory.CreateDirectory(Path.GetDirectoryName(creationPath));string creationSha=NativeJournal.Freeze(creationPath,creation);
      NativeJournal.Freeze(claim,new Dictionary<string,object>{{"operationId",id},{"recoveryId",recoveryId},{"planSha256",creationSha},{"automaticReplayForbidden",true}});claimed=true;
      if(interruption!=null)interruption("after_claim");
-     var copy=OwnedCopies.Create(root,id,lease.CheckpointPath,lease.CheckpointSha);lease.Recheck();Unchanged(hashes);
+     var copy=OwnedCopies.CreateInterrupted(root,id,lease.CheckpointPath,lease.CheckpointSha,2,interruption);lease.Recheck();Unchanged(hashes);
      if(interruption!=null)interruption("after_copy");
      var inspected=OwnedCopies.Inspect(root,id,(string)copy["ownershipSha256"]);if(!Equals(inspected["checkpointVerified"],true)||!Equals(inspected["workingFileChanged"],false))throw new IOException("Recovered byte copy failed verification.");
      result=Result("checkpoint_working_copy_prepared_disk");foreach(var pair in copy)if(pair.Key!="state"&&pair.Key!="qualification")result[pair.Key]=pair.Value;

@@ -2,13 +2,16 @@
 import argparse
 import hashlib
 import json
+import stat
 from pathlib import Path
 
 
 FAULTS = {'prepared_only', 'control', 'working_changed_before', 'expired', 'future_intent',
           'checkpoint_writable', 'checkpoint_changed', 'checkpoint_replaced', 'checkpoint_hardlink',
           'ownership_changed', 'plan_changed', 'busy_executor', 'busy_checkpoint',
-          'partial_after_claim', 'partial_after_copy', 'foreign_copy_identity'}
+          'partial_after_claim', 'partial_after_copy', 'foreign_copy_identity',
+          'checkpoint_junction', 'intent_junction', 'partial_copy_after_working_write',
+          'partial_copy_before_ownership', 'partial_copy_ownership_record', 'partial_copy_after_ownership'}
 
 
 def require(ok, reason):
@@ -48,13 +51,20 @@ def audit(stage):
         require(all(sha(Path(path)) == value for path, value in row['protectedHashes'].items()), 'Original protected file changed')
         result = row['result']
         control = row['fault'] in {'control', 'working_changed_before'}
-        partial = row['fault'] in {'partial_after_claim', 'partial_after_copy'}
+        partial = row['fault'].startswith('partial_')
         require(result['state'] == ('checkpoint_working_copy_prepared_disk' if control else
                                     'checkpoint_copy_outcome_unknown' if partial else 'checkpoint_copy_rejected_before_creation'), 'Wrong outcome')
         for flag in ['powerShapeConnectionAttempted', 'geometryMutationAttempted', 'contextChangeAttempted', 'cadSaveAttempted', 'originalOutcomeResolved', 'retryAllowed']:
             require(result[flag] is False, 'Unexpected authority/action flag')
         claim_path = root / 'checkpointrecoveries' / (intent_id + '.copy-once.json')
         require(claim_path.exists() == (control or partial), 'Wrong claim phase')
+        if row['fault'] in {'checkpoint_junction', 'intent_junction'}:
+            junction = Path(row['junctionPath'])
+            target = Path(row['junctionTarget']).resolve()
+            require(junction.resolve() == target and target.is_relative_to(root) and
+                    junction.lstat().st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT,
+                    'Missing or foreign junction fixture')
+            require('reparse' in result['error'].lower(), 'Failure did not exercise reparse guard')
         if control or partial:
             claim = json.loads(claim_path.read_text(encoding='utf-8-sig'))
             require(claim['operationId'] == row['copyId'] and claim['recoveryId'] == intent_id
@@ -63,6 +73,30 @@ def audit(stage):
             require(sha(creation_path) == claim['planSha256'], 'Creation plan SHA differs')
             creation = json.loads(creation_path.read_text(encoding='utf-8-sig'))
             require(creation['origin'] == plan['origin'] and creation['checkpoint'] == plan['checkpoint'], 'Recovery lineage differs')
+        if row['fault'].startswith('partial_copy_'):
+            folder = root / 'workingcopies' / row['copyId']
+            work = folder / ('Working_' + row['copyId'] + '.psmodel')
+            checkpoint = folder / 'checkpoint/Before.psmodel'
+            owner_path = folder / 'ownership.json'
+            require(work.stat().st_size > 0 and not (root / 'checkpointcopyplans' /
+                    (row['copyId'] + '.result.json')).exists(), 'Wrong interrupted proof phase')
+            if row['fault'] == 'partial_copy_after_working_write':
+                require(checkpoint.stat().st_size == 0 and not owner_path.exists(), 'Wrong partial target bytes')
+            else:
+                require(sha(work) == sha(checkpoint) == plan['checkpoint']['sha256'] and
+                        not checkpoint.stat().st_mode & stat.S_IWRITE, 'Interrupted completed byte copies differ')
+                require(owner_path.exists() == (row['fault'] != 'partial_copy_before_ownership'), 'Wrong owner phase')
+                if row['fault'] == 'partial_copy_ownership_record':
+                    malformed = False
+                    try:
+                        json.loads(owner_path.read_text(encoding='utf-8-sig'))
+                    except json.JSONDecodeError:
+                        malformed = True
+                    require(malformed, 'Interrupted ownership unexpectedly complete')
+                elif row['fault'] == 'partial_copy_after_ownership':
+                    owner = json.loads(owner_path.read_text(encoding='utf-8-sig'))
+                    require(owner['copyId'] == row['copyId'] and owner['source'] == plan['checkpoint'],
+                            'Completed ownership before lost return differs')
         if control:
             owner_path = root / 'workingcopies' / row['copyId'] / 'ownership.json'
             require(sha(owner_path) == result['ownershipSha256'], 'New owner SHA differs')

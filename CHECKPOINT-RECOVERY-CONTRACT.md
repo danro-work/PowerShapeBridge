@@ -7,6 +7,10 @@ STATUS-K7-RECOVERED-OPEN.md. Полный MCP route квалифицирован
 STATUS-K7-CHECKPOINT-WIRE.md; live acceptance остаётся впереди;
 контракт не означает выполненную CAD квалификацию или согласие на живое испытание.
 
+Reparse/partial target/ownership publication matrix qualified offline,
+STATUS-K7-CHECKPOINT-FILESYSTEM.md:22 native cases иsix real SDK/native queue
+failures. Final complete regression/CI иlive acceptance фиксируются отдельно.
+
 Результат восстановления — новая независимая owned рабочая копия сохранённых
 байтов checkpoint. Исходная working copy, source, checkpoint, journal, claim/fence
 и старый unknown outcome сохраняются. Новая копия не исправляет и не разрешает

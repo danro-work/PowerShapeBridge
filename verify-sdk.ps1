@@ -110,6 +110,7 @@ $taskFiles += @('src\test_sdk_activation_recovery_stdio.py')
 $taskFiles += @('src\CheckpointRecovery.cs','src\CheckpointRecoveryTests.cs','src\audit_checkpoint_recovery.py','src\test_sdk_checkpoint_recovery_stdio.py','verify-checkpoint-recovery.ps1','config\general-checkpoint-recovery.json')
 $taskFiles += @('src\CheckpointRecoveredOpenTests.cs','src\audit_checkpoint_recovered_open.py','verify-checkpoint-recovered-open.ps1','tools\NativeFixtureCheck\CheckpointOpenCheck.cs')
 $taskFiles += @('src\CheckpointRecoveryWireFixture.cs','src\test_sdk_checkpoint_wire_stdio.py','src\audit_checkpoint_wire_stdio.py')
+$taskFiles += @('src\OwnedCopies.cs','src\Bridge.cs','src\test_sdk_checkpoint_filesystem_faults.py','src\audit_checkpoint_filesystem_stdio.py')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'
