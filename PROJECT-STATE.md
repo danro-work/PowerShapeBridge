@@ -1,5 +1,13 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 checkpoint cancellation: six new official SDK route fault cases;
+focused13/full368 .NET passed without skip. Production SDK/native unchanged,
+installed0.33.3/CAD unchanged. STATUS-K7-CHECKPOINT-CANCELLATION.md;
+evidence/K7-checkpoint-cancellation/sdk-regression. Next publish this test-only
+block/CI, remaining reparse/publication/whole recovered MCP route and separately
+agreed live recovery. PR21/source c408c7c9 four CI passed, actual log checked.
+К7 и общая цель К11 ещё не завершены.
+
 К7 recovered OPEN: source SDK0.38.1/native0.33.5, installed0.33.3 unchanged.
 Six native recovery→OPEN→independent verifier/binding scenarios passed with fake
 CAD; independent253 artifact hash audit passed. Focused19 SDK/full362 .NET passed.

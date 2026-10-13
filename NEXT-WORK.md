@@ -1,5 +1,12 @@
 # Дальнейшая работа
 
+Checkpoint cancellation block: six additional cases, focused13/full368 .NET
+passed, STATUS-K7-CHECKPOINT-CANCELLATION.md. Publish branch/PR/CI, then
+remaining reparse/partial-publication coverage, complete recovered OPEN transport
+workflow and separately agreed live checkpoint scenario. PR21/source c408c7c9
+four Windows CI passed; new six-case runner/audit confirmed in SDK CI log.
+Installed0.33.3 unchanged. К7–К11 remain active; no automatic CAD deployment.
+
 К7 recovered OPEN fake-CAD matrix/independent audit/SDK stores: six cases253 hashes,
 focused19 and full362 .NET passed. Full verify-sdk session88319 completed PASS;
 evidence/K7-recovered-open/sdk-full, stage work/K7-recovered-open-sdk-full.
