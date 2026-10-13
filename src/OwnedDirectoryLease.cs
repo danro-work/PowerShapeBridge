@@ -23,8 +23,14 @@ namespace PowerShapeBridge {
   readonly SafeFileHandle handle;
   readonly string path;
   internal readonly Dictionary<string,object> Identity;
+  static string DirectoryPath(string directory) {
+   // Validate the original spelling before removing directory-only separators.
+   // Windows final paths omit these for nested directories; this is not an alias.
+   string full=OwnedCopies.LocalPath(directory);
+   return full.Length>3?full.TrimEnd('\\'):full;
+  }
   internal OwnedDirectoryLease(string directory) {
-   path=OwnedCopies.LocalPath(directory);OwnedCopies.NoReparse(path);
+   path=DirectoryPath(directory);OwnedCopies.NoReparse(path);
    // Attribute-only access does not participate in Windows share-delete checks.
    // Generic read includes directory listing access, so rename/delete is denied.
    handle=CreateFile(path,0x80000000,3,IntPtr.Zero,3,0x02000000,IntPtr.Zero);
@@ -40,7 +46,7 @@ namespace PowerShapeBridge {
    var final=new StringBuilder(32768);uint size=GetFinalPathNameByHandle(handle,final,(uint)final.Capacity,0);
    if(size==0||size>=final.Capacity)throw new IOException("Owned directory final path unavailable.");
    string value=final.ToString();if(value.StartsWith("\\\\?\\",StringComparison.Ordinal))value=value.Substring(4);
-   if(!string.Equals(OwnedCopies.LocalPath(value),path,StringComparison.OrdinalIgnoreCase))throw new IOException("Owned directory was moved or aliased.");
+   if(!string.Equals(DirectoryPath(value),path,StringComparison.OrdinalIgnoreCase))throw new IOException("Owned directory was moved or aliased.");
    return new Dictionary<string,object>{{"volumeSerial",info.Volume.ToString("x8")},
     {"fileIndex",info.IndexHigh.ToString("x8")+info.IndexLow.ToString("x8")},
     {"creationTime",info.Creation.High.ToString("x8")+info.Creation.Low.ToString("x8")}};

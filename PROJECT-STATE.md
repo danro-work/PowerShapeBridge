@@ -1,5 +1,13 @@
 # PowerShape Bridge — состояние для продолжения
 
+К6 live попытка, 13 октября: own copy b3d... активирована свежим выбором,
+наблюдения К5 X+1 совпали; new binding создана. prepare SaveAs22ee98... отклонён
+из-за trailing-separator directory identity mismatch. Ни SaveAs, ни reopen
+не вызваны; no replay,71 protected files unchanged. Сейчас own Working_b3d...
+активна; Test_Block_P2 не изменялся. STATUS-K6-LIVE-DIRECTORY-REJECTION.md.
+Исправление и regression в fix/save-directory-trailing-separator; runtime0.33.0
+не менять до квалификации и согласования нового пакета.
+
 Текущее установленное состояние, 13 октября 2026: пользователь разрешил
 0.32 → 0.33.0-dev с backup/restart; пакет work/K6-native-live применён.
 Одна панель0.33.0-dev подтверждена heartbeat и свежими CAD reads; 18 installed/
