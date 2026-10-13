@@ -1,5 +1,15 @@
 # PowerShape Bridge — состояние для продолжения
 
+Current installed0.33.3-dev verified/backup work/general-deployment-backup-
+20261013-074123/one panel7124. Original SaveAs59f5a399... independently verified
+fb7d6f55...: journal succeeded_verified/fence released by verifier/no replay.
+Native disk prepare46994... succeeded; SDK0.36.3 refused scoped handle because
+nested raw native verifier omits envelope bridgeRequestId. No OPEN.
+STATUS-K6-REOPEN-RECEIPT.md. Source branch fix/reopen-source-receipt-identity,
+SDK0.37.3-dev missing-ID in-memory normalization after pinned SHA/conflict
+refusal;17 focused passed/full running. Native/default config unchanged.
+Next qualified side SDK/fresh verifier/NEW owned reopen; К6–К11 incomplete.
+
 Квалифицирован native/legacy0.33.3 model-ID fix, source341951a/draft PR13.
 Full294/531/175(0 mismatch)/STDIO/Inspector/25 fault audit passed,134 hashes
 matched;four exact-head Windows CI passed. STATUS-K6-MODEL-ID-FIX.md.

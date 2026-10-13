@@ -1,5 +1,13 @@
 # Дальнейшая работа
 
+Installed0.33.3, original SaveAs59f... terminal independently verified without
+replay. Native prepare46994... disk-only succeeded, SDK scoped handle refused;
+no OPEN. Current SDK source0.37.3 fix branch fix/reopen-source-receipt-identity,
+17 focused passed/full running. STATUS-K6-REOPEN-RECEIPT.md. После full/CI:
+publish new side SDK (без default switch/restart), fresh verify original59f,
+NEW owned reopen intent/copy, one OPEN/separate verifier/new binding/raw audit.
+Не использовать expired46994 preparation или old connection handles.
+
 0.33.3 model-ID fix qualified294/531/175/25 иfour CI; final stage
 work/K6-native-model-id-live2 (первую live stage не применять), plan-only
 work/K6-model-id-deployment-plan.json. STATUS-K6-MODEL-ID-FIX.md.
