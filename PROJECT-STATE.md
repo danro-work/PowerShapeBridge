@@ -1,5 +1,14 @@
 # PowerShape Bridge — состояние для продолжения
 
+К8 independent observed-sample verifier:14 analytic cases/465 independently
+audited hashes passed. Separate read-only context checks frozen plan/journal/
+per-target returns/before/after, fresh samples and original owner/fence/claim.
+Diagnostic only observed_rotation_samples_match_unqualified; no command replay,
+succeeded_verified or fence release. STATUS-K8-ROTATION-INDEPENDENT-VERIFICATION.md.
+PR32/8c62a822 four CI passed. Runtime/READY K7/CAD unchanged; K7 approval pending.
+Next qualified native provider/solid faces/convention/raw tolerance and fence
+qualification,production SDK/transport/faults/saved result andfull K8-K11.
+
 К8 immutable rotation measurement records: execution plan schema2 pins
 per-target before SHA; command summary pins before/after.24 native cases577
 hashes +16 record cases256 hashes +21 .NET predicate cases passed.
