@@ -1,5 +1,12 @@
 # К7 — SDK transport fault matrix, выполняется
 
+Current К7 activation block:32 SDK rows включая returned cancellation всех four
+owned executors,681 archived hashes/four negative auditor checks; full330/531/
+1750 mismatch/25 native faults/20 activation rows/audits/STDIO/Inspector passed.
+STATUS-K7-ACTIVATION.md. Production native0.33.4 source только в staging;
+installed0.33.3/default config/CAD unchanged. Полная К7 всё ещё требует legacy
+recovery observation, остальных partial publication points и checkpoint recovery.
+
 Current:28 combined SDK rows и independent hash/journal audit passed,
 STATUS-K7-SDK-TRANSPORT.md. Full archived-evidence qualification326/531/175
 0-mismatch/28 SDK/25 native/STDIO/Inspector и four negative auditor checks passed;

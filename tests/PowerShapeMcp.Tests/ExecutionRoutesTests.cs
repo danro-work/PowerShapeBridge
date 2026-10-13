@@ -182,13 +182,17 @@ public sealed class ExecutionRoutesTests
     }
 
     [Theory]
-    [InlineData("execute_owned_translation",false)]
-    [InlineData("execute_owned_translation",true)]
-    [InlineData("open_working_copy",false)]
-    [InlineData("open_working_copy",true)]
-    [InlineData("activate_document",false)]
-    [InlineData("activate_document",true)]
-    public async Task OfficialSdkCancellationPreservesClaimedExecutionAndCannotReplay(string recipe,bool notify)
+    [InlineData("execute_owned_translation",false,false)]
+    [InlineData("execute_owned_translation",true,false)]
+    [InlineData("execute_owned_translation",false,true)]
+    [InlineData("execute_owned_translation",true,true)]
+    [InlineData("open_working_copy",false,false)]
+    [InlineData("open_working_copy",true,false)]
+    [InlineData("open_working_copy",false,true)]
+    [InlineData("open_working_copy",true,true)]
+    [InlineData("activate_document",false,false)]
+    [InlineData("activate_document",true,false)]
+    public async Task OfficialSdkCancellationPreservesClaimedExecutionAndCannotReplay(string recipe,bool notify,bool effectReturned)
     {
         await using var connection=await Connection.Create(timeout:5);
         var choice=recipe=="execute_owned_translation"?null:connection.Choice();
@@ -200,7 +204,8 @@ public sealed class ExecutionRoutesTests
         };
         using var cancellation=new CancellationTokenSource();
         var call=connection.Client.CallToolAsync(recipe,args,cancellationToken:cancellation.Token).AsTask();
-        var (id,_)=await connection.Claim(recipe);
+        var (id,parameters)=await connection.Claim(recipe);
+        if(effectReturned)LostReplyFixture.Return(connection.Data.Root,id,parameters,connection.Data.BindingReceipt["binding"]!.AsObject(),recipe=="execute_owned_translation",connection.Data.Utc);
         await TransportCancellationProof.CancelClaimed(call,cancellation,connection.Session,connection.Data.Root,id,connection.Client,connection.CancellationRecorder,notify);
         Assert.Throws<ReferenceRejected>(()=>connection.Session.Candidates.DocumentParameters(connection.Document));
         if(recipe=="execute_owned_translation")Assert.Throws<ReferenceRejected>(()=>connection.Session.Owned.ValidationParameters(connection.Owned));
@@ -209,7 +214,8 @@ public sealed class ExecutionRoutesTests
         var before=TransportCancellationProof.Snapshot(connection.Data.Root);
         Assert.True((await connection.Client.CallToolAsync(recipe,args)).IsError);
         TransportCancellationProof.Unchanged(connection.Data.Root,before);
-        TransportCancellationProof.Record(connection.Data.Root,id,recipe,notify?"cancel_notified_pending":"cancel_local_pending","client_wait_cancelled",before);
+        if(effectReturned)LostReplyFixture.OneAuthoritativeReturn(connection.Data.Root,id);
+        TransportCancellationProof.Record(connection.Data.Root,id,recipe,(notify?"cancel_notified_":"cancel_local_")+(effectReturned?"returned":"pending"),"client_wait_cancelled",before);
     }
 
     [Fact]

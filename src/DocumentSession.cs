@@ -90,39 +90,55 @@ namespace PowerShapeBridge {
    }
    return hashes;
   }
+  internal interface IActivationContext : IDisposable {
+   Dictionary<string,object> Windows();bool IsDocumentActive();string SelectedModelName();void Activate(int windowNumber);
+  }
+  sealed class ComActivationContext : IActivationContext {
+   object application;
+   internal ComActivationContext(Config config){application=Attach(config);}
+   public Dictionary<string,object> Windows(){return ReadStable(application);}
+   public bool IsDocumentActive(){dynamic ps=application;return Convert.ToBoolean(ps.IsDocumentActive());}
+   public string SelectedModelName(){dynamic ps=application;return Convert.ToString(ps.Evaluate("MODEL.SELECTED"),CultureInfo.InvariantCulture);}
+   public void Activate(int windowNumber){dynamic ps=application;ps.Exec("Sel_Window @"+windowNumber+" Front");}
+   public void Dispose(){if(application!=null&&Marshal.IsComObject(application))Marshal.ReleaseComObject(application);application=null;}
+  }
   public static Dictionary<string,object> Activate(string requestId,Dictionary<string,object> args) {
+   return Activate(Program.Root,requestId,args,()=>new ComActivationContext(Program.ReadConfig()));
+  }
+  internal static Dictionary<string,object> Activate(string root,string requestId,Dictionary<string,object> args,Func<IActivationContext> contextFactory) {
    var result=new Dictionary<string,object>{{"operationId",requestId},{"state","rejected_before_context_change"},{"geometryMutationAttempted",false},{"contextChangeAttempted",false}};
-   object application=null;string journal=Path.Combine(Program.Root,"operations",requestId+".json");bool attempted=false;
-   if(File.Exists(journal)||File.Exists(Path.Combine(Program.Root,"operations",requestId+".once"))) {
+   if(!EntitySets.Hex(requestId,32)){result["error"]="Invalid activation request identity.";return result;}
+   string journal=Path.Combine(root,"operations",requestId+".json");bool attempted=false;
+   if(File.Exists(journal)||File.Exists(Path.Combine(root,"operations",requestId+".once"))) {
     result["error"]="Activation request already recorded; replay forbidden.";result["originalJournalPreserved"]=true;return result;
    }
    try {
     ValidateActivation(args);DateTime expiry=DateTime.Parse((string)args["expiresUtc"],CultureInfo.InvariantCulture,DateTimeStyles.RoundtripKind).ToUniversalTime();
-    string listingPath=Path.Combine(Program.Root,"responses",(string)args["listingRequestId"]+".json");
+    string listingPath=Path.Combine(root,"responses",(string)args["listingRequestId"]+".json");
     if(Program.Hash(listingPath)!=(string)args["listingSha256"])throw new IOException("Document listing receipt changed.");
     var expected=Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(listingPath,Encoding.UTF8));
     if(!Equals(expected["state"],"documents_listed_verified"))throw new InvalidOperationException("Verified listing required.");
     DateTime listedUtc=DateTime.Parse((string)expected["timestampUtc"],CultureInfo.InvariantCulture,DateTimeStyles.RoundtripKind).ToUniversalTime();
     if(DateTime.UtcNow>=expiry||expiry>listedUtc.AddSeconds(300)||expiry<listedUtc)throw new InvalidOperationException("Document lease expired or invalid.");
-    using(var guard=new FileStream(Path.Combine(Program.Root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None)) {
-     application=Attach(Program.ReadConfig());dynamic ps=application;var before=ReadStable(application);
+    using(var guard=new FileStream(Path.Combine(root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None))using(var context=contextFactory()) {
+     var before=context.Windows();
      if(Key(before)!=Key(expected))throw new InvalidOperationException("Document/window context changed since listing.");
      var windows=(List<Dictionary<string,object>>)before["windows"];
      var target=windows.SingleOrDefault(w=>Equals(w["windowNumber"],args["windowNumber"])&&w.ContainsKey("modelId")&&Equals(w["modelId"],args["modelId"]));
      if(target==null||windows.Count(w=>w.ContainsKey("modelId")&&Equals(w["modelId"],args["modelId"]))!=1)throw new InvalidOperationException("Target model window absent or ambiguous.");
      var savedHashes=HashSavedFiles(windows.ToArray());result["savedFileHashesBefore"]=savedHashes;result["listingRequestId"]=args["listingRequestId"];result["listingSha256"]=args["listingSha256"];
      result["before"]=before;result["target"]=target;
-     using(var once=new FileStream(Path.Combine(Program.Root,"operations",requestId+".once"),FileMode.CreateNew,FileAccess.Write,FileShare.None)){}
-     if(Key(ReadStable(application))!=Key(expected)||DateTime.UtcNow>=expiry)throw new InvalidOperationException("Context/lease changed immediately before activation.");
+     using(var once=new FileStream(Path.Combine(root,"operations",requestId+".once"),FileMode.CreateNew,FileAccess.Write,FileShare.None)){}
+     if(Key(context.Windows())!=Key(expected)||DateTime.UtcNow>=expiry)throw new InvalidOperationException("Context/lease changed immediately before activation.");
      bool alreadyActive=Equals(target["selectedRaw"],1);result["alreadyActive"]=alreadyActive;
      if(!alreadyActive) {
       attempted=true;result["contextChangeAttempted"]=true;result["state"]="context_change_outcome_pending";TranslationTest.Journal(journal,result,"before_activate");
-      ps.Exec("Sel_Window @"+(int)args["windowNumber"]+" Front");
+      context.Activate((int)args["windowNumber"]);
      }
-     var after=ReadStable(application);result["after"]=after;
+     var after=context.Windows();result["after"]=after;
      var active=(Dictionary<string,object>)after["activeWindow"];
      if(active==null||!active.ContainsKey("modelId")||!Equals(active["modelId"],args["modelId"])||!Equals(active["windowNumber"],args["windowNumber"]))throw new InvalidOperationException("Requested document did not become active.");
-     if(!Convert.ToBoolean(ps.IsDocumentActive())||Convert.ToString(ps.Evaluate("MODEL.SELECTED"),CultureInfo.InvariantCulture)!=(string)target["modelName"])throw new InvalidOperationException("Active document and selected window disagree.");
+     if(!context.IsDocumentActive()||context.SelectedModelName()!=(string)target["modelName"])throw new InvalidOperationException("Active document and selected window disagree.");
      var afterWindows=(List<Dictionary<string,object>>)after["windows"];
      foreach(var window in afterWindows)window["selectedRaw"]=Equals(window["windowNumber"],before["activeWindow"]==null?null:((Dictionary<string,object>)before["activeWindow"])["windowNumber"])?1:0;
      if(Key(after)!=Key(before))throw new InvalidOperationException("Window/document metadata changed beyond activation.");
@@ -134,7 +150,6 @@ namespace PowerShapeBridge {
      TranslationTest.Journal(journal,result,"completed");return result;
     }
    }catch(Exception error){result["state"]=attempted?"context_change_outcome_unknown":"rejected_before_context_change";result["error"]=error.Message;result["recoveryInstructions"]="Read document list and operation journal; never automatically repeat an unknown activation.";TranslationTest.Journal(journal,result,"stopped");return result;}
-   finally {if(application!=null&&Marshal.IsComObject(application))Marshal.ReleaseComObject(application);}
   }
  }
 }

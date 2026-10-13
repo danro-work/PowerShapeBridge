@@ -25,6 +25,8 @@ def expected_rows():
                  for signal in ("local", "notified") for phase in ("pending", "returned")}
     for recipe in ("execute_owned_translation", "open_working_copy", "activate_document"):
         rows |= {(recipe, "cancel_" + signal + "_pending") for signal in ("local", "notified")}
+    for recipe in ("execute_owned_translation", "open_working_copy"):
+        rows |= {(recipe, "cancel_" + signal + "_returned") for signal in ("local", "notified")}
     return rows
 
 

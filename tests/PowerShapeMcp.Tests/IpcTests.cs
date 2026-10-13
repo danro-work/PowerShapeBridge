@@ -4,6 +4,7 @@ using Xunit;
 
 namespace PowerShapeMcp.Tests;
 
+[Collection("Timing-sensitive IPC")]
 public sealed class IpcTests
 {
     [Theory]
