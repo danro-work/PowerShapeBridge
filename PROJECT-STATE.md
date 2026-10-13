@@ -1,5 +1,15 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 checkpoint wire: seven whole official SDK STDIO/native queue scenarios
+passed with fake CAD; independent413 hashes/56 requests audit passed.
+STATUS-K7-CHECKPOINT-WIRE.md, evidence/K7-checkpoint-wire/final +wire-audit.json.
+Full verify-sdk session91892 completed PASS, evidence/K7-checkpoint-wire/sdk-full,
+stage work/K7-checkpoint-wire-sdk-full:368/531/1750 mismatch/32 SDK/25 native faults/
+20 activation/40 legacy STDIO/16 checkpoint/6 recovered OPEN/7 wire/Inspector.
+163 hashes matched +native entrypoint/staged binaries SHA. Runtime not deployed.
+PR22/source7036c016 four CI passed. Remaining reparse/partial publication,
+separately accepted live checkpoint and К8–К11. General MCP v1 not complete.
+
 К7 checkpoint cancellation: six new official SDK route fault cases;
 focused13/full368 .NET passed without skip. Production SDK/native unchanged,
 installed0.33.3/CAD unchanged. STATUS-K7-CHECKPOINT-CANCELLATION.md;

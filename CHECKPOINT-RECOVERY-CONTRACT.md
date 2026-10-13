@@ -1,9 +1,10 @@
-# К7 — контракт восстановления из checkpoint, к реализации
+# К7 — контракт восстановления из checkpoint
 
 Файловая часть реализована в SDK0.38/native0.33.5 и квалифицирована offline,
 STATUS-K7-CHECKPOINT-COPY.md. Recovery-reader никогда не выдаёт разрешение на
 restore. Guarded OPEN recovered copy проверяется offline с fake CAD,
-STATUS-K7-RECOVERED-OPEN.md; полный MCP route/live acceptance остаются впереди;
+STATUS-K7-RECOVERED-OPEN.md. Полный MCP route квалифицирован offline с fake CAD,
+STATUS-K7-CHECKPOINT-WIRE.md; live acceptance остаётся впереди;
 контракт не означает выполненную CAD квалификацию или согласие на живое испытание.
 
 Результат восстановления — новая независимая owned рабочая копия сохранённых

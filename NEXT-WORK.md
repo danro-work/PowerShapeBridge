@@ -1,5 +1,13 @@
 # Дальнейшая работа
 
+Checkpoint wire full route seven cases/413 hashes/56 requests passed, fake CAD.
+Full verify-sdk session91892 completed PASS; evidence/K7-checkpoint-wire/sdk-full,
+stage work/K7-checkpoint-wire-sdk-full.368/531/1750 mismatch/32/25/20/40/16/6/7/
+Inspector passed,163 hashes matched +native entrypoint/staged binaries SHA.
+Publish qualified source/CI. STATUS-K7-CHECKPOINT-WIRE.md.
+Then reparse/remaining publication faults and separately accepted live scenario.
+PR22 four CI passed. Installed0.33.3 unchanged; full goal К11 still active.
+
 Checkpoint cancellation block: six additional cases, focused13/full368 .NET
 passed, STATUS-K7-CHECKPOINT-CANCELLATION.md. Publish branch/PR/CI, then
 remaining reparse/partial-publication coverage, complete recovered OPEN transport
