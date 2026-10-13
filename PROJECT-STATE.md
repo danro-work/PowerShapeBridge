@@ -1,5 +1,14 @@
 # PowerShape Bridge — состояние для продолжения
 
+К8: actual official SDK STDIO/native guard/scoped Issue — six scenarios passed,
+237 hashes/30 requests audited; full session5783 completed PASS in
+ evidence/K8-owned-rotation-wire/sdk-full (SDK0.39.1),190 recorded hashes.
+SDK0.39.2 fixes lost bridgeRequestId in unknown/proof failure;15 focused tests passed.
+Post-fix whole wire six scenarios/237 hashes/30 requests passed, session68175. Native0.34 NOT installed,
+READY K7 packages unchanged; K7 approval pending. STATUS-K8-OWNED-ROTATION-WIRE.md.
+PR27/e6425fcf four CI passed. Next final post-fix qualification/source CI and
+rotation executor/verifier/faults/saved-result; general K8-K11 remain incomplete.
+
 K8 scoped owned rotation source SDK0.39.1/native+legacy0.34.0: new gated passive
 prepare_owned_rotation, native queue recipe/held guard, strict proof/TTL store.
 14 focused SDK/domain +15 actual native Receipt compatibility cases passed.
