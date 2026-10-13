@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using PowerShapeGeometry;
 
 namespace PowerShapeBridge {
  // Internal batch executor. No production queue/COM entrypoint until independent verification is qualified.
@@ -9,6 +10,7 @@ namespace PowerShapeBridge {
   internal interface IContext : DocumentBindings.IContext {
    int Composite(int type,int nativeId);
    double[] Bounds(int composite);
+   RotationSampleVerifier.Samples Measurements(int composite);
    int Rotate(int composite,int integerDegrees,double[] pointAndUnitDirection);
   }
   static void Require(bool ok,string message){if(!ok)throw new InvalidOperationException(message);}
@@ -59,7 +61,12 @@ namespace PowerShapeBridge {
       Require(!File.Exists(fence)&&!File.Exists(claim),"Rotation copy fenced or plan already claimed; no replay.");d.Check(lease,context,result);
       var targets=d.Keys.Select(key=>{int composite=context.Composite(key[0],key[1]);var bounds=context.Bounds(composite);Box(bounds);return new Dictionary<string,object>{{"entityKey",key},{"compositeId",composite},{"boundsBeforeWorldRawPaired",bounds}};}).ToArray();
       Require(targets.Select(target=>target["compositeId"]).Distinct().Count()==targets.Length,"Aliased composite targets forbidden.");var windows=context.Windows();var saved=WorkingCopyOpen.SavedHashes(windows);
-      var plan=new Dictionary<string,object>(parameters){{"schemaVersion",1},{"operationId",id},{"operation","rotate_owned_entities"},{"ownedRotationId",args["ownedRotationId"]},{"ownedRotationSha256",args["ownedRotationSha256"]},{"copyId",packet["copyId"]},{"ownershipSha256",packet["ownershipSha256"]},{"workingSha256",packet["workingSha256"]},{"inspectionRequestId",d.Binding["inspectionRequestId"]},{"inspectionSha256",d.Binding["inspectionSha256"]},{"windowContextSha256",packet["windowContextSha256"]},{"angleDegrees",angle},{"nativeAxis",axis},{"targets",targets},{"beforeWindows",windows},{"savedFileHashesBefore",saved},{"createdUtc",DateTime.UtcNow.ToString("o")},{"qualification","Internal executor; native sign/frame and independent geometry verification not qualified"}};
+      var provenance=RotationMeasurementRecords.Provenance(packet,d);
+      var captured=targets.Select(target=>{var samples=context.Measurements((int)target["compositeId"]);RotationSampleVerifier.Validate(samples);var key=(int[])target["entityKey"];Require(samples.Type==key[0]&&samples.NativeId==key[1]&&Near(samples.BoundsPaired,(double[])target["boundsBeforeWorldRawPaired"]),"Before-measurement target/bounds differ.");return samples;}).ToArray();
+      d.Check(lease,context,result);
+      result["localArtifactsMayExist"]=true;
+      for(int index=0;index<targets.Length;index++){string measurementSha=RotationMeasurementRecords.Freeze(root,id,index,"before",provenance,captured[index]);targets[index]["beforeMeasurementSha256"]=measurementSha;RotationMeasurementRecords.Read(root,id,index,"before",measurementSha,provenance,proofs);}
+      var plan=new Dictionary<string,object>(parameters){{"schemaVersion",2},{"operationId",id},{"operation","rotate_owned_entities"},{"ownedRotationId",args["ownedRotationId"]},{"ownedRotationSha256",args["ownedRotationSha256"]},{"copyId",packet["copyId"]},{"ownershipSha256",packet["ownershipSha256"]},{"workingSha256",packet["workingSha256"]},{"inspectionRequestId",d.Binding["inspectionRequestId"]},{"inspectionSha256",d.Binding["inspectionSha256"]},{"windowContextSha256",packet["windowContextSha256"]},{"measurementProvenance",provenance},{"angleDegrees",angle},{"nativeAxis",axis},{"targets",targets},{"beforeWindows",windows},{"savedFileHashesBefore",saved},{"createdUtc",DateTime.UtcNow.ToString("o")},{"qualification","Internal executor; native sign/frame and independent geometry verification not qualified"}};
       string path=Artifact(root,"rotationexecutions",id);Directory.CreateDirectory(Path.GetDirectoryName(path));string sha=NativeJournal.Freeze(path,plan);result["plan"]=plan;result["planSha256"]=sha;result["copyId"]=packet["copyId"];result["localArtifactsMayExist"]=true;
       journal=new NativeJournal(root,id,sha);journal.Append("prepared",new Dictionary<string,object>{{"operation","rotate_owned_entities"},{"targetCount",targets.Length}});
       string fenceSha=NativeJournal.Freeze(fence,new Dictionary<string,object>{{"schemaVersion",1},{"operationId",id},{"planSha256",sha},{"copyId",packet["copyId"]},{"ownershipSha256",packet["ownershipSha256"]},{"automaticReplayForbidden",true}});result["executionFenceSha256"]=fenceSha;proofs.Json(fence,fenceSha);
@@ -76,11 +83,16 @@ namespace PowerShapeBridge {
        var finalBefore=Stable(d,lease,context,current,new int[0][],saved);
        Require(EntitySets.ObservedDigest(finalBefore)==EntitySets.ObservedDigest(snapshot)&&context.Composite(key[0],key[1])==composite&&Near(context.Bounds(composite),bounds),"Rotation target/context changed after command-start publication.");
        context.ConfirmDocument();Require(DateTime.UtcNow<d.Expires&&DocumentBindings.WindowDigest(context.Windows())==(string)d.Binding["windowContextSha256"],"Final rotation context/lease changed.");
+       var beforeSamples=RotationMeasurementRecords.Read(root,id,index,"before",(string)targets[index]["beforeMeasurementSha256"],provenance,proofs);
+       Require(EntitySets.Canonical(RotationMeasurementRecords.Encode(beforeSamples))==EntitySets.Canonical(RotationMeasurementRecords.Encode(context.Measurements(composite))),"Native measurements changed before target rotation.");
+       var measuredGuard=Stable(d,lease,context,current,new int[0][],saved);Require(EntitySets.ObservedDigest(measuredGuard)==EntitySets.ObservedDigest(snapshot)&&context.Composite(key[0],key[1])==composite&&Near(context.Bounds(composite),bounds),"Context changed while rereading measurements.");
+       context.ConfirmDocument();Require(DateTime.UtcNow<d.Expires&&DocumentBindings.WindowDigest(context.Windows())==(string)d.Binding["windowContextSha256"],"Measurement read exhausted final rotation context/lease.");
        calls++;result["geometryMutationAttempted"]=true;int code=context.Rotate(composite,angle,axis.ToArray());string returned=NativeJournal.Freeze(Path.Combine(commands,prefix+".returned.json"),new Dictionary<string,object>{{"operationId",id},{"planSha256",sha},{"index",index},{"startedSha256",started},{"returnCode",code},{"timestampUtc",DateTime.UtcNow.ToString("o")}});
        Require(code==1,"RotateItem returned non-success; batch stops without retry/inverse.");
        var after=Stable(d,lease,context,current,new[]{key},saved);Require(context.Composite(key[0],key[1])==composite,"Rotated target mapping changed; independent diagnosis required.");var afterBounds=context.Bounds(composite);Box(afterBounds);current=after;
+       var afterSamples=context.Measurements(composite);RotationSampleVerifier.Validate(afterSamples);Require(afterSamples.Type==key[0]&&afterSamples.NativeId==key[1]&&Near(afterSamples.BoundsPaired,afterBounds),"After-measurement target/bounds differ.");string afterSha=RotationMeasurementRecords.Freeze(root,id,index,"after",provenance,afterSamples);RotationMeasurementRecords.Read(root,id,index,"after",afterSha,provenance,proofs);
        string observation=NativeJournal.Freeze(Path.Combine(commands,prefix+".observed.json"),new Dictionary<string,object>{{"operationId",id},{"planSha256",sha},{"index",index},{"returnedSha256",returned},{"afterObservationSha256",EntitySets.ObservedDigest(after)},{"boundsAfterWorldRawPaired",afterBounds},{"geometryVerified",false}});
-       records.Add(new Dictionary<string,object>{{"index",index},{"entityKey",key},{"startedSha256",started},{"returnedSha256",returned},{"observedSha256",observation},{"returnCode",code}});
+       records.Add(new Dictionary<string,object>{{"index",index},{"entityKey",key},{"beforeMeasurementSha256",targets[index]["beforeMeasurementSha256"]},{"afterMeasurementSha256",afterSha},{"startedSha256",started},{"returnedSha256",returned},{"observedSha256",observation},{"returnCode",code}});
       }
       journal.Append("command_returned",new Dictionary<string,object>{{"returnCode",1},{"commandCalls",calls},{"allTargetsReturnedSuccess",true}});
       string summary=NativeJournal.Freeze(Path.Combine(commands,"summary.json"),new Dictionary<string,object>{{"operationId",id},{"planSha256",sha},{"commands",records},{"geometryVerified",false}});

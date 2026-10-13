@@ -131,6 +131,10 @@ namespace PowerShapeBridge
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{RotationMeasurementTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
+            if(args.Length==1&&args[0]=="--rotation-measurement-record-test") {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{RotationMeasurementRecordTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
             if(args.Length==2&&new[]{"--rotation-wire-seed","--rotation-wire-request"}.Contains(args[0])) {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{Console.WriteLine(Json.Serialize(args[0]=="--rotation-wire-seed"?OwnedRotationWireFixture.Seed(args[1]):OwnedRotationWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
