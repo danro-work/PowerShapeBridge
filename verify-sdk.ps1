@@ -35,6 +35,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Independent read-only parity failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'Independent recovery inspection failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_prepared.py') --dotnet $DotnetPath --host $taskHost --evidence $taskEvidence
 if ($LASTEXITCODE -ne 0) { throw 'Independent prepared parity failed.' }
+& $PythonPath (Join-Path $taskRoot 'src\test_sdk_rotation_plan_stdio.py') --dotnet $DotnetPath --host $taskHost --evidence (Join-Path $taskEvidence 'rotation-plans')
+if ($LASTEXITCODE -ne 0) { throw 'Independent passive rotation plan STDIO failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_execution.py') --dotnet $DotnetPath --host $taskHost --evidence $taskEvidence
 if ($LASTEXITCODE -ne 0) { throw 'Independent execution facade parity failed.' }
 & $PythonPath -m unittest discover -s (Join-Path $taskRoot 'src') -p 'test_save_target_fixture_oracle.py'
@@ -111,6 +113,7 @@ $taskFiles += @('src\CheckpointRecovery.cs','src\CheckpointRecoveryTests.cs','sr
 $taskFiles += @('src\CheckpointRecoveredOpenTests.cs','src\audit_checkpoint_recovered_open.py','verify-checkpoint-recovered-open.ps1','tools\NativeFixtureCheck\CheckpointOpenCheck.cs')
 $taskFiles += @('src\CheckpointRecoveryWireFixture.cs','src\test_sdk_checkpoint_wire_stdio.py','src\audit_checkpoint_wire_stdio.py')
 $taskFiles += @('src\OwnedCopies.cs','src\Bridge.cs','src\test_sdk_checkpoint_filesystem_faults.py','src\audit_checkpoint_filesystem_stdio.py')
+$taskFiles += @('src\test_sdk_rotation_plan_stdio.py','config\general-rotation-plans.json')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'
