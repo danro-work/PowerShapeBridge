@@ -40,6 +40,12 @@ qualified —16 passed (14 matrix rows +2 protocol controls).
 локальном блоке не повторялись: производственный код не менялся; их последняя
 полная квалификация44726bf сохранена в STATUS-K6-QUALIFIED.md.
 
+Source13f1c545732358d09d5096a6f18acf53bd111e55 опубликован в
+feat/recovery-sdk-cancellation, draft PR16 attached:
+https://github.com/danro-work/PowerShapeBridge/pull/16
+Four Windows CI38385716254/38385724636 baseline и38385716200/38385724496 SDK
+запущены; результат пока pending, не квалифицирован как passed.
+
 Ограничения: это часть К7, не весь этап. Впереди remaining timeout/lost native
 reply rows остальных executors, activation context faults, additional partial
 publication и отдельно принятый checkpoint recovery. Переход к К8–К11 сохраняется.

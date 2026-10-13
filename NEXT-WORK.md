@@ -2,7 +2,8 @@
 
 К7 cancellation:16 focused passed (14 transport matrix rows +2 SDK controls),
 STATUS-K7-SDK-CANCELLATION.md. Full .NET314/314 passed без skip;
-сохранить проверенный блок в отдельном PR. Затем оставшиеся timeout/lost reply
+source13f1c54 опубликован, draft PR16 attached. Дождаться четырёх CI для source:
+38385716254/38385724636 baseline,38385716200/38385724496 SDK; затем оставшиеся timeout/lost reply
 rows translation/SaveAs/ordinary OPEN, activation-context/partial publication и
 accepted checkpoint recovery. Local-only cancellation не означает native return.
 
