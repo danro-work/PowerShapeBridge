@@ -24,6 +24,7 @@ try {
     & $DotnetPath test $taskProject --no-build --no-restore --configuration Release --logger 'trx;LogFileName=sdk-tests.trx' --results-directory $taskEvidence
     if ($LASTEXITCODE -ne 0) { throw 'SDK tests failed.' }
 } finally { $env:PSBRIDGE_TEST_EVIDENCE = $taskPreviousTransportEvidence }
+& (Join-Path $taskRoot 'verify-rotation-samples.ps1') -StageDirectory ($NativeStageDirectory+'-sample-predicate') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-sample-predicate')
 & $PythonPath (Join-Path $taskRoot 'src\audit_sdk_transport_faults.py') --evidence $taskTransportEvidence --output (Join-Path $taskEvidence 'transport-fault-audit.json') --exercise-rejections
 if ($LASTEXITCODE -ne 0) { throw 'SDK transport fault evidence audit failed.' }
 $taskHost = Join-Path $taskRoot 'src\PowerShapeMcp.Host\bin\Release\net10.0\PowerShapeMcp.Host.dll'
@@ -123,6 +124,7 @@ $taskFiles += @('src\OwnedRotationPlans.cs','src\OwnedRotationPlanTests.cs','src
 $taskFiles += @('tools\NativeFixtureCheck\OwnedRotationCheck.cs','config\general-owned-rotation-plans.json')
 $taskFiles += @('src\OwnedRotationWireFixture.cs','src\test_sdk_owned_rotation_wire_stdio.py','src\audit_owned_rotation_wire_stdio.py','verify-owned-rotation-wire.ps1')
 $taskFiles += @('src\OwnedRotationExecution.cs','src\OwnedRotationExecutionTests.cs','src\audit_owned_rotation_execution.py','verify-owned-rotation-execution.ps1')
+$taskFiles += @('src\RotationSampleVerifier.cs','tools\VerifyRotationSamples.cs','verify-rotation-samples.ps1')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

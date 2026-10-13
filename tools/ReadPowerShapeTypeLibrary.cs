@@ -33,7 +33,7 @@ internal static class ReadPowerShapeTypeLibrary {
        try {
         var function=(FUNCDESC)Marshal.PtrToStructure(pointer,typeof(FUNCDESC));var names=new string[64];int found;info.GetNames(function.memid,names,names.Length,out found);
         string name=found>0?names[0]:"";
-        if(!new[]{"RotateItem","TranslateItem","CopyItems","ScaleItem","ScaleItems","TransformItem","GetItemBoundingBox","GetModelItems","GetItemData","Exec"}.Contains(name))continue;
+        if(!new[]{"RotateItem","TranslateItem","CopyItems","ScaleItem","ScaleItems","TransformItem","GetItemBoundingBox","GetModelItems","GetItemData","GetSurfacePoints","GetCompCurvePointData","GetNurbSurfaceData","GetSurfacePointData","GetSolidOwner","Exec"}.Contains(name))continue;
         var parameters=new List<object>();int size=Marshal.SizeOf(typeof(ELEMDESC));
         for(int p=0;p<function.cParams;p++) {
          var element=(ELEMDESC)Marshal.PtrToStructure(IntPtr.Add(function.lprgelemdescParam,p*size),typeof(ELEMDESC));
