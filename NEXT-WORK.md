@@ -1,5 +1,12 @@
 # Дальнейшая работа
 
+К7 cancellation:16 focused passed (14 transport matrix rows +2 SDK controls),
+STATUS-K7-SDK-CANCELLATION.md. Full .NET314/314 passed без skip;
+source13f1c54 опубликован, draft PR16 attached. Дождаться четырёх CI для source:
+38385716254/38385724636 baseline,38385716200/38385724496 SDK; затем оставшиеся timeout/lost reply
+rows translation/SaveAs/ordinary OPEN, activation-context/partial publication и
+accepted checkpoint recovery. Local-only cancellation не означает native return.
+
 АКТУАЛЬНО: К6 technical transition gate fulfilled, STATUS-K6-QUALIFIED.md.
 Current source SDK0.37.4/native0.33.3, branch fix/reopen-current-model-path;
 full298/531/175/25/four CI qualified. Current CAD Test_Block_P2 active/six windows,

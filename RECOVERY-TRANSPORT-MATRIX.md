@@ -1,5 +1,12 @@
 # К7 — SDK transport fault matrix, выполняется
 
+АКТУАЛЬНО,13 октября: К6 квалифицирован, STATUS-K6-QUALIFIED.md. К7 дополнен
+14 SDK cancellation rows для четырёх owned executors и activation +2 plain SDK
+controls;16 focused passed, STATUS-K7-SDK-CANCELLATION.md. Local-only cancellation
+и explicit protocol notification проверяются отдельно, retained artifacts и
+replay rejection обязательны. Полная К7 ещё не завершена. Ниже история первого
+transport блока; pending installation0.33.2 и CAD state в конце устарели.
+
 Ветка feat/recovery-transport-matrix основана на квалифицированном directory fix
 PR11. Производственный код, versions, installed runtime и packages не меняются.
 SavedReopenFixture.Execution получает opt-in publish=false: original raw proof
