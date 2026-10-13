@@ -98,6 +98,9 @@ namespace PowerShapeBridge {
    foreach(var key in keys)if(entities.Count(e=>Equals(e["nativeTypeCode"],key[0])&&Equals(e["nativeId"],key[1]))!=1)throw new InvalidOperationException("Entity absent or ambiguous.");
   }
   public static Dictionary<string,object> Run(string requestId,Dictionary<string,object> args,bool prepare) {
+   return InContext(requestId,args,prepare,()=>Probe.Run(false,false));
+  }
+  internal static Dictionary<string,object> InContext(string requestId,Dictionary<string,object> args,bool prepare,Func<Dictionary<string,object>> observe) {
    var result=new Dictionary<string,object>{{"state","entity_set_rejected"},{"bridgeVersion",Program.ReleaseVersion},{"timestampUtc",DateTime.UtcNow.ToString("o")},{"cadMutationAttempted",false},{"entitySetQualification",Qualification}};
    try {
     if(!Hex(requestId,32))throw new ArgumentException("Invalid entity-set request identity.");
@@ -112,7 +115,7 @@ namespace PowerShapeBridge {
     var expected=Receipt((string)plan["inspectionRequestId"],(string)plan["inspectionSha256"]);DateTime expiry=Expiry(plan["expiresUtc"]);int[][] keys=Keys(plan["entityKeys"]);
     // Cheap receipt/expiry/key rejection precedes any CAD read.
     CheckObserved(expected,expected,keys,expiry,DateTime.UtcNow);
-    var fresh=Probe.Run(false,false);
+    var fresh=observe();
     CheckObserved(expected,fresh,keys,expiry,DateTime.UtcNow);
     result["observedPropertiesSha256"]=ObservedDigest(fresh);result["model"]=fresh["model"];result["processId"]=fresh["processId"];result["processStartedUtc"]=fresh["processStartedUtc"];result["windowsSessionId"]=fresh["windowsSessionId"];
     result["entities"]=Inventory(fresh).Where(e=>keys.Any(k=>Equals(e["nativeTypeCode"],k[0])&&Equals(e["nativeId"],k[1]))).ToArray();

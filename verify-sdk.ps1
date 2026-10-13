@@ -75,6 +75,7 @@ $taskFixture = Join-Path $taskRoot ('work\K2-inspector-'+[guid]::NewGuid().ToStr
 & (Join-Path $taskRoot 'verify-owned-rotation-plans.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-owned-rotation') -EvidenceDirectory (Join-Path $taskEvidence 'owned-rotation-plans')
 & $DotnetPath run --no-restore --configuration Release --project $taskNativeProject -- --owned-rotation-packets ($NativeStageDirectory+'-owned-rotation') (Join-Path $taskEvidence 'owned-rotation-native-sdk.json')
 if($LASTEXITCODE -ne 0){throw 'Native owned rotation packet SDK proof compatibility failed.'}
+& (Join-Path $taskRoot 'verify-owned-rotation-wire.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-rotation-wire') -EvidenceDirectory (Join-Path $taskEvidence 'owned-rotation-wire')
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
 $taskInspectorConfig = Join-Path $taskFixture 'inspector.json'
@@ -119,6 +120,7 @@ $taskFiles += @('src\OwnedCopies.cs','src\Bridge.cs','src\test_sdk_checkpoint_fi
 $taskFiles += @('src\test_sdk_rotation_plan_stdio.py','config\general-rotation-plans.json')
 $taskFiles += @('src\OwnedRotationPlans.cs','src\OwnedRotationPlanTests.cs','src\audit_owned_rotation_plans.py','verify-owned-rotation-plans.ps1')
 $taskFiles += @('tools\NativeFixtureCheck\OwnedRotationCheck.cs','config\general-owned-rotation-plans.json')
+$taskFiles += @('src\OwnedRotationWireFixture.cs','src\test_sdk_owned_rotation_wire_stdio.py','src\audit_owned_rotation_wire_stdio.py','verify-owned-rotation-wire.ps1')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

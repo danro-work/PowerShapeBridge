@@ -59,6 +59,18 @@ public sealed class OwnedRotationRoutesTests
     {
         await using var c=await Connection.Create();var call=c.Client.CallToolAsync("prepare_owned_rotation",c.Args()).AsTask();var path=await c.Data.Files.ClaimRequest();var id=Path.GetFileNameWithoutExtension(path);var envelope=JsonNode.Parse(await c.Data.Files.ReadClaimedRequest(path))!;
         c.Reply(id,envelope["arguments"]!["parameters"]!.AsObject());var before=TransportCancellationProof.Snapshot(c.Data.Root);var response=await call;
-        Assert.True(response.IsError);Assert.Null(JsonNode.Parse(response.StructuredContent!.Value.GetRawText())!["ownedRotationHandle"]);TransportCancellationProof.Unchanged(c.Data.Root,before);Assert.Single(Directory.GetFiles(Path.Combine(c.Data.Root,"requests")));
+        var result=JsonNode.Parse(response.StructuredContent!.Value.GetRawText())!;
+        Assert.True(response.IsError);Assert.Null(result["ownedRotationHandle"]);Assert.Equal(id,result["bridgeRequestId"]!.GetValue<string>());
+        TransportCancellationProof.Unchanged(c.Data.Root,before);Assert.Single(Directory.GetFiles(Path.Combine(c.Data.Root,"requests")));
+    }
+    [Fact]
+    public async Task ChangedPacketRetainsOriginalRequestForDiagnosisWithoutHandleOrReplay()
+    {
+        await using var c=await Connection.Create();var call=c.Client.CallToolAsync("prepare_owned_rotation",c.Args()).AsTask();var path=await c.Data.Files.ClaimRequest();var id=Path.GetFileNameWithoutExtension(path);var envelope=JsonNode.Parse(await c.Data.Files.ReadClaimedRequest(path))!;
+        var reply=c.Reply(id,envelope["arguments"]!["parameters"]!.AsObject());File.AppendAllText(Path.Combine(c.Data.Root,"ownedrotations",id+".json")," ");
+        c.Data.Files.Write("responses/"+id+".json",reply.ToJsonString());var before=TransportCancellationProof.Snapshot(c.Data.Root);var response=await call;
+        var result=JsonNode.Parse(response.StructuredContent!.Value.GetRawText())!;
+        Assert.True(response.IsError);Assert.Null(result["ownedRotationHandle"]);Assert.Equal(id,result["bridgeRequestId"]!.GetValue<string>());Assert.False(result["retryAllowed"]!.GetValue<bool>());
+        TransportCancellationProof.Unchanged(c.Data.Root,before);Assert.Single(Directory.GetFiles(Path.Combine(c.Data.Root,"requests")));
     }
 }

@@ -1,5 +1,14 @@
 # Дальнейшая работа
 
+К8: actual official SDK STDIO/native guard/scoped Issue — six scenarios passed,
+237 hashes/30 requests audited; full session5783 completed PASS in
+ evidence/K8-owned-rotation-wire/sdk-full (SDK0.39.1),190 recorded hashes.
+SDK0.39.2 fixes lost bridgeRequestId in unknown/proof failure;15 focused tests passed.
+Post-fix whole wire six scenarios/237 hashes/30 requests passed, session68175. Native0.34 NOT installed,
+READY K7 packages unchanged; K7 approval pending. STATUS-K8-OWNED-ROTATION-WIRE.md.
+PR27/e6425fcf four CI passed. Next final post-fix qualification/source CI and
+rotation executor/verifier/faults/saved-result; general K8-K11 remain incomplete.
+
 Full session35683 completed PASS at evidence/K8-owned-rotation-sdk/sdk-full,
 stage work/K8-owned-rotation-sdk-full2;417/531/1750 mismatch/32/25/20/40/22/
 6/7/6/15/15 native-SDK/rotation STDIO/Inspector passed.14 SDK/domain +15 native
