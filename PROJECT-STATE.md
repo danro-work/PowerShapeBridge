@@ -1,5 +1,12 @@
 # PowerShape Bridge — состояние для продолжения
 
+Начат независимый offline К7 transport block: feat/recovery-transport-matrix.
+Две actual SDK saved-reopen rows (claimed timeout/lost reply after fake return)
+прошли;14 связанных тестов passed. Один request, consumed handle, retained
+claim/raw journal/files, no replay/new binding доказаны. RECOVERY-TRANSPORT-MATRIX.md.
+Production/version/runtime unchanged;0.33.2 install approval pending. Это часть
+матрицы, не полная К7; следующие rows и К8–К11 обязательны.
+
 Квалифицированное исправление К6 directory separator: native/legacy source
 0.33.2-dev, SDK0.37.2-dev unchanged, commit5fea662/draft PR11 attached.
 Full local292 SDK/520 native/171 artifacts0 mismatch/STDIO/Inspector/25 fault

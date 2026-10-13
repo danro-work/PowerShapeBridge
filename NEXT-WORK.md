@@ -1,5 +1,11 @@
 # Дальнейшая работа
 
+К7 current branch feat/recovery-transport-matrix: saved-reopen SDK timeout и
+lost raw reply rows +14 fixture users passed, RECOVERY-TRANSPORT-MATRIX.md.
+Следом SDK cancellation и full per-executor coverage translation/SaveAs/OPEN,
+activation-context/partial publication/checkpoint. К6 request install0.33.2-dev
+отправлен; без ответа runtime0.33.0 не менять и live pilot не повторять.
+
 К6 directory fix0.33.2-dev qualified (292/520/171/25,134 hashes,four CI),
 draft PR11. Пакет work/K6-native-directory-live и plan-only prepared; runtime
 0.33.0-dev остаётся. Следующая live точка: согласованная установка0.33.2 с
