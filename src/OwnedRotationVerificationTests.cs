@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Diagnostics;
+using System.Threading;
 using PowerShapeGeometry;
 
 namespace PowerShapeBridge {
@@ -9,6 +11,9 @@ namespace PowerShapeBridge {
   static void Require(bool ok,string error){if(!ok)throw new InvalidOperationException(error);}
   static Dictionary<string,object> Clone(Dictionary<string,object> value){return Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(value));}
   static Dictionary<string,string> Hashes(string root){return Directory.GetFiles(root,"*",SearchOption.AllDirectories).ToDictionary(path=>path,path=>Program.Hash(path));}
+  internal static void WaitAfter(DateTime returnedUtc) {
+   var timer=Stopwatch.StartNew();while(DateTime.UtcNow<=returnedUtc){Require(timer.Elapsed<TimeSpan.FromSeconds(1),"Fixture clock did not advance past actual command return.");Thread.Sleep(1);}
+  }
   internal sealed class Context : OwnedRotationExecution.IContext,OwnedRotationVerification.IContext {
    internal Dictionary<string,object> Snapshot,Listing;internal readonly Dictionary<int,RotationSampleVerifier.Samples> Data=new Dictionary<int,RotationSampleVerifier.Samples>();internal int Calls,Reads;internal string Fault;
    internal Context(OwnedRotationPlanTests.Fixture f){Snapshot=Clone(f.Base.Snapshot);Listing=Clone(f.Base.Listing);foreach(var entity in EntitySets.Inventory(Snapshot)){int type=(int)entity["nativeTypeCode"];double[] bounds={-10,10,-10,10,0,20};var positions=Enumerable.Range(0,8).Select(mask=>new RotationSampleVerifier.Witness("anchor-"+mask,Enumerable.Range(0,3).Select(i=>bounds[2*i+((mask&(1<<i))==0?0:1)]).ToArray())).ToArray();Data[type]=new RotationSampleVerifier.Samples(type,(int)entity["nativeId"],"world","document_raw",new string('a',64),positions,new[]{new RotationSampleVerifier.Witness("direction-x",new double[]{1,0,0})},new double[]{1},bounds);}}
@@ -30,11 +35,13 @@ namespace PowerShapeBridge {
   }
   internal static int Run() {
    Require(File.Exists(Path.Combine(Program.Root,".rotation-verification-fixture")),"Explicit own verifier marker required; no CAD.");var rows=new List<Dictionary<string,object>>();
-   foreach(string fault in new[]{"control","mixed_targets","negative_angle","wrong_angle","wrong_samples","wrong_mapping","late_context","wrong_receipt_sha","wrong_before_sha","wrong_summary_sha","changed_fence","partial_second","old_inspection","wrong_window"}) {
+   foreach(string fault in new[]{"control","mixed_targets","negative_angle","wrong_angle","wrong_samples","wrong_mapping","late_context","wrong_receipt_sha","wrong_before_sha","wrong_summary_sha","changed_fence","partial_second","old_inspection","equal_inspection","wrong_window"}) {
     var f=new OwnedRotationPlanTests.Fixture(fault=="mixed_targets"||fault=="partial_second");if(fault=="negative_angle")((Dictionary<string,object>)f.Plan["parameters"])["angleDegrees"]=-90;f.Freeze();string root=f.Base.Root,packetId=Guid.NewGuid().ToString("N");var prepared=OwnedRotationPlans.Prepare(root,packetId,f.Args,f.Base.NewContext());
     var executionContext=new Context(f){Fault=fault=="wrong_angle"||fault=="partial_second"?fault:null};string id=Guid.NewGuid().ToString("N");var executed=OwnedRotationExecution.Execute(root,id,new Dictionary<string,object>{{"ownedRotationId",packetId},{"ownedRotationSha256",prepared["ownedRotationSha256"]}},executionContext);Require(Equals(executed["state"],fault=="partial_second"?"owned_rotation_outcome_unknown":"owned_rotation_executed_unverified"),"Own analytic execution failed: "+Program.Json.Serialize(executed));
     string receiptSha=NativeJournal.Freeze(Path.Combine(root,"responses",id+".json"),executed);var fresh=executionContext.Fresh(f);fresh.Fault=new[]{"wrong_samples","wrong_mapping","late_context"}.Contains(fault)?fault:null;
-    var inspection=Clone(fresh.Snapshot);inspection["timestampUtc"]=fault=="old_inspection"?f.Base.Snapshot["timestampUtc"]:DateTime.UtcNow.ToString("o");string inspectionId=Guid.NewGuid().ToString("N");inspection["bridgeRequestId"]=inspectionId;string inspectionSha=NativeJournal.Freeze(Path.Combine(root,"responses",inspectionId+".json"),inspection);
+    var returnedEvent=Directory.GetFiles(Path.Combine(root,"operations",id),"*.json").Select(path=>Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(path))).SingleOrDefault(e=>Equals(e["state"],"command_returned"));
+    WaitAfter(EntitySets.Expiry(returnedEvent==null?executed["timestampUtc"]:returnedEvent["timestampUtc"]));
+    var inspection=Clone(fresh.Snapshot);inspection["timestampUtc"]=fault=="old_inspection"?f.Base.Snapshot["timestampUtc"]:fault=="equal_inspection"?returnedEvent["timestampUtc"]:DateTime.UtcNow.ToString("o");string inspectionId=Guid.NewGuid().ToString("N");inspection["bridgeRequestId"]=inspectionId;string inspectionSha=NativeJournal.Freeze(Path.Combine(root,"responses",inspectionId+".json"),inspection);
     var listing=Clone(fresh.Listing);listing["timestampUtc"]=DateTime.UtcNow.ToString("o");listing["state"]="documents_listed_verified";string listingId=Guid.NewGuid().ToString("N"),listingSha=NativeJournal.Freeze(Path.Combine(root,"responses",listingId+".json"),listing);
     var args=new Dictionary<string,object>{{"executionRequestId",id},{"executionReceiptSha256",receiptSha},{"inspectionRequestId",inspectionId},{"inspectionSha256",inspectionSha},{"listingRequestId",listingId},{"listingSha256",listingSha},{"windowNumber",fault=="wrong_window"?99:1},{"modelId",9},{"expiresUtc",DateTime.UtcNow.AddSeconds(180).ToString("o")}};
     if(fault=="wrong_receipt_sha")args["executionReceiptSha256"]=new string('f',64);
