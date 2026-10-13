@@ -20,6 +20,9 @@ def general_core(settings):
     save_targets = settings.get('ownedSaveTargetsExperimental', False)
     saves = settings.get('ownedSavesExperimental', False)
     reopens = settings.get('ownedSavedReopenExperimental', False)
+    recovery = settings.get('checkpointRecoveryExperimental', False)
+    if type(recovery) is not bool or recovery and (profile != 'general-v1' or copies is not True):
+        raise ValueError('Checkpoint recovery requires general owned working copies')
     if type(reopens) is not bool or reopens and (profile != 'general-v1' or saves is not True or opens is not True):
         raise ValueError('Experimental saved reopen requires owned SaveAs and owned copy open')
     if type(saves) is not bool or saves and (profile != 'general-v1' or save_targets is not True):

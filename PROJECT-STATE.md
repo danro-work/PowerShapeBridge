@@ -1,5 +1,22 @@
 # PowerShape Bridge — состояние для продолжения
 
+Current К7 checkpoint filesystem feature: SDK0.38/native0.33.5 source, installed
+0.33.3/default config/CAD unchanged. Two fixed general-only tools, one-use intent,
+NEW saved-byte working copy, original unknown/artifacts retained.18 SDK tests,
+16 native cases+249 hash audit и actual SDK/native queue integration passed.
+Full evidence/K7-checkpoint-recovery/sdk-full passed361/531/1750 mismatch/32 SDK/
+25 native faults/20 activation/40 legacy STDIO/16 checkpoint+audit/SDK-native disk
+creation/Inspector;156 hashes matched. STATUS-K7-CHECKPOINT-COPY.md. Recovered-copy
+OPEN interoperability/live checkpoint ещё не квалифицированы этим блоком. PR19 four CI passed.
+Общая цель доК11 сохраняется.
+
+Current: SDK legacy reader0.37.5 sourcefe2cf8c/draft PR19 attached, full343/531/
+1750 mismatch/32 SDK/25 native faults/20 activation/40 legacy STDIO/Inspector
+и145 hashes qualified. CI pending SDK, baseline passed; handles в
+work/K7-legacy-recovery-current.json. Следом реализация protected checkpoint
+recovery, контракт CHECKPOINT-RECOVERY-CONTRACT.md planned. Общее MCP v1
+доК11 ещё не завершено; live recovery не запускался.
+
 К7 current legacy reader: source SDK0.37.5/native0.33.4, installed0.33.3 unchanged.
 13 unit +40 actual-native-artifact STDIO cases passed; reader observes legacy
 activation journal without authoritative return/permission/CAD/queue/repair.

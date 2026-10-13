@@ -20,6 +20,7 @@ public sealed class BridgeSession : IDisposable
     public OwnedSaveTargetStore SaveTargets { get; }
     public OwnedSavedResultStore SavedResults { get; }
     public OwnedReopenStore Reopens { get; }
+    public CheckpointRecoveryStore CheckpointRecoveries { get; }
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     public bool RecoveryInspectionEnabled { get; }
@@ -39,6 +40,7 @@ public sealed class BridgeSession : IDisposable
         SaveTargets=new(options.BridgeRoot,Bindings,clock,utcClock);
         SavedResults=new(options.BridgeRoot,SaveTargets,Candidates,clock,utcClock);
         Reopens=new(options.BridgeRoot,SavedResults,clock,utcClock);
+        CheckpointRecoveries=new(options.BridgeRoot,clock,utcClock);
         var config=Options.ReadConfiguration();
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
         RecoveryInspectionEnabled=config.TryGetProperty("recoveryInspectionExperimental",out var recoveryFlag)&&recoveryFlag.ValueKind==System.Text.Json.JsonValueKind.True;
@@ -59,6 +61,8 @@ public sealed class BridgeSession : IDisposable
             foreach(var (flagName,names) in new[]{("workingCopyOpenExperimental",new[]{"open_working_copy","verify_working_copy_open"}),("ownedTranslationsExperimental",new[]{"execute_owned_translation","verify_owned_translation"}),("ownedSavesExperimental",new[]{"execute_owned_save_as","verify_owned_save_as"}),("ownedSavedReopenExperimental",new[]{"execute_owned_saved_reopen","verify_owned_saved_reopen"})})
                 if(config.TryGetProperty(flagName,out var enabled)&&enabled.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(names);
         }
+        if(!options.ReadOnly&&config.TryGetProperty("checkpointRecoveryExperimental",out var recoveryCopy)&&recoveryCopy.ValueKind==System.Text.Json.JsonValueKind.True)
+            prepared.UnionWith(new[]{"prepare_checkpoint_recovery","create_checkpoint_working_copy"});
     }
     public void AssertToolAllowed(string name)
     {
@@ -111,6 +115,7 @@ public sealed class BridgeSession : IDisposable
             ["workerTimeoutSeconds"] = config.GetProperty("operationTimeoutSeconds").GetInt32()
         };
         if(config.TryGetProperty("recoveryResolutionExperimental",out _))result["recoveryResolution"]=RecoveryResolutionEnabled?"experimental_immutable_independent_verification_decisions":"disabled";
+        if(config.TryGetProperty("checkpointRecoveryExperimental",out _))result["checkpointRecovery"]=PreparedEnabled("prepare_checkpoint_recovery")?"experimental_new_owned_saved_byte_copy_no_open":"disabled";
         foreach (var (file, key) in new[] { ("deployment-current.json", "installedDeployment"), ("panel-status.json", "lastPanelReport"), ("worker-stage.json", "lastWorkerStage") })
         {
             if (!File.Exists(FileArtifacts.FixedPath(Options.BridgeRoot, "reports", file))) continue;
@@ -119,5 +124,5 @@ public sealed class BridgeSession : IDisposable
         }
         return result;
     }
-    public void Dispose(){Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
+    public void Dispose(){CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
 }
