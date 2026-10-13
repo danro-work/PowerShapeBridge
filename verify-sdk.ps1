@@ -81,6 +81,7 @@ if($LASTEXITCODE -ne 0){throw 'Native owned rotation packet SDK proof compatibil
 & (Join-Path $taskRoot 'verify-rotation-measurements.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-rotation-measurements') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-measurements')
 & (Join-Path $taskRoot 'verify-rotation-measurement-records.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-measurement-records') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-measurement-records')
 & (Join-Path $taskRoot 'verify-rotation-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-rotation-verification') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-verification')
+& (Join-Path $taskRoot 'verify-geometry-export-targets.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-targets') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-targets')
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
 $taskInspectorConfig = Join-Path $taskFixture 'inspector.json'
@@ -131,6 +132,7 @@ $taskFiles += @('src\RotationSampleVerifier.cs','tools\VerifyRotationSamples.cs'
 $taskFiles += @('src\RotationMeasurements.cs','src\RotationMeasurementTests.cs','src\audit_rotation_measurements.py','verify-rotation-measurements.ps1')
 $taskFiles += @('src\RotationMeasurementRecords.cs','src\RotationMeasurementRecordTests.cs','src\audit_rotation_measurement_records.py','verify-rotation-measurement-records.ps1')
 $taskFiles += @('src\OwnedRotationVerification.cs','src\OwnedRotationVerificationTests.cs','src\audit_rotation_verification.py','verify-rotation-verification.ps1')
+$taskFiles += @('src\OwnedGeometryExportTargets.cs','src\OwnedGeometryExportTargetTests.cs','src\audit_geometry_export_targets.py','verify-geometry-export-targets.ps1')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'
