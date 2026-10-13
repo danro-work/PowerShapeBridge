@@ -23,6 +23,8 @@ public sealed class BridgeSession : IDisposable
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     public bool RecoveryInspectionEnabled { get; }
+    public bool RecoveryResolutionEnabled { get; }
+    public OutcomeResolutionJournal Resolutions { get; }
     private readonly HashSet<string> prepared=[];
     private readonly HashSet<string> execution=[];
     private readonly object admissionGate=new();
@@ -40,6 +42,8 @@ public sealed class BridgeSession : IDisposable
         var config=Options.ReadConfiguration();
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
         RecoveryInspectionEnabled=config.TryGetProperty("recoveryInspectionExperimental",out var recoveryFlag)&&recoveryFlag.ValueKind==System.Text.Json.JsonValueKind.True;
+        RecoveryResolutionEnabled=!options.ReadOnly&&config.TryGetProperty("recoveryResolutionExperimental",out var resolutionFlag)&&resolutionFlag.ValueKind==System.Text.Json.JsonValueKind.True;
+        Resolutions=new(options.BridgeRoot,utcClock);
         if(!options.ReadOnly)
         {
             execution.Add("activate_document");
@@ -64,6 +68,11 @@ public sealed class BridgeSession : IDisposable
     }
     public bool PreparedEnabled(string name)=>prepared.Contains(name);
     public bool ExecutionEnabled(string name)=>execution.Contains(name);
+    public JsonObject RecordResolution(string verifier,JsonObject receipt,JsonObject parameters,CancellationToken cancellationToken)
+    {
+        if(!RecoveryResolutionEnabled)return receipt;
+        var result=receipt.DeepClone().AsObject();result["outcomeResolution"]=Resolutions.Record(verifier,receipt,parameters,cancellationToken);return result;
+    }
     public void RevokeCadLeases(bool consumeOwned)
     {
         Documents.Clear();References.Clear();Candidates.Clear();Bindings.Clear();
@@ -101,6 +110,7 @@ public sealed class BridgeSession : IDisposable
             ["documentChoice"] = ExecutionEnabled("activate_document")?"enabled":"disabled", ["expectedProject"] = null, ["captureViewport"] = false,
             ["workerTimeoutSeconds"] = config.GetProperty("operationTimeoutSeconds").GetInt32()
         };
+        if(config.TryGetProperty("recoveryResolutionExperimental",out _))result["recoveryResolution"]=RecoveryResolutionEnabled?"experimental_immutable_independent_verification_decisions":"disabled";
         foreach (var (file, key) in new[] { ("deployment-current.json", "installedDeployment"), ("panel-status.json", "lastPanelReport"), ("worker-stage.json", "lastWorkerStage") })
         {
             if (!File.Exists(FileArtifacts.FixedPath(Options.BridgeRoot, "reports", file))) continue;

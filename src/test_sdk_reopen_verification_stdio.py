@@ -78,6 +78,8 @@ def checks(args):
     assert len(markers) == 1
     root, metadata = markers[0].parent, read(markers[0])
     settings = read(Path(__file__).resolve().parents[1] / 'config/general-owned-saved-reopen.json')
+    if args.recovery_resolution:
+        settings.update(recoveryInspectionExperimental=True, recoveryResolutionExperimental=True)
     (root / 'bridge.config.json').write_text(json.dumps(settings), encoding='utf-8')
     original_journal = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in root.glob('operations/*/*.json')}
     panel = Panel(root, metadata)
@@ -87,8 +89,8 @@ def checks(args):
         for peer in (client, readonly):
             assert 'result' in peer.call(1, 'initialize', {'protocolVersion': '2025-11-25', 'capabilities': {}, 'clientInfo': {'name': 'reopen-independent', 'version': '1'}})
             peer.notify('notifications/initialized')
-        assert len(client.call(2, 'tools/list')['result']['tools']) == 27
-        assert len(readonly.call(2, 'tools/list')['result']['tools']) == 6
+        assert len(client.call(2, 'tools/list')['result']['tools']) == 27 + int(args.recovery_resolution)
+        assert len(readonly.call(2, 'tools/list')['result']['tools']) == 6 + int(args.recovery_resolution)
         for number, recipe in enumerate(('execute_owned_saved_reopen', 'verify_owned_saved_reopen'), 3):
             assert readonly.call(number, 'tools/call', {'name': recipe, 'arguments': {}})['error']['code'] == -32602
         candidate = client.call(3, 'tools/call', {'name': 'inspect_entity_candidates', 'arguments': {}})['result']
@@ -106,20 +108,32 @@ def checks(args):
         replay = client.call(6, 'tools/call', {'name': 'verify_owned_saved_reopen', 'arguments': arguments})['result']
         assert replay['isError'] and panel.calls == ['inspect_active_model', 'list_documents', 'verify_owned_saved_reopen']
         assert not panel.errors, panel.errors
+        if args.recovery_resolution:
+            proof = result['outcomeResolution']
+            record = root / 'recoveryresolutions' / arguments['reopenRequestId'] / (proof['verificationRequestId'] + '.json')
+            assert hashlib.sha256(record.read_bytes()).hexdigest() == proof['resolutionSha256']
+            assert all(proof[key] is False for key in ('executionAuthorized', 'retryAllowed', 'checkpointRestoreAuthorized'))
+            history = readonly.call(90, 'tools/call', {'name': 'inspect_operation_recovery', 'arguments': {'operationId': arguments['reopenRequestId']}})['result']
+            assert not history['isError'], history
+            assert history['structuredContent']['outcome'] == 'not_resolved_by_recorded_inspection'
+            recorded = history['structuredContent']['resolutionHistory']
+            assert recorded['state'] == 'resolution_history_read' and any(r['verificationRequestId'] == proof['verificationRequestId'] for r in recorded['records']), recorded
+            assert panel.calls == ['inspect_active_model', 'list_documents', 'verify_owned_saved_reopen']
         assert all(hashlib.sha256(path.read_bytes()).hexdigest() == digest for path, digest in original_journal.items())
         evidence = Path(args.evidence).resolve()
-        (evidence / 'sdk-reopen-verification-stdio.json').write_text(json.dumps({'state': 'passed', 'scope': 'Actual Framework saved-reopen original/terminal proof, official SDK STDIO, synthetic fresh read/verifier/binding replies; no live CAD',
-            'fullCatalog': 27, 'readOnlyCatalog': 6, 'cadConnectionAttempted': False, 'runtimeDeploymentPerformed': False, 'nativeFixtureRoot': str(root), 'nativeRecipes': panel.calls, 'journalUnchanged': True, 'verifiedReopen': result, 'transcript': client.transcript}, indent=2), encoding='utf-8')
+        (evidence / ('sdk-reopen-resolution-stdio.json' if args.recovery_resolution else 'sdk-reopen-verification-stdio.json')).write_text(json.dumps({'state': 'passed', 'scope': 'Actual Framework saved-reopen original/terminal proof, official SDK STDIO, synthetic fresh read/verifier/binding replies; no live CAD',
+            'fullCatalog': 27 + int(args.recovery_resolution), 'readOnlyCatalog': 6 + int(args.recovery_resolution), 'cadConnectionAttempted': False, 'runtimeDeploymentPerformed': False, 'nativeFixtureRoot': str(root), 'nativeRecipes': panel.calls, 'journalUnchanged': True, 'verifiedReopen': result, 'transcript': client.transcript}, indent=2), encoding='utf-8')
     finally:
         client.close()
         readonly.close()
         panel.stop.set()
         panel.thread.join(timeout=3)
-    print('PASS: SDK saved-reopen verification STDIO, actual native proofs, 27/6 catalogs, new binding/current entity IDs and unchanged journal; no CAD.')
+    print('PASS: SDK saved-reopen verification STDIO, actual native proofs, %d/%d catalogs, new binding/current entity IDs and unchanged journal%s; no CAD.' % (27 + int(args.recovery_resolution), 6 + int(args.recovery_resolution), ', immutable resolution/read-only history checked' if args.recovery_resolution else ''))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     for key in ('dotnet', 'host', 'stage', 'evidence'):
         parser.add_argument('--' + key, required=True)
+    parser.add_argument('--recovery-resolution', action='store_true')
     checks(parser.parse_args())

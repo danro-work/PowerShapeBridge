@@ -56,7 +56,16 @@ public sealed class BridgeIpc(HostOptions options) : IDisposable
                 if (cancellationToken.IsCancellationRequested) return State("cancelled_outcome_unknown", token, "Cancellation does not stop a claimed PowerShape operation.");
                 if (File.Exists(response))
                 {
-                    var data = FileArtifacts.ReadJson(options.BridgeRoot, Path.Combine("responses", token + ".json"), 16000000);
+                    JsonElement data;
+                    try{data=FileArtifacts.ReadJson(options.BridgeRoot,Path.Combine("responses",token+".json"),16000000);}
+                    catch(IOException error)when((error.HResult&0xffff) is 32 or 33)
+                    {
+                        // Poll only the same original receipt within the existing
+                        // deadline. Never republish/reclaim/replay a CAD request.
+                        await Task.Delay(25,CancellationToken.None);continue;
+                    }
+                    if(cancellationToken.IsCancellationRequested)return State("cancelled_outcome_unknown",token,"Cancellation does not stop a claimed PowerShape operation.");
+                    if(timer.Elapsed>=timeout)return State("timeout_outcome_unknown",token,"Receipt became readable after the original deadline; no command retry.");
                     if (!data.TryGetProperty("state", out var state) || state.ValueKind != JsonValueKind.String ||
                         data.TryGetProperty("bridgeRequestId", out var identity) && identity.GetString() != token)
                         throw new InvalidDataException("Invalid Bridge response identity/state.");

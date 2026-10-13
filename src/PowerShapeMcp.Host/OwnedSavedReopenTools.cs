@@ -13,7 +13,7 @@ public sealed class OwnedSavedReopenTools(BridgeSession session)
     [McpServerTool(Name="execute_owned_saved_reopen",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false),Description("Open one prepared saved-result Working copy in a new model window after fresh active source choice, context and immutable file/provenance checks. Consumes the reopen handle and CAD leases before IPC. Returns only executed_unverified or unknown; separate verifier required. No automatic OPEN replay, SaveAs, close or geometry command. Unavailable in read-only server.")]
     public Task<CallToolResult> ExecuteOwnedSavedReopen([Description("Unconsumed saved-result reopen preparation handle in this connection.")]string ownedReopenHandle,[Description("Fresh candidate observation of the active saved source document.")]string candidateDocumentHandle,[Description("Fresh one-use listing choice of the active saved source document.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Run(false,new(){["ownedReopenHandle"]=ownedReopenHandle,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
 
-    [McpServerTool(Name="verify_owned_saved_reopen",ReadOnly=true,Destructive=false,Idempotent=false,OpenWorld=false),Description("Verify an original saved-result OPEN with authoritative return journal, separate fresh reads, protected bytes and available content/raw units. Issues a NEW working copy and document binding using current entity IDs only on checked success. May append a terminal journal/create a passive binding; no OPEN, selection, Save, close or geometry command. Unknown outcomes are never replayed. Unavailable in read-only server.")]
+    [McpServerTool(Name="verify_owned_saved_reopen",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false),Description("Verify an original saved-result OPEN with authoritative return journal, separate fresh reads, protected bytes and available content/raw units. Issues a NEW working copy and document binding using current entity IDs only on checked success. May append a terminal journal, create a passive binding and write an enabled immutable outcome-resolution record; no OPEN, selection, Save, close or geometry command. Unknown outcomes are never replayed. Unavailable in read-only server.")]
     public Task<CallToolResult> VerifyOwnedSavedReopen([Description("Original saved-result OPEN request ID.")]string reopenRequestId,[Description("Original native saved-result OPEN receipt SHA256.")]string reopenReceiptSha256,[Description("Fresh candidate observation of the newly opened working document.")]string candidateDocumentHandle,[Description("Fresh one-use active listing choice of the newly opened working document.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Run(true,new(){["reopenRequestId"]=reopenRequestId,["reopenReceiptSha256"]=reopenReceiptSha256,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
 
     private async Task<CallToolResult> Run(bool verify,JsonObject args,CancellationToken cancellationToken)
@@ -34,7 +34,17 @@ public sealed class OwnedSavedReopenTools(BridgeSession session)
             {var unknown=Failure(verify,cancellationToken.IsCancellationRequested?"cancelled_outcome_unknown":"timeout_outcome_unknown",true);unknown["bridgeRequestId"]=request;return DiagnosticTools.Result(unknown,true);}
             if(state==(verify?"owned_saved_reopen_verified_observed":"owned_saved_reopen_executed_unverified"))
             {
-                if(verify)data=OwnedReopenProof.IssueBinding(session,data,parameters,args["candidateDocumentHandle"]!.GetValue<string>());
+                if(verify)
+                {
+                    if(session.RecoveryResolutionEnabled)
+                    {
+                        OwnedReopenProof.Verification(session,data,parameters);
+                        var resolution=session.Resolutions.Record(name,data,parameters,cancellationToken);
+                        data=OwnedReopenProof.IssueBinding(session,data,parameters,args["candidateDocumentHandle"]!.GetValue<string>());
+                        data["outcomeResolution"]=resolution;
+                    }
+                    else data=OwnedReopenProof.IssueBinding(session,data,parameters,args["candidateDocumentHandle"]!.GetValue<string>());
+                }
                 else OwnedReopenProof.Execution(session,data,parameters);
                 if(cancellationToken.IsCancellationRequested||timer.Elapsed>=session.Options.Timeout)
                 {

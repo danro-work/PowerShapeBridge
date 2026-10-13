@@ -30,7 +30,7 @@ public sealed class OwnedSaveRoutesTests
         public async ValueTask DisposeAsync(){await Client.DisposeAsync();stop.Cancel();await server.DisposeAsync();try{await run;}catch(OperationCanceledException){}Data.Session.Dispose();stop.Dispose();}
         public async Task<string> Claim()
         {
-            var request=await Data.Data.Files.ClaimRequest();var envelope=JsonNode.Parse(File.ReadAllText(request+".processing"))!;
+            var request=await Data.Data.Files.ClaimRequest();var envelope=JsonNode.Parse(await Data.Data.Files.ReadClaimedRequest(request))!;
             Assert.Equal("recipe.prepare",envelope["operation"]!.GetValue<string>());Assert.Equal("prepare_owned_save_as",envelope["arguments"]!["recipeId"]!.GetValue<string>());
             Assert.True(JsonNode.DeepEquals(Data.Parameters,envelope["arguments"]!["parameters"]));return Path.GetFileNameWithoutExtension(request);
         }

@@ -1,5 +1,47 @@
 # Дальнейшая работа
 
+К7 resolution/history5a46c88 /draft PR9 offline qualified: clean292 .NET/514 native/
+171 artifacts/ten external STDIO/Inspector,128 hashes и все четыре CIpassed.
+Следующий обязательный блок: полная матрица lost reply/timeout/non-success/partial
+publication/changed context для каждого executor; сопоставить существующие native/
+SDK fixtures с покрытием, экспортировать machine-readable fault evidence, не
+выдавать новый reader/journal за всю К7. Затем separately accepted checkpoint
+recovery scenario. SDK0.37.2 source/runtime0.32/K6 package0.36.3 различать; runtime,
+default config/K6 staging не менять без pending user decision. Цель доК11 active.
+Ниже исторические состояния уже пройденного qualification блока.
+
+К7 SDK0.37.2 original receipt sharing read-wait fix:12 targeted IPC/deadline
+passed. Сохранить final source commit, clean/full292 tests +514 native/171 artifacts/
+ten STDIO/Inspector и exact-head CI; failed clean6488 evidence не стирать.
+Все четыре CI6488 passed, но clean локально обнаружил production response lock.
+Draft PR9 связан с блоком. Затем К7 full executor fault matrix и separate accepted
+checkpoint recovery. Runtime/K6 package/default config untouched, permission pending.
+
+6488d2c /draft PR9 resolution journal/history: local full289 .NET/514 native/
+171 artifacts/ten external STDIO scenarios/Inspector passed. Завершить ongoing
+clean SDK в work/c7t (session78914) и exact-head CI, сверить recorded source/binary
+SHA, обновить PR/state. Затем К7 full executor fault matrix и checkpoint recovery
+с separately accepted scenario. Runtime/K6 packages/default config не менять;
+K6 Apply question pending. Ниже исторические записи этапа.
+
+К7 resolution: access к штатному reviewer восстановился; external reopen28/7
+passed. Full289 .NET passed, SDK/native/ten external STDIO/Inspector verification
+на fresh work/rj продолжается. Сохранить результат, commit/push/draft PR(base
+feat/recovery-inspection /PR8), clean checkout и exact-head CI. Controlled lock
+regression test-only fixed old fake-panel envelope read race; native source и
+K6 packages untouched. После qualification — полная К7 fault matrix и отдельно
+принятый checkpoint recovery scenario. K6 Apply permission остаётся pending.
+
+Сначала завершить pending qualification source SDK0.37.1-dev на ветке
+feat/recovery-resolution-journal; OUTCOME-RESOLUTION-JOURNAL.md.288 .NET и
+external SaveAs resolution25/7 passed. Новый saved-reopen resolution script
+запуск reviewer остановил из-за usage limit ДО выполнения; обходить нельзя.
+После восстановления допуска: external reopen --recovery-resolution, затем
+полный verify-sdk на свежем NativeStage, commit/push/clean/stacked PR(base PR8)
+и exact-head CI. Текущие изменения НЕ закоммичены; existing PR8 их не содержит.
+Пакеты/staging/runtime К6 не пересобирать. Затем К7 full fault matrix и отдельно
+принятый checkpoint recovery. K6 Apply permission всё ещё pending; цельК11 active.
+
 K7 PR8: clean SDK5da2c04 passed262 .NET/514 native/171 artifacts; все четыре
 CI daba4db passed, включая eighth external recovery STDIO script.123 hashes
 matched; independent six-case full/RO tool reads passed, protected71 files и

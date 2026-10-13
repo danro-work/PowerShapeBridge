@@ -78,7 +78,7 @@ public sealed class OwnedSaveTools(BridgeSession session)
     [McpServerTool(Name="execute_owned_save_as",ReadOnly=false,Destructive=true,Idempotent=false,OpenWorld=false),Description("Save the active owned working document to its prepared NEW fixed target exactly once through the existing native worker. Consumes the save handle and CAD leases before IPC. Returned success remains unverified/fenced until a separate fresh verifier; unknown outcomes are never saved or retried automatically. Unavailable in read-only mode.")]
     public Task<CallToolResult> ExecuteOwnedSaveAs([Description("Unconsumed prepared SaveAs handle in this connection.")]string ownedSaveAsHandle,CancellationToken cancellationToken)=>Save(false,new(){["ownedSaveAsHandle"]=ownedSaveAsHandle},cancellationToken);
 
-    [McpServerTool(Name="verify_owned_save_as",ReadOnly=true,Destructive=false,Idempotent=false,OpenWorld=false),Description("Independently verify the original owned SaveAs receipt, authoritative return journal, fresh observations and saved bytes. Native verifier may append the journal and release only its matching fence; returns a connection-scoped savedResultHandle on checked success. No SaveAs, activation or geometry command. Unavailable in read-only server.")]
+    [McpServerTool(Name="verify_owned_save_as",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false),Description("Independently verify the original owned SaveAs receipt, authoritative return journal, fresh observations and saved bytes. Native verifier may append the journal and release only its matching fence; SDK may write an enabled immutable outcome-resolution record. Returns a connection-scoped savedResultHandle on checked success. No SaveAs, activation or geometry command. Unavailable in read-only server.")]
     public Task<CallToolResult> VerifyOwnedSaveAs([Description("Original SaveAs request ID.")]string saveRequestId,[Description("Original native SaveAs receipt SHA256.")]string saveReceiptSha256,[Description("Fresh candidate observation of the saved result.")]string candidateDocumentHandle,[Description("Fresh one-use active listing choice of that result.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Save(true,new(){["saveRequestId"]=saveRequestId,["saveReceiptSha256"]=saveReceiptSha256,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
 
     private async Task<CallToolResult> Save(bool verify,JsonObject args,CancellationToken cancellationToken)
@@ -101,7 +101,17 @@ public sealed class OwnedSaveTools(BridgeSession session)
             {var unknown=SaveFailure(verify,"cancelled_outcome_unknown",true);unknown["bridgeRequestId"]=request;return DiagnosticTools.Result(unknown,true);}
             if(state==(verify?"owned_save_as_verified_observed":"owned_save_as_executed_unverified"))
             {
-                if(verify)data=session.SavedResults.Issue(data,parameters,args["candidateDocumentHandle"]!.GetValue<string>());
+                if(verify)
+                {
+                    if(session.RecoveryResolutionEnabled)
+                    {
+                        session.SavedResults.VerifyReceipt(data,parameters);
+                        var resolution=session.Resolutions.Record(name,data,parameters,cancellationToken);
+                        data=session.SavedResults.Issue(data,parameters,args["candidateDocumentHandle"]!.GetValue<string>());
+                        data["outcomeResolution"]=resolution;
+                    }
+                    else data=session.SavedResults.Issue(data,parameters,args["candidateDocumentHandle"]!.GetValue<string>());
+                }
                 else session.SavedResults.CheckedExecution(data,parameters);
                 if(cancellationToken.IsCancellationRequested||timer.Elapsed>=session.Options.Timeout)
                 {

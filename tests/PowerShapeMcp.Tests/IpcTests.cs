@@ -6,6 +6,30 @@ namespace PowerShapeMcp.Tests;
 
 public sealed class IpcTests
 {
+    [Theory]
+    [InlineData("release")][InlineData("timeout")][InlineData("cancel")]
+    public async Task LockedOriginalReceiptIsOnlyReadAgainWithinOriginalBudget(string finish)
+    {
+        var fixture=new Fixture();fixture.Write("PSBridge.Worker.exe","Opaque marker; never launched.");
+        using var ipc=new BridgeIpc(fixture.Options(seconds:5));using var stop=new CancellationTokenSource();
+        var call=ipc.SubmitAsync("recipe.prepare",new(){["recipeId"]="list_documents",["parameters"]=new JsonObject()},stop.Token);
+        var request=await fixture.ClaimRequest();var id=Path.GetFileNameWithoutExtension(request);
+        var response=FileArtifacts.FixedPath(fixture.Root,"responses",id+".json");Directory.CreateDirectory(Path.GetDirectoryName(response)!);
+        var bytes=System.Text.Encoding.UTF8.GetBytes("{\"state\":\"documents_listed_verified\"}");
+        var held=new FileStream(response,FileMode.CreateNew,FileAccess.Write,FileShare.None);held.Write(bytes);held.Flush(true);
+        JsonObject result;
+        try
+        {
+            await Task.Delay(75);Assert.False(call.IsCompleted); // File exists, but cannot yet be read.
+            if(finish=="release"){held.Dispose();result=await call;}
+            else{if(finish=="cancel")stop.Cancel();result=await call;}
+        }
+        finally{held.Dispose();}
+        Assert.Equal(finish=="release"?"documents_listed_verified":finish=="cancel"?"cancelled_outcome_unknown":"timeout_outcome_unknown",result["state"]!.GetValue<string>());
+        Assert.Equal(id,result["bridgeRequestId"]!.GetValue<string>());Assert.True(File.Exists(request+".processing"));
+        Assert.Single(Directory.GetFiles(Path.Combine(fixture.Root,"requests")));Assert.Equal(bytes,File.ReadAllBytes(response));
+        Assert.Empty(Directory.GetFiles(Path.Combine(fixture.Root,"requests"),"*.json")); // No new publication or CAD replay.
+    }
     [Fact]
     public async Task FakePanelReceivesAtomicEnvelopeAndOnlyMatchedResponse()
     {

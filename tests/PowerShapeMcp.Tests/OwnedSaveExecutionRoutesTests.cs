@@ -27,7 +27,7 @@ public sealed class OwnedSaveExecutionRoutesTests
         internal static async Task<Connection> Create(bool readOnly=false,bool saves=true){var result=new Connection(readOnly,saves);result.Client=await McpClient.CreateAsync(result.transport,cancellationToken:result.stop.Token);return result;}
         internal async Task<(string Id,JsonObject Parameters)> Claim(string recipe)
         {
-            var path=await Data.Data.Files.ClaimRequest();var envelope=JsonNode.Parse(File.ReadAllText(path+".processing"))!;
+            var path=await Data.Data.Files.ClaimRequest();var envelope=JsonNode.Parse(await Data.Data.Files.ReadClaimedRequest(path))!;
             Assert.Equal("recipe.prepare",envelope["operation"]!.GetValue<string>());Assert.Equal(recipe,envelope["arguments"]!["recipeId"]!.GetValue<string>());
             return(Path.GetFileNameWithoutExtension(path),envelope["arguments"]!["parameters"]!.AsObject());
         }

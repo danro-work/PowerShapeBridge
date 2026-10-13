@@ -107,6 +107,7 @@ public sealed class RecoveryInspection(string root)
                 returned.Length==1&&!authoritative?"non_success_or_unproven_return_requires_recovery":authoritative?"returned_requires_independent_verification":started.Length==1?"started_without_authoritative_return":
                 "no_authoritative_command_start_recorded";
             output["assessment"]=assessment;
+            output["resolutionHistory"]=new OutcomeResolutionJournal(root).Read(operationId,cancellationToken);
             // Even a verified journal does not establish today's CAD state. This
             // reader NEVER clears unknown or issues execution/recovery authority.
             output["outcome"]="not_resolved_by_recorded_inspection";
