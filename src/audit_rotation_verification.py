@@ -7,7 +7,7 @@ from audit_checkpoint_recovered_open import journal, read, require, sha
 
 FAULTS = {'control', 'mixed_targets', 'negative_angle', 'wrong_angle', 'wrong_samples',
           'wrong_mapping', 'late_context', 'wrong_receipt_sha', 'wrong_before_sha',
-          'wrong_summary_sha', 'changed_fence', 'partial_second', 'old_inspection', 'wrong_window'}
+          'wrong_summary_sha', 'changed_fence', 'partial_second', 'old_inspection', 'equal_inspection', 'wrong_window'}
 CONTROLS = {'control', 'mixed_targets', 'negative_angle'}
 
 
@@ -82,4 +82,4 @@ if __name__ == '__main__':
     result = audit(args.stage.resolve())
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2), encoding='utf-8')
-    print(f"PASS: 14 independent rotation verification cases / {result['artifactHashesChecked']} hashes audited; no CAD/fence release.")
+    print(f"PASS: {result['cases']} independent rotation verification cases / {result['artifactHashesChecked']} hashes audited; no CAD/fence release.")

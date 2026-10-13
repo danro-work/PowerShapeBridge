@@ -1,5 +1,16 @@
 # Дальнейшая работа
 
+К8 verifier CI clock fix:PR33 push SDK38477064300 failed at equal observation/
+command-return timestamps; PR SDK38477123747 passed. Fixture now waits actual
+UTC advancement, no future timestamp or production guard relaxation. Equal-time
+negative added;15 cases/497 hashes passed, clock-qualified/session78053.
+STATUS-K8-VERIFIER-CLOCK-AND-SOLID-SOURCE.md. Passive standalone read confirms
+active Test_Block_P2 SOLID5 isGeneralSolid, primitive axes unavailable strings;
+COG/MOI available butnot general geometry. Official pinned Autodesk API exports
+change selection; no read-only export. Runtime/READY K7/CAD unchanged.
+K7 approval pending. Next owned geometry export qualification on agreed copies,
+native provider/convention/fence/SDK/transport/faults andfull K8-K11.
+
 К8 independent observed-sample verifier:14 analytic cases/465 independently
 audited hashes passed. Separate read-only context checks frozen plan/journal/
 per-target returns/before/after, fresh samples and original owner/fence/claim.
