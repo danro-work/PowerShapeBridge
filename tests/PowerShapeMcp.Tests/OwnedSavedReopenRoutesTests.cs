@@ -65,4 +65,39 @@ public sealed class OwnedSavedReopenRoutesTests
         var reply=await call;Assert.True(reply.IsError);var result=JsonNode.Parse(reply.StructuredContent!.Value.GetRawText())!;Assert.Null(result["workingDocumentBindingHandle"]);Assert.True(result["verificationMayBePartial"]!.GetValue<bool>());
         Assert.Equal(2,Directory.GetFiles(Path.Combine(connection.Fixture.Root,"requests")).Length);
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ClaimedTimeoutOrLostReplyRetainsOneRequestAndCannotReplay(bool effectReturned)
+    {
+        await using var connection=await Connection.Create();
+        var args=connection.OpenArgs().ToDictionary(p=>p.Key,p=>(object?)p.Value!.GetValue<string>());
+        var call=connection.Client.CallToolAsync("execute_owned_saved_reopen",args).AsTask();
+        var (id,parameters)=await connection.Claim("execute_owned_saved_reopen");
+        Assert.Throws<ReferenceRejected>(()=>connection.Fixture.Session.Reopens.Parameters(connection.Fixture.Handle));
+        if(effectReturned)connection.Fixture.Execution(id,parameters,publish:false);
+        var root=connection.Fixture.Root;
+        var protectedPaths=Directory.GetFiles(root,"*",SearchOption.AllDirectories)
+            .Where(path=>!path.EndsWith(".test-tmp",StringComparison.Ordinal)).ToArray();
+        static string Sha(string path)=>Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(path)));
+        var before=protectedPaths.ToDictionary(path=>path,Sha);
+        var reply=await call;Assert.True(reply.IsError);
+        var result=JsonNode.Parse(reply.StructuredContent!.Value.GetRawText())!;
+        Assert.Equal("timeout_outcome_unknown",result["state"]!.GetValue<string>());
+        Assert.False(result["retryAllowed"]!.GetValue<bool>());
+        Assert.True(result["contextChangeMayHaveOccurred"]!.GetValue<bool>());
+        Assert.Null(result["workingDocumentBindingHandle"]);
+        Assert.True(File.Exists(FileArtifacts.FixedPath(root,"requests",id+".json.processing")));
+        Assert.False(File.Exists(FileArtifacts.FixedPath(root,"responses",id+".json")));
+        if(effectReturned)
+        {
+            Assert.Equal(connection.Fixture.OriginalSha.ToUpperInvariant(),Sha(FileArtifacts.FixedPath(root,"responses",id+".unpublished")));
+            Assert.True(File.Exists(FileArtifacts.FixedPath(root,"workingcopies",connection.Fixture.Prepared["reopen"]!["copyId"]!.GetValue<string>(),"open-once.json")));
+        }
+        var replay=await connection.Client.CallToolAsync("execute_owned_saved_reopen",args);
+        Assert.True(replay.IsError);Assert.Single(Directory.GetFiles(Path.Combine(root,"requests")));
+        foreach(var pair in before)Assert.Equal(pair.Value,Sha(pair.Key));
+        Assert.Equal(protectedPaths.Order(),Directory.GetFiles(root,"*",SearchOption.AllDirectories).Order());
+    }
 }

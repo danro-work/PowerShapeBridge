@@ -29,7 +29,7 @@ internal sealed class SavedReopenFixture
         var item=new JsonObject{["schemaVersion"]=1,["operationId"]=Operation,["planSha256"]=Original["planSha256"]!.DeepClone(),["sequence"]=sequence,["previousSha256"]=prior,["state"]=state,["timestampUtc"]=LeaseTime.Format(Data.Target.Data.Utc),["details"]=details};
         prior=ArtifactProof.Freeze(Root,$"operations/{Operation}/{sequence:D6}.json",item);sequence++;
     }
-    internal JsonObject Execution(string id,JsonObject parameters)
+    internal JsonObject Execution(string id,JsonObject parameters,bool publish=true)
     {
         Operation=id;var prepared=Prepared["reopen"]!.AsObject();var plan=parameters.DeepClone().AsObject();plan["schemaVersion"]=1;plan["operationId"]=id;plan["operation"]="open_owned_saved_result";
         plan["bridgeVersion"]="0.33.0-dev";plan["createdUtc"]=LeaseTime.Format(Data.Target.Data.Utc);plan["geometryExecutionEnabled"]=false;
@@ -40,7 +40,9 @@ internal sealed class SavedReopenFixture
         foreach(var key in new[]{"copyId","ownershipSha256","workingPath","reopenId","reopenSha256"})Original[key]=plan[key]!.DeepClone();
         ArtifactProof.Freeze(Root,"workingcopies/"+prepared["copyId"]!.GetValue<string>()+"/open-once.json",new(){["operationId"]=id,["planSha256"]=hash,["copyId"]=prepared["copyId"]!.DeepClone(),["ownershipSha256"]=prepared["ownershipSha256"]!.DeepClone(),["automaticReplayForbidden"]=true});
         foreach(var state in new[]{"prepared","execution_claimed","command_started","command_returned","executed_unverified"})Append(state,state=="command_returned"?new(){["nativeRequestId"]=id}:new());
-        OriginalSha=Publish(id,Original);return Original.DeepClone().AsObject();
+        // A lost wire reply retains the original proof in the owned fixture but
+        // never recreates a response under the executor's polling filename.
+        OriginalSha=publish?Publish(id,Original):ArtifactProof.Freeze(Root,"responses/"+id+".unpublished",Original);return Original.DeepClone().AsObject();
     }
     internal JsonObject FreshReads()
     {

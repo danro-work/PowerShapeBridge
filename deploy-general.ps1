@@ -10,6 +10,7 @@ $stagedRoot = [IO.Path]::GetFullPath($StagingDirectory)
 $runtimeRoot = Join-Path $projectRoot 'releases\P2.6'
 $panelPath = Join-Path $runtimeRoot 'PSBridge.exe'
 . (Join-Path $projectRoot 'panel-window.ps1')
+. (Join-Path $projectRoot 'deployment-report.ps1')
 $fileNames = @('PSBridge.exe','PSBridge.Worker.exe','bridge.config.json','mcp_server.py','core_config.py','entity_sets.py','operation_plans.py','working_copies.py','document_bindings.py','working_copy_open.py','owned_operation_plans.py','owned_translation.py','entity_references.py','document_handles.py','surface_job.py','slice_job.py','group_job.py')
 function Assert-Idle {
     if (@(Get-ChildItem -LiteralPath (Join-Path $runtimeRoot 'requests') -File | Where-Object { $_.Name -match '\.json$|\.processing$' }).Count -gt 0 -or @(Get-Process -Name PSBridge.Worker -ErrorAction SilentlyContinue).Count -gt 0) { throw 'A Bridge request is pending or running.' }
@@ -95,8 +96,8 @@ try {
     do {
         if ($newPanel.HasExited) { throw 'New panel exited during startup.' }
         $reportPath = Join-Path $runtimeRoot 'reports\panel-status.json'
-        if (Test-Path -LiteralPath $reportPath) {
-            $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+        $report = Read-BridgeDeploymentReport $reportPath
+        if ($null -ne $report) {
             $ready = $report.processId -eq $newPanel.Id -and $report.version -eq $build.version -and $report.configurationProfile -eq 'general-v1' -and $report.configurationSha256 -eq (File-HashOrNull (Join-Path $runtimeRoot 'bridge.config.json'))
         }
         if (!$ready) { Start-Sleep -Milliseconds 200 }

@@ -1,5 +1,23 @@
 # PowerShape Bridge — состояние для продолжения
 
+13 октября: пользователь разрешил0.33.2-dev, установка succeeded +independent
+18 installed/backup SHA,71 protected files, one new panel23584 confirmed.
+STATUS-K6-DEPLOYMENT-0332.md. Новый live К6 SaveAs59f5a399... вызван один раз,
+native command_returned есть, но old modelId guard дал outcome_unknown.
+Same native window1/windowNumber5, новый modelId280011395; активен own
+Result_f238febe4cc84525b2820af5ceeaca57. File SHA и observations совпали,
+71 protected files unchanged. Claim/fence retained; no replay/reopen/restore.
+STATUS-K6-SAVE-MODEL-IDENTITY.md. Далее квалифицировать исправление identity
+guard и separate original SaveAs verifier. Исторические pending0.33.2 apply
+ниже более не актуальны. Полные К6–К11 остаются обязательными.
+
+Начат независимый offline К7 transport block: feat/recovery-transport-matrix.
+Две actual SDK saved-reopen rows (claimed timeout/lost reply after fake return)
+прошли;14 связанных тестов passed. Один request, consumed handle, retained
+claim/raw journal/files, no replay/new binding доказаны. RECOVERY-TRANSPORT-MATRIX.md.
+Production/version/runtime unchanged;0.33.2 install approval pending. Это часть
+матрицы, не полная К7; следующие rows и К8–К11 обязательны.
+
 Квалифицированное исправление К6 directory separator: native/legacy source
 0.33.2-dev, SDK0.37.2-dev unchanged, commit5fea662/draft PR11 attached.
 Full local292 SDK/520 native/171 artifacts0 mismatch/STDIO/Inspector/25 fault
