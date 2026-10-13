@@ -16,5 +16,7 @@ Original SaveAs59f5a399... receipt/plan/journal/claim/fence/result hashes
 evidence/K6-model-id-fix/deployment.json, deployment-independent-verification.json,
 deployment-context-before/after.json, protected-before/after-deployment.json.
 K6 SDK0.36.3 package/default Codex config не переключались.
-Отдельный новый клиент сейчас проверяет оригинальный SaveAs и own reopen;
-его terminal результат и raw audit фиксируются отдельно. К6 ещё не объявлен закрытым.
+Отдельный клиент подтвердил original SaveAs без replay; terminal succeeded_verified,
+fence снят verifier. Native reopen preparation succeeded, но SDK отказал из-за
+missing transport ID в nested raw proof. OPEN не вызван; STATUS-K6-REOPEN-RECEIPT.md.
+К6 ещё не объявлен закрытым.

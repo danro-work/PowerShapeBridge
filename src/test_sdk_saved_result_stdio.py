@@ -69,7 +69,13 @@ class Panel:
                         result['expiresUtc'] = parameters['expiresUtc']
                         result['evidence'] = [{'requestId': parameters[a], 'sha256': parameters[b]} for a, b in
                                               [('saveRequestId', 'saveReceiptSha256'), ('inspectionRequestId', 'inspectionSha256'), ('listingRequestId', 'listingSha256')]]
-                    result['bridgeRequestId'] = path.stem
+                    if recipe == 'verify_owned_save_as':
+                        # Real native verifier bodies omit the queue envelope ID.
+                        # The SDK injects it in memory; nested raw proof reads
+                        # must derive it from the SHA-verified fixed filename.
+                        result.pop('bridgeRequestId', None)
+                    else:
+                        result['bridgeRequestId'] = path.stem
                     result['timestampUtc'] = now
                     raw = b'\xef\xbb\xbf' + json.dumps(result, indent=2).encode('utf-8')
                     temporary = self.root / 'responses' / (path.stem + '.reply-tmp')

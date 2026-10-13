@@ -28,6 +28,11 @@ public sealed class OwnedReopenStore(string root,OwnedSavedResultStore saved,Fun
         var source=new JsonObject{["verificationRequestId"]=plan["verificationRequestId"]!.DeepClone(),["verificationReceiptSha256"]=plan["verificationReceiptSha256"]!.DeepClone()};
         if(parameters is not null)Require(JsonNode.DeepEquals(parameters,source),"saved_reopen_source_identity_differs");
         var verified=ArtifactProof.Verified(root,"responses",Text(source,"verificationRequestId"),Text(source,"verificationReceiptSha256"),16777216);
+        // Native bodies need not carry the transport envelope ID. Use only the
+        // already SHA-verified fixed filename, and reject a conflicting claim.
+        var verificationId=Text(source,"verificationRequestId");
+        if(verified["bridgeRequestId"] is not null)Require(Text(verified,"bridgeRequestId")==verificationId,"saved_reopen_source_response_identity_differs");
+        verified["bridgeRequestId"]=verificationId;
         Require(verified["evidence"] is JsonArray entries&&entries.Count==3&&entries.All(e=>e is JsonObject reference&&ArtifactProof.Fields(reference,"requestId","sha256")),"saved_reopen_source_evidence_invalid");
         var evidence=verified["evidence"]!.AsArray();
         var listing=ArtifactProof.Verified(root,"responses",evidence[2]!["requestId"]!.GetValue<string>(),evidence[2]!["sha256"]!.GetValue<string>(),16777216);
