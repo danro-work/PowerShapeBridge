@@ -20,7 +20,7 @@ namespace PowerShapeGeometry {
   static bool Finite(double value){return !double.IsNaN(value)&&!double.IsInfinity(value);}
   static void Vector(double[] value){Require(value.Length==3&&value.All(Finite),"Finite 3D witness required.");}
   static void Box(double[] value){Require(value.Length==6&&value.All(Finite)&&value[0]<=value[1]&&value[2]<=value[3]&&value[4]<=value[5],"Paired world bounds required.");}
-  static void Valid(Samples value) {
+  internal static void Validate(Samples value) {
    Require(new[]{40,21,59}.Contains(value.Type)&&value.NativeId>=0&&value.Frame=="world"&&value.Units=="document_raw","Explicit native key/world/document_raw required.");
    Require(value.DescriptorSha256.Length==64&&value.DescriptorSha256.All(c=>c>='0'&&c<='9'||c>='a'&&c<='f'),"Pinned measurement descriptor SHA required.");
    Require(value.Positions.Length>0&&value.Positions.Length<=65536&&value.Directions.Length<=131072&&value.Invariants.Length<=128&&value.Invariants.All(Finite),"Missing/oversized/invalid samples.");
@@ -50,7 +50,7 @@ namespace PowerShapeGeometry {
    Require(Enumerable.Range(0,3).All(i=>bounds[2*i]>=envelope[2*i]-tolerance&&bounds[2*i+1]<=envelope[2*i+1]+tolerance),"Bounds escape rigid-motion envelope.");
   }
   internal static void Verify(Samples before,Samples after,int angle,double[] axis,double absoluteTolerance,double relativeTolerance) {
-   Require(Finite(absoluteTolerance)&&absoluteTolerance>0&&absoluteTolerance<=1&&Finite(relativeTolerance)&&relativeTolerance>=0&&relativeTolerance<=1e-6,"Explicit bounded raw tolerances required.");Valid(before);Valid(after);
+   Require(Finite(absoluteTolerance)&&absoluteTolerance>0&&absoluteTolerance<=1&&Finite(relativeTolerance)&&relativeTolerance>=0&&relativeTolerance<=1e-6,"Explicit bounded raw tolerances required.");Validate(before);Validate(after);
    Require(before.Type==after.Type&&before.NativeId==after.NativeId&&before.DescriptorSha256==after.DescriptorSha256,"Measurement identity/domain changed.");
    Require(before.Positions.Select(p=>p.Key).SequenceEqual(after.Positions.Select(p=>p.Key))&&before.Directions.Select(p=>p.Key).SequenceEqual(after.Directions.Select(p=>p.Key)),"Witness anchors/order changed.");
    for(int i=0;i<before.Positions.Length;i++)Require(Near(Transform(before.Positions[i].Value,angle,axis),after.Positions[i].Value,absoluteTolerance,relativeTolerance),"Point does not match explicit rotation.");

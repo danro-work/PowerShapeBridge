@@ -1,5 +1,14 @@
 # PowerShape Bridge — состояние для продолжения
 
+К8 immutable rotation measurement records: execution plan schema2 pins
+per-target before SHA; command summary pins before/after.24 native cases577
+hashes +16 record cases256 hashes +21 .NET predicate cases passed.
+STATUS-K8-ROTATION-MEASUREMENT-RECORDS.md. No native verifier/fence release or
+production execution route; fake bbox corners are not CAD geometry evidence.
+PR31/0d11c5e1 four CI passed. Runtime/READY K7/CAD unchanged; K7 approval pending.
+Next independent fresh measurement verifier,solid provider/live layout/native
+convention qualification,SDK/transport/faults/saved result andfull K8-K11.
+
 К8 passive measurement provider: documented SurfacePoints/CurvePointData
 retained COM getter methods +strict guard/decoder,28 fake cases/280 protected
 file hashes passed. Native regression76791 passed531 checks. No live getter

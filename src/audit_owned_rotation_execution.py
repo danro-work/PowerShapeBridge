@@ -9,9 +9,10 @@ FAULTS = {'control', 'mixed_targets', 'noop_success', 'negative_angle', 'oblique
           'throw_before_effect', 'throw_after_effect', 'return_zero', 'partial_second_throw',
           'partial_second_zero', 'untargeted_changed', 'changed_process_after', 'late_context',
           'alias_mapping', 'invalid_bounds', 'packet_sha', 'fenced_copy', 'busy_executor',
-          'previous_target_changed', 'after_start_context', 'mapping_after_command'}
+          'previous_target_changed', 'after_start_context', 'mapping_after_command',
+          'before_measurement_bad', 'before_measurement_drift', 'after_measurement_bad'}
 CONTROLS = {'control', 'mixed_targets', 'noop_success', 'negative_angle', 'oblique_axis'}
-PREFLIGHT = {'late_context', 'alias_mapping', 'invalid_bounds', 'packet_sha', 'fenced_copy', 'busy_executor'}
+PREFLIGHT = {'late_context', 'alias_mapping', 'invalid_bounds', 'packet_sha', 'fenced_copy', 'busy_executor', 'before_measurement_bad'}
 
 
 def audit(stage):
@@ -36,13 +37,24 @@ def audit(stage):
         require(result['state'] == expected and result['contextChangeAttempted'] is False and
                 result['cadSaveAttempted'] is False and result['retryAllowed'] is False, 'Wrong result/action')
         commands = row['commands']
-        expected_calls = 0 if fault in PREFLIGHT or fault == 'after_start_context' else (3 if fault == 'mixed_targets' else
+        expected_calls = 0 if fault in PREFLIGHT or fault in {'after_start_context', 'before_measurement_drift'} else (3 if fault == 'mixed_targets' else
                          2 if fault in {'partial_second_throw', 'partial_second_zero'} else 1)
         require(len(commands) == result['commandCallsAttempted'] == expected_calls, 'Command count differs')
         if result.get('planSha256'):
             plan_path = root / 'rotationexecutions' / (rid + '.json')
             require(sha(plan_path) == result['planSha256'] and read(plan_path) == result['plan'], 'Plan differs')
             plan = read(plan_path)
+            if plan['schemaVersion'] == 2:
+                provenance = plan['measurementProvenance']
+                for index, target in enumerate(plan['targets']):
+                    path = root / 'rotationmeasurements' / rid / f'{index:06}.before.json'
+                    require(sha(path) == target['beforeMeasurementSha256'], 'Before measurement SHA changed')
+                    record = read(path)
+                    require(record['schemaVersion'] == 1 and record['executionRequestId'] == rid and record['index'] == index and
+                            record['phase'] == 'before' and record['provenance'] == provenance, 'Before provenance/identity differs')
+                    sample = record['samples']
+                    require([sample['type'], sample['nativeId']] == target['entityKey'] and sample['boundsWorldRawPaired'] ==
+                            target['boundsBeforeWorldRawPaired'] and sample['frame'] == 'world' and sample['units'] == 'document_raw', 'Before measurement target/frame differs')
             fence = root / 'workingcopies' / plan['copyId'] / 'mutation-fence.json'
             require(fence.is_file() and sha(fence) == result['executionFenceSha256'], 'Fence missing or altered')
             claim = read(root / 'rotationplans' / (plan['rotationPlanId'] + '.execution-once.json'))
@@ -80,6 +92,13 @@ def audit(stage):
                     prefix = root / 'rotationcommands' / rid / f"{item['index']:06}"
                     for role in ('started', 'returned', 'observed'):
                         require(sha(prefix.with_suffix('.' + role + '.json')) == item[role + 'Sha256'], 'Summary chain differs')
+                    if plan['schemaVersion'] == 2:
+                        for phase in ('before', 'after'):
+                            measurement = root / 'rotationmeasurements' / rid / f"{item['index']:06}.{phase}.json"
+                            require(sha(measurement) == item[phase + 'MeasurementSha256'], 'Measurement summary SHA differs')
+                            record = read(measurement)
+                            require(record['executionRequestId'] == rid and record['index'] == item['index'] and record['phase'] == phase and
+                                    record['provenance'] == plan['measurementProvenance'], 'Measurement linkage differs')
         else:
             require(expected_calls == 0 and row['replayResult']['state'] in {
                     'not_attempted_before_claim', 'owned_rotation_rejected_before_change'}, 'Unexpected preflight action')
