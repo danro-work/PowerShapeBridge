@@ -16,13 +16,13 @@ public sealed class ExecutionTools(BridgeSession session)
     [McpServerTool(Name="open_working_copy",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false),Description("Open this connection's owned saved-byte working copy in a new window after fresh candidate/listing checks. Consumes CAD leases before submission. No save or geometry command; requires independent verification and never retries an unknown outcome.")]
     public Task<CallToolResult> OpenWorkingCopy([Description("Owned copy handle from preparation.")]string workingCopyHandle,[Description("Fresh observed active candidate document.")]string candidateDocumentHandle,[Description("One-use active document choice from a fresh listing.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Run("open_working_copy",new(){["workingCopyHandle"]=workingCopyHandle,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
 
-    [McpServerTool(Name="verify_working_copy_open",ReadOnly=true,Destructive=false,Idempotent=false,OpenWorld=false),Description("Independently verify an owned open from its original receipt and fresh observations; issue a new owned-copy lease on success. May append its journal. Does not replay open or issue CAD commands; unavailable in read-only server.")]
+    [McpServerTool(Name="verify_working_copy_open",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false),Description("Independently verify an owned open from its original receipt and fresh observations; issue a new owned-copy lease on success. May append its journal and, when enabled, an immutable outcome-resolution record. Does not replay open or issue CAD commands; unavailable in read-only server.")]
     public Task<CallToolResult> VerifyWorkingCopyOpen([Description("Original open request ID.")]string openRequestId,[Description("Original native open receipt SHA256.")]string openReceiptSha256,[Description("Fresh observed candidate document.")]string candidateDocumentHandle,[Description("Fresh one-use active document listing choice.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Run("verify_working_copy_open",new(){["openRequestId"]=openRequestId,["openReceiptSha256"]=openReceiptSha256,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
 
     [McpServerTool(Name="execute_owned_translation",ReadOnly=false,Destructive=true,Idempotent=false,OpenWorld=false),Description("Execute one prepared owned SOLID translation through the existing single native worker. Consume all CAD leases before submission. A successful return is only executed_unverified and remains fenced until separate fresh verification. No save, replay, inverse or automatic retry.")]
     public Task<CallToolResult> ExecuteOwnedTranslation([Description("Prepared owned-operation handle in this connection.")]string ownedOperationHandle,CancellationToken cancellationToken)=>Run("execute_owned_translation",new(){["ownedOperationHandle"]=ownedOperationHandle},cancellationToken);
 
-    [McpServerTool(Name="verify_owned_translation",ReadOnly=true,Destructive=false,Idempotent=false,OpenWorld=false),Description("Verify the original translation receipt and authoritative journal using fresh native observations. The native verifier releases only its matching fence on verified success; no command replay or CAD mutation. Unavailable in read-only server.")]
+    [McpServerTool(Name="verify_owned_translation",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false),Description("Verify the original translation receipt and authoritative journal using fresh native observations. May append its journal and an enabled immutable outcome-resolution record. The native verifier releases only its matching fence on verified success; no command replay or CAD mutation. Unavailable in read-only server.")]
     public Task<CallToolResult> VerifyOwnedTranslation([Description("Original execution request ID.")]string executionRequestId,[Description("Original native execution receipt SHA256.")]string executionReceiptSha256,[Description("Fresh candidate document observation.")]string candidateDocumentHandle,[Description("Fresh one-use active listing choice.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Run("verify_owned_translation",new(){["executionRequestId"]=executionRequestId,["executionReceiptSha256"]=executionReceiptSha256,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
 
     private async Task<CallToolResult> Run(string name,JsonObject args,CancellationToken cancellationToken)
@@ -54,10 +54,15 @@ public sealed class ExecutionTools(BridgeSession session)
                 {
                     case "open_working_copy":OwnedExecutionProof.OpenReceipt(session.Options.BridgeRoot,data,parameters);break;
                     case "execute_owned_translation":OwnedExecutionProof.TranslationReceipt(session.Options.BridgeRoot,data,parameters);break;
-                    case "verify_owned_translation":OwnedExecutionProof.CheckedTranslationVerification(data,parameters);break;
+                    case "verify_owned_translation":OwnedExecutionProof.CheckedTranslationVerification(data,parameters);data=session.RecordResolution(name,data,parameters,cancellationToken);break;
                     case "verify_working_copy_open":
                         if(!JsonNode.DeepEquals(data["openOperationId"],args["openRequestId"])||!JsonNode.DeepEquals(data["openReceiptSha256"],args["openReceiptSha256"])||!JsonNode.DeepEquals(data["expiresUtc"],parameters["expiresUtc"]))throw new ReferenceRejected("verified_open_native_identity_differs");
-                        data=session.Copies.IssueVerifiedOpen(data);break;
+                        data=session.RecordResolution(name,data,parameters,cancellationToken);data=session.Copies.IssueVerifiedOpen(data);break;
+                }
+                if(session.RecoveryResolutionEnabled&&name.StartsWith("verify_",StringComparison.Ordinal)&&(cancellationToken.IsCancellationRequested||timer.Elapsed>=session.Options.Timeout))
+                {
+                    if(name=="verify_working_copy_open")session.Copies.Clear();
+                    data=Unknown(name,cancellationToken.IsCancellationRequested?"cancelled_outcome_unknown":"timeout_outcome_unknown",request);
                 }
             }
             else if(state?.EndsWith("_outcome_unknown",StringComparison.Ordinal)==true)

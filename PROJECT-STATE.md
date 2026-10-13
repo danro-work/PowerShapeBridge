@@ -1,5 +1,35 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 resolution continuation: source SDK0.37.1-dev / feat/recovery-resolution-journal.
+Reviewer access восстановился; pending external saved-reopen resolution28/7
+passed (actual native synthetic artifacts/fake fresh replies), new binding /
+readonly history /unchanged journal checked. Verifier annotations ReadOnly=false
+reflect journal writes; read-only server still excludes them. Старый PreparedRoutes
+full-run file-sharing failure исправлен только в test helper: bounded read of
+claimed envelope, no command/claim repeat; controlled lock +prepared8 passed.
+Fresh-stage preflight в начале verify-sdk. Full289 .NET на новом work/rj passed;
+общий SDK/native/ten STDIO/Inspector run ещё выполняется. Далее commit/push/draft
+PR(base PR8), clean и exact-head CI. OUTCOME-RESOLUTION-JOURNAL.md. Runtime/native
+source/K6 packages/default config/CAD untouched. K6 Apply permission pending;
+К7 full fault matrix/checkpoint recovery scenario и К8–К11 ещё впереди.
+Ниже история первоначального resolution блока/лимита допуска.
+
+K7 следующий блок: source SDK0.37.1-dev, feat/recovery-resolution-journal
+от e3d1304. OutcomeResolutionJournal writer/history интегрирован с четырьмя
+operation-specific verifiers; explicit recoveryResolutionExperimental (reader
+dependency), read-only writer disabled. Независимый immutable decision record
+с raw native verifier/journal/plan/SHA/fresh context evidence не даёт replay,
+current lease или checkpoint recovery authority. Reader показывает historical
+resolutionHistory и по-прежнему не разрешает current unknown из диска.
+26 новых cases, full288 .NET passed; external SaveAs resolution25/7 passed на
+actual Framework synthetic artifacts/fake fresh replies, command journal intact.
+Новый external saved-reopen test НЕ запущен: auto approval review usage-limit
+failure, не unsafe verdict; не обходить reviewer другим способом. Full new SDK/
+clean/CI/commit/push/PR ещё не выполнены, изменения НЕ закоммичены. Contract:
+OUTCOME-RESOLUTION-JOURNAL.md; evidence/K7-recovery/resolution. Installed runtime/
+CAD/default config unchanged. K6 Apply permission pending. Полная К7 fault matrix
+и отдельно принятый checkpoint recovery scenario остаются впереди; цель К11 active.
+
 K7 draft PR8 создан/прикреплён; source SDK0.37.0-dev. Исправлен structured отказ
 oversized recovery plan; clean code5da2c04 прошёл262 .NET tests. Новый внешний
 src/test_sdk_recovery_stdio.py: шесть full/read-only successful reads, extra

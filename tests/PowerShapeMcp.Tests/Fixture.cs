@@ -48,4 +48,14 @@ public sealed class Fixture
             catch(IOException)when(DateTime.UtcNow<deadline){await Task.Delay(10);}
         }
     }
+    public async Task<string> ReadClaimedRequest(string request)
+    {
+        var path=FileArtifacts.FixedPath(Root,Path.GetRelativePath(Root,request+".processing"));
+        var deadline=DateTime.UtcNow.AddSeconds(5);
+        while(true)
+        {
+            try{return File.ReadAllText(path);}
+            catch(IOException error)when((error.HResult&0xffff) is 32 or 33&&DateTime.UtcNow<deadline){await Task.Delay(10);}
+        }
+    }
 }

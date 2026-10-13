@@ -6,6 +6,7 @@ param(
     [string]$NativeStageDirectory = (Join-Path $PSScriptRoot 'work\SDK-native-fixtures')
 )
 $ErrorActionPreference = 'Stop'
+if (Test-Path -LiteralPath $NativeStageDirectory) { throw 'Native compatibility requires a fresh stage, not old fixture artifacts.' }
 $taskRoot = $PSScriptRoot
 $taskProject = Join-Path $taskRoot 'tests\PowerShapeMcp.Tests\PowerShapeMcp.Tests.csproj'
 $taskEvidence = [IO.Path]::GetFullPath($EvidenceDirectory)
@@ -30,7 +31,6 @@ if ($LASTEXITCODE -ne 0) { throw 'Independent prepared parity failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'Independent execution facade parity failed.' }
 & $PythonPath -m unittest discover -s (Join-Path $taskRoot 'src') -p 'test_save_target_fixture_oracle.py'
 if ($LASTEXITCODE -ne 0) { throw 'Type-sensitive target oracle regression failed.' }
-if (Test-Path -LiteralPath $NativeStageDirectory) { throw 'Native compatibility requires a fresh stage, not old fixture artifacts.' }
 & (Join-Path $taskRoot 'build.ps1') -OutputDirectory $NativeStageDirectory -ConfigurationPath (Join-Path $taskRoot 'config\general-owned-translations.json')
 & (Join-Path $NativeStageDirectory 'PSBridge.Worker.exe') --self-test | Tee-Object -FilePath (Join-Path $taskEvidence 'native-fixture-tests.txt')
 if ($LASTEXITCODE -ne 0) { throw 'Native synthetic fixture generation failed.' }
@@ -49,6 +49,10 @@ if ($LASTEXITCODE -ne 0) { throw 'Independent saved-result SDK STDIO failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'Independent saved-reopen SDK/native filesystem STDIO failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_reopen_verification_stdio.py') --dotnet $DotnetPath --host $taskHost --stage $NativeStageDirectory --evidence $taskEvidence
 if ($LASTEXITCODE -ne 0) { throw 'Independent saved-reopen verification/new binding STDIO failed.' }
+& $PythonPath (Join-Path $taskRoot 'src\test_sdk_saved_result_stdio.py') --dotnet $DotnetPath --host $taskHost --stage $NativeStageDirectory --evidence $taskEvidence --recovery-resolution
+if ($LASTEXITCODE -ne 0) { throw 'Independent SaveAs resolution/history SDK STDIO failed.' }
+& $PythonPath (Join-Path $taskRoot 'src\test_sdk_reopen_verification_stdio.py') --dotnet $DotnetPath --host $taskHost --stage $NativeStageDirectory --evidence $taskEvidence --recovery-resolution
+if ($LASTEXITCODE -ne 0) { throw 'Independent saved-reopen resolution/history SDK STDIO failed.' }
 $taskFixture = Join-Path $taskRoot ('work\K2-inspector-'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
@@ -81,6 +85,7 @@ $taskFiles += @('src\saved_reopen_fixture_oracle.py','src\OwnedSavedSource.cs','
 $taskFiles += @('src\SavedReopenObservation.cs','src\OwnedSavedReopenLease.cs','src\OwnedSavedReopenExecution.cs','src\OwnedSavedReopenVerification.cs','src\OwnedSavedReopenExecutionTests.cs','src\saved_reopen_verification_oracle.py','src\WorkingCopyOpen.cs','src\OwnedOpenVerification.cs')
 $taskFiles += @('src\test_sdk_reopen_verification_stdio.py')
 $taskFiles += @('config\general-recovery-inspection.json')
+$taskFiles += @('config\general-recovery-resolution.json')
 $taskFiles += @('src\test_sdk_recovery_stdio.py')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8

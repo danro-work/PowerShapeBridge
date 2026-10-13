@@ -52,7 +52,7 @@ public sealed class ExecutionRoutesTests
         }
         public async Task<(string Id,JsonObject Parameters)> Claim(string name)
         {
-            var path=await Data.Files.ClaimRequest();var envelope=JsonNode.Parse(File.ReadAllText(path+".processing"))!;
+            var path=await Data.Files.ClaimRequest();var envelope=JsonNode.Parse(await Data.Files.ReadClaimedRequest(path))!;
             Assert.Equal("recipe.prepare",envelope["operation"]!.GetValue<string>());Assert.Equal(name,envelope["arguments"]!["recipeId"]!.GetValue<string>());
             return(Path.GetFileNameWithoutExtension(path),envelope["arguments"]!["parameters"]!.AsObject());
         }

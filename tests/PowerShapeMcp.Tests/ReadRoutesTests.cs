@@ -41,7 +41,7 @@ public sealed class ReadRoutesTests
         {
             var pending=Client.CallToolAsync(name,arguments,cancellationToken:stop.Token).AsTask();
             var request=await Fixture.ClaimRequest();var id=Path.GetFileNameWithoutExtension(request);
-            var envelope=JsonNode.Parse(File.ReadAllText(request+".processing"))!.AsObject();
+            var envelope=JsonNode.Parse(await Fixture.ReadClaimedRequest(request))!.AsObject();
             Assert.Equal(new[]{"arguments","operation","requestId"},envelope.Select(p=>p.Key).Order());
             Assert.Equal("recipe.prepare",envelope["operation"]!.GetValue<string>());
             Assert.Equal(name=="list_documents"?"list_documents":"inspect_active_model",envelope["arguments"]!["recipeId"]!.GetValue<string>());

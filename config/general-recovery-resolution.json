@@ -1,0 +1,23 @@
+{
+  "coreProfile": "general-v1",
+  "entitySetsExperimental": true,
+  "operationPlansExperimental": true,
+  "workingCopiesExperimental": true,
+  "documentBindingsExperimental": true,
+  "workingCopyOpenExperimental": true,
+  "ownedOperationPlansExperimental": true,
+  "expectedVersion": "23.2.2",
+  "timeoutSeconds": 20,
+  "operationTimeoutSeconds": 80,
+  "maxEntities": 10000,
+  "captureViewport": false,
+  "inspectUnitFactors": true,
+  "inspectSelectionBounds": true,
+  "inspectSelectionSignature": true,
+  "ownedTranslationsExperimental": true,
+  "ownedSaveTargetsExperimental": true,
+  "ownedSavesExperimental": true,
+  "ownedSavedReopenExperimental": true,
+  "recoveryInspectionExperimental": true,
+  "recoveryResolutionExperimental": true
+}

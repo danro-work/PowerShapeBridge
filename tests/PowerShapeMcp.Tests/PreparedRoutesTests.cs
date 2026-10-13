@@ -40,7 +40,7 @@ public sealed class PreparedRoutesTests
         public async Task<JsonObject> Native(string name,Dictionary<string,object?> args,Func<string,JsonObject,JsonObject> reply)
         {
             var call=Client.CallToolAsync(name,args).AsTask();var path=await Data.Files.ClaimRequest();var id=Path.GetFileNameWithoutExtension(path);
-            var envelope=JsonNode.Parse(File.ReadAllText(path+".processing"))!.AsObject();
+            var envelope=JsonNode.Parse(await Data.Files.ReadClaimedRequest(path))!.AsObject();
             Assert.Equal("recipe.prepare",envelope["operation"]!.GetValue<string>());Assert.Equal(name,envelope["arguments"]!["recipeId"]!.GetValue<string>());
             var result=reply(id,envelope["arguments"]!["parameters"]!.AsObject());result["bridgeRequestId"]=id;
             Data.Files.Write("responses/"+id+".json",result.ToJsonString());
@@ -139,7 +139,7 @@ public sealed class PreparedRoutesTests
         await using var connection=await Connection.Create();var doc=connection.Candidates["candidateDocumentHandle"]!.GetValue<string>();
         var call=connection.Client.CallToolAsync("bind_working_document",new Dictionary<string,object?>{["candidateDocumentHandle"]=doc,["workingCopyHandle"]=connection.Copy}).AsTask();
         var path=await connection.Data.Files.ClaimRequest();var id=Path.GetFileNameWithoutExtension(path);
-        var parameters=JsonNode.Parse(File.ReadAllText(path+".processing"))!["arguments"]!["parameters"]!.AsObject();
+        var parameters=JsonNode.Parse(await connection.Data.Files.ReadClaimedRequest(path))!["arguments"]!["parameters"]!.AsObject();
         var binding=parameters.DeepClone().AsObject();binding["schemaVersion"]=1;binding["bindingId"]=id;binding["bridgeVersion"]="0.31.0";binding["timestampUtc"]=LeaseTime.Format(connection.Data.Utc);
         binding["observedPropertiesSha256"]=new string('e',64);binding["windowContextSha256"]=new string('f',64);binding["executionEnabled"]=false;
         var sha=ArtifactProof.Freeze(connection.Data.Root,"documentbindings/"+id+".json",binding);

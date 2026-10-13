@@ -88,6 +88,8 @@ def checks(args):
     assert len(markers) == 1
     root = markers[0].parent
     settings = read(Path(__file__).resolve().parents[1] / ('config/general-owned-saved-reopen.json' if args.reopen else 'config/general-owned-saves.json'))
+    if args.recovery_resolution:
+        settings.update(recoveryInspectionExperimental=True, recoveryResolutionExperimental=True)
     (root / 'bridge.config.json').write_text(json.dumps(settings), encoding='utf-8')
     metadata = read(markers[0])
     before = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in root.glob('operations/*/*.json')}
@@ -99,7 +101,7 @@ def checks(args):
             assert 'result' in peer.call(1, 'initialize', {'protocolVersion': '2025-11-25', 'capabilities': {}, 'clientInfo': {'name': 'saved-result-independent', 'version': '1'}})
             peer.notify('notifications/initialized')
         tools = client.call(2, 'tools/list')['result']['tools']
-        assert len(tools) == (27 if args.reopen else 24)
+        assert len(tools) == (27 if args.reopen else 24) + int(args.recovery_resolution)
         by_name = {tool['name']: tool for tool in tools}
         shapes = {'prepare_owned_save_as': ['workingDocumentBindingHandle'], 'execute_owned_save_as': ['ownedSaveAsHandle'],
                   'verify_owned_save_as': ['saveRequestId', 'saveReceiptSha256', 'candidateDocumentHandle', 'activeDocumentHandle']}
@@ -112,7 +114,7 @@ def checks(args):
             assert schema['required'] == required and set(schema['properties']) == set(required) and schema['additionalProperties'] is False
             for key, value in schema['properties'].items():
                 assert value['type'] == 'string' and value['pattern'] == ('^[0-9a-f]{64}$' if key.endswith('Sha256') else '^[0-9a-f]{32}$')
-        assert len(readonly.call(2, 'tools/list')['result']['tools']) == 6
+        assert len(readonly.call(2, 'tools/list')['result']['tools']) == 6 + int(args.recovery_resolution)
         for number, name in enumerate(shapes, 3):
             refused = readonly.call(number, 'tools/call', {'name': name, 'arguments': {}})
             assert refused['error']['code'] == -32602
@@ -145,18 +147,27 @@ def checks(args):
             assert not (root / 'operations' / prepared['reopenId']).exists()
             assert panel.calls == ['inspect_active_model', 'list_documents', 'verify_owned_save_as', 'prepare_owned_saved_reopen']
         assert not panel.errors, panel.errors
+        if args.recovery_resolution:
+            proof = saved['outcomeResolution']
+            record = root / 'recoveryresolutions' / arguments['saveRequestId'] / (proof['verificationRequestId'] + '.json')
+            assert hashlib.sha256(record.read_bytes()).hexdigest() == proof['resolutionSha256']
+            assert all(proof[key] is False for key in ('executionAuthorized', 'retryAllowed', 'checkpointRestoreAuthorized'))
+            history = readonly.call(90, 'tools/call', {'name': 'inspect_operation_recovery', 'arguments': {'operationId': arguments['saveRequestId']}})['result']
+            assert not history['isError'], history
+            recorded = history['structuredContent']['resolutionHistory']
+            assert recorded['state'] == 'resolution_history_read' and any(r['verificationRequestId'] == proof['verificationRequestId'] for r in recorded['records']), recorded
         assert all(hashlib.sha256(path.read_bytes()).hexdigest() == digest for path, digest in before.items())
         evidence = Path(args.evidence).resolve()
         evidence.mkdir(parents=True, exist_ok=True)
-        (evidence / ('sdk-saved-reopen-stdio.json' if args.reopen else 'sdk-saved-result-stdio.json')).write_text(json.dumps({'state': 'passed', 'scope': 'Official SDK STDIO, fake read/verifier replies and actual filesystem-only Framework preparation in an isolated fixture; no live CAD' if args.reopen else 'Official SDK STDIO and fake verifier on actual Framework saved-result artifacts; no live CAD',
-            'fullCatalog': len(tools), 'readOnlyCatalog': 6, 'cadConnectionAttempted': False, 'runtimeDeploymentPerformed': False,
+        (evidence / ('sdk-save-resolution-stdio.json' if args.recovery_resolution else 'sdk-saved-reopen-stdio.json' if args.reopen else 'sdk-saved-result-stdio.json')).write_text(json.dumps({'state': 'passed', 'scope': 'Official SDK STDIO, fake read/verifier replies and actual filesystem-only Framework preparation in an isolated fixture; no live CAD' if args.reopen else 'Official SDK STDIO and fake verifier on actual Framework saved-result artifacts; no live CAD',
+            'fullCatalog': len(tools), 'readOnlyCatalog': 6 + int(args.recovery_resolution), 'cadConnectionAttempted': False, 'runtimeDeploymentPerformed': False,
             'nativeFixtureRoot': str(root), 'nativeRecipes': panel.calls, 'journalUnchanged': True, 'savedResult': saved, 'preparedReopen': prepared, 'transcript': client.transcript}, indent=2), encoding='utf-8')
     finally:
         client.close()
         readonly.close()
         panel.stop.set()
         panel.thread.join(timeout=3)
-    print('PASS: SDK saved-result STDIO, %d/6 catalogs, exact schemas, fresh proofs, one-use choice and unchanged journal%s; no CAD.' % (len(tools), ', actual native filesystem-only reopen preparation' if args.reopen else ''))
+    print('PASS: SDK saved-result STDIO, %d/%d catalogs, exact schemas, fresh proofs, one-use choice and unchanged journal%s%s; no CAD.' % (len(tools), 6 + int(args.recovery_resolution), ', actual native filesystem-only reopen preparation' if args.reopen else '', ', immutable resolution/read-only history checked' if args.recovery_resolution else ''))
 
 
 if __name__ == '__main__':
@@ -164,4 +175,5 @@ if __name__ == '__main__':
     for name in ('dotnet', 'host', 'stage', 'evidence'):
         parser.add_argument('--' + name, required=True)
     parser.add_argument('--reopen', action='store_true')
+    parser.add_argument('--recovery-resolution', action='store_true')
     checks(parser.parse_args())
