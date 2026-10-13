@@ -1,5 +1,14 @@
 # PowerShape Bridge — состояние для продолжения
 
+К8 internal batch rotation executor:21 fake-context scenarios/486 independent
+artifact hashes passed, evidence/K8-owned-rotation-execution/qualified. Per-target
+started/returned/observed records, held guards, one-use claim/fence, partial-stop,
+no replay/inverse; executed_unverified only. No production COM/queue/MCP executor.
+STATUS-K8-OWNED-ROTATION-EXECUTION.md. Native regression75721 failed with access denied; fresh user-level8331 passed531 checks.
+PR28/c37b7c23 four CI passed. Installed runtime/READY K7 unchanged; K7 approval
+pending. Next independent rotation geometry verifier, adapter/SDK/faults/live
+qualification/saved result; full K8-K11 remains incomplete.
+
 К8: actual official SDK STDIO/native guard/scoped Issue — six scenarios passed,
 237 hashes/30 requests audited; full session5783 completed PASS in
  evidence/K8-owned-rotation-wire/sdk-full (SDK0.39.1),190 recorded hashes.
