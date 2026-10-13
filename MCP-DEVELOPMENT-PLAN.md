@@ -1,5 +1,11 @@
 # План разработки PowerShape MCP на основе Bridge
 
+К6: installed0.33.2 verified. Один own SaveAs59f5a399... создал результат,
+но ложный old model-ID guard оставил outcome_unknown. Исправление0.33.3
+qualified294/531/175/25/four CI; concrete final package/plan-only prepared,
+STATUS-K6-MODEL-ID-FIX.md. Следом согласованная установка и separate original
+SaveAs verifier без повторного сохранения; К6 не объявляется завершённым.
+
 К6 live выявил ошибочный отказ directory guard до SaveAs. Исправление0.33.2-dev
 qualified full offline/four Windows CI; concrete package/plan-only prepared,
 STATUS-K6-DIRECTORY-FIX.md. Следом его согласованная установка и новый owned
