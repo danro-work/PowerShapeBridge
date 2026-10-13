@@ -17,7 +17,7 @@ namespace PowerShapeBridge {
    Dictionary<string,object> Observation();
    void ConfirmDocument();
   }
-  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext {
+  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext {
    object application,document;
    internal ComContext(Config config) {
     try {application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("No active model document.");document=ps.ActiveDocument;ConfirmDocument();}
@@ -30,6 +30,8 @@ namespace PowerShapeBridge {
    }
    public double[] Bounds(int composite){ConfirmDocument();dynamic doc=document;return TranslationTest.Bounds(doc.GetItemBoundingBox(composite,false));}
    public int Translate(int composite,double[] vector){ConfirmDocument();dynamic doc=document;return Program.StrictInt(doc.TranslateItem(composite,vector[0],vector[1],vector[2]));}
+   public object SurfacePoints(string name,double tStart,double tEnd,int tCount,double uStart,double uEnd,int uCount){ConfirmDocument();dynamic doc=document;return doc.GetSurfacePoints(name,1,tStart,tEnd,tCount,uStart,uEnd,uCount);}
+   public object CurvePoints(string name,int start,int end){ConfirmDocument();dynamic doc=document;return doc.GetCompCurvePointData(name,start,end,1);}
    public void SaveAs(string path){ConfirmDocument();WorkingCopyOpen.CommandPath(path);dynamic ps=application;ps.Exec("FILE SAVEASPATH "+path);}
    public void ConfirmDocument() {
     dynamic ps=application;if(Convert.ToBoolean(ps.Busy())||!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("Active COM document unavailable/busy.");
