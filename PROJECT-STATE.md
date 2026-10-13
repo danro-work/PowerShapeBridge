@@ -1,5 +1,18 @@
 # PowerShape Bridge — состояние для продолжения
 
+Текущий завершённый offline блок К7: SDK0.37.2 /5a46c88, draft PR9 attached.
+Immutable OutcomeResolutionJournal на четырёх operation-specific verifiers,
+opt-in recoveryResolutionExperimental; readonly history через existing reader,
+no replay/current lease/checkpoint authority из исторической записи. Ipc sharing
+32/33 только read-poll original receipt в исходном deadline; timeout/cancelunknown.
+Clean full в work/c7u/evidence/K7-resolution-final-clean passed292 .NET/514 native/
+171 artifacts(0 mismatch)/ten external STDIO/Inspector;128 recorded SHA matched.
+Все четыре CI5a46 passed38349844154/38349847213/38349844216/38349847228; actual
+SDK log checked. Contract OUTCOME-RESOLUTION-JOURNAL.md. Installed runtime/native
+source/K6 packages/CAD/default config untouched. K6 Apply permission pending.
+Далее К7 full executor fault matrix и отдельно принятый checkpoint recovery
+scenario; К7–К11 не завершены. Ниже история блока/устранённых ограничений.
+
 Current K7 source SDK0.37.2-dev: original-receipt read poll при sharing/lock32/33
 в исходном deadline, без повторной publication/claim/CAD команды. После чтения
 проверяются cancellation/deadline; malformed response остаётся immediate unknown.

@@ -1,5 +1,17 @@
 # К7 — отдельные записи подтверждённого исхода
 
+Final qualification: SDK0.37.2 /commit5a46c88 прошёл clean full в work/c7u/
+evidence/K7-resolution-final-clean:292 .NET/514 native/171 artifact cases
+(133 accepted,0 mismatch), ten external STDIO scenarios/Inspector. Все128
+recorded source/binary SHA совпали с clean files; evidence/K7-recovery/resolution/
+final-clean-hash-audit.json. Все четыре exact-head CI passed38349844154/
+38349847213 baseline и38349844216/38349847228 SDK; actual SDK log подтверждён,
+включая SaveAs25/7 и saved-reopen28/7 resolution/history modes. Draft PR9 attached.
+Resolution/history block offline qualified; полный К7 всё ещё НЕ завершён.
+Не выполнены full executor fault matrix, accepted checkpoint recovery и liveК6.
+Installed runtime/native source/publishedK6/default config/CAD этим блоком не менялись.
+Дальнейшие записи ниже — история разработки/диагностики, не текущие ограничения.
+
 Последняя правка: clean6488d2c run отказал в прежнем SaveAs route из-за sharing
 lock на original response; evidence work/c7t/evidence/K7-resolution-clean retained.
 Все четыре CI6488d2c passed38349096739/38349176382 baseline и38349096738/

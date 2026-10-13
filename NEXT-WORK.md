@@ -1,5 +1,15 @@
 # Дальнейшая работа
 
+К7 resolution/history5a46c88 /draft PR9 offline qualified: clean292 .NET/514 native/
+171 artifacts/ten external STDIO/Inspector,128 hashes и все четыре CIpassed.
+Следующий обязательный блок: полная матрица lost reply/timeout/non-success/partial
+publication/changed context для каждого executor; сопоставить существующие native/
+SDK fixtures с покрытием, экспортировать machine-readable fault evidence, не
+выдавать новый reader/journal за всю К7. Затем separately accepted checkpoint
+recovery scenario. SDK0.37.2 source/runtime0.32/K6 package0.36.3 различать; runtime,
+default config/K6 staging не менять без pending user decision. Цель доК11 active.
+Ниже исторические состояния уже пройденного qualification блока.
+
 К7 SDK0.37.2 original receipt sharing read-wait fix:12 targeted IPC/deadline
 passed. Сохранить final source commit, clean/full292 tests +514 native/171 artifacts/
 ten STDIO/Inspector и exact-head CI; failed clean6488 evidence не стирать.
