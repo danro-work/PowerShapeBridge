@@ -79,7 +79,10 @@ namespace PowerShapeBridge {
    if(args.Count!=2||!args.ContainsKey("entitySetId")||!Hex(args["entitySetId"],32)||!args.ContainsKey("entitySetSha256")||!Hex(args["entitySetSha256"],64))throw new ArgumentException("Invalid entity-set identity.");
   }
   internal static Dictionary<string,object> Receipt(string id,string sha) {
-   string path=Path.Combine(Program.Root,"responses",id+".json");
+   return Receipt(Program.Root,id,sha);
+  }
+  internal static Dictionary<string,object> Receipt(string root,string id,string sha) {
+   string path=Path.Combine(root,"responses",id+".json");
    using(var input=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read)) {
     if(input.Length>16000000)throw new IOException("Inspection receipt exceeds limit.");
     byte[] bytes=new byte[(int)input.Length];int offset=0;while(offset<bytes.Length){int n=input.Read(bytes,offset,bytes.Length-offset);if(n==0)throw new IOException("Incomplete receipt read.");offset+=n;}

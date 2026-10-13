@@ -11,7 +11,7 @@
 | К4 | Пройден | SDK 0.34.0-dev full/read-only 16/6; clean checkout/CI, 141 .NET, 312 native/63 artifact cases |
 | К5 | Технически пройден, user decision pending | SDK0.35.1/native0.32 clean/CI/deploy/live unique OPEN + one SOLID/independent audit passed; 162 .NET/320 native/78 artifacts; K5-SDK-SWITCH.md, default switch ещё не принят |
 | К6 | Выполняется | SDK0.36.3 one-use saved reopen + separate verifier/new binding: 239 .NET/514 native/171 artifacts, seven STDIO/Inspector, profile27/6; clean baseline/SDK4a230a6 и четыре Windows CIef999f3 passed. Staged deployment/live К6 впереди. STATUS-K6-SAVE-AS.md |
-| К7 | Reader и resolution/history blocks offline qualified; К7 не завершён | PR8 +PR9 /SDK0.37.2 /5a46c88:clean292 .NET/514 native/171 artifacts/ten external STDIO/Inspector,128 hashes matched, четыре CIpassed. Full executor fault matrix и accepted checkpoint scenario впереди. OUTCOME-RESOLUTION-JOURNAL.md; К6 approval pending |
+| К7 | Reader/resolution/native core25 blocks offline qualified; К7 не завершён | PR8/9/10: native0.33.1/SDK0.37.2 clean292 .NET/514 native/171 artifacts/ten STDIO/Inspector +25 matrix/audit,134 hashes/four CI passed. Per-executor SDK transport/activation faults, more partial publication и accepted checkpoint scenario впереди. RECOVERY-FAULT-MATRIX.md; К6 approval pending |
 | К8 | Не начато | Общие transforms и organization |
 | К9 | Не начато | Planes/intersections/exchange/observation |
 | К10 | Не начато | Все обязательные операции на пяти классах моделей/сеансов |

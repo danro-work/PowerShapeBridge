@@ -7,19 +7,19 @@ using System.Linq;
 namespace PowerShapeBridge {
  internal static class OwnedTranslationTests {
   static Dictionary<string,object> Clone(Dictionary<string,object> d){return Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(d));}
-  sealed class Fake : OwnedTranslation.IContext {
-   internal Dictionary<string,object> Snapshot,Listing;internal double[] Box={-10,10,-10,10,0,20};internal int Calls,Reads,Code=1;internal bool Throw,WrongCog,Changed;internal Action<int> DuringRead;
+  internal sealed class Fake : OwnedTranslation.IContext {
+   internal Dictionary<string,object> Snapshot,Listing;internal double[] Box={-10,10,-10,10,0,20};internal int Calls,Reads,Code=1;internal bool Throw,ThrowAfter,WrongCog,Changed;internal Action<int> DuringRead;internal Action DuringCommand;
    public Dictionary<string,object> Windows(){return Clone(Listing);}
    public Dictionary<string,object> Observation(){Reads++;if(DuringRead!=null)DuringRead(Reads);return Clone(Snapshot);}
    public void ConfirmDocument(){if(Changed)throw new InvalidOperationException("Synthetic active document changed.");}
    public int Composite(int type,int id){ConfirmDocument();if(type!=40||id!=5)throw new InvalidOperationException("Unexpected fake entity.");return 101;}
    public double[] Bounds(int composite){ConfirmDocument();if(composite!=101)throw new InvalidOperationException("Wrong composite.");return Box.ToArray();}
-   public int Translate(int composite,double[] vector){ConfirmDocument();Calls++;if(Throw)throw new IOException("Synthetic interrupted COM command.");if(Code==1){Box=Box.Select((x,i)=>x+vector[i/2]).ToArray();var solid=EntitySets.Inventory(Snapshot).Single(e=>Equals(e["nativeTypeCode"],40));var geometry=(Dictionary<string,object>)solid["geometry"];geometry["cogRaw"]=((IList)geometry["cogRaw"]).Cast<object>().Select((x,i)=>Program.StrictDouble(x)+(WrongCog?0:vector[i])).ToArray();}return Code;}
+   public int Translate(int composite,double[] vector){ConfirmDocument();Calls++;if(DuringCommand!=null)DuringCommand();if(Throw)throw new IOException("Synthetic interrupted COM command.");if(Code==1){Box=Box.Select((x,i)=>x+vector[i/2]).ToArray();var solid=EntitySets.Inventory(Snapshot).Single(e=>Equals(e["nativeTypeCode"],40));var geometry=(Dictionary<string,object>)solid["geometry"];geometry["cogRaw"]=((IList)geometry["cogRaw"]).Cast<object>().Select((x,i)=>Program.StrictDouble(x)+(WrongCog?0:vector[i])).ToArray();}if(ThrowAfter)throw new IOException("Synthetic lost return after fake effect.");return Code;}
    public void Dispose(){}
   }
-  static Fake Context(OwnedOperationPlanTests.Fixture fixture){return new Fake{Snapshot=Clone(fixture.Snapshot),Listing=Clone(fixture.Listing)};}
-  static Dictionary<string,object> Handle(OwnedOperationPlanTests.Fixture fixture){var result=fixture.Prepare();if(!Equals(result["state"],"owned_operation_prepared_observed"))throw new Exception("Synthetic packet failed.");return new Dictionary<string,object>{{"ownedOperationId",result["ownedOperationId"]},{"ownedOperationSha256",result["ownedOperationSha256"]}};}
-  static Dictionary<string,object> Proof(OwnedOperationPlanTests.Fixture f,Dictionary<string,object> execution,Fake context) {
+  internal static Fake Context(OwnedOperationPlanTests.Fixture fixture){return new Fake{Snapshot=Clone(fixture.Snapshot),Listing=Clone(fixture.Listing)};}
+  internal static Dictionary<string,object> Handle(OwnedOperationPlanTests.Fixture fixture){var result=fixture.Prepare();if(!Equals(result["state"],"owned_operation_prepared_observed"))throw new Exception("Synthetic packet failed.");return new Dictionary<string,object>{{"ownedOperationId",result["ownedOperationId"]},{"ownedOperationSha256",result["ownedOperationSha256"]}};}
+  internal static Dictionary<string,object> Proof(OwnedOperationPlanTests.Fixture f,Dictionary<string,object> execution,Fake context) {
    string id=(string)execution["operationId"];string receiptPath=Path.Combine(f.Root,"responses",id+".json");string receiptSha=File.Exists(receiptPath)?Program.Hash(receiptPath):NativeJournal.Freeze(receiptPath,execution);var fresh=Clone(context.Snapshot);fresh["timestampUtc"]=DateTime.UtcNow.AddMilliseconds(1).ToString("o");string inspection=Guid.NewGuid().ToString("N");fresh["bridgeRequestId"]=inspection;string inspectionSha=NativeJournal.Freeze(Path.Combine(f.Root,"responses",inspection+".json"),fresh);var listing=Clone(context.Listing);listing["timestampUtc"]=fresh["timestampUtc"];listing["state"]="documents_listed_verified";string listingId=Guid.NewGuid().ToString("N"),listingSha=NativeJournal.Freeze(Path.Combine(f.Root,"responses",listingId+".json"),listing);
    return new Dictionary<string,object>{{"executionRequestId",id},{"executionReceiptSha256",receiptSha},{"inspectionRequestId",inspection},{"inspectionSha256",inspectionSha},{"listingRequestId",listingId},{"listingSha256",listingSha},{"windowNumber",1},{"modelId",9},{"expiresUtc",DateTime.UtcNow.AddSeconds(190).ToString("o")}};
   }

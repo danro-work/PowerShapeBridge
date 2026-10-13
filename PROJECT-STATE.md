@@ -1,5 +1,45 @@
 # PowerShape Bridge — состояние для продолжения
 
+Current qualified K7 native core fece6ee /draft PR10 attached: native/legacy
+source0.33.1-dev, SDK0.37.2. Cleanfull292 .NET/514 native/171 artifact cases(0
+mismatch)/ten external STDIO/Inspector +separate25 native core fault cells/audit
+passed в work/c7v/evidence/K7-native-fault-clean.134 recorded SHA matched; все
+четыре CI38354243685/38354422830/38354243670/38354422888 passed, SDKlog checked.
+Объём25 cells: four OWNED executors/control/lost return after fake effect/lost
+raw response/partial journal/changed process/non-success(translation0/−1).
+Native ordinary-open verifier has internal fake/root seam; public contract/guards
+remain. No new MCP tool. RECOVERY-FAULT-MATRIX.md. Следом per-executor SDK
+timeout/cancel/lost wire reply и activation-context faults, затем separately
+accepted checkpoint recovery. Runtime/K6 package/CAD/default config untouched;
+K6 Apply permission pending. Полная К7–К11 не завершена. Ниже история блока.
+
+Latest K7 native core fece6ee /draft PR10 attached(base PR9): native/legacy0.33.1,
+SDK0.37.2. Full local SDK passed292 .NET/514 native/171 artifacts(0 mismatch)/ten
+STDIO/Inspector +separate25 native fault cells/Python audit. Clean checkout в
+work/c7v/evidence/K7-native-fault-clean выполняется; exact-head CI выполняется.
+Scope four OWNED executors; SDK per-executor transport faults и activation context
+faults/accepted checkpoint recovery/live К6 остаются впереди. Runtime/K6 package/
+CAD/default config unchanged. RECOVERY-FAULT-MATRIX.md; цельК11 active.
+
+Qualification native fault core:25 native cells/audit и conventional514 passed.
+Negative marker test refusedexit3/no fixtures created. Full SDK native0.33.1
+в evidence/K7-fault-matrix/sdk-full выполняется;292 .NET passed. Next commit/
+draft PR(base PR9), clean/CI. Native core всё ещё не покрывает per-executor SDK
+timeout/cancel/lost wire reply, checkpoint recovery и live. Source SDK0.37.2;
+runtime/K6 packages/default config/CAD untouched, Apply permission pending.
+
+К7 fault matrix native core начат: source native/legacy adapter0.33.1-dev,
+SDK0.37.2 unchanged. Internal ordinary-open verifier test seam/rooted receipt
+overload, public Run и fixed args/guards unchanged. Separate CLI с explicit
+isolated marker:25 fake-context cells четырёх executors (control, lost return
+after effect, lost raw response, partial journal, changed process, non-success
+plus code−1). Все25 native/independent artifact audit passed в work/kfv;
+evidence/K7-fault-matrix/qualified. Conventional native regression выполняется;
+full SDK/clean/CI ещё впереди. RECOVERY-FAULT-MATRIX.md. SDK per-executor
+transport timeout/cancel/lost wire reply и checkpoint recovery ещё НЕ покрыты.
+Runtime/K6 packages/default config/CAD unchanged; pending Apply permission
+сохраняется. GoalК11 active, К7–К11 не завершены.
+
 Текущий завершённый offline блок К7: SDK0.37.2 /5a46c88, draft PR9 attached.
 Immutable OutcomeResolutionJournal на четырёх operation-specific verifiers,
 opt-in recoveryResolutionExperimental; readonly history через existing reader,

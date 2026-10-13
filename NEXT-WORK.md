@@ -1,5 +1,29 @@
 # Дальнейшая работа
 
+Следующий обязательный К7 block: SDK per-executor timeout/cancel/lost wire reply
+для four owned executors и activation context; сохранить actual request/receipt/
+journal/claim/fence и отсутствие command replay. Native core25 fece6ee /PR10
+qualified clean292/514/171/ten STDIO/Inspector/extra25/audit +134 hashes/four CI.
+Не повторять уже passed checks без нового изменения/ошибки. Далее дополнительные
+partial publication points и отдельно принятый checkpoint recovery scenario.
+Native source0.33.1, SDK0.37.2, immutable K6 package native0.33.0/SDK0.36.3 и
+installed runtime0.32 различать; pending K6 decision не считать разрешением.
+RECOVERY-FAULT-MATRIX.md; полная цель доК11 active.
+
+fece6ee /draft PR10 native fault core:local full292/514/171/ten STDIO/Inspector
+и extra25 fault rows/audit passed. Дождаться cleanSDK session75924 в work/c7v,
+exact-head CI, сверить source/binary hashes и fault audit, обновить state/PR.
+После этого SDK per-executor timeout/cancel/lost wire reply плюс activation
+context faults и separately accepted checkpoint recovery; полная К7 не завершена.
+Runtime/K6 package/default config untouched; K6 permission pending.
+
+Следующий К7 block native fault core:25 cells/audit passed, source native0.33.1
+legacy metadata aligned, SDK0.37.2. Дождаться native regression session86741,
+полный verify-sdk с новым separate fault stage, commit/push/PR(base PR9), clean/CI.
+RECOVERY-FAULT-MATRIX.md содержит остаток SDK per-executor transport faults и
+accepted checkpoint recovery. Не считать native core полным К7. Runtime/K6
+packages/default config не менять; pending K6 user decision остаётся.
+
 К7 resolution/history5a46c88 /draft PR9 offline qualified: clean292 .NET/514 native/
 171 artifacts/ten external STDIO/Inspector,128 hashes и все четыре CIpassed.
 Следующий обязательный блок: полная матрица lost reply/timeout/non-success/partial
