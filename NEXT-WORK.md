@@ -1,5 +1,13 @@
 # Дальнейшая работа
 
+К7 legacy activation recovery reader0.37.5:13 focused и40 actual-native STDIO
+passed, STATUS-K7-LEGACY-RECOVERY.md. Full session23857 completed в
+evidence/K7-legacy-recovery/sdk-qualified:343/531/1750 mismatch/32/25/20/
+40 legacy STDIO/Inspector passed, hashes matched. Далее source commit/PR/CI.
+Native source0.33.4/installed0.33.3 различать. Далее other partial publication
+points и separately accepted recovery into NEW owned checkpoint copy; К8–К11
+не сокращать. PR18/sourceee72c68 four CI passed.
+
 Current К7 activation/native0.33.4 SDK0.37.4: full session39854 completed,
 evidence/K7-activation/sdk-qualified passed330/531/1750 mismatch/32 SDK/
 25 native faults/20 activation rows/STDIO/Inspector;143 hashes matched. Failed

@@ -63,6 +63,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Independent SaveAs resolution/history SDK STDI
 if ($LASTEXITCODE -ne 0) { throw 'Independent saved-reopen resolution/history SDK STDIO failed.' }
 & (Join-Path $taskRoot 'verify-recovery-faults.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-faults') -EvidenceDirectory (Join-Path $taskEvidence 'native-core-faults')
 & (Join-Path $taskRoot 'verify-activation-faults.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-activation') -EvidenceDirectory (Join-Path $taskEvidence 'activation-faults')
+& $PythonPath (Join-Path $taskRoot 'src\test_sdk_activation_recovery_stdio.py') --dotnet $DotnetPath --host $taskHost --stage ($NativeStageDirectory+'-activation') --evidence $taskEvidence
+if($LASTEXITCODE -ne 0){throw 'SDK legacy activation recovery STDIO qualification failed.'}
 $taskFixture = Join-Path $taskRoot ('work\K2-inspector-'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
@@ -100,6 +102,7 @@ $taskFiles += @('src\RecoveryFaultTests.cs','src\audit_recovery_fault_matrix.py'
 $taskFiles += @('src\test_sdk_recovery_stdio.py')
 $taskFiles += @('src\audit_sdk_transport_faults.py')
 $taskFiles += @('src\DocumentSession.cs','src\ActivationFaultTests.cs','src\audit_activation_faults.py','verify-activation-faults.ps1')
+$taskFiles += @('src\test_sdk_activation_recovery_stdio.py')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

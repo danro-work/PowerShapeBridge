@@ -1,5 +1,15 @@
 # PowerShape Bridge — состояние для продолжения
 
+К7 current legacy reader: source SDK0.37.5/native0.33.4, installed0.33.3 unchanged.
+13 unit +40 actual-native-artifact STDIO cases passed; reader observes legacy
+activation journal without authoritative return/permission/CAD/queue/repair.
+Full evidence/K7-legacy-recovery/sdk-qualified passed343 .NET/32 SDK/
+531 native/1750 mismatch/25 faults/20 activation/40 legacy STDIO/Inspector;
+recorded source/binary hashes matched. Source commit/PR/CI далее.
+STATUS-K7-LEGACY-RECOVERY.md. PR18/sourceee72c68 four CI passed. Следом
+remaining partial publication и separately accepted checkpoint recovery;
+общий MCP v1 доК11 остаётся полной целью.
+
 К7 current activation block: source native/legacy0.33.4, SDK0.37.4. Installed
 0.33.3/default config/CAD unchanged. Native20 activation rows+110-hash independent
 audit и marker refusal passed; SDK32 rows/681 hashes/four negative checks passed.
