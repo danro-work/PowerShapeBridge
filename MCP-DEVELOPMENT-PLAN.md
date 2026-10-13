@@ -1,5 +1,12 @@
 # План разработки PowerShape MCP на основе Bridge
 
+Актуальная контрольная точка, 13 октября 2026: **К6 квалифицирован в CAD**.
+Один own SaveAs и один saved-byte reopen, independent terminal verifiers,
+new issued/validated binding, protected files и independent audit подтверждены.
+STATUS-K6-QUALIFIED.md. Граница — один SOLID/world/empty selection case;
+все модели/операции К10 ещё не приняты. Следом полная К7, затем К8–К11.
+Ниже исходный план и история; прежние pending/unknown К6 statements устарели.
+
 К6: installed0.33.2 verified. Один own SaveAs59f5a399... создал результат,
 но ложный old model-ID guard оставил outcome_unknown. Исправление0.33.3
 qualified294/531/175/25/four CI; concrete final package/plan-only prepared,

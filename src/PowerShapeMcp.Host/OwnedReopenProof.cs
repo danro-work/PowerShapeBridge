@@ -47,7 +47,8 @@ public static class OwnedReopenProof
         var expected=ArtifactProof.Verified(root,"responses",Text(parameters,"inspectionRequestId"),Text(parameters,"inspectionSha256"),16777216);
         var listing=ArtifactProof.Verified(root,"responses",Text(parameters,"listingRequestId"),Text(parameters,"listingSha256"),16777216);
         Require(JsonNode.DeepEquals(result["model"],expected["model"])&&JsonNode.DeepEquals(result["model"]?["id"],parameters["modelId"])&&JsonNode.DeepEquals(listing["activeWindow"]?["modelId"],parameters["modelId"])&&
-            JsonNode.DeepEquals(listing["activeWindow"]?["windowNumber"],parameters["windowNumber"])&&JsonNode.DeepEquals(result["model"]?["path"],plan["workingPath"]),"saved_reopen_verified_current_model_differs");
+            JsonNode.DeepEquals(listing["activeWindow"]?["windowNumber"],parameters["windowNumber"])&&
+            ObservationPolicy.NormalizePath(Text(result["model"]!.AsObject(),"path"))==ObservationPolicy.NormalizePath(Text(plan,"workingPath")),"saved_reopen_verified_current_model_differs");
         var evidence=new JsonArray();foreach(var pair in new[]{("reopenRequestId","reopenReceiptSha256"),("inspectionRequestId","inspectionSha256"),("listingRequestId","listingSha256")})evidence.Add(new JsonObject{["requestId"]=parameters[pair.Item1]!.DeepClone(),["sha256"]=parameters[pair.Item2]!.DeepClone()});
         var terminal=ArtifactProof.Journal(root,Text(parameters,"reopenRequestId"))["events"]!.AsArray().Last()!["details"]!.AsObject();
         Require(JsonNode.DeepEquals(result["evidence"],evidence)&&ArtifactProof.Boolean(terminal["noCommandReplay"],true)&&JsonNode.DeepEquals(terminal["sourceSavedResultSha256"],result["sourceSavedResultSha256"])&&JsonNode.DeepEquals(terminal["ownedModelId"],parameters["modelId"])&&

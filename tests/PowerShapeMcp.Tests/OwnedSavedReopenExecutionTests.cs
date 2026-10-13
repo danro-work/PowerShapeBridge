@@ -33,19 +33,34 @@ public sealed class OwnedSavedReopenExecutionTests
         Assert.Equal(100,issued["bindingLifetimeSeconds"]!.GetValue<int>());
     }
     [Theory]
-    [InlineData("flags")][InlineData("binding")][InlineData("source")][InlineData("fresh_choice")][InlineData("retained_fence")][InlineData("missing_return")]
+    [InlineData("flags")][InlineData("binding")][InlineData("source")][InlineData("fresh_choice")][InlineData("retained_fence")][InlineData("missing_return")][InlineData("working_path")]
     public void ForgedOrChangedProofCannotIssueBinding(string fault)
     {
         var data=new SavedReopenFixture();var session=data.Session;var parameters=OwnedExecutionProof.SavedReopenParameters(OpenArgs(data),session.Candidates,session.Reopens,session.Documents);data.Execution(Guid.NewGuid().ToString("N"),parameters);
         var fresh=data.FreshReads();var proof=OwnedExecutionProof.VerificationParameters(fresh,session.Candidates,session.Documents,false,false,true);var verified=data.Verification(Guid.NewGuid().ToString("N"),proof);
         if(fault=="flags")verified["noCommandReplay"]=false;
         if(fault=="binding")verified["bindingSha256"]=new string('f',64);
+        if(fault=="working_path")verified["model"]!["path"]=Path.Combine(data.Root,"Different.psmodel");
         if(fault=="source")File.AppendAllText(data.Prepared["reopen"]!["savedResult"]!["path"]!.GetValue<string>()," changed");
         if(fault=="fresh_choice")proof["modelId"]=9;
         if(fault=="retained_fence")data.Data.Target.Data.Files.Write("workingcopies/"+data.Prepared["reopenId"]!.GetValue<string>()+"/mutation-fence.json","unresolved operation");
         if(fault=="missing_return")File.AppendAllText(FileArtifacts.FixedPath(data.Root,"operations",data.Operation,"000003.json")," ");
         data.Data.Target.Data.Files.Write("responses/"+verified["bridgeRequestId"]!.GetValue<string>()+".json",verified.ToJsonString());
         Assert.Throws<ReferenceRejected>(()=>OwnedReopenProof.IssueBinding(session,verified,proof,fresh["candidateDocumentHandle"]!.GetValue<string>()));
+    }
+    [Fact]
+    public void ForwardSlashNativeModelPathIssuesOnlyTheOwnedWorkingBinding()
+    {
+        var data=new SavedReopenFixture();var session=data.Session;
+        var parameters=OwnedExecutionProof.SavedReopenParameters(OpenArgs(data),session.Candidates,session.Reopens,session.Documents);
+        data.Execution(Guid.NewGuid().ToString("N"),parameters);session.RevokeCadLeases(true);
+        var fresh=data.FreshReads(forwardPath:true);var proof=OwnedExecutionProof.VerificationParameters(fresh,session.Candidates,session.Documents,false,false,true);
+        var verified=data.Verification(Guid.NewGuid().ToString("N"),proof);
+        var originalBytes=File.ReadAllBytes(FileArtifacts.FixedPath(data.Root,"responses",verified["bridgeRequestId"]!.GetValue<string>()+".json"));
+        var issued=OwnedReopenProof.IssueBinding(session,verified,proof,fresh["candidateDocumentHandle"]!.GetValue<string>());
+        Assert.Contains('/',issued["model"]!["path"]!.GetValue<string>());Assert.NotNull(issued["workingDocumentBindingHandle"]);
+        Assert.Equal(data.Prepared["reopenId"]!.GetValue<string>(),session.Copies.InspectParameters(issued["workingCopyHandle"]!.GetValue<string>())["copyId"]!.GetValue<string>());
+        Assert.Equal(originalBytes,File.ReadAllBytes(FileArtifacts.FixedPath(data.Root,"responses",verified["bridgeRequestId"]!.GetValue<string>()+".json")));
     }
     [Fact]
     public async Task CancellationAfterPublishedOpenRetainsClaimedEnvelopeAndCannotReplay()

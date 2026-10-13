@@ -1,5 +1,21 @@
 # Дальнейшая работа
 
+АКТУАЛЬНО: К6 technical transition gate fulfilled, STATUS-K6-QUALIFIED.md.
+Current source SDK0.37.4/native0.33.3, branch fix/reopen-current-model-path;
+full298/531/175/25/four CI qualified. Current CAD Test_Block_P2 active/six windows,
+own saved result/Working_d5 left open; no further K6 SaveAs/OPEN needed.
+Следом полный К7: остальные SDK transport faults/cancellation, activation context,
+partial publication и separately accepted checkpoint recovery. Использовать
+RECOVERY-TRANSPORT-MATRIX.md как частичную базу; К8–К11 не сокращать.
+
+SDK0.37.4 path fix: full qualification/CI, publish side client; затем ONLY
+verify existing OPEN45ddd3c930f843ca858486ad1c7fe36c, fresh reads/current binding.
+Original SaveAs59f и OPEN45 native succeeded_verified, SDK binding не выдана
+из-за path slash format; sourceSDK0.37.4 fixing, STATUS-K6-REOPEN-PATH.md.
+Нельзя повторять SaveAs/OPEN; six windows/active own Working_d5... сохраняются.
+Native0.33.3 panel не менять. После SDK success independent full raw/file audit
+К6, далее complete К7/К8–К11.
+
 Installed0.33.3, original SaveAs59f... terminal independently verified without
 replay. Native prepare46994... disk-only succeeded, SDK scoped handle refused;
 no OPEN. Current SDK source0.37.3 fix branch fix/reopen-source-receipt-identity,

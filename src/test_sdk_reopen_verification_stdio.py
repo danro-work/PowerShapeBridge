@@ -21,6 +21,14 @@ class Panel:
         params = metadata['parameters']
         self.snapshot = read(root / 'responses' / (params['inspectionRequestId'] + '.json'))
         self.listing = read(root / 'responses' / (params['listingRequestId'] + '.json'))
+        # PowerShape returns current model paths with forward slashes while the
+        # owned filesystem plan uses Windows backslashes. Keep raw bodies as-is.
+        self.snapshot['model']['path'] = self.snapshot['model']['path'].replace('\\', '/')
+        self.receipt['model']['path'] = self.receipt['model']['path'].replace('\\', '/')
+        self.listing['activeWindow']['modelPath'] = self.listing['activeWindow']['modelPath'].replace('\\', '/')
+        for window in self.listing['windows']:
+            if 'modelPath' in window:
+                window['modelPath'] = window['modelPath'].replace('\\', '/')
         active = self.listing['activeWindow']
         self.listing['documents'] = [{'modelId': active['modelId'], 'windowNumber': active['windowNumber'], 'activationSupported': True}]
         self.calls, self.errors = [], []
