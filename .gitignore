@@ -42,6 +42,9 @@
 *.iges
 *.stl
 *.dmt
+!/tests/PowerShapeMcp.Tests/fixtures/dmt/NormalDmt.dmt
+!/tests/PowerShapeMcp.Tests/fixtures/dmt/TwoBlocks.dmt
+!/tests/PowerShapeMcp.Tests/fixtures/dmt/smallModel.dmt
 
 # Build output and caches.
 *.exe

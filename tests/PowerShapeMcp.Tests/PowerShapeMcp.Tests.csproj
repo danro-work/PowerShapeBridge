@@ -18,5 +18,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="fixtures/observations.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="fixtures/dmt/*.dmt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
