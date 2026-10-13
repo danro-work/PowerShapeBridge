@@ -1,4 +1,9 @@
-# К6 — собственный SaveAs и reopen, выполняется
+# К6 — собственный SaveAs и reopen, технически квалифицирован
+
+Актуальный результат: STATUS-K6-QUALIFIED.md. Live one SaveAs/one OPEN и новая
+issued/validated binding прошли; independent34 raw/file +71 protected audit
+passed. Installed native0.33.3/side SDK0.37.4; broader К10 и общая К11 не приняты.
+Ниже сохранена история реализации и диагностики.
 
 13 октября 2026 runtime0.33.0-dev установлен с backup/restart по разрешению
 пользователя; независимая проверка прошла, STATUS-K6-DEPLOYMENT-033.md.

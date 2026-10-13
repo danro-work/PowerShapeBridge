@@ -1,4 +1,10 @@
-# К6 — native reopen принят, SDK path format исправляется
+# К6 — SDK path format исправлен и live binding выдана
+
+Итог: source44726bf/full298/531/1750 mismatch/STDIO/Inspector/25 audit/four CI
+passed,134 hashes matched. Side SDK0.37.4 verify existing OPEN без replay
+выдал binding065ba2cc..., validation passed; Test_Block_P2 active/six windows.
+Independent live audit passed34 files/71 protected, STATUS-K6-QUALIFIED.md.
+Ниже история до квалификации.
 
 Native0.33.3/side SDK0.37.3: own reopen d5ed3054cfa145c887e6805bb5dde541
 подготовлен. OPEN45ddd3c930f843ca858486ad1c7fe36c исполнен один раз;

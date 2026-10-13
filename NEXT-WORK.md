@@ -1,5 +1,13 @@
 # Дальнейшая работа
 
+АКТУАЛЬНО: К6 technical transition gate fulfilled, STATUS-K6-QUALIFIED.md.
+Current source SDK0.37.4/native0.33.3, branch fix/reopen-current-model-path;
+full298/531/175/25/four CI qualified. Current CAD Test_Block_P2 active/six windows,
+own saved result/Working_d5 left open; no further K6 SaveAs/OPEN needed.
+Следом полный К7: остальные SDK transport faults/cancellation, activation context,
+partial publication и separately accepted checkpoint recovery. Использовать
+RECOVERY-TRANSPORT-MATRIX.md как частичную базу; К8–К11 не сокращать.
+
 SDK0.37.4 path fix: full qualification/CI, publish side client; затем ONLY
 verify existing OPEN45ddd3c930f843ca858486ad1c7fe36c, fresh reads/current binding.
 Original SaveAs59f и OPEN45 native succeeded_verified, SDK binding не выдана
