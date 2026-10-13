@@ -1,58 +1,60 @@
 # К8 — неизменяемые измерения в журнале поворота
 
-Внутренний rotation execution plan теперьschema2. Для каждого target до первой
-команды записывается отдельный rotationmeasurements/<execution>/<index>.before.json.
-Plan закрепляет SHA. После успешного return иcontext checks появляется after.json;
-summary связывает before/after SHA сstarted/returned/observed records.
-Исходный schema1 без измерений не выдаётся за новый контракт.
+Внутренний план исполнения поворота теперь использует schema2. До первой команды
+для каждого объекта создаётся отдельная запись
+rotationmeasurements/<execution>/<index>.before.json. План закрепляет её SHA.
+После успешного возврата команды и проверки контекста создаётся after.json.
+Итоговый журнал связывает оба SHA с записями started/returned/observed.
+Прежний schema1 без измерений не считается новым контрактом.
 
-Record schema1 закрепляет execution ID,index,phase,recordedUtc, copy/owner/working
-SHA,binding/inspection IDs/SHA,source observation/window digest иexpiry. recordedUtc
-обозначает запись на диск, ане атомарное время всех точек. Payload содержит native
-key,world/document_raw,descriptor SHA,unique anchors,positions,directions,invariants
-иpaired bounds. Exact-field/type/finite/shape checks не принимают bool вместочисла,
-неоднозначные anchors иличужие provenance. FileMode.CreateNew не перезаписывает proof.
+Запись schema1 содержит execution ID, index, phase, recordedUtc и происхождение
+данных: copy/owner/working SHA, binding/inspection IDs и SHA, исходные observation/
+window digests и expiry. recordedUtc — время записи файла, а не одновременного
+измерения всех точек. Данные содержат native key, world/document_raw, descriptor
+SHA, уникальные anchors, позиции, направления, invariants и paired bounds.
+Проверяются точные поля, типы, конечность чисел и размеры массивов.
 
-Перед target callback before запись перечитывается по pinned SHA; fresh measured
-samples должны совпасть. После этого снова проверяется весь текущий контекст:
-долгое чтение измерений не даёт права исполнить команду после expiry/сменыдокумента.
-Proof streams держатся до завершения. Попытка изменить/удалить held record запрещена.
-Возможные частичные before artifacts обозначаются localArtifactsMayExist.
+Перед командой запись before перечитывается по закреплённому SHA и сравнивается
+со свежими измерениями. Затем ещё раз проверяются контекст и expiry: длительное
+чтение не разрешает выполнить команду на устаревшем документе. Proof streams
+удерживаются до завершения. CreateNew запрещает перезапись; частичные локальные
+артефакты обозначаются localArtifactsMayExist.
 
 ## Проверки
 
-- 24 native batch cases/577 independently audited hashes прошли в
+- 24 сценария пакетного исполнителя и 577 хешей прошли независимый аудит:
   evidence/K8-rotation-receipts/execution-faults,
-  stage work/K8-rotation-receipts-faults,session55131 завершён успешно.
-  Дополнительные cases: malformed before samples →0 commands; drift приперечитывании
-  before →unknown/0 calls сclaim/fence; malformed after →unknown послеоднойкоманды.
-- 16 immutable record cases/256 hashes прошли в
+  stage work/K8-rotation-receipts-faults, session55131 завершён успешно.
+  Испорченные before samples отклонены до команды. Изменившиеся при повторном
+  чтении samples дают unknown с нулём вызовов и сохранёнными claim/fence.
+  Испорченные after samples дают unknown после одного вызова.
+- 16 проверок неизменяемых записей и 256 хешей прошли аудит:
   evidence/K8-rotation-receipts/records-qualified,
-  stage work/K8-rotation-records-audited,session9043 завершёнуспешно.
-  Header/schema/phase/index/provenance/SHA/vector/type/extra-fields отказы,
-  foreign execution,rewrite иheld tamper не изменили существующие proofs.
-- 21 .NET mathematical predicate tests прошли безskip в
-  evidence/K8-rotation-receipts/kernel-regression,session26301 завершёнуспешно.
+  stage work/K8-rotation-records-audited, session9043 завершён успешно.
+  Проверены schema/phase/index/provenance/SHA/vector/type/extra fields,
+  foreign execution, rewrite и held tamper. Существующие артефакты сохранены.
+- 21 тест математической проверки .NET прошёл без пропусков:
+  evidence/K8-rotation-receipts/kernel-regression, session26301 завершён успешно.
 
-Record CLI безмаркерa отказывается иничего не создаёт. Новый record runner
-включён вverify-sdk.ps1; batch auditor теперьпроверяет measurement linkage.
+CLI без собственного маркера отказывается работать и не создаёт fixtures.
+Новый runner включён в verify-sdk.ps1; пакетный auditor проверяет связи измерений.
 Предыдущий PR31/0d11c5e108c044188305f94e07a900c1bd094c34 прошёл четыре CI:
-38472860435/38472958341 baseline,38472860388/38472958423 SDK;
-его native531 regression тожеpassed. Новыйsource полныйCI ещётребуется.
+38472860435/38472958341 baseline, 38472860388/38472958423 SDK.
+Его native regression прошла 531 проверку. Полный CI нового исходного кода впереди.
 
-## Предел доказательства
+## Ограничения
 
-Batch fake теперьвозвращает восемьуглов своего искусственного bbox как witnesses.
-Это исключительно механизм испытания записи/связей/защит; точкиbbox не выдаются
-за геометрию реального тела. Синтетический effect не является физическим поворотом.
-Даже noop success остаётся executed_unverified иcopy fenced.
+Fake context возвращает углы своего искусственного bbox как witnesses только
+для проверки записи и связей. Эти точки не выдаются за геометрию реального тела;
+синтетический эффект не является физическим поворотом. Даже noop success остаётся
+executed_unverified, рабочая копия — заблокированной.
 
-Нет независимого native verifier/fence release илиproduction rotation queue/COM/
-MCP executor. Реальный measurement provider ещёне имеетsolid face samples илиlive
-layout qualification. Передвыпуском нужнысертификаты источникаmeasurements,
-fresh independent after measurements,calibration sign/frame иотдельныйfault
-recovery длячастичногопакета. Record alone не даётexecution/verification authority.
+Независимый native verifier, снятие fence и production COM/queue/MCP executor ещё
+не добавлены. Провайдер тела и живые форматы измерений не квалифицированы.
+Нужны свежие независимые измерения после команды, проверенная native convention
+и восстановление частичного пакета без повторов. Запись сама по себе не разрешает
+исполнение и не подтверждает результат.
 
-К7 live approval всёещёpending; installed runtime/READY packages/реальныйCAD
-этимблокомне менялись. ПолныйК8 иК9–К11 незавершены. Следом независимыйverifier
-по pinned before-records,провайдер тела,production transport/faults иlive scenario.
+К7 ждёт разрешения пользователя. Установленный runtime, READY-пакеты и CAD не
+изменялись. Полные К8 и К9–К11 не завершены. Следом — независимый verifier по
+закреплённым before records, провайдер тела, transport/faults и живой сценарий.
