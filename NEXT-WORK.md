@@ -1,5 +1,13 @@
 # Дальнейшая работа
 
+Legacy reader SDK0.37.5 qualified и опубликован: sourcefe2cf8c, draft PR19 attached.
+CI handles сохранены в work/K7-legacy-recovery-current.json; source SDK runs
+38393634042/38393486387 ещё pending, baseline38393634228/38393486124 passed.
+Следующая реализация: CHECKPOINT-RECOVERY-CONTRACT.md — новый one-use intent и
+NEW owned saved-byte copy, original unknown/claims не изменяются. Контракт
+planned, не CAD qualification/approval. После offline/CI — конкретный пакет и
+отдельно согласованный live scenario; native/runtime разделять.
+
 К7 legacy activation recovery reader0.37.5:13 focused и40 actual-native STDIO
 passed, STATUS-K7-LEGACY-RECOVERY.md. Full session23857 completed в
 evidence/K7-legacy-recovery/sdk-qualified:343/531/1750 mismatch/32/25/20/
