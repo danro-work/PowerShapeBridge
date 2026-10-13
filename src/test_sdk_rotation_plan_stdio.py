@@ -16,7 +16,7 @@ def sha(path):
 def checks(args):
     project = Path(__file__).resolve().parents[1]
     root = project / 'work' / ('K8-rotation-stdio-' + uuid.uuid4().hex)
-    root.mkdir()
+    root.mkdir(parents=True)
     for folder in ('requests', 'responses', 'entitysets'):
         (root / folder).mkdir()
     config = json.loads((project / 'config/general-rotation-plans.json').read_text(encoding='utf-8-sig'))

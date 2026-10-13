@@ -1,5 +1,14 @@
 # PowerShape Bridge — состояние для продолжения
 
+К8 reference geometry/API metadata: offline PowershapeNT.tlb confirms rotation
+VT_I4 angle/VT_VARIANT axis, no CAD/application creation.10 analytic geometry
+checks/full403 .NET passed, including arbitrary-angle bbox envelope counterexample.
+PR25 source9addbb8 SDK CI failed only at missing work parent in clean fixture,
+after393 .NET passed. Fixed root.mkdir(parents=True); clean Git export probe passed.
+Evidence/K8-rotation-geometry, K8-api-signatures/typelib.json.
+K8-ROTATION-PLAN-CONTRACT.md. Need publish correction/CI; no native rotation executor.
+K7 live approval still pending; READY packages and installed runtime unchanged.
+
 К8 offline preparation while K7 live approval pending: SDK0.39.0-dev source adds
 feature-gated passive prepare_rotation_plan. No native queue/rotation executor.
 Explicit integer angles/world axis, scoped set/plan SHA/TTL; mixed40/21/59 keys,

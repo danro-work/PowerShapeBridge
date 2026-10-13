@@ -1,5 +1,12 @@
 # Дальнейшая работа
 
+Publish PR25 clean-checkout fixture fix +reference rotation geometry/type-library
+reader. Full403 .NET/10 geometry/clean STDIO passed. SDK CI previous9addbb8 failed
+at missing work parent, fixed without relaxing assertions. Recheck exact new head CI.
+Next native owned rotation preparation/guard/executor/independent verification and
+fault matrix; fractional/scaling methods need separately documented route.
+Do not execute pending K7 apply/live scenario without direct human approval.
+
 K8 passive rotation source SDK0.39 qualified393 .NET +STDIO +previous SDK parity;
 publish separate branch/PR/CI, preserve READY K7 packages0.38.1/0.33.5.
 K8-ROTATION-PLAN-CONTRACT.md. Native rotation executor/sign/frame/SAFEARRAY,
