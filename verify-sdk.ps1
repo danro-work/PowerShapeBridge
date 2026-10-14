@@ -93,6 +93,7 @@ if($LASTEXITCODE -ne 0){throw 'Native owned rotation packet SDK proof compatibil
 & (Join-Path $taskRoot 'verify-rotation-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-rotation-verification') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-verification')
 & (Join-Path $taskRoot 'verify-geometry-export-targets.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-targets') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-targets')
 & (Join-Path $taskRoot 'verify-owned-dgk-targets.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-dgk-targets') -EvidenceDirectory (Join-Path $taskEvidence 'owned-dgk-targets')
+& (Join-Path $taskRoot 'verify-owned-dgk-export.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-dgk-export') -EvidenceDirectory (Join-Path $taskEvidence 'owned-dgk-export')
 & (Join-Path $taskRoot 'verify-geometry-export-executor.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-executor') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-executor')
 & (Join-Path $taskRoot 'verify-geometry-export-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-verifier') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-verification')
 & (Join-Path $taskRoot 'verify-native-selection-reading.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-native-selection') -EvidenceDirectory (Join-Path $taskEvidence 'native-selection-reading')
@@ -158,6 +159,7 @@ $taskFiles += @('src\OwnedGeometryExportVerification.cs','src\OwnedGeometryExpor
 $taskFiles += @('src\NativeSelectionReading.cs','src\NativeSelectionReadingTests.cs','src\audit_native_selection_reading.py','verify-native-selection-reading.ps1','tools\ReadPowerShapeExportMetadata.cs')
 $taskFiles += @('src\DgkBundleVerifier.cs','src\DgkBundleFiles.cs','src\DgkBundleFilesTests.cs','tools\audit_dgk_bundle.py')
 $taskFiles += @('src\OwnedDgkTargets.cs','src\OwnedDgkTargetTests.cs','src\audit_owned_dgk_targets.py','verify-owned-dgk-targets.ps1')
+$taskFiles += @('src\OwnedDgkExport.cs','src\OwnedDgkExportTests.cs','src\audit_owned_dgk_export.py','verify-owned-dgk-export.ps1')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

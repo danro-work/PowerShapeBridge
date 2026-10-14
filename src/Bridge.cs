@@ -160,6 +160,10 @@ namespace PowerShapeBridge
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{OwnedDgkTargetTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
+            if(args.Length==1&&args[0]=="--owned-dgk-export-test") {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{OwnedDgkExportTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
             if(args.Length==1&&args[0]=="--owned-uniform-scale-plan-test") {
                 try{OwnedUniformScalePlanTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
