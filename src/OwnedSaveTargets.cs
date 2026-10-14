@@ -25,6 +25,7 @@ namespace PowerShapeBridge {
    result["bridgeVersion"]=Program.ReleaseVersion;result["timestampUtc"]=DateTime.UtcNow.ToString("o");return result;
   }
   internal static void NoFence(string root,string copyId) {
+   OwnedGeometryExportTargets.NoExportFence(root,copyId);
    string fence=OwnedTranslation.FencePath(root,copyId);OwnedCopies.NoReparse(fence);
    if(File.Exists(fence)||Directory.Exists(fence))throw new InvalidOperationException("Owned copy is fenced; inspect original journal without retry.");
   }

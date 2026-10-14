@@ -83,6 +83,8 @@ if($LASTEXITCODE -ne 0){throw 'Native owned rotation packet SDK proof compatibil
 & (Join-Path $taskRoot 'verify-rotation-measurement-records.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-measurement-records') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-measurement-records')
 & (Join-Path $taskRoot 'verify-rotation-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-rotation-verification') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-verification')
 & (Join-Path $taskRoot 'verify-geometry-export-targets.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-targets') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-targets')
+& (Join-Path $taskRoot 'verify-geometry-export-executor.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-geometry-export-executor') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-executor')
+& (Join-Path $taskRoot 'verify-geometry-export-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-geometry-export-verification') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-verification')
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
 $taskInspectorConfig = Join-Path $taskFixture 'inspector.json'
@@ -134,6 +136,8 @@ $taskFiles += @('src\RotationMeasurements.cs','src\RotationMeasurementTests.cs',
 $taskFiles += @('src\RotationMeasurementRecords.cs','src\RotationMeasurementRecordTests.cs','src\audit_rotation_measurement_records.py','verify-rotation-measurement-records.ps1')
 $taskFiles += @('src\OwnedRotationVerification.cs','src\OwnedRotationVerificationTests.cs','src\audit_rotation_verification.py','verify-rotation-verification.ps1')
 $taskFiles += @('src\OwnedGeometryExportTargets.cs','src\OwnedGeometryExportTargetTests.cs','src\audit_geometry_export_targets.py','verify-geometry-export-targets.ps1')
+$taskFiles += @('src\OwnedGeometryExport.cs','src\OwnedGeometryExportTests.cs','src\audit_geometry_export_executor.py','verify-geometry-export-executor.ps1')
+$taskFiles += @('src\OwnedGeometryExportVerification.cs','src\OwnedGeometryExportVerificationTests.cs','src\audit_geometry_export_verification.py','verify-geometry-export-verification.ps1')
 $taskFiles += @('src\DmtMeshReader.cs','tools\ReadDmtMesh.cs','src\qualify_dmt_reader.py','verify-dmt-reader.ps1','tests\PowerShapeMcp.Tests\DmtMeshReaderTests.cs','tests\PowerShapeMcp.Tests\fixtures\dmt\source-manifest.jsonl','tests\PowerShapeMcp.Tests\fixtures\dmt\NormalDmt.dmt','tests\PowerShapeMcp.Tests\fixtures\dmt\TwoBlocks.dmt','tests\PowerShapeMcp.Tests\fixtures\dmt\smallModel.dmt')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8

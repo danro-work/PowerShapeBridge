@@ -11,6 +11,8 @@ namespace PowerShapeBridge {
   internal static void Validate(Dictionary<string,object> args){string[] keys={"bindingId","bindingSha256","entitySetId","entitySetSha256"};Require(args.Count==4&&keys.All(k=>args.ContainsKey(k)&&EntitySets.Hex(args[k],k.EndsWith("Sha256",StringComparison.Ordinal)?64:32)),"Exact owned binding/entity-set references required.");}
   internal static string Folder(string root,string id){Require(EntitySets.Hex(id,32),"Export identity required.");string path=Path.Combine(OwnedCopies.LocalPath(root.TrimEnd('\\','/')),"geometryexports",id);OwnedCopies.NoReparse(path);return path;}
   internal static string TargetPath(string root,string id){return Path.Combine(Folder(root,id),"Geometry_"+id+".dmt");}
+  internal static string ExportFencePath(string root,string copyId){Require(EntitySets.Hex(copyId,32),"Owned copy ID required.");string path=Path.Combine(root,"workingcopies",copyId,"geometry-export-fence.json");OwnedCopies.NoReparse(path);return path;}
+  internal static void NoExportFence(string root,string copyId){string path=ExportFencePath(root,copyId);Require(!File.Exists(path)&&!Directory.Exists(path),"Unverified selection/export fence; no further change or export.");}
   static Dictionary<string,object> Fence(string root,Dictionary<string,object> binding,Dictionary<string,object> source,OwnedOperationPlans.Proofs proofs) {
    string path=OwnedTranslation.FencePath(root,(string)binding["copyId"]);OwnedCopies.NoReparse(path);Require(!Directory.Exists(path),"Fence path is a directory.");if(!File.Exists(path))return new Dictionary<string,object>{{"present",false}};
    var record=proofs.Json(path,null);Require(record.Count==6&&record.ContainsKey("operationId")&&EntitySets.Hex(record["operationId"],32)&&record.ContainsKey("planSha256")&&EntitySets.Hex(record["planSha256"],64)&&Equals(record["schemaVersion"],1)&&Equals(record["copyId"],binding["copyId"])&&Equals(record["ownershipSha256"],binding["ownershipSha256"])&&Equals(record["automaticReplayForbidden"],true),"Unknown/foreign copy fence; export preparation forbidden.");
@@ -33,10 +35,10 @@ namespace PowerShapeBridge {
   static void Empty(string path){OwnedCopies.NoReparse(path);Require(!File.Exists(path)&&!Directory.Exists(path),"Export output/claim exists; no overwrite or replay.");}
   internal sealed class Dependencies {
    internal readonly Dictionary<string,object> Binding,Expected;internal readonly int[][] Keys;internal readonly DateTime Expires;
-   internal Dependencies(string root,Dictionary<string,object> args,OwnedOperationPlans.Proofs proofs) {
+   internal Dependencies(string root,Dictionary<string,object> args,OwnedOperationPlans.Proofs proofs,DateTime? evidenceTime=null) {
     Validate(args);var bindingArgs=new Dictionary<string,object>{{"bindingId",args["bindingId"]},{"bindingSha256",args["bindingSha256"]}};var loaded=DocumentBindings.Load(root,bindingArgs);Binding=proofs.Json(Path.Combine(root,"documentbindings",(string)args["bindingId"]+".json"),(string)args["bindingSha256"]);Require(EntitySets.Canonical(loaded)==EntitySets.Canonical(Binding),"Binding changed during load.");
     Expected=proofs.Json(Path.Combine(root,"responses",(string)Binding["inspectionRequestId"]+".json"),(string)Binding["inspectionSha256"],16000000);var set=proofs.Json(Path.Combine(root,"entitysets",(string)args["entitySetId"]+".json"),(string)args["entitySetSha256"]);EntitySets.ValidatePrepare(set);var source=proofs.Json(Path.Combine(root,"responses",(string)set["inspectionRequestId"]+".json"),(string)set["inspectionSha256"],16000000);Keys=EntitySets.Keys(set["entityKeys"]);Require(Keys.Length>0&&Keys.Length<=128&&Keys.All(k=>k[0]==40||k[0]==21),"DMT qualification targets must be solids or surfaces.");Expires=new[]{EntitySets.Expiry(Binding["expiresUtc"]),EntitySets.Expiry(set["expiresUtc"])}.Min();
-    EntitySets.CheckObserved(source,Expected,Keys,Expires,DateTime.UtcNow);Require(EntitySets.ObservedDigest(Expected)==(string)Binding["observedPropertiesSha256"],"Binding observation differs.");
+    EntitySets.CheckObserved(source,Expected,Keys,Expires,evidenceTime??DateTime.UtcNow);Require(EntitySets.ObservedDigest(Expected)==(string)Binding["observedPropertiesSha256"],"Binding observation differs.");
     foreach(string key in new[]{"contextBefore","contextAfter"})Require(EntitySets.Canonical(Expected[key])==EntitySets.Canonical(new[]{0,0}),"World/empty-selection snapshot required.");
     foreach(string key in new[]{"selectionBefore","selectionAfter"})Require(((IList)Expected[key]).Count==0,"Empty selection required.");
    }
@@ -48,7 +50,7 @@ namespace PowerShapeBridge {
     using(var proofs=new OwnedOperationPlans.Proofs()) {
      var d=new Dependencies(root,args,proofs);var binding=d.Binding;var source=d.Expected;var keys=d.Keys;var expiry=d.Expires;
      using(var copy=OwnedCopies.Hold(root,(string)binding["copyId"],(string)binding["ownershipSha256"])) {
-      copy.CheckPath((string)((Dictionary<string,object>)source["model"])["path"]);copy.Recheck();var fence=Fence(root,binding,source,proofs);
+      copy.CheckPath((string)((Dictionary<string,object>)source["model"])["path"]);copy.Recheck();NoExportFence(root,(string)binding["copyId"]);var fence=Fence(root,binding,source,proofs);
       string parent=Path.GetDirectoryName(folder);Directory.CreateDirectory(parent);OwnedCopies.NoReparse(parent);
       using(var rootPin=new OwnedDirectoryLease(root))using(var parentPin=new OwnedDirectoryLease(parent)) {
        result["localArtifactsMayExist"]=true;NativeJournal.Freeze(folder+".reservation.json",new Dictionary<string,object>{{"schemaVersion",1},{"targetId",id},{"format","dmt"},{"bindingId",args["bindingId"]},{"bindingSha256",args["bindingSha256"]},{"automaticReplayForbidden",true}});Directory.CreateDirectory(folder);Require(Directory.GetFileSystemEntries(folder).Length==0,"Export folder not empty.");
@@ -65,24 +67,25 @@ namespace PowerShapeBridge {
   }
   internal sealed class TargetLease : IDisposable {
    internal readonly Dictionary<string,object> Plan;internal readonly OwnedCopies.OwnershipLease Copy;internal readonly Dependencies Source;
-   readonly string root,id;readonly OwnedOperationPlans.Proofs proofs=new OwnedOperationPlans.Proofs();OwnedDirectoryLease rootPin,parentPin,folderPin;
-   internal TargetLease(string bridgeRoot,string targetId,string sha) {
-    root=OwnedCopies.LocalPath(bridgeRoot.TrimEnd('\\','/'));id=targetId;
+   readonly string root,id;readonly bool verification;readonly OwnedOperationPlans.Proofs proofs=new OwnedOperationPlans.Proofs();OwnedDirectoryLease rootPin,parentPin,folderPin;
+   internal TargetLease(string bridgeRoot,string targetId,string sha,bool forVerification=false) {
+    root=OwnedCopies.LocalPath(bridgeRoot.TrimEnd('\\','/'));id=targetId;verification=forVerification;
     try {
      Require(EntitySets.Hex(sha,64),"Target SHA required.");string folder=Folder(root,id);rootPin=new OwnedDirectoryLease(root);parentPin=new OwnedDirectoryLease(Path.GetDirectoryName(folder));folderPin=new OwnedDirectoryLease(folder);Plan=proofs.Json(Path.Combine(folder,"target.json"),sha);
      string[] fields={"bindingId","bindingSha256","entitySetId","entitySetSha256","schemaVersion","targetId","operation","format","selectionPolicy","preparedUtc","expiresUtc","executionEnabled","copyId","ownershipSha256","inspectionRequestId","inspectionSha256","nativeObservedPropertiesSha256","windowContextSha256","entityKeys","workingPath","workingSha256","checkpointPath","checkpointSha256","targetPath","directoryIdentity","fenceObservation","qualification"};
      Require(Plan.Count==fields.Length&&fields.All(Plan.ContainsKey)&&Equals(Plan["schemaVersion"],1)&&Equals(Plan["targetId"],id)&&Equals(Plan["operation"],"export_owned_geometry")&&Equals(Plan["format"],"dmt")&&Equals(Plan["executionEnabled"],false)&&Equals(Plan["selectionPolicy"],"explicit_target_set; separately qualified full-mode executor required")&&Equals(Plan["targetPath"],TargetPath(root,id))&&EntitySets.Canonical(Plan["directoryIdentity"])==EntitySets.Canonical(folderPin.Identity),"Invalid disabled export target/directory identity.");
-     Source=new Dependencies(root,new[]{"bindingId","bindingSha256","entitySetId","entitySetSha256"}.ToDictionary(k=>k,k=>Plan[k]),proofs);
+     Source=new Dependencies(root,new[]{"bindingId","bindingSha256","entitySetId","entitySetSha256"}.ToDictionary(k=>k,k=>Plan[k]),proofs,verification?(DateTime?)EntitySets.Expiry(Plan["preparedUtc"]):null);
      foreach(string key in new[]{"copyId","ownershipSha256","inspectionRequestId","inspectionSha256","windowContextSha256"})Require(Equals(Plan[key],Source.Binding[key]),"Export binding dependency differs.");
      Require(Equals(Plan["nativeObservedPropertiesSha256"],Source.Binding["observedPropertiesSha256"])&&EntitySets.Canonical(Plan["entityKeys"])==EntitySets.Canonical(Source.Keys)&&EntitySets.Expiry(Plan["expiresUtc"])==Source.Expires&&EntitySets.Expiry(Plan["preparedUtc"])>=EntitySets.Expiry(Source.Expected["timestampUtc"]),"Export observation/targets/expiry differ.");
      Copy=OwnedCopies.Hold(root,(string)Plan["copyId"],(string)Plan["ownershipSha256"]);Require(Equals(Plan["workingPath"],Copy.WorkingPath)&&Equals(Plan["workingSha256"],Copy.Inspection["workingSha256"])&&Equals(Plan["checkpointPath"],Copy.CheckpointPath)&&Equals(Plan["checkpointSha256"],Copy.CheckpointSha),"Export copy files differ.");Copy.CheckPath((string)((Dictionary<string,object>)Source.Expected["model"])["path"]);
-     var reservation=proofs.Json(folder+".reservation.json",null);Require(reservation.Count==6&&Equals(reservation["schemaVersion"],1)&&Equals(reservation["targetId"],id)&&Equals(reservation["format"],"dmt")&&Equals(reservation["bindingId"],Plan["bindingId"])&&Equals(reservation["bindingSha256"],Plan["bindingSha256"])&&Equals(reservation["automaticReplayForbidden"],true),"Export reservation differs.");Recheck();
+     var reservation=proofs.Json(folder+".reservation.json",null);Require(reservation.Count==6&&Equals(reservation["schemaVersion"],1)&&Equals(reservation["targetId"],id)&&Equals(reservation["format"],"dmt")&&Equals(reservation["bindingId"],Plan["bindingId"])&&Equals(reservation["bindingSha256"],Plan["bindingSha256"])&&Equals(reservation["automaticReplayForbidden"],true),"Export reservation differs.");if(verification)RecheckDependencies();else Recheck();
     }catch{Dispose();throw;}
    }
-   internal void Recheck() {
-    rootPin.Recheck();parentPin.Recheck();folderPin.Recheck();Copy.Recheck();EntitySets.CheckObserved(Source.Expected,Source.Expected,Source.Keys,Source.Expires,DateTime.UtcNow);
-    Require(EntitySets.Canonical(Fence(root,Source.Binding,Source.Expected,proofs))==EntitySets.Canonical(Plan["fenceObservation"]),"Export copy fence changed.");Empty((string)Plan["targetPath"]);Empty(Path.Combine(Folder(root,id),"export-once.json"));
+   internal void RecheckDependencies() {
+    rootPin.Recheck();parentPin.Recheck();folderPin.Recheck();Copy.Recheck();EntitySets.CheckObserved(Source.Expected,Source.Expected,Source.Keys,Source.Expires,verification?EntitySets.Expiry(Plan["preparedUtc"]):DateTime.UtcNow);
+    Require(EntitySets.Canonical(Fence(root,Source.Binding,Source.Expected,proofs))==EntitySets.Canonical(Plan["fenceObservation"]),"Export copy fence changed.");
    }
+   internal void Recheck(){Require(!verification,"Historical verification lease cannot authorize execution.");RecheckDependencies();NoExportFence(root,(string)Plan["copyId"]);Empty((string)Plan["targetPath"]);Empty(Path.Combine(Folder(root,id),"export-once.json"));}
    public void Dispose(){if(Copy!=null)Copy.Dispose();proofs.Dispose();if(folderPin!=null)folderPin.Dispose();if(parentPin!=null)parentPin.Dispose();if(rootPin!=null)rootPin.Dispose();}
   }
  }

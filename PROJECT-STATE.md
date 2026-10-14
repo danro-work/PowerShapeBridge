@@ -1,5 +1,13 @@
 # PowerShape Bridge — состояние для продолжения
 
+К8 internal owned geometry export/external verification:26 executor cases/595
+hashes and21 verifier cases/734 hashes passed locally. Claims/export fences,
+per-step records, fixed DMT file identity/grammar/SHA and fresh receipt/context
+checks;no public route/native adapter/CAD/fence release. STATUS-K8-GEOMETRY-EXPORT-
+EXECUTOR.md and STATUS-K8-EXPORT-INDEPENDENT-VERIFICATION.md. General CAD exchange
+remains DGK/PSMODEL;DMT supplementary. Full K8–K11/native qualification and К7 live
+approval remain pending. Other feature changes excluded from this review tree.
+
 К8 independent DMT reader:27 .NET cases and10 Framework full-data controls/5
 refusals passed. Official Autodesk pinned LFS fixtures/hashes/license included;
 float/double/normals/16-32 bit index boundary, full truncation matrix, strict
