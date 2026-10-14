@@ -48,9 +48,10 @@ namespace PowerShapeBridge {
    return plan.Artifacts.Select(item=>new Dictionary<string,object>{{"name",item.Name},{"role",item.Role},{"required",item.Required},{"expectedSha256",item.ExpectedSha256}}).ToArray();
   }
   static Dictionary<string,object> ReferenceArgs(Dictionary<string,object> args){return Refs.ToDictionary(key=>key,key=>args[key]);}
-  static void Validate(Dictionary<string,object> args) {
+  internal static void Validate(Dictionary<string,object> args) {
    Fields(args,"bindingId","bindingSha256","entitySetId","entitySetSha256","parameters");
    OwnedGeometryExportTargets.Validate(ReferenceArgs(args));Require(args["parameters"] is Dictionary<string,object>,"DGK parameters object required.");
+   Bundle(new string('a',32),(Dictionary<string,object>)args["parameters"]);
   }
   static void EmptyDirectory(string path){OwnedCopies.NoReparse(path);Require(Directory.Exists(path)&&!Directory.EnumerateFileSystemEntries(path).Any(),"DGK artifacts directory must remain empty before execution.");}
   internal static Dictionary<string,object> Prepare(string root,string id,Dictionary<string,object> input) {

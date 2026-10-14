@@ -1,4 +1,4 @@
-﻿"""PowerShape Bridge MCP stdio adapter, Python standard library only.
+"""PowerShape Bridge MCP stdio adapter, Python standard library only.
 
 The already running user-session panel owns all PowerShape calls. This process
 only publishes fixed snapshot requests and consumes their matching responses.
@@ -29,7 +29,7 @@ from owned_translation import execution_receipt as translation_receipt, validate
 
 VERSIONS = ('2025-11-25', '2025-06-18', '2025-03-26')
 MAX_MESSAGE = 65536
-ADAPTER_VERSION = '0.34.1-dev'
+ADAPTER_VERSION = '0.34.2-dev'
 DOCUMENT_TOOLS = [
     {'name':'list_documents',
      'description':'Read and recheck native PowerShape windows and already-open model documents without activating, saving, closing, selecting entities or creating images. Returns process/start/session identity and one-use opaque documentHandle choices (300 seconds, same MCP connection). Windows are not persistent IDs; documents with multiple model windows cannot be activated by this version.',

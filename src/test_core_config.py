@@ -37,6 +37,17 @@ class CoreConfiguration(unittest.TestCase):
             with self.subTest(flag=flag), self.assertRaises(ValueError):
                 general_core({**full, flag: False})
 
+    def test_owned_dgk_flag_is_strict_and_does_not_add_legacy_python_tools(self):
+        full = {**self.settings, 'entitySetsExperimental': True, 'workingCopiesExperimental': True,
+                'documentBindingsExperimental': True, 'ownedDgkTargetsExperimental': True}
+        self.assertTrue(general_core(full))
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                general_core({**full, 'ownedDgkTargetsExperimental': value})
+        for flag in ('entitySetsExperimental', 'workingCopiesExperimental', 'documentBindingsExperimental'):
+            with self.subTest(flag=flag), self.assertRaises(ValueError):
+                general_core({**full, flag: False})
+
     def test_save_flags_require_boolean_and_owned_dependencies(self):
         for key in ('ownedSaveTargetsExperimental', 'ownedSavesExperimental'):
             for value in (True, 'true', 1, None):

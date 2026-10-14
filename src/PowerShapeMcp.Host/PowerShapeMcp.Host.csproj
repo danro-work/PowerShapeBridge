@@ -6,8 +6,9 @@
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <Version>0.39.4-dev</Version>
+    <Version>0.39.5-dev</Version>
   </PropertyGroup>
+  <ItemGroup><InternalsVisibleTo Include="NativeFixtureCheck" /></ItemGroup>
   <ItemGroup>
     <PackageReference Include="ModelContextProtocol" Version="[2.2.0]" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="[10.0.12]" />
