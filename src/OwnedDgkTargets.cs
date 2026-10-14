@@ -100,10 +100,10 @@ namespace PowerShapeBridge {
    internal readonly OwnedCopies.OwnershipLease Copy;
    internal readonly OwnedGeometryExportTargets.Dependencies Source;
    internal readonly DgkBundleVerifier.Plan BundlePlan;
-   readonly string root,id;readonly OwnedOperationPlans.Proofs proofs=new OwnedOperationPlans.Proofs();
+   readonly string root,id;readonly bool verification;readonly OwnedOperationPlans.Proofs proofs=new OwnedOperationPlans.Proofs();
    OwnedDirectoryLease rootPin,parentPin,folderPin,bundlePin;FileStream workingPin;
-   internal TargetLease(string bridgeRoot,string targetId,string sha) {
-    root=OwnedCopies.LocalPath(bridgeRoot.TrimEnd('\\','/'));id=targetId;
+   internal TargetLease(string bridgeRoot,string targetId,string sha,bool forVerification=false) {
+    root=OwnedCopies.LocalPath(bridgeRoot.TrimEnd('\\','/'));id=targetId;verification=forVerification;
     try {
      Require(EntitySets.Hex(sha,64),"DGK target SHA required.");string folder=Folder(root,id),artifacts=BundleFolder(root,id);
      rootPin=new OwnedDirectoryLease(root);parentPin=new OwnedDirectoryLease(Path.GetDirectoryName(folder));
@@ -122,7 +122,7 @@ namespace PowerShapeBridge {
       EntitySets.Canonical(Plan["directoryIdentity"])==EntitySets.Canonical(folderPin.Identity)&&
       EntitySets.Canonical(Plan["bundleDirectoryIdentity"])==EntitySets.Canonical(bundlePin.Identity),"DGK fixed bundle/manifest/directory identity differs.");
      foreach(var item in BundlePlan.Artifacts)OwnedGeometryExport.QuotedPath(Path.Combine(artifacts,item.Name));
-     Source=new OwnedGeometryExportTargets.Dependencies(root,ReferenceArgs(Plan),proofs,null,true);
+     Source=new OwnedGeometryExportTargets.Dependencies(root,ReferenceArgs(Plan),proofs,verification?(DateTime?)EntitySets.Expiry(Plan["preparedUtc"]):null,true);
      foreach(string key in new[]{"copyId","ownershipSha256","inspectionRequestId","inspectionSha256","windowContextSha256"})Require(Equals(Plan[key],Source.Binding[key]),"DGK binding dependency differs.");
      Require(Equals(Plan["nativeObservedPropertiesSha256"],Source.Binding["observedPropertiesSha256"])&&
       EntitySets.Canonical(Plan["entityKeys"])==EntitySets.Canonical(Source.Keys)&&EntitySets.Expiry(Plan["expiresUtc"])==Source.Expires&&
@@ -136,16 +136,17 @@ namespace PowerShapeBridge {
      Require(Equals(reservation["schemaVersion"],1)&&Equals(reservation["targetId"],id)&&Equals(reservation["format"],"dgk")&&
       Equals(reservation["bindingId"],Plan["bindingId"])&&Equals(reservation["bindingSha256"],Plan["bindingSha256"])&&
       Equals(reservation["parametersSha256"],Plan["parametersSha256"])&&Equals(reservation["automaticReplayForbidden"],true),"DGK reservation differs.");
-     Recheck();
+     if(verification)RecheckDependencies();else Recheck();
     }catch{Dispose();throw;}
    }
    internal void RecheckDependencies() {
     rootPin.Recheck();parentPin.Recheck();folderPin.Recheck();bundlePin.Recheck();Copy.Recheck();
     Require(OwnedCopies.Digest(workingPin)==(string)Plan["workingSha256"],"Pinned DGK working bytes changed.");
-    EntitySets.CheckObserved(Source.Expected,Source.Expected,Source.Keys,Source.Expires,DateTime.UtcNow);
+    EntitySets.CheckObserved(Source.Expected,Source.Expected,Source.Keys,Source.Expires,verification?EntitySets.Expiry(Plan["preparedUtc"]):DateTime.UtcNow);
     Require(EntitySets.Canonical(OwnedGeometryExportTargets.Fence(root,Source.Binding,Source.Expected,proofs))==EntitySets.Canonical(Plan["fenceObservation"]),"DGK copy fence changed.");
    }
    internal void Recheck() {
+    Require(!verification,"Historical DGK proof lease cannot authorize execution.");
     RecheckDependencies();OwnedGeometryExportTargets.NoExportFence(root,(string)Plan["copyId"]);EmptyDirectory((string)Plan["bundleDirectory"]);
     string claim=Path.Combine(Folder(root,id),"export-once.json");OwnedCopies.NoReparse(claim);Require(!File.Exists(claim)&&!Directory.Exists(claim),"DGK export already claimed; replay forbidden.");
    }

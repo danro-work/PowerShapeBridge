@@ -24,7 +24,7 @@ namespace PowerShapeBridge {
    return EntitySets.Canonical(list.Cast<object>().Select(EntitySets.Canonical).OrderBy(item=>item,StringComparer.Ordinal).ToArray());
   }
   static string Type(int code){return code==40?"SOLID":code==21?"SURFACE":"COMPCURVE";}
-  static void Settings(Dictionary<string,object> value,Dictionary<string,object> parameters) {
+  internal static void Settings(Dictionary<string,object> value,Dictionary<string,object> parameters) {
    string[] fields={"format","coordinateFrame","exportVariant","triangleCompanions","featureCompanions","effectiveOptionsSha256","providerQualification"};
    Require(value!=null&&value.Count==fields.Length&&fields.All(value.ContainsKey)&&Equals(value["format"],"dgk")&&
     EntitySets.Hex(value["effectiveOptionsSha256"],64)&&new[]{"synthetic_only","observed_unqualified"}.Contains(value["providerQualification"] as string),"Exact unqualified observed DGK settings snapshot required.");
