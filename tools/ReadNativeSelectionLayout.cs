@@ -39,8 +39,12 @@ internal static class ReadNativeSelectionLayout
             if (!Equals(em[key], fm[key])) throw new InvalidOperationException("Model identity changed: " + key);
         if (!String.Equals(Path.GetFullPath((string)em["path"]), Path.GetFullPath((string)fm["path"]), StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Model path changed.");
-        if (!Equals(fresh["busy"], false) || Json.Serialize(fresh["contextBefore"]) != "[0,0]" || Json.Serialize(fresh["contextAfter"]) != "[0,0]")
-            throw new InvalidOperationException("Requires idle world context with empty selection.");
+        var expectedContext = (object[])expected["contextBefore"];
+        if (expectedContext.Length != 2 || !(expectedContext[0] is int) || (int)expectedContext[0] < 0 || (int)expectedContext[0] > 128 || !Equals(expectedContext[1], 0))
+            throw new InvalidOperationException("Requires a bounded observed selection in world context.");
+        string context = Json.Serialize(expectedContext);
+        if (!Equals(fresh["busy"], false) || Json.Serialize(expected["contextAfter"]) != context || Json.Serialize(fresh["contextBefore"]) != context || Json.Serialize(fresh["contextAfter"]) != context)
+            throw new InvalidOperationException("Observed selection count or world context changed.");
     }
     [STAThread]
     static int Main(string[] args)
@@ -59,6 +63,7 @@ internal static class ReadNativeSelectionLayout
             var issued = DateTimeOffset.Parse((string)expected["timestampUtc"]).UtcDateTime;
             if (DateTime.UtcNow > issued.AddSeconds(300) || issued > DateTime.UtcNow.AddSeconds(5)) throw new InvalidOperationException("Preflight expired.");
             report["assemblySha256"] = Hash(assemblyPath); report["inputSha256"] = Hash(input);
+            report["diagnosticSha256"] = Hash(Assembly.GetExecutingAssembly().Location);
             var assembly = Assembly.LoadFrom(assemblyPath);
             var program = assembly.GetType("PowerShapeBridge.Program", true);
             var config = program.GetMethod("ReadConfig", BindingFlags.Public | BindingFlags.Static).Invoke(null, null);
@@ -89,8 +94,8 @@ internal static class ReadNativeSelectionLayout
                 if (beforeHash != (string)report["workingSha256After"] || Json.Serialize(report["windowsBefore"]) != Json.Serialize(report["windowsAfter"]))
                     throw new InvalidOperationException("Saved bytes or window context changed.");
                 Call(context, "ConfirmDocument");
-                report["state"] = Equals(result["state"], "native_selection_items_read_unqualified") ? "passive_empty_selection_layout_observed" : "passive_layout_observed_reader_rejected";
-                report["scope"] = "Existing one-SOLID document and empty selection only; nonempty selection and DGK export remain unqualified.";
+                report["state"] = Equals(result["state"], "native_selection_items_read_unqualified") ? "passive_selection_layout_observed" : "passive_layout_observed_reader_rejected";
+                report["scope"] = "Existing document and independently observed current selection only; no selection change or DGK export. Native layout qualification remains separate.";
                 exit = 0;
             }
         }
