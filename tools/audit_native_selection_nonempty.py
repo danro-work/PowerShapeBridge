@@ -1,5 +1,6 @@
 """Independent audit of the manually selected single SOLID in the K7 own copy."""
 import hashlib
+import argparse
 import json
 from pathlib import Path
 
@@ -17,8 +18,13 @@ def sha(path):
 
 
 def main():
-    report = read(STAGE / "result.json")
-    preflight = read(STAGE / "preflight.json")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--corrected", action="store_true", help="Audit preserved corrected diagnostic and its fresh preflight.")
+    args = parser.parse_args()
+    result_name = "result-corrected.json" if args.corrected else "result.json"
+    preflight_name = "preflight-corrected.json" if args.corrected else "preflight.json"
+    report = read(STAGE / result_name)
+    preflight = read(STAGE / preflight_name)
     assert preflight["state"] == "active_model_inspected"
     assert preflight["contextBefore"] == preflight["contextAfter"] == [1, 0]
     assert preflight["model"]["name"] == "Working_" + COPY_ID
@@ -55,11 +61,15 @@ def main():
     for path, expected in old["protectedHashes"].items():
         assert sha(Path(path)) == expected, path
         hashes.append({"path": path, "sha256": expected})
-    for name, field in (("preflight.json", "inputSha256"), ("ReadNativeSelectionLayout.exe", "diagnosticSha256")):
+    for name, field in ((preflight_name, "inputSha256"), ("ReadNativeSelectionLayout.exe", "diagnosticSha256")):
         path = STAGE / name
         assert sha(path) == report[field]
         hashes.append({"path": str(path), "sha256": report[field]})
-    hashes.append({"path": str(STAGE / "result.json"), "sha256": sha(STAGE / "result.json")})
+    hashes.append({"path": str(STAGE / result_name), "sha256": sha(STAGE / result_name)})
+    if args.corrected:
+        original = read(STAGE / "result.json")
+        assert original["state"] == "passive_layout_probe_failed" and "InvalidCastException" in original["error"]
+        hashes.append({"path": str(STAGE / "result.json"), "sha256": sha(STAGE / "result.json")})
     result = {"state": "passed", "protectedHashCount": len(old["protectedHashes"]), "hashes": hashes,
               "selectionGetterSucceeded": True, "selectionCount": 1, "selectedEntityKeys": [[40, 5]],
               "scope": "One manually selected SOLID in the K7 own copy; no selection change, geometry edit, save or export. Other types and lifecycle cases remain unqualified."}

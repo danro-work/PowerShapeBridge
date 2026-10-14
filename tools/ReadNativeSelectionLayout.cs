@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -39,7 +40,9 @@ internal static class ReadNativeSelectionLayout
             if (!Equals(em[key], fm[key])) throw new InvalidOperationException("Model identity changed: " + key);
         if (!String.Equals(Path.GetFullPath((string)em["path"]), Path.GetFullPath((string)fm["path"]), StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Model path changed.");
-        var expectedContext = (object[])expected["contextBefore"];
+        var contextList = expected["contextBefore"] as IList;
+        if (contextList == null) throw new InvalidOperationException("Observed context must be an array.");
+        var expectedContext = contextList.Cast<object>().ToArray();
         if (expectedContext.Length != 2 || !(expectedContext[0] is int) || (int)expectedContext[0] < 0 || (int)expectedContext[0] > 128 || !Equals(expectedContext[1], 0))
             throw new InvalidOperationException("Requires a bounded observed selection in world context.");
         string context = Json.Serialize(expectedContext);

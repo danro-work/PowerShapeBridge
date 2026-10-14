@@ -1,7 +1,37 @@
 # К8 — пассивное чтение native selection layout
 
+## Дополнение: непустое выделение проверено
+
+14 октября пользователь вручную выделил единственный SOLID и сообщил
+«выделено». Новый inspect_active_model подтвердил собственную копию К7,
+world context [1,0], имя `1`, native key 40/5. Attach-only diagnostic прочитал
+GetSelectedItems как rank-1 System.Object[] с Int32 composite800000005;
+GetItemData подтвердил тип/ID/имя/уровень0. Strict reader вернул
+`native_selection_items_read_unqualified`; глобальная qualification не повышалась.
+Отдельный audit прошёл: все семь окон, сохранённые bytes и 11 защищённых файлов
+не изменились. Выделение осталось на месте; no selection/save/export/geometry.
+
+Первый probe остановился до чтения selection: входной JSON serializer вернул
+ArrayList, а diagnostic пытался cast в object[]. Исправлен только diagnostic
+Guard на IList; native reader/null refusal не изменялись. Оригинальный
+`work/K8-native-selection-nonempty/result.json` сохранён; исправленный результат
+и новая preflight отдельные. Audit с `--corrected` сохраняет хеш первой ошибки.
+
+Evidence: `work/K8-native-selection-nonempty/result-corrected.json`,
+`preflight-corrected.json`, `independent-audit.json` — passed.
+Это один SOLID/одна копия, не универсальная приёмка selection mutation,
+SURFACE/COMPCURVE, восстановления контекста, экспорта или полного К8–К11.
+
 14 октября 2026. Диагностический блок завершён; квалификация production
 selection/export provider не принята.
+
+Source опубликован отдельным draft [PR47](https://github.com/danro-work/PowerShapeBridge/pull/47),
+head1bbff16edbcd10501eb2779a545a54a76e3dde9e, branchcodex/native-selection-layout,
+basefeat/dgk-native-sdk-wire; 6 feature files, attached. Четыре CI проверены live:
+sdk38607253887/38607243985, baseline38607253899/38607244101 all4 SUCCESS на head1bbff16;
+не перезапускать по observation timeout. Merge/deploy не выполнялись.
+Следующий nonempty read/scoped audit подготовлен, compile/argument refusal/Python
+syntax checks passed; ожидается ответ после ручного выделения пользователем.
 
 ## Проверено в PowerShape 2023
 
