@@ -20,13 +20,14 @@ namespace PowerShapeGeometry {
   }
   public sealed class Mesh {
    public readonly string Header;
+   public readonly ReadOnlyCollection<byte> HeaderBytes;
    public readonly uint Flags;
    public readonly ReadOnlyCollection<Block> Blocks;
    public readonly ReadOnlyCollection<double> BoundsPaired;
    public readonly int VertexCount,TriangleCount;
    public bool MillimetresDeclared {get{return (Flags&2)!=0;}}
    public string LengthUnits {get{return MillimetresDeclared?"mm_declared_by_file_flag":"unknown";}}
-   internal Mesh(string header,uint flags,List<Block> blocks,double[] bounds,int vertices,int triangles){Header=header;Flags=flags;Blocks=blocks.AsReadOnly();BoundsPaired=Array.AsReadOnly(bounds);VertexCount=vertices;TriangleCount=triangles;}
+   internal Mesh(byte[] header,uint flags,List<Block> blocks,double[] bounds,int vertices,int triangles){HeaderBytes=Array.AsReadOnly(header);Header=Encoding.ASCII.GetString(header);Flags=flags;Blocks=blocks.AsReadOnly();BoundsPaired=Array.AsReadOnly(bounds);VertexCount=vertices;TriangleCount=triangles;}
   }
   static void Require(bool ok,string error){if(!ok)throw new InvalidDataException(error);}
   static int Count(uint value,int maximum,string field){Require(value>0&&value<=maximum,"DMT "+field+" count out of supported bounds.");return (int)value;}
@@ -35,7 +36,9 @@ namespace PowerShapeGeometry {
    if(stream==null)throw new ArgumentNullException("stream");Require(stream.CanRead&&stream.CanSeek,"Seekable bounded DMT stream required.");Require(stream.Position==0&&stream.Length>0&&stream.Length<=MaxBytes,"DMT stream size/initial position out of supported bounds.");
    try {
     using(var reader=new BinaryReader(stream,Encoding.ASCII,true)) {
-     var header=new StringBuilder();for(int i=0;i<256;i++){byte b=reader.ReadByte();if(b==0)break;Require(b>=32&&b<=126,"DMT header must contain printable ASCII.");header.Append((char)b);}
+     // Autodesk reads descriptive header bytes up to NUL or 256 bytes. Legacy
+     // shipped COPYCAD files include LF; the header is not a geometry signature.
+     var header=new List<byte>();for(int i=0;i<256;i++){byte b=reader.ReadByte();if(b==0)break;header.Add(b);}
      ushort version=reader.ReadUInt16();Require(version==1000,"Unsupported DMT version.");uint flags=reader.ReadUInt32();Require((flags&~3u)==0,"Unsupported DMT file flags.");bool single=(flags&1)!=0;
      int blockCount=Count(reader.ReadUInt32(),MaxBlocks,"block"),vertexTotal=Count(reader.ReadUInt32(),MaxVertices,"vertex"),triangleTotal=Count(reader.ReadUInt32(),MaxTriangles,"triangle");
      Require((long)blockCount*14<=stream.Length-stream.Position,"Impossible DMT block inventory.");var blocks=new List<Block>(blockCount);int verticesRead=0,trianglesRead=0;var bounds=new[]{double.PositiveInfinity,double.NegativeInfinity,double.PositiveInfinity,double.NegativeInfinity,double.PositiveInfinity,double.NegativeInfinity};
@@ -51,7 +54,7 @@ namespace PowerShapeGeometry {
       for(int index=0;index<indices.Length;index++){uint value=indexBytes==4?reader.ReadUInt32():reader.ReadUInt16();Require(value<(uint)vertices,"DMT triangle index outside block.");indices[index]=(int)value;}
       Require(reader.ReadUInt16()==version,"DMT block trailer version differs.");verticesRead+=vertices;trianglesRead+=triangles;blocks.Add(new Block(blockFlags,points,directions,indices));
      }
-     Require(verticesRead==vertexTotal&&trianglesRead==triangleTotal,"DMT totals differ from blocks.");Require(stream.Position==stream.Length,"Trailing DMT bytes are unsupported.");return new Mesh(header.ToString(),flags,blocks,bounds,verticesRead,trianglesRead);
+     Require(verticesRead==vertexTotal&&trianglesRead==triangleTotal,"DMT totals differ from blocks.");Require(stream.Position==stream.Length,"Trailing DMT bytes are unsupported.");return new Mesh(header.ToArray(),flags,blocks,bounds,verticesRead,trianglesRead);
     }
    }catch(EndOfStreamException error){throw new InvalidDataException("Truncated DMT header/metadata.",error);}
   }

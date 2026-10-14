@@ -16,6 +16,14 @@ PowerShape, очередь, installed runtime и готовые К7-пакеты
 
 Доказательства:evidence/K8-dmt-reader/framework/framework-audit.json,
 evidence/K8-dmt-reader/dmt-reader-tests.trx. Контракт:DMT-READER-CONTRACT.md.
+Полная локальная .NET-регрессия:два запуска дали465/466 без skip; каждый имел
+один UnauthorizedAccessException в старой файловой фикстуре (AdvisoryReport
+File.Replace в sandbox; SavedReopen config File.Move при user-level запуске).
+Отдельная user-level перепроверка этих двух групп прошла10/10 без изменений кода.
+Полный локальный PASS не заявляется. Доказательства:sdk-regression,
+sdk-regression-user,access-recheck под evidence/K8-dmt-reader.
+PR36/6c87ace:baseline push38482332622/PR38482413926 passed; SDK
+38482332733/38482414085 ещё выполнялись при последнем чтении.
 У всех трёх исторических DMT fileFlags0. Надпись header 'in MM' не превращает
 unknown units в подтверждённые mm. Ни world frame, ни стабильные mesh indices,
 ни CAD topology/convention из чтения этих файлов не следуют.

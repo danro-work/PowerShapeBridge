@@ -8,6 +8,8 @@ DmtMeshReader — чистый C# reader mesh-файлов. Он доступе�
 ## Поддерживаемый профиль
 
 Version 1000, little-endian, ASCII header до 256 байтов, file flags 0–3,
+Header является описанием, а не magic signature:LF/CR и прочие bytes не запрещаются.
+Исходные bytes сохраняются в HeaderBytes; Header использует ASCII display decoding.
 block flags 0–1. File bit0 определяет float32/float64 координаты и нормали,
 file bit1 объявляет миллиметры. Block bit0 означает нормали на вершинах.
 Индексы треугольников uint16 при числе вершин блока ≤65535, иначе uint32.
@@ -48,10 +50,14 @@ Reader не отвергает совпавшие вершины, вырожде
 и SHA/size из LFS pointers в tests/PowerShapeMcp.Tests/fixtures/dmt. Они не являются
 снимками текущего установленного PowerShape.
 
-27 .NET cases включают три официальных файла, float/double и normals combinations,
+30 .NET cases включают три официальных файла, legacy LF/raw-byte/256-byte headers,
+float/double и normals combinations,
 порог 65535/65536, malformed metadata/index/nonfinite/trailer и каждое усечение
 549-byte NormalDmt. Framework qualification независимо декодирует все vertices,
-normals и indices Python struct, сверяет ordered SHA и bounds:10 controls/5 refusals.
+normals и indices Python struct, сверяет ordered SHA и bounds:11 controls/5 refusals.
+Пять DMT из установленного PowerShape 2023 также прочитаны и полностью сверены
+независимым декодером; исходные файлы не менялись. Это проверка совместимости
+файлов, а не квалификация нового экспорта из текущей CAD-модели.
 
 [Autodesk Product Help:Units and Tolerances](https://help.autodesk.com/view/PWRS/2023/ENU/?guid=GUID-F0748270-4E08-4646-9B4C-DA03B074023E)
 описывает единицы активной модели, но не доказывает связь с file flag или native raw
