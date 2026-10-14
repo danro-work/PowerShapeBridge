@@ -26,6 +26,17 @@ class CoreConfiguration(unittest.TestCase):
                 with self.subTest(key=key, value=value), self.assertRaises(ValueError):
                     general_core({**self.settings, key: value})
 
+    def test_owned_uniform_scale_flag_requires_boolean_and_owned_dependencies(self):
+        full = {**self.settings, 'entitySetsExperimental': True, 'workingCopiesExperimental': True,
+                'documentBindingsExperimental': True, 'ownedUniformScalePlansExperimental': True}
+        self.assertTrue(general_core(full))
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                general_core({**full, 'ownedUniformScalePlansExperimental': value})
+        for flag in ('entitySetsExperimental', 'workingCopiesExperimental', 'documentBindingsExperimental'):
+            with self.subTest(flag=flag), self.assertRaises(ValueError):
+                general_core({**full, flag: False})
+
     def test_save_flags_require_boolean_and_owned_dependencies(self):
         for key in ('ownedSaveTargetsExperimental', 'ownedSavesExperimental'):
             for value in (True, 'true', 1, None):

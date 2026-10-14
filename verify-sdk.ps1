@@ -25,6 +25,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'SDK tests failed.' }
 } finally { $env:PSBRIDGE_TEST_EVIDENCE = $taskPreviousTransportEvidence }
 & (Join-Path $taskRoot 'verify-rotation-samples.ps1') -StageDirectory ($NativeStageDirectory+'-sample-predicate') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-sample-predicate')
+& (Join-Path $taskRoot 'verify-uniform-scale-samples.ps1') -StageDirectory ($NativeStageDirectory+'-uniform-scale-predicate') -EvidenceDirectory (Join-Path $taskEvidence 'uniform-scale-predicate')
 & (Join-Path $taskRoot 'verify-dmt-reader.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-dmt-reader') -EvidenceDirectory (Join-Path $taskEvidence 'dmt-reader')
 & $PythonPath (Join-Path $taskRoot 'src\audit_sdk_transport_faults.py') --evidence $taskTransportEvidence --output (Join-Path $taskEvidence 'transport-fault-audit.json') --exercise-rejections
 if ($LASTEXITCODE -ne 0) { throw 'SDK transport fault evidence audit failed.' }
@@ -39,6 +40,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Independent recovery inspection failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'Independent prepared parity failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_rotation_plan_stdio.py') --dotnet $DotnetPath --host $taskHost --evidence (Join-Path $taskEvidence 'rotation-plans')
 if ($LASTEXITCODE -ne 0) { throw 'Independent passive rotation plan STDIO failed.' }
+& $PythonPath (Join-Path $taskRoot 'src\test_sdk_uniform_scale_stdio.py') --dotnet $DotnetPath --host $taskHost --evidence (Join-Path $taskEvidence 'uniform-scale-plans')
+if ($LASTEXITCODE -ne 0) { throw 'Independent uniform scale STDIO failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\test_sdk_execution.py') --dotnet $DotnetPath --host $taskHost --evidence $taskEvidence
 if ($LASTEXITCODE -ne 0) { throw 'Independent execution facade parity failed.' }
 & $PythonPath -m unittest discover -s (Join-Path $taskRoot 'src') -p 'test_save_target_fixture_oracle.py'
@@ -75,16 +78,18 @@ if($LASTEXITCODE -ne 0){throw 'SDK/native checkpoint recovery STDIO qualificatio
 & (Join-Path $taskRoot 'verify-checkpoint-recovered-open.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -StageDirectory ($NativeStageDirectory+'-recovered-open') -EvidenceDirectory (Join-Path $taskEvidence 'checkpoint-recovered-open')
 $taskFixture = Join-Path $taskRoot ('work\K2-inspector-'+[guid]::NewGuid().ToString('N'))
 & (Join-Path $taskRoot 'verify-owned-rotation-plans.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-owned-rotation') -EvidenceDirectory (Join-Path $taskEvidence 'owned-rotation-plans')
+& (Join-Path $taskRoot 'verify-owned-uniform-scale-plans.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-owned-scale') -EvidenceDirectory (Join-Path $taskEvidence 'owned-uniform-scale-plans')
 & $DotnetPath run --no-restore --configuration Release --project $taskNativeProject -- --owned-rotation-packets ($NativeStageDirectory+'-owned-rotation') (Join-Path $taskEvidence 'owned-rotation-native-sdk.json')
 if($LASTEXITCODE -ne 0){throw 'Native owned rotation packet SDK proof compatibility failed.'}
 & (Join-Path $taskRoot 'verify-owned-rotation-wire.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-rotation-wire') -EvidenceDirectory (Join-Path $taskEvidence 'owned-rotation-wire')
+& (Join-Path $taskRoot 'verify-owned-uniform-scale-wire.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-scale-wire') -EvidenceDirectory (Join-Path $taskEvidence 'owned-scale-wire')
 & (Join-Path $taskRoot 'verify-owned-rotation-execution.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-rotation-execution') -EvidenceDirectory (Join-Path $taskEvidence 'owned-rotation-execution')
 & (Join-Path $taskRoot 'verify-rotation-measurements.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-rotation-measurements') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-measurements')
 & (Join-Path $taskRoot 'verify-rotation-measurement-records.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-measurement-records') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-measurement-records')
 & (Join-Path $taskRoot 'verify-rotation-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-rotation-verification') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-verification')
 & (Join-Path $taskRoot 'verify-geometry-export-targets.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-targets') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-targets')
-& (Join-Path $taskRoot 'verify-geometry-export-executor.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-geometry-export-executor') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-executor')
-& (Join-Path $taskRoot 'verify-geometry-export-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-geometry-export-verification') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-verification')
+& (Join-Path $taskRoot 'verify-geometry-export-executor.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-executor') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-executor')
+& (Join-Path $taskRoot 'verify-geometry-export-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-verifier') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-verification')
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
 $taskInspectorConfig = Join-Path $taskFixture 'inspector.json'
@@ -128,17 +133,22 @@ $taskFiles += @('src\CheckpointRecoveryWireFixture.cs','src\test_sdk_checkpoint_
 $taskFiles += @('src\OwnedCopies.cs','src\Bridge.cs','src\test_sdk_checkpoint_filesystem_faults.py','src\audit_checkpoint_filesystem_stdio.py')
 $taskFiles += @('src\test_sdk_rotation_plan_stdio.py','config\general-rotation-plans.json')
 $taskFiles += @('src\OwnedRotationPlans.cs','src\OwnedRotationPlanTests.cs','src\audit_owned_rotation_plans.py','verify-owned-rotation-plans.ps1')
+$taskFiles += @('src\OwnedUniformScalePlans.cs','src\OwnedUniformScalePlanTests.cs','src\audit_owned_uniform_scale_plans.py','verify-owned-uniform-scale-plans.ps1')
 $taskFiles += @('tools\NativeFixtureCheck\OwnedRotationCheck.cs','config\general-owned-rotation-plans.json')
 $taskFiles += @('src\OwnedRotationWireFixture.cs','src\test_sdk_owned_rotation_wire_stdio.py','src\audit_owned_rotation_wire_stdio.py','verify-owned-rotation-wire.ps1')
+$taskFiles += @('src\OwnedUniformScaleWireFixture.cs','src\test_sdk_owned_uniform_scale_wire_stdio.py','src\audit_owned_uniform_scale_wire_stdio.py','verify-owned-uniform-scale-wire.ps1','config\general-owned-uniform-scale-plans.json','src\PowerShapeMcp.Host\OwnedUniformScaleStore.cs','src\PowerShapeMcp.Host\OwnedUniformScaleTools.cs','tests\PowerShapeMcp.Tests\OwnedUniformScaleFixture.cs','tests\PowerShapeMcp.Tests\OwnedUniformScaleStoreTests.cs','tests\PowerShapeMcp.Tests\OwnedUniformScaleRoutesTests.cs')
 $taskFiles += @('src\OwnedRotationExecution.cs','src\OwnedRotationExecutionTests.cs','src\audit_owned_rotation_execution.py','verify-owned-rotation-execution.ps1')
 $taskFiles += @('src\RotationSampleVerifier.cs','tools\VerifyRotationSamples.cs','verify-rotation-samples.ps1')
+$taskFiles += @('src\UniformScaleSampleVerifier.cs','tools\VerifyUniformScaleSamples.cs','verify-uniform-scale-samples.ps1','tests\PowerShapeMcp.Tests\UniformScaleSampleVerifierTests.cs')
+$taskFiles += @('src\PowerShapeMcp.Host\UniformScalePlanStore.cs','tests\PowerShapeMcp.Tests\UniformScalePlanStoreTests.cs')
+$taskFiles += @('src\PowerShapeMcp.Host\UniformScalePlanTools.cs','tests\PowerShapeMcp.Tests\UniformScalePlanRoutesTests.cs','src\test_sdk_uniform_scale_stdio.py','config\general-uniform-scale-plans.json')
 $taskFiles += @('src\RotationMeasurements.cs','src\RotationMeasurementTests.cs','src\audit_rotation_measurements.py','verify-rotation-measurements.ps1')
 $taskFiles += @('src\RotationMeasurementRecords.cs','src\RotationMeasurementRecordTests.cs','src\audit_rotation_measurement_records.py','verify-rotation-measurement-records.ps1')
 $taskFiles += @('src\OwnedRotationVerification.cs','src\OwnedRotationVerificationTests.cs','src\audit_rotation_verification.py','verify-rotation-verification.ps1')
 $taskFiles += @('src\OwnedGeometryExportTargets.cs','src\OwnedGeometryExportTargetTests.cs','src\audit_geometry_export_targets.py','verify-geometry-export-targets.ps1')
+$taskFiles += @('src\DmtMeshReader.cs','tools\ReadDmtMesh.cs','src\qualify_dmt_reader.py','verify-dmt-reader.ps1','tests\PowerShapeMcp.Tests\DmtMeshReaderTests.cs','tests\PowerShapeMcp.Tests\fixtures\dmt\source-manifest.jsonl','tests\PowerShapeMcp.Tests\fixtures\dmt\NormalDmt.dmt','tests\PowerShapeMcp.Tests\fixtures\dmt\TwoBlocks.dmt','tests\PowerShapeMcp.Tests\fixtures\dmt\smallModel.dmt')
 $taskFiles += @('src\OwnedGeometryExport.cs','src\OwnedGeometryExportTests.cs','src\audit_geometry_export_executor.py','verify-geometry-export-executor.ps1')
 $taskFiles += @('src\OwnedGeometryExportVerification.cs','src\OwnedGeometryExportVerificationTests.cs','src\audit_geometry_export_verification.py','verify-geometry-export-verification.ps1')
-$taskFiles += @('src\DmtMeshReader.cs','tools\ReadDmtMesh.cs','src\qualify_dmt_reader.py','verify-dmt-reader.ps1','tests\PowerShapeMcp.Tests\DmtMeshReaderTests.cs','tests\PowerShapeMcp.Tests\fixtures\dmt\source-manifest.jsonl','tests\PowerShapeMcp.Tests\fixtures\dmt\NormalDmt.dmt','tests\PowerShapeMcp.Tests\fixtures\dmt\TwoBlocks.dmt','tests\PowerShapeMcp.Tests\fixtures\dmt\smallModel.dmt')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'
