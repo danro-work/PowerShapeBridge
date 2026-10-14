@@ -22,6 +22,9 @@ def general_core(settings):
     reopens = settings.get('ownedSavedReopenExperimental', False)
     recovery = settings.get('checkpointRecoveryExperimental', False)
     owned_rotations = settings.get('ownedRotationPlansExperimental', False)
+    owned_scales = settings.get('ownedUniformScalePlansExperimental', False)
+    if type(owned_scales) is not bool or owned_scales and (profile != 'general-v1' or copies is not True or bindings is not True or experimental is not True):
+        raise ValueError('Owned uniform scale preparation requires general sets, copies and bindings')
     if type(owned_rotations) is not bool or owned_rotations and (profile != 'general-v1' or copies is not True or bindings is not True or experimental is not True):
         raise ValueError('Owned rotation preparation requires general sets, copies and bindings')
     if type(recovery) is not bool or recovery and (profile != 'general-v1' or copies is not True):

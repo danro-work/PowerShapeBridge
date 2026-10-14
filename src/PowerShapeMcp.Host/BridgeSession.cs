@@ -23,6 +23,8 @@ public sealed class BridgeSession : IDisposable
     public CheckpointRecoveryStore CheckpointRecoveries { get; }
     public RotationPlanStore RotationPlans { get; }
     public OwnedRotationStore OwnedRotations { get; }
+    internal UniformScalePlanStore ScalePlans { get; }
+    internal OwnedUniformScaleStore OwnedScales { get; }
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     public bool RecoveryInspectionEnabled { get; }
@@ -45,6 +47,8 @@ public sealed class BridgeSession : IDisposable
         CheckpointRecoveries=new(options.BridgeRoot,clock,utcClock);
         RotationPlans=new(options.BridgeRoot,Candidates,clock,utcClock);
         OwnedRotations=new(options.BridgeRoot,RotationPlans,Bindings,clock,utcClock);
+        ScalePlans=new(options.BridgeRoot,Candidates,clock,utcClock);
+        OwnedScales=new(options.BridgeRoot,ScalePlans,Bindings,clock,utcClock);
         var config=Options.ReadConfiguration();
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
         RecoveryInspectionEnabled=config.TryGetProperty("recoveryInspectionExperimental",out var recoveryFlag)&&recoveryFlag.ValueKind==System.Text.Json.JsonValueKind.True;
@@ -55,6 +59,8 @@ public sealed class BridgeSession : IDisposable
             execution.Add("activate_document");
             foreach(var (flagName,names) in new[]{
                 ("rotationPlansExperimental",new[]{"prepare_rotation_plan"}),
+                ("uniformScalePlansExperimental",new[]{"prepare_uniform_scale_plan"}),
+                ("ownedUniformScalePlansExperimental",new[]{"prepare_owned_uniform_scale"}),
                 ("ownedRotationPlansExperimental",new[]{"prepare_owned_rotation"}),
                 ("entitySetsExperimental",new[]{"prepare_entity_set","validate_entity_set"}),
                 ("operationPlansExperimental",new[]{"prepare_operation_plan","inspect_operation_plan"}),
@@ -88,6 +94,8 @@ public sealed class BridgeSession : IDisposable
         Documents.Clear();References.Clear();Candidates.Clear();Bindings.Clear();
         RotationPlans.Clear();
         OwnedRotations.Clear();
+        ScalePlans.Clear();
+        OwnedScales.Clear();
         SaveTargets.Clear();
         Reopens.Clear();
         if(consumeOwned){Plans.Clear();Owned.Clear();}
@@ -124,6 +132,8 @@ public sealed class BridgeSession : IDisposable
         };
         if(config.TryGetProperty("recoveryResolutionExperimental",out _))result["recoveryResolution"]=RecoveryResolutionEnabled?"experimental_immutable_independent_verification_decisions":"disabled";
         if(config.TryGetProperty("checkpointRecoveryExperimental",out _))result["checkpointRecovery"]=PreparedEnabled("prepare_checkpoint_recovery")?"experimental_new_owned_saved_byte_copy_no_open":"disabled";
+        if(config.TryGetProperty("uniformScalePlansExperimental",out _))result["uniformScalePlans"]=PreparedEnabled("prepare_uniform_scale_plan")?"experimental_local_plan_only_execution_disabled":"disabled";
+        if(config.TryGetProperty("ownedUniformScalePlansExperimental",out _))result["ownedUniformScalePlans"]=PreparedEnabled("prepare_owned_uniform_scale")?"experimental_passive_owned_guard_execution_disabled":"disabled";
         foreach (var (file, key) in new[] { ("deployment-current.json", "installedDeployment"), ("panel-status.json", "lastPanelReport"), ("worker-stage.json", "lastWorkerStage") })
         {
             if (!File.Exists(FileArtifacts.FixedPath(Options.BridgeRoot, "reports", file))) continue;
@@ -132,5 +142,5 @@ public sealed class BridgeSession : IDisposable
         }
         return result;
     }
-    public void Dispose(){OwnedRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
+    public void Dispose(){OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
 }

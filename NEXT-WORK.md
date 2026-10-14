@@ -1,5 +1,12 @@
 # Дальнейшая работа
 
+К8 passive scale source SDK0.39.4/native0.34.1:local and owned preparation tools,
+strict config/parameters/session leases, dimensioned mathematical predicate and
+actual Framework+STDIO ownership/receipt/file guards. No scale execution/live CAD
+acceptance. STATUS-K8-OWNED-SCALE-SDK-WIRE.md. Complete K8–K11, native recipe/
+remapping/geometry/saved-result/fault qualification remain required. Installed
+runtime/READY K7 unchanged;live K7 approval pending. Selection module excluded.
+
 К8 internal owned geometry export/external verification:26 executor cases/595
 hashes and21 verifier cases/734 hashes passed locally. Claims/export fences,
 per-step records, fixed DMT file identity/grammar/SHA and fresh receipt/context

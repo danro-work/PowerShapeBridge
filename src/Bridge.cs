@@ -45,6 +45,7 @@ namespace PowerShapeBridge
         public bool ownedSavedReopenExperimental { get; set; }
         public bool checkpointRecoveryExperimental { get; set; }
         public bool ownedRotationPlansExperimental { get; set; }
+        public bool ownedUniformScalePlansExperimental { get; set; }
         public bool IsGeneralCore { get { return coreProfile == "general-v1"; } }
         public bool CoreTransportEnabled { get { return IsGeneralCore || (mcpMutationsPanel && recipeOperationsPanel); } }
         public string qualificationOperationId { get; set; }
@@ -69,6 +70,7 @@ namespace PowerShapeBridge
             if(ownedSavedReopenExperimental&&(!IsGeneralCore||!ownedSavesExperimental||!workingCopyOpenExperimental))throw new ArgumentException("Saved reopen requires owned SaveAs and owned copy open.");
             if(checkpointRecoveryExperimental&&(!IsGeneralCore||!workingCopiesExperimental))throw new ArgumentException("Checkpoint recovery requires general owned working copies.");
             if(ownedRotationPlansExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned rotation preparation requires general sets, copies and bindings.");
+            if(ownedUniformScalePlansExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned uniform scale preparation requires general sets, copies and bindings.");
             if (IsGeneralCore) {
                 if (captureViewport || translationTestPanel || checkpointTestPanel || parameterizedTranslationPanel || diskVerificationPanel || mcpMutationsPanel || recipeOperationsPanel ||
                     !string.IsNullOrEmpty(expectedProject) || !string.IsNullOrEmpty(sourceStep) || !string.IsNullOrEmpty(protectedProject) || !string.IsNullOrEmpty(qualificationOperationId) ||
@@ -87,12 +89,23 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.34.0-dev";
+        public const string ReleaseVersion = "0.34.1-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
         {
-            Config c = Json.Deserialize<Config>(File.ReadAllText(Path.Combine(Root, "bridge.config.json"), Encoding.UTF8));
+            return ParseConfig(File.ReadAllText(Path.Combine(Root, "bridge.config.json"), Encoding.UTF8));
+        }
+        internal static Config ParseConfig(string text)
+        {
+            var raw=Json.Deserialize<Dictionary<string,object>>(text);object enabled;
+            if(raw!=null&&raw.TryGetValue("ownedUniformScalePlansExperimental",out enabled)) {
+                if(!(enabled is bool))throw new ArgumentException("Owned uniform scale flag must be JSON boolean.");
+                if((bool)enabled)foreach(string flag in new[]{"entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {
+                    object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Owned uniform scale dependencies must be true JSON booleans.");
+                }
+            }
+            Config c = Json.Deserialize<Config>(text);
             if (c == null) throw new ArgumentException("Empty configuration.");
             c.Validate(); return c;
         }
@@ -120,13 +133,13 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--checkpoint-recovered-open-test") {
                 try{CheckpointRecoveredOpenTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.Message);return 3;}
             }
-            if(args.Length==1&&args[0]=="--geometry-export-executor-test") {
-                Console.OutputEncoding=new UTF8Encoding(false);
-                try{OwnedGeometryExportTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
-            }
             if(args.Length==1&&args[0]=="--geometry-export-verification-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{OwnedGeometryExportVerificationTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--geometry-export-executor-test") {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{OwnedGeometryExportTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
             if(args.Length==1&&args[0]=="--geometry-export-target-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
@@ -134,6 +147,9 @@ namespace PowerShapeBridge
             }
             if(args.Length==1&&args[0]=="--owned-rotation-plan-test") {
                 try{OwnedRotationPlanTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--owned-uniform-scale-plan-test") {
+                try{OwnedUniformScalePlanTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
             if(args.Length==1&&args[0]=="--owned-rotation-execution-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
@@ -154,6 +170,10 @@ namespace PowerShapeBridge
             if(args.Length==2&&new[]{"--rotation-wire-seed","--rotation-wire-request"}.Contains(args[0])) {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{Console.WriteLine(Json.Serialize(args[0]=="--rotation-wire-seed"?OwnedRotationWireFixture.Seed(args[1]):OwnedRotationWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==2&&new[]{"--uniform-scale-wire-seed","--uniform-scale-wire-request"}.Contains(args[0])) {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{Console.WriteLine(Json.Serialize(args[0]=="--uniform-scale-wire-seed"?OwnedUniformScaleWireFixture.Seed(args[1]):OwnedUniformScaleWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
             if(args.Length==2&&new[]{"--checkpoint-wire-seed","--checkpoint-wire-request"}.Contains(args[0])) {
                 try{Console.WriteLine(Json.Serialize(args[0]=="--checkpoint-wire-seed"?CheckpointRecoveryWireFixture.Seed(args[1]):CheckpointRecoveryWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
