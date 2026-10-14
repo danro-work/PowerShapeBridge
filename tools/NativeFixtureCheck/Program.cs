@@ -3,6 +3,7 @@ using PowerShapeMcp;
 
 if(args.Length==3&&args[0]=="--checkpoint-recovered-open")return CheckpointOpenCheck.Run(args[1],args[2]);
 if(args.Length==3&&args[0]=="--owned-rotation-packets")return OwnedRotationCheck.Run(args[1],args[2]);
+if(args.Length==3&&args[0]=="--owned-dgk-targets")return DgkTargetCheck.Run(args[1],args[2]);
 if(args.Length==4&&args[0]=="--recovery-inspect")
 {
     var recoveryRoot=Path.GetFullPath(args[1]);var recoveryOutput=Path.GetFullPath(args[3]);

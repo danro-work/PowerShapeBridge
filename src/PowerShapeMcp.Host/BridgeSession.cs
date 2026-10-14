@@ -25,6 +25,7 @@ public sealed class BridgeSession : IDisposable
     public OwnedRotationStore OwnedRotations { get; }
     internal UniformScalePlanStore ScalePlans { get; }
     internal OwnedUniformScaleStore OwnedScales { get; }
+    internal OwnedDgkTargetStore DgkTargets { get; }
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     public bool RecoveryInspectionEnabled { get; }
@@ -49,6 +50,7 @@ public sealed class BridgeSession : IDisposable
         OwnedRotations=new(options.BridgeRoot,RotationPlans,Bindings,clock,utcClock);
         ScalePlans=new(options.BridgeRoot,Candidates,clock,utcClock);
         OwnedScales=new(options.BridgeRoot,ScalePlans,Bindings,clock,utcClock);
+        DgkTargets=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         var config=Options.ReadConfiguration();
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
         RecoveryInspectionEnabled=config.TryGetProperty("recoveryInspectionExperimental",out var recoveryFlag)&&recoveryFlag.ValueKind==System.Text.Json.JsonValueKind.True;
@@ -61,6 +63,7 @@ public sealed class BridgeSession : IDisposable
                 ("rotationPlansExperimental",new[]{"prepare_rotation_plan"}),
                 ("uniformScalePlansExperimental",new[]{"prepare_uniform_scale_plan"}),
                 ("ownedUniformScalePlansExperimental",new[]{"prepare_owned_uniform_scale"}),
+                ("ownedDgkTargetsExperimental",new[]{"prepare_owned_dgk_export"}),
                 ("ownedRotationPlansExperimental",new[]{"prepare_owned_rotation"}),
                 ("entitySetsExperimental",new[]{"prepare_entity_set","validate_entity_set"}),
                 ("operationPlansExperimental",new[]{"prepare_operation_plan","inspect_operation_plan"}),
@@ -96,6 +99,7 @@ public sealed class BridgeSession : IDisposable
         OwnedRotations.Clear();
         ScalePlans.Clear();
         OwnedScales.Clear();
+        DgkTargets.Clear();
         SaveTargets.Clear();
         Reopens.Clear();
         if(consumeOwned){Plans.Clear();Owned.Clear();}
@@ -142,5 +146,5 @@ public sealed class BridgeSession : IDisposable
         }
         return result;
     }
-    public void Dispose(){OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
+    public void Dispose(){DgkTargets.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
 }
