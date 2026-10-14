@@ -90,6 +90,7 @@ if($LASTEXITCODE -ne 0){throw 'Native owned rotation packet SDK proof compatibil
 & (Join-Path $taskRoot 'verify-geometry-export-targets.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-targets') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-targets')
 & (Join-Path $taskRoot 'verify-geometry-export-executor.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-executor') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-executor')
 & (Join-Path $taskRoot 'verify-geometry-export-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-verifier') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-verification')
+& (Join-Path $taskRoot 'verify-native-selection-reading.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-native-selection') -EvidenceDirectory (Join-Path $taskEvidence 'native-selection-reading')
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
 $taskInspectorConfig = Join-Path $taskFixture 'inspector.json'
@@ -149,6 +150,7 @@ $taskFiles += @('src\OwnedGeometryExportTargets.cs','src\OwnedGeometryExportTarg
 $taskFiles += @('src\DmtMeshReader.cs','tools\ReadDmtMesh.cs','src\qualify_dmt_reader.py','verify-dmt-reader.ps1','tests\PowerShapeMcp.Tests\DmtMeshReaderTests.cs','tests\PowerShapeMcp.Tests\fixtures\dmt\source-manifest.jsonl','tests\PowerShapeMcp.Tests\fixtures\dmt\NormalDmt.dmt','tests\PowerShapeMcp.Tests\fixtures\dmt\TwoBlocks.dmt','tests\PowerShapeMcp.Tests\fixtures\dmt\smallModel.dmt')
 $taskFiles += @('src\OwnedGeometryExport.cs','src\OwnedGeometryExportTests.cs','src\audit_geometry_export_executor.py','verify-geometry-export-executor.ps1')
 $taskFiles += @('src\OwnedGeometryExportVerification.cs','src\OwnedGeometryExportVerificationTests.cs','src\audit_geometry_export_verification.py','verify-geometry-export-verification.ps1')
+$taskFiles += @('src\NativeSelectionReading.cs','src\NativeSelectionReadingTests.cs','src\audit_native_selection_reading.py','verify-native-selection-reading.ps1','tools\ReadPowerShapeExportMetadata.cs')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'
