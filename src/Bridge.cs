@@ -120,6 +120,14 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--checkpoint-recovered-open-test") {
                 try{CheckpointRecoveredOpenTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.Message);return 3;}
             }
+            if(args.Length==1&&args[0]=="--geometry-export-executor-test") {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{OwnedGeometryExportTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--geometry-export-verification-test") {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{OwnedGeometryExportVerificationTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
             if(args.Length==1&&args[0]=="--geometry-export-target-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{OwnedGeometryExportTargetTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
@@ -153,7 +161,7 @@ namespace PowerShapeBridge
             if (args.Length == 1 && args[0] == "--self-test")
             {
                 try { return SelfTests.Run(); }
-                catch (Exception ex) { Console.Error.WriteLine(ex.Message); return 3; }
+                catch (Exception ex) { Console.Error.WriteLine(ex.ToString()); return 3; }
             }
             if (args.Length == 1 && args[0] == "--translation-test")
             {

@@ -57,7 +57,7 @@ namespace PowerShapeBridge {
      var axis=OwnedRotationPlans.Axis((Dictionary<string,object>)d.Plan["parameters"]);int angle=Program.StrictInt(((Dictionary<string,object>)d.Plan["parameters"])["angleDegrees"]);
      sourceProof=new Dictionary<string,object>{{"requestId",d.Binding["inspectionRequestId"]},{"sha256",d.Binding["inspectionSha256"]}};
      using(var lease=OwnedCopies.Hold(root,(string)packet["copyId"],(string)packet["ownershipSha256"])) {
-      Match(packet,d,lease);fence=OwnedTranslation.FencePath(root,(string)packet["copyId"]);string claim=Path.Combine(root,"rotationplans",(string)packet["rotationPlanId"]+".execution-once.json");OwnedCopies.NoReparse(claim);
+      OwnedGeometryExportTargets.NoExportFence(root,(string)packet["copyId"]);Match(packet,d,lease);fence=OwnedTranslation.FencePath(root,(string)packet["copyId"]);string claim=Path.Combine(root,"rotationplans",(string)packet["rotationPlanId"]+".execution-once.json");OwnedCopies.NoReparse(claim);
       Require(!File.Exists(fence)&&!File.Exists(claim),"Rotation copy fenced or plan already claimed; no replay.");d.Check(lease,context,result);
       var targets=d.Keys.Select(key=>{int composite=context.Composite(key[0],key[1]);var bounds=context.Bounds(composite);Box(bounds);return new Dictionary<string,object>{{"entityKey",key},{"compositeId",composite},{"boundsBeforeWorldRawPaired",bounds}};}).ToArray();
       Require(targets.Select(target=>target["compositeId"]).Distinct().Count()==targets.Length,"Aliased composite targets forbidden.");var windows=context.Windows();var saved=WorkingCopyOpen.SavedHashes(windows);
