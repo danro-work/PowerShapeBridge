@@ -17,7 +17,7 @@ namespace PowerShapeBridge {
    Dictionary<string,object> Observation();
    void ConfirmDocument();
   }
-  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,NativeSelectionReading.IContext {
+  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,NativeSelectionReading.IContext,NativeLevelReading.IContext {
    object application,document;
    internal ComContext(Config config) {
     try {application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("No active model document.");document=ps.ActiveDocument;ConfirmDocument();}
@@ -27,6 +27,9 @@ namespace PowerShapeBridge {
    public Dictionary<string,object> Observation(){return Probe.ReadInContext(application,document);}
    public object ModelItems(){ConfirmDocument();dynamic doc=document;return doc.GetModelItems();}
    public object SelectedItems(){ConfirmDocument();dynamic doc=document;return doc.GetSelectedItems();}
+   public object LevelFields(){ConfirmDocument();dynamic ps=application;object[] substitutions=Enumerable.Range(0,1000).Select(number=>(object)number.ToString(CultureInfo.InvariantCulture)).ToArray();return new object[]{ps.EvaluateArray("LEVEL[*].NAME",1000,substitutions),ps.EvaluateArray("LEVEL[*].USED",1000,substitutions),ps.EvaluateArray("LEVEL[*].ACTIVE",1000,substitutions)};}
+   public object LevelFilters(){ConfirmDocument();dynamic ps=application;return new object[]{ps.Evaluate("LEVEL.FILTERED.USED"),ps.Evaluate("LEVEL.FILTERED.NAMED"),ps.Evaluate("LEVEL.FILTERED.ON")};}
+   public object LevelSample(int number){if(number<0||number>999)throw new ArgumentException("Native level number outside range.");ConfirmDocument();dynamic ps=application;string prefix="LEVEL["+number.ToString(CultureInfo.InvariantCulture)+"]";return new object[]{ps.Evaluate(prefix+".NAME"),ps.Evaluate(prefix+".USED"),ps.Evaluate(prefix+".ACTIVE")};}
    public object ItemData(object composites){ConfirmDocument();dynamic doc=document;object types=null,ids=null,names=null,descriptions=null,levels=null;doc.GetItemData(composites,out types,out ids,out names,out descriptions,out levels);return new object[]{types,ids,names,levels};}
    public int Composite(int type,int nativeId) {
     ConfirmDocument();dynamic doc=document;object[] items=Program.ArrayValues((object)doc.GetModelItems());object types=null,ids=null,names=null,descriptions=null,levels=null;doc.GetItemData(items,out types,out ids,out names,out descriptions,out levels);var ts=Program.ArrayValues(types);var ns=Program.ArrayValues(ids);if(ts.Length!=items.Length||ns.Length!=items.Length)throw new InvalidOperationException("Incomplete direct item mapping.");var matched=Enumerable.Range(0,items.Length).Where(i=>Program.StrictInt(ts[i])==type&&Program.StrictInt(ns[i])==nativeId).ToArray();if(matched.Length!=1)throw new InvalidOperationException("Direct item identity absent/ambiguous.");return Program.StrictInt(items[matched[0]]);

@@ -101,6 +101,7 @@ if($LASTEXITCODE -ne 0){throw 'Native DGK target SDK compatibility failed.'}
 & (Join-Path $taskRoot 'verify-geometry-export-executor.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-executor') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-executor')
 & (Join-Path $taskRoot 'verify-geometry-export-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-verifier') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-verification')
 & (Join-Path $taskRoot 'verify-native-selection-reading.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-native-selection') -EvidenceDirectory (Join-Path $taskEvidence 'native-selection-reading')
+& (Join-Path $taskRoot 'verify-native-levels-reading.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-native-levels') -EvidenceDirectory (Join-Path $taskEvidence 'native-levels-reading')
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
 $taskInspectorConfig = Join-Path $taskFixture 'inspector.json'
@@ -161,6 +162,7 @@ $taskFiles += @('src\DmtMeshReader.cs','tools\ReadDmtMesh.cs','src\qualify_dmt_r
 $taskFiles += @('src\OwnedGeometryExport.cs','src\OwnedGeometryExportTests.cs','src\audit_geometry_export_executor.py','verify-geometry-export-executor.ps1')
 $taskFiles += @('src\OwnedGeometryExportVerification.cs','src\OwnedGeometryExportVerificationTests.cs','src\audit_geometry_export_verification.py','verify-geometry-export-verification.ps1')
 $taskFiles += @('src\NativeSelectionReading.cs','src\NativeSelectionReadingTests.cs','src\audit_native_selection_reading.py','verify-native-selection-reading.ps1','tools\ReadPowerShapeExportMetadata.cs')
+$taskFiles += @('src\NativeLevelReading.cs','src\NativeLevelReadingTests.cs','src\audit_native_levels_reading.py','verify-native-levels-reading.ps1','tools\ReadNativeLevelLayout.cs','tools\audit_native_levels_read.py')
 $taskFiles += @('src\DgkBundleVerifier.cs','src\DgkBundleFiles.cs','src\DgkBundleFilesTests.cs','tools\audit_dgk_bundle.py')
 $taskFiles += @('src\OwnedDgkTargets.cs','src\OwnedDgkTargetTests.cs','src\audit_owned_dgk_targets.py','verify-owned-dgk-targets.ps1')
 $taskFiles += @('src\OwnedDgkExport.cs','src\OwnedDgkExportTests.cs','src\audit_owned_dgk_export.py','verify-owned-dgk-export.ps1')

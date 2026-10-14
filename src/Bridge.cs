@@ -145,6 +145,9 @@ namespace PowerShapeBridge
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{NativeSelectionReadingTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
+            if(args.Length==1&&args[0]=="--native-levels-reading-test") {
+                try{NativeLevelReadingTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
             if(args.Length==1&&args[0]=="--geometry-export-verification-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{OwnedGeometryExportVerificationTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
