@@ -1,5 +1,11 @@
 # PowerShape Bridge — состояние для продолжения
 
+К8 passive native selection read:strict composite/item tuple decoder and
+GetModelItems/GetSelectedItems/GetItemData wrappers,21 fake cases and independent
+4 controls/17 refusals passed. Native layout is unqualified;no public tool/queue
+route/CAD operation. STATUS-K8-NATIVE-SELECTION-READING.md. Separate subsequent
+live getter qualification and full K8–K11 remain required;K7 approval pending.
+
 К8 passive scale source SDK0.39.4/native0.34.1:local and owned preparation tools,
 strict config/parameters/session leases, dimensioned mathematical predicate and
 actual Framework+STDIO ownership/receipt/file guards. No scale execution/live CAD
