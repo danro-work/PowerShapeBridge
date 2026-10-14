@@ -139,12 +139,14 @@ namespace PowerShapeBridge {
      Recheck();
     }catch{Dispose();throw;}
    }
-   internal void Recheck() {
+   internal void RecheckDependencies() {
     rootPin.Recheck();parentPin.Recheck();folderPin.Recheck();bundlePin.Recheck();Copy.Recheck();
     Require(OwnedCopies.Digest(workingPin)==(string)Plan["workingSha256"],"Pinned DGK working bytes changed.");
     EntitySets.CheckObserved(Source.Expected,Source.Expected,Source.Keys,Source.Expires,DateTime.UtcNow);
     Require(EntitySets.Canonical(OwnedGeometryExportTargets.Fence(root,Source.Binding,Source.Expected,proofs))==EntitySets.Canonical(Plan["fenceObservation"]),"DGK copy fence changed.");
-    OwnedGeometryExportTargets.NoExportFence(root,(string)Plan["copyId"]);EmptyDirectory((string)Plan["bundleDirectory"]);
+   }
+   internal void Recheck() {
+    RecheckDependencies();OwnedGeometryExportTargets.NoExportFence(root,(string)Plan["copyId"]);EmptyDirectory((string)Plan["bundleDirectory"]);
     string claim=Path.Combine(Folder(root,id),"export-once.json");OwnedCopies.NoReparse(claim);Require(!File.Exists(claim)&&!Directory.Exists(claim),"DGK export already claimed; replay forbidden.");
    }
    public void Dispose(){if(workingPin!=null)workingPin.Dispose();if(Copy!=null)Copy.Dispose();proofs.Dispose();if(bundlePin!=null)bundlePin.Dispose();if(folderPin!=null)folderPin.Dispose();if(parentPin!=null)parentPin.Dispose();if(rootPin!=null)rootPin.Dispose();}
