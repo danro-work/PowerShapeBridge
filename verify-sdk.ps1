@@ -49,6 +49,10 @@ if ($LASTEXITCODE -ne 0) { throw 'Type-sensitive target oracle regression failed
 & (Join-Path $taskRoot 'build.ps1') -OutputDirectory $NativeStageDirectory -ConfigurationPath (Join-Path $taskRoot 'config\general-owned-translations.json')
 & (Join-Path $NativeStageDirectory 'PSBridge.Worker.exe') --self-test | Tee-Object -FilePath (Join-Path $taskEvidence 'native-fixture-tests.txt')
 if ($LASTEXITCODE -ne 0) { throw 'Native synthetic fixture generation failed.' }
+& (Join-Path $NativeStageDirectory 'PSBridge.Worker.exe') --dgk-bundle-files-test | Tee-Object -FilePath (Join-Path $taskEvidence 'dgk-bundle-file-tests.txt')
+if ($LASTEXITCODE -ne 0) { throw 'DGK retained artifact fixture tests failed.' }
+& $PythonPath (Join-Path $taskRoot 'tools\audit_dgk_bundle.py') --stage $NativeStageDirectory --output (Join-Path $taskEvidence 'dgk-bundle-file-audit.json')
+if ($LASTEXITCODE -ne 0) { throw 'Independent DGK byte/identity audit failed.' }
 & $PythonPath (Join-Path $taskRoot 'tools\audit_native_save_fixture.py') --stage $NativeStageDirectory --output (Join-Path $taskEvidence 'save-artifact-audit.json')
 if ($LASTEXITCODE -ne 0) { throw 'Independent native SaveAs artifact audit failed.' }
 & $PythonPath (Join-Path $taskRoot 'src\native_fixture_oracle.py') --stage $NativeStageDirectory --output (Join-Path $taskEvidence 'native-oracle.json')
@@ -151,6 +155,7 @@ $taskFiles += @('src\DmtMeshReader.cs','tools\ReadDmtMesh.cs','src\qualify_dmt_r
 $taskFiles += @('src\OwnedGeometryExport.cs','src\OwnedGeometryExportTests.cs','src\audit_geometry_export_executor.py','verify-geometry-export-executor.ps1')
 $taskFiles += @('src\OwnedGeometryExportVerification.cs','src\OwnedGeometryExportVerificationTests.cs','src\audit_geometry_export_verification.py','verify-geometry-export-verification.ps1')
 $taskFiles += @('src\NativeSelectionReading.cs','src\NativeSelectionReadingTests.cs','src\audit_native_selection_reading.py','verify-native-selection-reading.ps1','tools\ReadPowerShapeExportMetadata.cs')
+$taskFiles += @('src\DgkBundleVerifier.cs','src\DgkBundleFiles.cs','src\DgkBundleFilesTests.cs','tools\audit_dgk_bundle.py')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

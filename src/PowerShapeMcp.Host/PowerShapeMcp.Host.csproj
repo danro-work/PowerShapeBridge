@@ -20,5 +20,6 @@
     <Compile Include="../RotationSampleVerifier.cs" Link="RotationSampleVerifier.cs" />
     <Compile Include="../UniformScaleSampleVerifier.cs" Link="UniformScaleSampleVerifier.cs" />
     <Compile Include="../DmtMeshReader.cs" Link="DmtMeshReader.cs" />
+    <Compile Include="../DgkBundleVerifier.cs" Link="DgkBundleVerifier.cs" />
   </ItemGroup>
 </Project>
