@@ -38,6 +38,10 @@ namespace PowerShapeBridge {
    if(recipe=="prepare_entity_set"){EntitySets.ValidatePrepare(parameters);return;}
    if(recipe=="validate_entity_set"){EntitySets.ValidateHandle(parameters);return;}
   }
+  if(op=="recipe.prepare"&&a.Count==2&&a.ContainsKey("recipeId")&&Equals(a["recipeId"],"inspect_model_levels")&&a.ContainsKey("parameters")) {
+   var parameters=a["parameters"] as Dictionary<string,object>;
+   if(!c.IsGeneralCore||!c.levelReadingExperimental||parameters==null||parameters.Count!=0)throw new ArgumentException("Passive level reading disabled or unexpected parameters.");return;
+  }
   if(op=="recipe.prepare" && a.Count==2 && a.ContainsKey("recipeId") && a["recipeId"] is string && a.ContainsKey("parameters") && a["parameters"] is Dictionary<string,object> &&
      new[]{"list_documents","inspect_active_model","activate_document"}.Contains((string)a["recipeId"])) {
       if(!c.CoreTransportEnabled)throw new ArgumentException("Core transport disabled.");return;
@@ -77,6 +81,9 @@ namespace PowerShapeBridge {
   return EntitySets.Run(id,(Dictionary<string,object>)readArgs["parameters"],Equals(readArgs["recipeId"],"prepare_entity_set"));
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"list_documents")) {
   if(((Dictionary<string,object>)readArgs["parameters"]).Count!=0)throw new ArgumentException("Document listing takes no parameters.");return DocumentSession.List();
+ }
+ if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"inspect_model_levels")) {
+  if(!c.IsGeneralCore||!c.levelReadingExperimental||((Dictionary<string,object>)readArgs["parameters"]).Count!=0)throw new ArgumentException("Passive level reading disabled or unexpected parameters.");return NativeLevelReading.Run();
  }
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"activate_document"))return DocumentSession.Activate(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"inspect_active_model"))

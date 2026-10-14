@@ -47,6 +47,7 @@ namespace PowerShapeBridge
         public bool ownedRotationPlansExperimental { get; set; }
         public bool ownedUniformScalePlansExperimental { get; set; }
         public bool ownedDgkTargetsExperimental { get; set; }
+        public bool levelReadingExperimental { get; set; }
         public bool IsGeneralCore { get { return coreProfile == "general-v1"; } }
         public bool CoreTransportEnabled { get { return IsGeneralCore || (mcpMutationsPanel && recipeOperationsPanel); } }
         public string qualificationOperationId { get; set; }
@@ -73,6 +74,7 @@ namespace PowerShapeBridge
             if(ownedRotationPlansExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned rotation preparation requires general sets, copies and bindings.");
             if(ownedUniformScalePlansExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned uniform scale preparation requires general sets, copies and bindings.");
             if(ownedDgkTargetsExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned DGK targets require general sets, copies and bindings.");
+            if(levelReadingExperimental&&!IsGeneralCore)throw new ArgumentException("Passive level reading requires general core.");
             if (IsGeneralCore) {
                 if (captureViewport || translationTestPanel || checkpointTestPanel || parameterizedTranslationPanel || diskVerificationPanel || mcpMutationsPanel || recipeOperationsPanel ||
                     !string.IsNullOrEmpty(expectedProject) || !string.IsNullOrEmpty(sourceStep) || !string.IsNullOrEmpty(protectedProject) || !string.IsNullOrEmpty(qualificationOperationId) ||
@@ -91,7 +93,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.34.3-dev";
+        public const string ReleaseVersion = "0.34.4-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -101,6 +103,10 @@ namespace PowerShapeBridge
         internal static Config ParseConfig(string text)
         {
             var raw=Json.Deserialize<Dictionary<string,object>>(text);object enabled;
+            if(raw!=null&&raw.TryGetValue("levelReadingExperimental",out enabled)) {
+                if(!(enabled is bool))throw new ArgumentException("Level reading flag must be JSON boolean.");
+                if((bool)enabled&&(!raw.ContainsKey("coreProfile")||!Equals(raw["coreProfile"],"general-v1")))throw new ArgumentException("Level reading requires general core.");
+            }
             if(raw!=null&&raw.TryGetValue("ownedDgkTargetsExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("DGK target flag must be JSON boolean.");
                 if((bool)enabled)foreach(string flag in new[]{"entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {

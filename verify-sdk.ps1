@@ -163,6 +163,7 @@ $taskFiles += @('src\OwnedGeometryExport.cs','src\OwnedGeometryExportTests.cs','
 $taskFiles += @('src\OwnedGeometryExportVerification.cs','src\OwnedGeometryExportVerificationTests.cs','src\audit_geometry_export_verification.py','verify-geometry-export-verification.ps1')
 $taskFiles += @('src\NativeSelectionReading.cs','src\NativeSelectionReadingTests.cs','src\audit_native_selection_reading.py','verify-native-selection-reading.ps1','tools\ReadPowerShapeExportMetadata.cs')
 $taskFiles += @('src\NativeLevelReading.cs','src\NativeLevelReadingTests.cs','src\audit_native_levels_reading.py','verify-native-levels-reading.ps1','tools\ReadNativeLevelLayout.cs','tools\audit_native_levels_read.py')
+$taskFiles += @('src\PowerShapeMcp.Host\LevelReadTools.cs','tests\PowerShapeMcp.Tests\LevelReadToolsTests.cs','config\general-levels-read.json','tools\ReadNativeLevelRecipe.cs','tools\qualify_levels_live_stdio.py','tools\audit_levels_live_stdio.py')
 $taskFiles += @('src\DgkBundleVerifier.cs','src\DgkBundleFiles.cs','src\DgkBundleFilesTests.cs','tools\audit_dgk_bundle.py')
 $taskFiles += @('src\OwnedDgkTargets.cs','src\OwnedDgkTargetTests.cs','src\audit_owned_dgk_targets.py','verify-owned-dgk-targets.ps1')
 $taskFiles += @('src\OwnedWorkingBytePin.cs','src\OwnedWorkingBytePinTests.cs')
