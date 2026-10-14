@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.MemoryMappedFiles;
 using System.Linq;
 
 namespace PowerShapeBridge {
@@ -24,10 +25,10 @@ namespace PowerShapeBridge {
    string[] faults={"primary","curve","mixed","all_companions","working_byte_capture","caller_mutation",
     "wrong_binding_sha","wrong_set_sha","extra_path","world_required","settings_claim","unknown_variant","bad_triangle_suffix","duplicate_triangle",
     "features_missing","features_on_geometry","optional_only_features","feature_path","feature_wrong_role","numeric_required","expired","selection",
-    "unknown_fence","export_fence","checkpoint_writable","reserved","existing_folder","held_writer",
+    "unknown_fence","export_fence","checkpoint_writable","reserved","existing_folder","held_writer","held_writer_truncate","held_writer_mapped",
     "output_file","output_directory","stray_file","claimed","late_fence","late_working","target_path_tamper","manifest_tamper","expiry_tamper","future_prepared_tamper","parameters_tamper","directory_replaced","bundle_replaced","target_tamper"};
-   var prepared=new HashSet<string>(new[]{"primary","curve","mixed","all_companions","working_byte_capture","caller_mutation", "output_file","output_directory","stray_file","claimed","late_fence","late_working","target_path_tamper","manifest_tamper","expiry_tamper","future_prepared_tamper","parameters_tamper","directory_replaced","bundle_replaced","target_tamper"});
-   var leaseOk=new HashSet<string>(new[]{"primary","curve","mixed","all_companions","working_byte_capture","caller_mutation"});
+   var prepared=new HashSet<string>(new[]{"primary","curve","mixed","all_companions","working_byte_capture","caller_mutation","held_writer","held_writer_truncate","held_writer_mapped", "output_file","output_directory","stray_file","claimed","late_fence","late_working","target_path_tamper","manifest_tamper","expiry_tamper","future_prepared_tamper","parameters_tamper","directory_replaced","bundle_replaced","target_tamper"});
+   var leaseOk=new HashSet<string>(new[]{"primary","curve","mixed","all_companions","working_byte_capture","caller_mutation","held_writer","held_writer_truncate","held_writer_mapped"});
    foreach(string fault in faults) {
     var fixture=new OwnedOperationPlanTests.Fixture(true,true);var args=Args(fixture);string id=Guid.NewGuid().ToString("N");
     if(fault=="curve"||fault=="mixed") {
@@ -68,7 +69,7 @@ namespace PowerShapeBridge {
     Require(Equals(result["state"],prepared.Contains(fault)?"owned_dgk_target_prepared_files":"owned_dgk_target_rejected"),fault+": "+Program.Json.Serialize(result));
     Require(before.All(pair=>Program.Hash(pair.Key)==pair.Value),"DGK preparation changed protected input.");
     foreach(string flag in new[]{"executionEnabled","exportAttempted","geometryMutationAttempted","contextChangeAttempted","cadSaveAttempted","powerShapeConnectionAttempted","retryAllowed","exportSettingsQualified","nativeProviderQualified"})Require(Equals(result[flag],false),"Unexpected DGK execution/qualification flag.");
-    bool? accepted=null;
+    bool? accepted=null;bool workingChangeRejected=false;
     if(prepared.Contains(fault)) {
      string sha=(string)result["targetSha256"],targetJson=Path.Combine(folder,"target.json");var plan=Read(targetJson);
      using(var lease=new OwnedDgkTargets.TargetLease(fixture.Root,id,sha)) {
@@ -93,13 +94,23 @@ namespace PowerShapeBridge {
      if(fault=="bundle_replaced") {Directory.Move(bundle,bundle+"-original");Directory.CreateDirectory(bundle);}
      if(fault=="target_tamper")File.AppendAllText(targetJson," ");
      accepted=leaseOk.Contains(fault);
-     if(accepted.Value)using(var lease=new OwnedDgkTargets.TargetLease(fixture.Root,id,sha)){lease.Recheck();}
+     if(accepted.Value)using(var writerForLease=fault.StartsWith("held_writer",StringComparison.Ordinal)?new FileStream(fixture.Working,FileMode.Open,FileAccess.ReadWrite,FileShare.ReadWrite,1):null){
+      byte[] saved;using(var savedFile=new FileStream(fixture.Working,FileMode.Open,FileAccess.Read,FileShare.ReadWrite))using(var reader=new BinaryReader(savedFile))saved=reader.ReadBytes((int)savedFile.Length);
+      using(var lease=new OwnedDgkTargets.TargetLease(fixture.Root,id,sha)){
+       lease.Recheck();
+       if(writerForLease!=null){Reject(()=>{writerForLease.Position=0;writerForLease.Write(new byte[]{255},0,1);writerForLease.Flush(true);});lease.Recheck();}
+       if(fault=="held_writer_truncate"){writerForLease.SetLength(saved.Length-1);Reject(()=>lease.Recheck());workingChangeRejected=true;}
+       if(fault=="held_writer_mapped")using(var map=MemoryMappedFile.CreateFromFile(writerForLease,null,0,MemoryMappedFileAccess.ReadWrite,HandleInheritability.None,true))using(var view=map.CreateViewAccessor()){view.Write(0,(byte)(saved[0]^255));view.Flush();Reject(()=>lease.Recheck());workingChangeRejected=true;}
+      }
+      if(writerForLease!=null){writerForLease.Position=0;writerForLease.Write(saved,0,saved.Length);writerForLease.SetLength(saved.Length);writerForLease.Flush(true);}
+     }
      else Reject(()=>{using(var lease=new OwnedDgkTargets.TargetLease(fixture.Root,id,sha)){lease.Recheck();}});
      Require(Equals(OwnedDgkTargets.Prepare(fixture.Root,id,request)["state"],"owned_dgk_target_rejected"),"DGK target preparation replay accepted.");
     }
-    rows.Add(new Dictionary<string,object>{{"fault",fault},{"root",fixture.Root},{"targetId",id},{"parameters",request},{"result",result},{"leaseAccepted",accepted},{"protectedHashes",before},{"artifactHashes",Hashes(fixture.Root)},{"cadConnectionAttempted",false}});
+    rows.Add(new Dictionary<string,object>{{"fault",fault},{"root",fixture.Root},{"targetId",id},{"parameters",request},{"result",result},{"leaseAccepted",accepted},{"workingChangeRejected",workingChangeRejected},{"protectedHashes",before},{"artifactHashes",Hashes(fixture.Root)},{"cadConnectionAttempted",false}});
    }
-   Directory.CreateDirectory(Path.Combine(Program.Root,"reports"));NativeJournal.Freeze(Path.Combine(Program.Root,"reports","owned-dgk-target-tests.json"),new Dictionary<string,object>{{"state","passed"},{"rows",rows},{"cadConnectionAttempted",false}});
+   var bytePinRows=OwnedWorkingBytePinTests.Run();
+   Directory.CreateDirectory(Path.Combine(Program.Root,"reports"));NativeJournal.Freeze(Path.Combine(Program.Root,"reports","owned-dgk-target-tests.json"),new Dictionary<string,object>{{"state","passed"},{"rows",rows},{"workingBytePinCases",bytePinRows},{"cadConnectionAttempted",false}});
    Console.WriteLine("PASS: "+rows.Count+" owned DGK target/lease cases; no CAD/export.");return rows.Count;
   }
  }

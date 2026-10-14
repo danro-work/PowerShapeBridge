@@ -28,9 +28,11 @@ internal sealed class OwnedDgkTargetStore(string root,CandidateStore candidates,
         var result=bindingArgs.DeepClone().AsObject();foreach(var pair in setArgs)result[pair.Key]=pair.Value?.DeepClone();result["parameters"]=definition;return result;
     }
     private static bool Same(string a,string b)=>ObservationPolicy.NormalizePath(a)==ObservationPolicy.NormalizePath(b);
-    private static string HashFile(string path)
+    private static string HashFile(string path,bool activeWorkingCopy=false)
     {
-        using var file=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read);
+        // SDK receipt checks sample mutable working bytes. Native transactions
+        // retain byte/context guards; checkpoint sharing remains read-only.
+        using var file=new FileStream(path,FileMode.Open,FileAccess.Read,activeWorkingCopy?FileShare.ReadWrite:FileShare.Read);
         Require(file.Length is >0 and <=1073741824,"dgk_target_owned_bytes_size_invalid");return Convert.ToHexStringLower(SHA256.HashData(file));
     }
     private void Ownership(JsonObject plan,JsonObject source)
@@ -48,7 +50,7 @@ internal sealed class OwnedDgkTargetStore(string root,CandidateStore candidates,
         var cpSha=Text(checkpoint,"sha256");Require(FileArtifacts.Token(cpSha,64)&&Text(original,"sha256")==cpSha&&Text(work,"initialSha256")==cpSha&&Text(plan,"checkpointSha256")==cpSha);
         long Size(JsonObject value){var element=JsonSerializer.SerializeToElement(value["length"]);Require(element.ValueKind==JsonValueKind.Number&&element.TryGetInt64(out var size)&&size is >0 and <=1073741824);return element.GetInt64();}
         Require(Size(original)==Size(checkpoint)&&Size(work)==Size(checkpoint));
-        Require((File.GetAttributes(cpPath)&FileAttributes.ReadOnly)!=0&&new FileInfo(cpPath).Length==Size(checkpoint)&&HashFile(cpPath)==cpSha&&HashFile(workPath)==Text(plan,"workingSha256"),"dgk_target_owned_bytes_differs");
+        Require((File.GetAttributes(cpPath)&FileAttributes.ReadOnly)!=0&&new FileInfo(cpPath).Length==Size(checkpoint)&&HashFile(cpPath)==cpSha&&HashFile(workPath,true)==Text(plan,"workingSha256"),"dgk_target_owned_bytes_differs");
         // Retained native identities/live context remain native responsibilities.
     }
     private static void DirectoryIdentity(JsonNode? value)

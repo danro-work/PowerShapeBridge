@@ -165,6 +165,7 @@ $taskFiles += @('src\NativeSelectionReading.cs','src\NativeSelectionReadingTests
 $taskFiles += @('src\NativeLevelReading.cs','src\NativeLevelReadingTests.cs','src\audit_native_levels_reading.py','verify-native-levels-reading.ps1','tools\ReadNativeLevelLayout.cs','tools\audit_native_levels_read.py')
 $taskFiles += @('src\DgkBundleVerifier.cs','src\DgkBundleFiles.cs','src\DgkBundleFilesTests.cs','tools\audit_dgk_bundle.py')
 $taskFiles += @('src\OwnedDgkTargets.cs','src\OwnedDgkTargetTests.cs','src\audit_owned_dgk_targets.py','verify-owned-dgk-targets.ps1')
+$taskFiles += @('src\OwnedWorkingBytePin.cs','src\OwnedWorkingBytePinTests.cs')
 $taskFiles += @('src\OwnedDgkExport.cs','src\OwnedDgkExportTests.cs','src\audit_owned_dgk_export.py','verify-owned-dgk-export.ps1')
 $taskFiles += @('src\OwnedDgkExportVerification.cs','src\OwnedDgkExportVerificationTests.cs','src\audit_owned_dgk_verification.py','verify-owned-dgk-verification.ps1')
 $taskFiles += @('tools\NativeFixtureCheck\DgkTargetCheck.cs','config\general-owned-dgk-targets.json')

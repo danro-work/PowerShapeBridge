@@ -55,6 +55,17 @@ public sealed class OwnedDgkTargetStoreTests
         Assert.Throws<ReferenceRejected>(()=>new OwnedDgkTargetStore(data.Root,data.Base.Candidates,data.Base.Bindings).ValidationParameters(handle));
         data.Store.Revoke(handle);Assert.Throws<ReferenceRejected>(()=>data.Store.ValidationParameters(handle));
     }
+    [Fact]
+    public void ActiveWorkingWriterAllowsReadsButChangedBytesRevokeValidation()
+    {
+        var data=new Data();var result=data.Native(Guid.NewGuid().ToString("N"));
+        var working=result["target"]!["workingPath"]!.GetValue<string>();
+        using var writer=new FileStream(working,FileMode.Open,FileAccess.ReadWrite,FileShare.ReadWrite,1);
+        var handle=data.Store.Issue(result,data.Request,data.Set,data.Base.Binding)["ownedDgkTargetHandle"]!.GetValue<string>();
+        Assert.Equal(result["targetId"]!.GetValue<string>(),data.Store.ValidationParameters(handle)["targetId"]!.GetValue<string>());
+        writer.Position=0;writer.Write(new byte[]{255},0,1);writer.Flush(true);
+        Assert.ThrowsAny<Exception>(()=>data.Store.ValidationParameters(handle));
+    }
     [Theory]
     [InlineData("targetPath")][InlineData("bundleDirectory")][InlineData("entityKeys")][InlineData("parametersSha256")]
     [InlineData("nativeObservedPropertiesSha256")][InlineData("expiresUtc")][InlineData("manifest")][InlineData("extra")][InlineData("executionEnabled")]
