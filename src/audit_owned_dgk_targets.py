@@ -10,11 +10,11 @@ FAULTS = {'primary', 'curve', 'mixed', 'all_companions', 'working_byte_capture',
           'unknown_variant', 'bad_triangle_suffix', 'duplicate_triangle', 'features_missing',
           'features_on_geometry', 'optional_only_features', 'feature_path', 'feature_wrong_role',
           'numeric_required', 'expired', 'selection', 'unknown_fence', 'export_fence',
-          'checkpoint_writable', 'reserved', 'existing_folder', 'held_writer',
+          'checkpoint_writable', 'reserved', 'existing_folder', 'held_writer', 'held_writer_truncate', 'held_writer_mapped',
           'output_file', 'output_directory', 'stray_file', 'claimed', 'late_fence', 'late_working',
           'target_path_tamper', 'manifest_tamper', 'expiry_tamper', 'future_prepared_tamper',
           'parameters_tamper', 'directory_replaced', 'bundle_replaced', 'target_tamper'}
-CONTROLS = {'primary', 'curve', 'mixed', 'all_companions', 'working_byte_capture', 'caller_mutation'}
+CONTROLS = {'primary', 'curve', 'mixed', 'all_companions', 'working_byte_capture', 'caller_mutation', 'held_writer', 'held_writer_truncate', 'held_writer_mapped'}
 PREPARED = CONTROLS | {'output_file', 'output_directory', 'stray_file', 'claimed', 'late_fence',
                        'late_working', 'target_path_tamper', 'manifest_tamper', 'expiry_tamper',
                        'future_prepared_tamper', 'parameters_tamper', 'directory_replaced',
@@ -41,9 +41,18 @@ def audit(stage):
     rows = report['rows']
     assert report['state'] == 'passed' and report['cadConnectionAttempted'] is False
     assert len(rows) == len(FAULTS) and {row['fault'] for row in rows} == FAULTS
+    byte_rows = report['workingBytePinCases']
+    assert len(byte_rows) == 9 and {row['case'] for row in byte_rows} == {
+        'existing_writer_read', 'overwrite_blocked', 'append_blocked', 'truncate_detected_by_sha',
+        'rename_blocked', 'second_shared_reader', 'mapped_write_detected_by_sha', 'released_write_allowed', 'exclusive_lock_refused'}
+    for row in byte_rows:
+        assert row['state'] == 'passed' and row['cadConnectionAttempted'] is False
+        path = Path(row['path']).resolve()
+        assert path.is_relative_to(stage / 'work') and sha(path) == row['sha256']
     count = 0
     for row in rows:
         fault = row['fault']
+        assert row['workingChangeRejected'] is (fault in {'held_writer_truncate', 'held_writer_mapped'})
         root = Path(row['root']).resolve()
         assert root.is_relative_to(stage / 'work')
         inventory = {Path(path).resolve(): digest for path, digest in row['artifactHashes'].items()}
@@ -109,7 +118,7 @@ def audit(stage):
         previous_journals = {Path(path).resolve() for path in row['protectedHashes']
                              if Path(path).resolve().is_relative_to(root / 'operations')}
         assert {path.resolve() for path in (root / 'operations').rglob('*') if path.is_file()} == previous_journals, 'Preparation added a mutation journal'
-    return {'state': 'passed', 'cases': len(rows), 'leaseControls': len(CONTROLS),
+    return {'state': 'passed', 'cases': len(rows), 'leaseControls': len(CONTROLS), 'workingBytePinCases': len(byte_rows),
             'artifactHashesChecked': count, 'cadConnectionAttempted': False, 'geometryExportExecuted': False}
 
 

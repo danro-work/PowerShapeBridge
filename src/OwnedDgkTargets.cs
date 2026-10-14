@@ -11,7 +11,7 @@ namespace PowerShapeBridge {
  // Strict filesystem-only preparation. It never selects/exports/activates CAD.
  internal static class OwnedDgkTargets {
   const string SelectionPolicy="explicit_target_set; no empty-selection fallback";
-  const string Qualification="Disabled DGK target/bundle plan; settings/provider/geometry unqualified; no CAD command authority";
+  const string Qualification="Disabled DGK target/bundle plan; settings/provider/geometry unqualified; no CAD command authority. Working ordinary data writes locked; EOF/mapped changes require retained identity/length/SHA rechecks, no continuous write exclusion.";
   static readonly string[] Refs={"bindingId","bindingSha256","entitySetId","entitySetSha256"};
   static void Require(bool ok,string message){if(!ok)throw new InvalidDataException(message);}
   static void Fields(Dictionary<string,object> value,params string[] names){Require(value!=null&&value.Count==names.Length&&names.All(value.ContainsKey),"Exact DGK schema required.");}
@@ -64,7 +64,7 @@ namespace PowerShapeBridge {
     using(var proofs=new OwnedOperationPlans.Proofs()) {
      var source=new OwnedGeometryExportTargets.Dependencies(root,ReferenceArgs(args),proofs,null,true);var binding=source.Binding;
      using(var copy=OwnedCopies.Hold(root,(string)binding["copyId"],(string)binding["ownershipSha256"]))
-     using(var workingPin=new FileStream(copy.WorkingPath,FileMode.Open,FileAccess.Read,FileShare.Read)) {
+     using(var workingPin=new OwnedWorkingBytePin(copy.WorkingPath)) {
       copy.CheckPath((string)((Dictionary<string,object>)source.Expected["model"])["path"]);copy.Recheck();
       OwnedGeometryExportTargets.NoExportFence(root,(string)binding["copyId"]);var fence=OwnedGeometryExportTargets.Fence(root,binding,source.Expected,proofs);
       string parent=Path.GetDirectoryName(folder);Directory.CreateDirectory(parent);OwnedCopies.NoReparse(parent);
@@ -86,7 +86,7 @@ namespace PowerShapeBridge {
          {"fenceObservation",fence},{"qualification",Qualification}};
         string sha=NativeJournal.Freeze(Path.Combine(folder,"target.json"),plan);
         rootPin.Recheck();parentPin.Recheck();folderPin.Recheck();bundlePin.Recheck();copy.Recheck();EmptyDirectory(artifacts);
-        Require(OwnedCopies.Digest(workingPin)==(string)copy.Inspection["workingSha256"],"Pinned DGK working bytes changed.");
+        Require(OwnedCopies.Digest(workingPin.Stream)==(string)copy.Inspection["workingSha256"],"Pinned DGK working bytes changed.");
         Require(EntitySets.Canonical(OwnedGeometryExportTargets.Fence(root,binding,source.Expected,proofs))==EntitySets.Canonical(fence),"Copy fence changed during DGK preparation.");
         Require(DateTime.UtcNow<source.Expires,"DGK preparation expired.");result["state"]="owned_dgk_target_prepared_files";result["targetSha256"]=sha;result["target"]=plan;
        }
@@ -102,7 +102,7 @@ namespace PowerShapeBridge {
    internal readonly OwnedGeometryExportTargets.Dependencies Source;
    internal readonly DgkBundleVerifier.Plan BundlePlan;
    readonly string root,id;readonly bool verification;readonly OwnedOperationPlans.Proofs proofs=new OwnedOperationPlans.Proofs();
-   OwnedDirectoryLease rootPin,parentPin,folderPin,bundlePin;FileStream workingPin;
+   OwnedDirectoryLease rootPin,parentPin,folderPin,bundlePin;OwnedWorkingBytePin workingPin;
    internal TargetLease(string bridgeRoot,string targetId,string sha,bool forVerification=false) {
     root=OwnedCopies.LocalPath(bridgeRoot.TrimEnd('\\','/'));id=targetId;verification=forVerification;
     try {
@@ -130,7 +130,7 @@ namespace PowerShapeBridge {
       EntitySets.Expiry(Plan["preparedUtc"])>=EntitySets.Expiry(Source.Expected["timestampUtc"])&&
       EntitySets.Expiry(Plan["preparedUtc"])<=DateTime.UtcNow&&EntitySets.Expiry(Plan["preparedUtc"])<Source.Expires,"DGK observation/targets/lifetime differs.");
      Copy=OwnedCopies.Hold(root,(string)Plan["copyId"],(string)Plan["ownershipSha256"]);Copy.CheckPath((string)((Dictionary<string,object>)Source.Expected["model"])["path"]);
-     workingPin=new FileStream(Copy.WorkingPath,FileMode.Open,FileAccess.Read,FileShare.Read);
+     workingPin=new OwnedWorkingBytePin(Copy.WorkingPath);
      Require(Equals(Plan["workingPath"],Copy.WorkingPath)&&Equals(Plan["workingSha256"],Copy.Inspection["workingSha256"])&&
       Equals(Plan["checkpointPath"],Copy.CheckpointPath)&&Equals(Plan["checkpointSha256"],Copy.CheckpointSha),"DGK owned saved bytes differ.");
      var reservation=proofs.Json(folder+".reservation.json",null);Fields(reservation,"schemaVersion","targetId","format","bindingId","bindingSha256","parametersSha256","automaticReplayForbidden");
@@ -142,7 +142,7 @@ namespace PowerShapeBridge {
    }
    internal void RecheckDependencies() {
     rootPin.Recheck();parentPin.Recheck();folderPin.Recheck();bundlePin.Recheck();Copy.Recheck();
-    Require(OwnedCopies.Digest(workingPin)==(string)Plan["workingSha256"],"Pinned DGK working bytes changed.");
+    Require(OwnedCopies.Digest(workingPin.Stream)==(string)Plan["workingSha256"],"Pinned DGK working bytes changed.");
     EntitySets.CheckObserved(Source.Expected,Source.Expected,Source.Keys,Source.Expires,verification?EntitySets.Expiry(Plan["preparedUtc"]):DateTime.UtcNow);
     Require(EntitySets.Canonical(OwnedGeometryExportTargets.Fence(root,Source.Binding,Source.Expected,proofs))==EntitySets.Canonical(Plan["fenceObservation"]),"DGK copy fence changed.");
    }

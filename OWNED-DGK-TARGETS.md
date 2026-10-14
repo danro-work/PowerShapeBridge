@@ -34,8 +34,14 @@ parameters SHA. Target SHA фиксирует все параметры, manifes
 Binding/set/source receipts, TTL=min, наблюдаемые properties, world/empty selection,
 ownership, checkpoint ReadOnly/identity/SHA и текущие saved working bytes связаны
 проверками. Рабочие байты могут законно отличаться от initial checkpoint до
-подготовки; новый captured SHA удерживается read-only file handle во время
-подготовки/lease. Directory identities, final paths, reparse/hard-link guards
+подготовки; новый captured SHA повторно проверяется через удерживаемые handles.
+Активная собственная working copy допускает уже открытый writer PowerShape:
+FileShare.ReadWrite (без Delete) плюс shared byte-range lock запрещает обычную
+запись данных. Изменение EOF и mapped views не блокируются; identity/length/SHA
+guards отклоняют наблюдаемое изменение. Непрерывное исключение всех способов
+записи не заявляется. Источник/checkpoint сохраняют прежние ReadOnly/sharing
+guards; SDK только повторно читает working bytes, не выдавая write authority.
+Directory identities, final paths, reparse/hard-link guards
 и удержание proof artifacts предотвращают подмену в пределах проверки.
 
 После подготовки TargetLease повторно проверяет точную схему, параметры/reservation,
@@ -57,7 +63,9 @@ unknown/partial/foreign fences блокируют подготовку.
 getter действующих настроек. Активная workplane может попасть в DGK: initial
 preparation требует world context, без скрытого выбора уровней или всей модели.
 
-42 синтетических Framework сценария и независимый аудит файлов/dependencies;
+44 синтетических Framework сценария и 9 low-level byte-pin cases, независимый
+аудит файлов/dependencies; held writer разрешает preparation/lease, но изменённые
+working bytes (включая truncate/mapped writes) отклоняют повторную проверку;
 реального экспорта/импорта и топологической проверки здесь нет. executor должен
 получить fresh retained CAD context, qualified settings/provider, guarded exact
 selection, once/fence/per-step evidence и independent bundle/geometry verifier.
