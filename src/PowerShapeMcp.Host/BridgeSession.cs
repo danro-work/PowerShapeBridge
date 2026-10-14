@@ -28,6 +28,7 @@ public sealed class BridgeSession : IDisposable
     internal OwnedDgkTargetStore DgkTargets { get; }
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
+    public bool LevelReadingEnabled { get; }
     public bool RecoveryInspectionEnabled { get; }
     public bool RecoveryResolutionEnabled { get; }
     public OutcomeResolutionJournal Resolutions { get; }
@@ -52,6 +53,7 @@ public sealed class BridgeSession : IDisposable
         OwnedScales=new(options.BridgeRoot,ScalePlans,Bindings,clock,utcClock);
         DgkTargets=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         var config=Options.ReadConfiguration();
+        LevelReadingEnabled=config.TryGetProperty("levelReadingExperimental",out var levelFlag)&&levelFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
         RecoveryInspectionEnabled=config.TryGetProperty("recoveryInspectionExperimental",out var recoveryFlag)&&recoveryFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         RecoveryResolutionEnabled=!options.ReadOnly&&config.TryGetProperty("recoveryResolutionExperimental",out var resolutionFlag)&&resolutionFlag.ValueKind==System.Text.Json.JsonValueKind.True;
@@ -82,6 +84,7 @@ public sealed class BridgeSession : IDisposable
     public void AssertToolAllowed(string name)
     {
         if(name is "bridge_status" or "operation_result" or "list_documents" or "inspect_active_model" or "resolve_entity_references" ||
+            name=="inspect_model_levels"&&LevelReadingEnabled||
             name=="inspect_entity_candidates"&&CandidatesEnabled||name=="inspect_operation_recovery"&&RecoveryInspectionEnabled||prepared.Contains(name)||execution.Contains(name))return;
         throw new McpProtocolException("Tool is unavailable in this server/mode.",McpErrorCode.InvalidParams);
     }

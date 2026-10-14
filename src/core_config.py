@@ -10,6 +10,9 @@ FIXTURE_FIELDS = ('expectedProject', 'sourceStep', 'protectedProject',
 
 def general_core(settings):
     profile = settings.get('coreProfile')
+    levels = settings.get('levelReadingExperimental', False)
+    if type(levels) is not bool or levels and profile != 'general-v1':
+        raise ValueError('Passive level reading requires general core and a boolean flag')
     experimental = settings.get('entitySetsExperimental', False)
     plans = settings.get('operationPlansExperimental', False)
     copies = settings.get('workingCopiesExperimental', False)
