@@ -152,6 +152,10 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--owned-rotation-plan-test") {
                 try{OwnedRotationPlanTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
+            if(args.Length==1&&args[0]=="--dgk-bundle-files-test") {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{DgkBundleFilesTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
             if(args.Length==1&&args[0]=="--owned-uniform-scale-plan-test") {
                 try{OwnedUniformScalePlanTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
