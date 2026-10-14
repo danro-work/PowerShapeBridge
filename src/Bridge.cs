@@ -203,6 +203,10 @@ namespace PowerShapeBridge
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{Console.WriteLine(Json.Serialize(args[0]=="--uniform-scale-wire-seed"?OwnedUniformScaleWireFixture.Seed(args[1]):OwnedUniformScaleWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
+            if(args.Length==2&&new[]{"--dgk-target-wire-seed","--dgk-target-wire-request"}.Contains(args[0])) {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{Console.WriteLine(Json.Serialize(args[0]=="--dgk-target-wire-seed"?OwnedDgkTargetWireFixture.Seed(args[1]):OwnedDgkTargetWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
             if(args.Length==2&&new[]{"--checkpoint-wire-seed","--checkpoint-wire-request"}.Contains(args[0])) {
                 try{Console.WriteLine(Json.Serialize(args[0]=="--checkpoint-wire-seed"?CheckpointRecoveryWireFixture.Seed(args[1]):CheckpointRecoveryWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }

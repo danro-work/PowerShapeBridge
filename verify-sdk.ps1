@@ -87,6 +87,7 @@ $taskFixture = Join-Path $taskRoot ('work\K2-inspector-'+[guid]::NewGuid().ToStr
 if($LASTEXITCODE -ne 0){throw 'Native owned rotation packet SDK proof compatibility failed.'}
 & (Join-Path $taskRoot 'verify-owned-rotation-wire.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-rotation-wire') -EvidenceDirectory (Join-Path $taskEvidence 'owned-rotation-wire')
 & (Join-Path $taskRoot 'verify-owned-uniform-scale-wire.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-scale-wire') -EvidenceDirectory (Join-Path $taskEvidence 'owned-scale-wire')
+& (Join-Path $taskRoot 'verify-owned-dgk-wire.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-dgk-wire') -EvidenceDirectory (Join-Path $taskEvidence 'owned-dgk-wire')
 & (Join-Path $taskRoot 'verify-owned-rotation-execution.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-rotation-execution') -EvidenceDirectory (Join-Path $taskEvidence 'owned-rotation-execution')
 & (Join-Path $taskRoot 'verify-rotation-measurements.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-rotation-measurements') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-measurements')
 & (Join-Path $taskRoot 'verify-rotation-measurement-records.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-measurement-records') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-measurement-records')
@@ -165,6 +166,7 @@ $taskFiles += @('src\OwnedDgkTargets.cs','src\OwnedDgkTargetTests.cs','src\audit
 $taskFiles += @('src\OwnedDgkExport.cs','src\OwnedDgkExportTests.cs','src\audit_owned_dgk_export.py','verify-owned-dgk-export.ps1')
 $taskFiles += @('src\OwnedDgkExportVerification.cs','src\OwnedDgkExportVerificationTests.cs','src\audit_owned_dgk_verification.py','verify-owned-dgk-verification.ps1')
 $taskFiles += @('tools\NativeFixtureCheck\DgkTargetCheck.cs','config\general-owned-dgk-targets.json')
+$taskFiles += @('src\OwnedDgkTargetWireFixture.cs','src\test_sdk_owned_dgk_wire_stdio.py','src\audit_owned_dgk_wire_stdio.py','verify-owned-dgk-wire.ps1')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'
