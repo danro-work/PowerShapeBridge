@@ -39,6 +39,27 @@ public sealed class DmtMeshReaderTests
         var mesh=DmtMeshReader.Read(new MemoryStream(Synthetic(flags:0)));
         Assert.Contains("in MM",mesh.Header);Assert.Equal("unknown",mesh.LengthUnits);Assert.False(mesh.MillimetresDeclared);
     }
+    [Fact]
+    public void LegacyLineBreaksInDescriptiveHeaderAreNotMalformedGeometry()
+    {
+        byte[] original=Synthetic(flags:0);byte[] header=Encoding.ASCII.GetBytes("COPYCAD historical header\n in MM");
+        var mesh=DmtMeshReader.Read(new MemoryStream([..header,0,..original[Metadata(original)..]]));
+        Assert.Equal("COPYCAD historical header\n in MM",mesh.Header);Assert.Equal(header,mesh.HeaderBytes);Assert.Equal("unknown",mesh.LengthUnits);Assert.Equal(1,mesh.TriangleCount);
+    }
+    [Fact]
+    public void OriginalHeaderBytesSurviveTheAsciiDisplayDecoder()
+    {
+        byte[] original=Synthetic();byte[] header=[65,128,9,13,10,255];
+        var mesh=DmtMeshReader.Read(new MemoryStream([..header,0,..original[Metadata(original)..]]));
+        Assert.Equal(header,mesh.HeaderBytes);Assert.Equal(3,mesh.VertexCount);
+    }
+    [Fact]
+    public void DocumentedMaximumLengthHeaderDoesNotRequireANullTerminator()
+    {
+        byte[] original=Synthetic();byte[] header=Enumerable.Repeat((byte)65,256).ToArray();
+        var mesh=DmtMeshReader.Read(new MemoryStream([..header,..original[Metadata(original)..]]));
+        Assert.Equal(header,mesh.HeaderBytes);Assert.Equal(new[]{0,1,2},mesh.Blocks[0].Triangles);
+    }
     [Theory][InlineData(65535)][InlineData(65536)]
     public void BlockVertexCountDeterminesIndexWidth(int vertices)
     {

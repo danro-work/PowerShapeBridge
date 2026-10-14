@@ -84,6 +84,8 @@ def qualify(binary, fixtures, stage, evidence):
     inputs['ushort_boundary'] = synthetic(vertices=65535)
     inputs['uint_boundary'] = synthetic(vertices=65536)
     inputs['unknown_units'] = synthetic(mm=False)
+    legacy = synthetic(single=True, normals=True, mm=False)
+    inputs['legacy_copycad_header'] = b'COPYCAD historical header\n in MM\0' + legacy[legacy.index(0) + 1:]
     rows = []
     for name, data in inputs.items():
         path = stage / (name + '.dmt')
