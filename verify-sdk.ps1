@@ -102,6 +102,7 @@ if($LASTEXITCODE -ne 0){throw 'Native DGK target SDK compatibility failed.'}
 & (Join-Path $taskRoot 'verify-geometry-export-verification.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-export-verifier') -EvidenceDirectory (Join-Path $taskEvidence 'geometry-export-verification')
 & (Join-Path $taskRoot 'verify-native-selection-reading.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-native-selection') -EvidenceDirectory (Join-Path $taskEvidence 'native-selection-reading')
 & (Join-Path $taskRoot 'verify-native-levels-reading.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-native-levels') -EvidenceDirectory (Join-Path $taskEvidence 'native-levels-reading')
+& (Join-Path $taskRoot 'verify-owned-level-move-plans.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-level-moves') -EvidenceDirectory (Join-Path $taskEvidence 'owned-level-move-plans')
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
 $taskInspectorConfig = Join-Path $taskFixture 'inspector.json'
@@ -164,6 +165,7 @@ $taskFiles += @('src\OwnedGeometryExportVerification.cs','src\OwnedGeometryExpor
 $taskFiles += @('src\NativeSelectionReading.cs','src\NativeSelectionReadingTests.cs','src\audit_native_selection_reading.py','verify-native-selection-reading.ps1','tools\ReadPowerShapeExportMetadata.cs')
 $taskFiles += @('src\NativeLevelReading.cs','src\NativeLevelReadingTests.cs','src\audit_native_levels_reading.py','verify-native-levels-reading.ps1','tools\ReadNativeLevelLayout.cs','tools\audit_native_levels_read.py')
 $taskFiles += @('src\PowerShapeMcp.Host\LevelReadTools.cs','tests\PowerShapeMcp.Tests\LevelReadToolsTests.cs','config\general-levels-read.json','tools\ReadNativeLevelRecipe.cs','tools\qualify_levels_live_stdio.py','tools\audit_levels_live_stdio.py')
+$taskFiles += @('src\OwnedLevelMovePlans.cs','src\OwnedLevelMovePlanTests.cs','src\audit_owned_level_move_plans.py','verify-owned-level-move-plans.ps1')
 $taskFiles += @('src\DgkBundleVerifier.cs','src\DgkBundleFiles.cs','src\DgkBundleFilesTests.cs','tools\audit_dgk_bundle.py')
 $taskFiles += @('src\OwnedDgkTargets.cs','src\OwnedDgkTargetTests.cs','src\audit_owned_dgk_targets.py','verify-owned-dgk-targets.ps1')
 $taskFiles += @('src\OwnedWorkingBytePin.cs','src\OwnedWorkingBytePinTests.cs')
