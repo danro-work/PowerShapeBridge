@@ -39,6 +39,13 @@ namespace PowerShapeBridge {
    return OwnedWorkplanePlans.Check(fixture.Root,Guid.NewGuid().ToString("N"),args,true,context);
   }
   internal static Dictionary<string,object> Verify(string root,string operation,string receiptSha,Context context) {
+   // Windows may give adjacent calls the same UTC tick. Generate genuinely
+   // later fake read receipts; do not weaken the production after-return guard.
+   var original=NativeJournal.VerifiedJson(Path.Combine(root,"responses",operation+".json"),receiptSha,16000000);
+   var returned=NativeJournal.ForVerification(root,operation,(string)original["planSha256"]).CommandReturnedUtc;
+   var clockWait=System.Diagnostics.Stopwatch.StartNew();
+   while(DateTime.UtcNow<=returned&&clockWait.ElapsedMilliseconds<1000)System.Threading.Thread.Sleep(1);
+   Need(DateTime.UtcNow>returned,"Synthetic read clock did not advance beyond command return.");
    string source=Guid.NewGuid().ToString("N"),listing=Guid.NewGuid().ToString("N");var observed=context.Observation();observed["bridgeRequestId"]=source;
    var windows=context.Windows();windows["state"]="documents_listed_verified";windows["timestampUtc"]=DateTime.UtcNow.ToString("o");
    string a=NativeJournal.Freeze(Path.Combine(root,"responses",source+".json"),observed),b=NativeJournal.Freeze(Path.Combine(root,"responses",listing+".json"),windows);
