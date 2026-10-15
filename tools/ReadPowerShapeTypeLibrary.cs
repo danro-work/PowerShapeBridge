@@ -10,6 +10,7 @@ using TYPEDESC=System.Runtime.InteropServices.ComTypes.TYPEDESC;
 using TYPEATTR=System.Runtime.InteropServices.ComTypes.TYPEATTR;
 using FUNCDESC=System.Runtime.InteropServices.ComTypes.FUNCDESC;
 using ELEMDESC=System.Runtime.InteropServices.ComTypes.ELEMDESC;
+using VARDESC=System.Runtime.InteropServices.ComTypes.VARDESC;
 
 // Offline metadata only. No COM application/document creation or running-object lookup.
 internal static class ReadPowerShapeTypeLibrary {
@@ -33,7 +34,7 @@ internal static class ReadPowerShapeTypeLibrary {
        try {
         var function=(FUNCDESC)Marshal.PtrToStructure(pointer,typeof(FUNCDESC));var names=new string[64];int found;info.GetNames(function.memid,names,names.Length,out found);
         string name=found>0?names[0]:"";
-        if(!new[]{"RotateItem","TranslateItem","CopyItems","ScaleItem","ScaleItems","TransformItem","GetItemBoundingBox","GetModelItems","GetItemData","GetSurfacePoints","GetCompCurvePointData","GetNurbSurfaceData","GetSurfacePointData","GetSolidOwner","Exec"}.Contains(name))continue;
+        if(!new[]{"RotateItem","TranslateItem","CopyItems","ScaleItem","ScaleItems","TransformItem","GetItemBoundingBox","GetModelItems","GetItemData","GetSurfacePoints","GetCompCurvePointData","GetNurbSurfaceData","GetSurfacePointData","GetSolidOwner","Exec","ActiveWorkplane","GetWorkplanes","GetWorkplaneInfo"}.Contains(name,StringComparer.OrdinalIgnoreCase))continue;
         var parameters=new List<object>();int size=Marshal.SizeOf(typeof(ELEMDESC));
         for(int p=0;p<function.cParams;p++) {
          var element=(ELEMDESC)Marshal.PtrToStructure(IntPtr.Add(function.lprgelemdescParam,p*size),typeof(ELEMDESC));
@@ -42,7 +43,16 @@ internal static class ReadPowerShapeTypeLibrary {
         methods.Add(new{name,dispatchId=function.memid,invokeKind=function.invkind.ToString(),returnType=Kind(function.elemdescFunc.tdesc),parameters});
        }finally{info.ReleaseFuncDesc(pointer);}
       }
-      types.Add(new{name=typeName,guid=type.guid.ToString(),kind=type.typekind.ToString(),methodCount=type.cFuncs,methods});
+      var variables=new List<object>();
+      for(int variable=0;variable<type.cVars;variable++) {
+       IntPtr pointer;info.GetVarDesc(variable,out pointer);
+       try {
+        var value=(VARDESC)Marshal.PtrToStructure(pointer,typeof(VARDESC));
+        string name,body,file;int help;info.GetDocumentation(value.memid,out name,out body,out help,out file);
+        if(string.Equals(name,"ActiveWorkplane",StringComparison.OrdinalIgnoreCase))variables.Add(new{name,dispatchId=value.memid,type=Kind(value.elemdescVar.tdesc),kind=value.varkind.ToString(),flags=value.wVarFlags,documentation=body});
+       }finally{info.ReleaseVarDesc(pointer);}
+      }
+      types.Add(new{name=typeName,guid=type.guid.ToString(),kind=type.typekind.ToString(),methodCount=type.cFuncs,methods,variableCount=type.cVars,variables});
      }finally{if(attributes!=IntPtr.Zero)info.ReleaseTypeAttr(attributes);Marshal.ReleaseComObject(info);}
     }
    }finally{Marshal.ReleaseComObject(library);}
