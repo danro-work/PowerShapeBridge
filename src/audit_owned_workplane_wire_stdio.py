@@ -31,6 +31,16 @@ def audit(folder):
         z,y=info[3:6],info[6:9];assert abs(sum(v*v for v in z)-1)<1e-9 and abs(sum(v*v for v in y)-1)<1e-9 and abs(sum(a*b for a,b in zip(z,y)))<1e-9
     assert r['adoption']['verificationOnly'] is True and r['adoption']['executionAuthorized'] is False
     assert r['rejectedVerificationHandleExecution']['isError'] is True
+    if 'boundCurrentVerifiedCopy' in r:
+        first=r['verification'];second=r['reconnectedVerification']
+        assert first['workingCopyHandle']!=second['workingCopyHandle'] and 0<first['workingCopyLifetimeSeconds']<=300 and 0<second['workingCopyLifetimeSeconds']<=300
+        for key in ('boundCurrentVerifiedCopy','boundReconnectedVerifiedCopy'):
+            bound=r[key];binding=bound['binding']
+            assert bound['state']=='working_document_bound_observed' and binding['copyId']==plan['copyId'] and binding['ownershipSha256']==plan['ownershipSha256']
+            assert sha(root/'documentbindings'/(binding['bindingId']+'.json'))==bound['bindingSha256'];checks+=1
+            observed=read(root/'responses'/(binding['inspectionRequestId']+'.json'))
+            assert len(observed['entities'])==len(plan['before']['entities'])+1 and sum(e['nativeTypeCode']==54 for e in observed['entities'])==1
+            assert observed['contextBefore']==observed['contextAfter']==[0,0]
     assert not (root/'workingcopies'/plan['copyId']/'mutation-fence.json').exists()
     contexts=sorted((root/'wire-contexts').glob('*.json'));last=read(contexts[-1]);assert last['creates']==last['activations']==1 and last['active']==0
     old=plan['before']['entities'];new=last['snapshot']['entities'];oldkeys={(v['nativeTypeCode'],v['nativeId']) for v in old}

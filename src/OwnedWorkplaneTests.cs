@@ -59,7 +59,7 @@ namespace PowerShapeBridge {
     var fixture=new OwnedOperationPlanTests.Fixture(true,true);var context=new Context(fixture);
     if(fault=="changed_document")((Dictionary<string,object>)context.Snapshot["model"])["id"]=99;
     var prepared=Prepare(fixture,context,fault);bool preRefusal=new[]{"nonorthogonal","bool","extra","changed_document"}.Contains(fault);
-    Dictionary<string,object> execution=null,verification=null;string operation=null,receiptSha=null;
+    Dictionary<string,object> execution=null,verification=null,historical=null;string operation=null,receiptSha=null;
     if(preRefusal)Need(Equals(prepared["state"],"owned_workplane_preparation_rejected")&&context.Creates==0&&context.Activations==0,"Unsafe preparation reached mutation.");
     else {
      Need(Equals(prepared["state"],"owned_workplane_prepared_observed"),"Synthetic preparation failed: "+Program.Json.Serialize(prepared));
@@ -70,6 +70,16 @@ namespace PowerShapeBridge {
      Need(context.Creates==1&&context.Activations==(new[]{"native_zero","native_bool"}.Contains(fault)?0:1),"Unexpected Create/Activate calls.");
      string fence=OwnedTranslation.FencePath(fixture.Root,(string)execution["copyId"]);Need(File.Exists(fence),"Execution lost matching fence.");
      if(!failed) {
+      if(fault=="control") {
+       var archived=Clone((Dictionary<string,object>)execution["plan"]);archived["createdCompositeId"]=execution["createdCompositeId"];
+       var archivedBefore=(Dictionary<string,object>)archived["before"];archivedBefore["timestampUtc"]=DateTime.UtcNow.AddHours(-2).ToString("o");
+       OwnedWorkplaneExecution.Postconditions(archived,context.Observation(),context);
+       var changed=context.Observation();EntitySets.Inventory(changed)[0]["name"]="Historical baseline must still reject changed geometry metadata";
+       bool rejected=false;try{OwnedWorkplaneExecution.Postconditions(archived,changed,context);}catch(InvalidDataException){rejected=true;}
+       Need(rejected&&context.Creates==1&&context.Activations==1,"Historical comparison lost content checking or replayed.");
+       Need(Program.Hash(Path.Combine(fixture.Root,"workplaneexecutions",operation+".json"))==(string)execution["planSha256"],"Historical comparison rewrote original evidence.");
+       historical=new Dictionary<string,object>{{"beforeTimestampUtc",archivedBefore["timestampUtc"]},{"matchingAccepted",true},{"changedRejected",true},{"originalPlanUnchanged",true}};
+      }
       if(fault=="verify_changed_document")((Dictionary<string,object>)context.Snapshot["model"])["id"]=99;
       verification=Verify(fixture.Root,operation,receiptSha,context);bool accepted=fault!="verify_changed_document";
       Need(Equals(verification["state"],accepted?"owned_workplane_verified_observed":"owned_workplane_verification_rejected")&&File.Exists(fence)!=accepted,"Incorrect independent verifier/fence result: "+Program.Json.Serialize(verification));
@@ -81,7 +91,7 @@ namespace PowerShapeBridge {
       }
      }
     }
-    rows.Add(new Dictionary<string,object>{{"fault",fault},{"root",fixture.Root},{"prepared",prepared},{"execution",execution},{"verification",verification},{"operationId",operation},{"receiptSha256",receiptSha},{"createCalls",context.Creates},{"worldActivationCalls",context.Activations}});
+    rows.Add(new Dictionary<string,object>{{"fault",fault},{"root",fixture.Root},{"prepared",prepared},{"execution",execution},{"verification",verification},{"operationId",operation},{"receiptSha256",receiptSha},{"createCalls",context.Creates},{"worldActivationCalls",context.Activations},{"historicalBaselineChecks",historical}});
    }
    Directory.CreateDirectory(Path.Combine(Program.Root,"reports"));File.WriteAllText(Path.Combine(Program.Root,"reports","owned-workplane-tests.json"),Program.Json.Serialize(new Dictionary<string,object>{{"state","passed"},{"cases",rows.ToArray()},{"cadConnectionAttempted",false}}));
    Console.WriteLine("PASS: "+rows.Count+" owned workplane controls/faults; fake callbacks, no CAD.");return rows.Count;

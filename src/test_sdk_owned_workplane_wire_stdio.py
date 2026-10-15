@@ -48,6 +48,9 @@ def run(args):
         active=next(d for d in listing['documents'] if d['isActive'])
         verified=ok('verify_owned_workplane',{'workplaneExecutionHandle':execution['workplaneExecutionHandle'],'candidateDocumentHandle':candidate['candidateDocumentHandle'],'activeDocumentHandle':active['documentHandle']})
         report['verification']=verified;assert verified['state']=='owned_workplane_verified_observed'
+        assert verified['workingCopyLifetimeSeconds']>0 and len(verified['workingCopyHandle'])==32
+        report['boundCurrentVerifiedCopy']=ok('bind_working_document',{'candidateDocumentHandle':candidate['candidateDocumentHandle'],'workingCopyHandle':verified['workingCopyHandle']})
+        assert report['boundCurrentVerifiedCopy']['binding']['copyId']==copy['copyId']
         no_writes=inventory(root);recovery=ok('inspect_operation_recovery',{'operationId':execution['operationId']})
         assert recovery['state']=='recovery_inspected_recorded' and recovery['assessment']=='historically_verified_requires_fresh_context'
         assert recovery['authoritativeSuccessReturnRecorded'] is True and recovery['executionAuthorized'] is False and inventory(root)==no_writes
@@ -63,6 +66,9 @@ def run(args):
         again=ok('verify_owned_workplane',{'workplaneExecutionHandle':adopted['workplaneExecutionHandle'],'candidateDocumentHandle':candidate['candidateDocumentHandle'],'activeDocumentHandle':active['documentHandle']})
         report.update(adoption=adopted,rejectedVerificationHandleExecution=rejected,reconnectedVerification=again,previousTranscript=old_transcript)
         assert again['state']=='owned_workplane_verified_observed'
+        assert again['workingCopyHandle']!=verified['workingCopyHandle']
+        report['boundReconnectedVerifiedCopy']=ok('bind_working_document',{'candidateDocumentHandle':candidate['candidateDocumentHandle'],'workingCopyHandle':again['workingCopyHandle']})
+        assert report['boundReconnectedVerifiedCopy']['binding']['copyId']==copy['copyId']
         for path,digest in seed['protectedHashes'].items():assert sha(Path(path))==digest,path
         contexts=sorted((root/'wire-contexts').glob('*.json'));last=read(contexts[-1])
         assert last['creates']==last['activations']==1 and last['active']==0
