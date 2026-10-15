@@ -93,7 +93,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.34.4-dev";
+        public const string ReleaseVersion = "0.34.5-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -153,6 +153,10 @@ namespace PowerShapeBridge
             }
             if(args.Length==1&&args[0]=="--native-levels-reading-test") {
                 try{NativeLevelReadingTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--owned-level-move-plan-test") {
+                try { OwnedLevelMovePlanTests.Run(); return 0; }
+                catch(Exception error) { Console.WriteLine("FAIL: " + error.Message); return 3; }
             }
             if(args.Length==1&&args[0]=="--geometry-export-verification-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
