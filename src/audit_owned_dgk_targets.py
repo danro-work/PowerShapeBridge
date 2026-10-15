@@ -42,9 +42,10 @@ def audit(stage):
     assert report['state'] == 'passed' and report['cadConnectionAttempted'] is False
     assert len(rows) == len(FAULTS) and {row['fault'] for row in rows} == FAULTS
     byte_rows = report['workingBytePinCases']
-    assert len(byte_rows) == 9 and {row['case'] for row in byte_rows} == {
+    assert len(byte_rows) == 14 and {row['case'] for row in byte_rows} == {
         'existing_writer_read', 'overwrite_blocked', 'append_blocked', 'truncate_detected_by_sha',
-        'rename_blocked', 'second_shared_reader', 'mapped_write_detected_by_sha', 'released_write_allowed', 'exclusive_lock_refused'}
+        'rename_blocked', 'second_shared_reader', 'mapped_write_detected_by_sha', 'released_write_allowed', 'exclusive_lock_refused',
+        'cfb_reserved_lock_compatible', 'cfb_data_overwrite_blocked', 'cfb_supported_last_byte_blocked', 'cfb_reserved_lock_preserved', 'empty_file_refused'}
     for row in byte_rows:
         assert row['state'] == 'passed' and row['cadConnectionAttempted'] is False
         path = Path(row['path']).resolve()

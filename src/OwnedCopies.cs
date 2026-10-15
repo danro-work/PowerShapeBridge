@@ -11,7 +11,7 @@ namespace PowerShapeBridge {
  // Saved-file byte copies only. No COM, activation, SaveAs, model close or geometry command.
  public static class OwnedCopies {
   public const string Qualification="Saved disk bytes only; unsaved CAD changes are not included. Copies are not opened or certified loadable by PowerShape. Ownership/file guard is not a guard in the executor COM context. Execution remains disabled.";
-  const long MaximumBytes=1073741824;
+  internal const long MaximumBytes=1073741824;
   [StructLayout(LayoutKind.Sequential)] struct NativeTime {public uint Low,High;}
   [StructLayout(LayoutKind.Sequential)] struct NativeInfo {public uint Attributes;public NativeTime Creation,Access,Write;public uint Volume,SizeHigh,SizeLow,Links,IndexHigh,IndexLow;}
   [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetFileInformationByHandle(SafeFileHandle handle,out NativeInfo info);
