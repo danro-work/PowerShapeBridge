@@ -1,7 +1,8 @@
 # К8: создание рабочей системы координат на собственной копии
 
-Состояние 15 октября 2026: код и целевые проверки готовы; реальное создание
-в PowerShape ещё НЕ проверено. Native 0.35.0-dev, SDK 0.41.0-dev.
+Состояние 15 октября 2026: одна реальная WORLD workplane создана и независимо
+проверена, включая новое SDK-подключение без replay. Native 0.35.0-dev,
+SDK 0.41.0-dev. STATUS-K8-OWNED-WORKPLANE-LIVE.md. Сохранение и общая К8 не приняты.
 
 ## Граница операции
 
@@ -55,8 +56,10 @@ claim, блокировку копии и неизменяемый журнал.
 66 целевых .NET проверок (24 workplane и 42 recovery), 12 native controls/faults,
 проверки допуска enabled/disabled, сквозной SDK→native file protocol с одной
 имитацией создания и переподключением без повтора — passed.
-Эти проверки не заменяют первый положительный контроль API PowerShape.
-Полная регрессия выполняется после реального результата согласно AGENTS.md.
+Положительный контроль API выполнен один раз по отдельному разрешению;
+55hash file audit и дополнительный passive COM read passed. После него141целевых
+.NET checks/0skips и полный workplane runner с transport faults/audits passed.
+Полная CI выполняется после этого реального результата согласно AGENTS.md.
 
 Документация Autodesk PowerShape 2023: [создание и автоматическая активация](https://help.autodesk.com/view/PWRS/2023/ENU/?guid=GUID-C39FE110-A305-47EF-8A41-C2EB2C5F084A),
 [рабочие системы координат](https://help.autodesk.com/view/PWRS/2023/ENU/?guid=GUID-78B0EC20-83D4-4572-810B-AA178064A51E).

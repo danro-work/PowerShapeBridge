@@ -31,3 +31,8 @@ $taskWire=Join-Path $EvidenceDirectory wire
 if($LASTEXITCODE -ne 0){throw 'Workplane SDK/native wire failed.'}
 & $PythonPath (Join-Path $PSScriptRoot src\audit_owned_workplane_wire_stdio.py) --evidence $taskWire --output (Join-Path $taskWire wire-audit.json)
 if($LASTEXITCODE -ne 0){throw 'Independent workplane wire audit failed.'}
+$taskFaults=Join-Path $EvidenceDirectory transport
+& $PythonPath (Join-Path $PSScriptRoot src\test_sdk_owned_workplane_transport.py) --stage $StageDirectory --host $HostPath --dotnet $DotnetPath --evidence $taskFaults
+if($LASTEXITCODE -ne 0){throw 'Workplane SDK transport faults failed.'}
+& $PythonPath (Join-Path $PSScriptRoot src\audit_owned_workplane_transport.py) --evidence $taskFaults --output (Join-Path $taskFaults transport-audit.json)
+if($LASTEXITCODE -ne 0){throw 'Independent workplane transport audit failed.'}
