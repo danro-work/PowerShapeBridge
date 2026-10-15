@@ -44,6 +44,16 @@ missing/foreign/extra claim, foreign/missing/retained fence, changed packet,
 wrong/ambiguous plan, oversizedplan и некорректную форму return.
 20существующих recovery cases также прошли. Все отказы сохраняют файлы.
 
+Первый PR CI на618d727 имел один baseline failure в прежнем Python protocol
+fixture: повторяющиеся request IDs могли попадать на ещё не удалённый pending
+entry после публикации ответа. Причина воспроизведена с контролируемым порядком:
+первый invalid request даёт−32602, повтор того же pending ID−32600, новый ID−32602.
+MCP2025-11-25 запрещает повтор ID в одном сеансе:
+https://modelcontextprotocol.io/specification/2025-11-25/basic#requests
+Исправлен только test client/invalid-case IDs; production server не менялся,
+проверка−32602 и все negative cases сохранены. Protocol test после fix passed.
+Evidence: evidence/K8-level-recovery-protocol-fix/reproduction.json.
+
 ## Ограничения
 
 Reader всегда оставляет `outcome=not_resolved_by_recorded_inspection`,

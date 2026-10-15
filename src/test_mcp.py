@@ -21,6 +21,7 @@ class Client:
         self.p = subprocess.Popen([sys.executable, str(SCRIPT), '--bridge-root', str(root), '--timeout', str(timeout)],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.lines = queue.Queue()
+        self.request_ids = set()
         def read():
             for line in self.p.stdout:
                 self.lines.put(json.loads(line))
@@ -32,6 +33,10 @@ class Client:
         if params is not None:
             value['params'] = params
         if id is not None:
+            # MCP forbids reusing an ID within the same session, including after
+            # an error response. This also catches fixture mistakes locally.
+            assert id not in self.request_ids, 'Test client reused an MCP request ID'
+            self.request_ids.add(id)
             value['id'] = id
         self.p.stdin.write(json.dumps(value).encode() + b'\n')
         self.p.stdin.flush()
@@ -126,28 +131,29 @@ def checks():
         e.init()
         e.send('tools/list', id=2)
         assert 'execute_translation' in {t['name'] for t in e.recv()['result']['tools']}
+        invalid_request_ids = iter(range(100, 1000))
         e.send('tools/call', {'name': 'prepare_recipe', 'arguments': {'recipeId': 'rotate_z', 'parameters': {'angleDegrees': 45.5}}}, 20)
         assert e.recv()['error']['code'] == -32602
         for bad_parameters in ({'levelNumber': True}, {'levelNumber': 899}, {'levelNumber': 910}, {'angleDegrees': 45}, {'levelNumber': 900, 'command': 'DELETE'}):
-            e.send('tools/call', {'name': 'prepare_recipe', 'arguments': {'recipeId': 'assign_test_level', 'parameters': bad_parameters}}, 23)
+            e.send('tools/call', {'name': 'prepare_recipe', 'arguments': {'recipeId': 'assign_test_level', 'parameters': bad_parameters}}, next(invalid_request_ids))
             assert e.recv()['error']['code'] == -32602
         for z_axis, y_axis, origin in (([0,0,0],[0,1,0],[0,0,0]),([0,0,1],[0,0,1],[0,0,0]),([0,0,2],[0,1,0],[0,0,0]),([0,0,1],[0,1,0],[101,0,0]),([False,0,1],[0,1,0],[0,0,0])):
-            e.send('tools/call', {'name':'prepare_recipe','arguments':{'recipeId':'create_workplane_world','parameters':{'originWorldMm':origin,'zAxis':z_axis,'yAxis':y_axis}}},25)
+            e.send('tools/call', {'name':'prepare_recipe','arguments':{'recipeId':'create_workplane_world','parameters':{'originWorldMm':origin,'zAxis':z_axis,'yAxis':y_axis}}},next(invalid_request_ids))
             assert e.recv()['error']['code'] == -32602
         for factor in (True,0,-1,1,2.1,'1.1'):
-            e.send('tools/call',{'name':'prepare_recipe','arguments':{'recipeId':'scale_uniform_world','parameters':{'scaleFactor':factor}}},27)
+            e.send('tools/call',{'name':'prepare_recipe','arguments':{'recipeId':'scale_uniform_world','parameters':{'scaleFactor':factor}}},next(invalid_request_ids))
             assert e.recv()['error']['code']==-32602
         for invalid in ({'command':'DELETE'},{'operationId':'a'*32},{'scaleFactor':1.1}):
-            e.send('tools/call',{'name':'prepare_recipe','arguments':{'recipeId':'convert_test_solid_to_surfaces','parameters':invalid}},29)
+            e.send('tools/call',{'name':'prepare_recipe','arguments':{'recipeId':'convert_test_solid_to_surfaces','parameters':invalid}},next(invalid_request_ids))
             assert e.recv()['error']['code']==-32602
         for invalid in ({'offsetDistanceMm':2},{'targetSide':0},{'command':'DELETE'}):
-            e.send('tools/call',{'name':'prepare_recipe','arguments':{'recipeId':'offset_test_top_surface_1mm','parameters':invalid}},32)
+            e.send('tools/call',{'name':'prepare_recipe','arguments':{'recipeId':'offset_test_top_surface_1mm','parameters':invalid}},next(invalid_request_ids))
             assert e.recv()['error']['code']==-32602
         for internal in ('qualify_test_dgk_roundtrip','verify_test_dgk_saved_copy','cleanup_failed_test_dgk_source','qualify_test_section_z10','qualify_test_section_z0','verify_existing_slice_batch'):
-            e.send('tools/call',{'name':'prepare_recipe','arguments':{'recipeId':internal,'parameters':{}}},33)
+            e.send('tools/call',{'name':'prepare_recipe','arguments':{'recipeId':internal,'parameters':{}}},next(invalid_request_ids))
             assert e.recv()['error']['code']==-32602
         for parameters in ({'firstZMm':0,'lastZMm':18,'stepMm':8},{'firstZMm':2,'lastZMm':20,'stepMm':9},{'firstZMm':2,'lastZMm':18,'stepMm':7},{'firstZMm':2,'lastZMm':18,'stepMm':4},{'firstZMm':True,'lastZMm':10,'stepMm':1},{'firstZMm':0.10000001,'lastZMm':10,'stepMm':1},{'firstZMm':2,'lastZMm':18,'stepMm':8,'command':'DELETE'}):
-            e.send('tools/call',{'name':'prepare_recipe','arguments':{'recipeId':'slice_test_cube_xy','parameters':parameters}},34)
+            e.send('tools/call',{'name':'prepare_recipe','arguments':{'recipeId':'slice_test_cube_xy','parameters':parameters}},next(invalid_request_ids))
             assert e.recv()['error']['code']==-32602
         e.send('tools/call', {'name': 'prepare_translation', 'arguments': {'deltaWorldMm': [True, 0, 0]}}, 3)
         assert e.recv()['error']['code'] == -32602
