@@ -1,9 +1,31 @@
 # К8 — проверка переноса после переподключения
 
-Source SDK0.40.1/native0.34.7, ветка codex/level-move-reconnect-verification.
-Изменения пока не опубликованы. Frozen package PR53/b94722f (SDK0.40.0/native34.7)
-прошёл все4GitHubCI; отдельное разрешение на backup/update и один General->Surfaces
-перенос запрошено, ответ пока не получен. Новый source не входит в этот пакет.
+Актуально: SDK0.40.1/native0.34.8, ветка codex/level-move-reconnect-cfb,
+на базе исправления CFB в draft PR54/c194a20. Native0.34.8 уже установлен
+с разрешения пользователя. Один General→Surfaces перенос выполнен;
+его разрешение использовано, новый перенос не выполнялся.
+
+Реальная проверка после нового STDIO подключения прошла на изолированном SDK:
+adoption исходного execution3b1a8dc3bd55434d938672fe51bc5c61 не создала
+native artifacts/queue request. Verification-only handle отклонён локально
+при передаче в execute до очереди. Свежие candidate/listing/levels и native
+verifier повторно подтвердили Surfaces, пустое выделение, семь окон и свойства.
+Исходный журнал сохранил те же6events/один вызов,20контрольных hashes прежние.
+Evidence: `evidence/K8-live-level-reconnect/result.json` и отдельный file-only
+`evidence/K8-live-level-reconnect/independent-audit.json` — passed.
+
+После реального результата:44focused tests/0skips passed. Пять обычных и пять
+reconnect STDIO/native scenarios passed, каждый комплект48requests/341hashes.
+Evidence: `evidence/K8-reconnect-cfb-after-live-focused/level-reconnect-cfb.trx`;
+`evidence/K8-reconnect-cfb-after-live-wire/wire-audit.json` и `reconnect/wire-audit.json`.
+Первый packet_tamper fixture остановился по8s timeout ещё при synthetic prepare;
+failure сохранён в first-attempt-timeout.txt. Четыре завершённых случая не
+перезапускались; недостающий случай прошёл на новой synthetic fixture identity,
+после чего выполнен отдельный reconnect комплект. Реальный CAD не затрагивался.
+
+Сохранение/переоткрытие результата не выполнено. Следующий конкретный сценарий
+в K8-LIVE-LEVEL-SAVED-RESULT-SCENARIO.md; passivepreflight passed, без SaveAs/OPEN.
+Ниже описание реализации и историческая квалификация исходной ветки f6ac392.
 
 Добавлен full-only `adopt_owned_level_move_execution` в OwnedLevelMoveTools.Create,
 уже зарегистрированный через ToolCatalog. Он выдаёт opaque handle только для
