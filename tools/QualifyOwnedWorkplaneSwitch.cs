@@ -113,6 +113,7 @@ internal static class QualifyOwnedWorkplaneSwitch {
   internal object Call(string type,string name,params object[] args){return Invoke(Assembly.GetType("PowerShapeBridge."+type,true),name,null,args);}
   internal string Digest(Dictionary<string,object> value){return (string)Call("EntitySets","ObservedDigest",value);}
   internal IDisposable Hold(string copy,string ownership){return (IDisposable)Call("OwnedCopies","Hold",Root,copy,ownership);}
+  internal void Recheck(IDisposable lease){Invoke(lease.GetType(),"Recheck",lease);}
   internal string Saved(Dictionary<string,object> windows){return Json.Serialize(Call("WorkingCopyOpen","SavedHashes",windows));}
   internal object Journal(string root,string id,string sha){return Activator.CreateInstance(journal,All,null,new object[]{root,id,sha},null);}
   internal void Append(object value,string state,Dictionary<string,object> details){Invoke(journal,"Append",value,state,details);}
@@ -151,7 +152,7 @@ internal static class QualifyOwnedWorkplaneSwitch {
     var baseline=Capture(context);var observed=Map(baseline["observation"]);Empty(observed,0);Need(Equals(baseline["activeRaw"],0)&&SamePath((string)Map(observed["model"])["path"],working),"Expected newly reopened owned model must be active in WORLD.");
     Need(Equals(Map(baseline["windows"])["windowCount"],9),"Expected nine existing windows.");Need(Near(Numbers(baseline["frameRaw"],9),Numbers(audit["workplaneWorldInfo"],9)),"Expected saved frame differs.");
     var sourceRead=Load(independentSource);Need(native.Digest(observed)==native.Digest(Map(sourceRead["after"])),"Current observed owned model differs from independently saved result.");
-    string saved=native.Saved(Map(baseline["windows"]));DateTime deadline=DateTime.UtcNow.AddSeconds(120);Action guard=()=>{Need(DateTime.UtcNow<deadline,"Qualification guard expired; no further setter allowed.");Need(Hash(worker)==WorkerSha&&Hash(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"bridge.config.json"))==Hash(Path.Combine(root,"bridge.config.json")),"Runtime or diagnostic configuration changed.");foreach(var p in protectedHashes)Need(Hash(p.Key)==(string)p.Value,"Protected file changed.");Need(saved==native.Saved(context.Windows()),"Existing saved document bytes changed.");context.Confirm();};
+    string saved=native.Saved(Map(baseline["windows"]));DateTime deadline=DateTime.UtcNow.AddSeconds(120);Action guard=()=>{Need(DateTime.UtcNow<deadline,"Qualification guard expired; no further setter allowed.");native.Recheck(lease);Need(Hash(worker)==WorkerSha&&Hash(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"bridge.config.json"))==Hash(Path.Combine(root,"bridge.config.json")),"Runtime or diagnostic configuration changed.");foreach(var p in protectedHashes)Need(Hash(p.Key)==(string)p.Value,"Protected file changed.");Need(saved==native.Saved(context.Windows()),"Existing saved document bytes changed.");context.Confirm();};
     guard();Need(native.Digest(observed)==native.Digest(context.Observation()),"Current context changed before action.");report["before"]=baseline;
     if(!execute){report["state"]="owned_workplane_switch_read_only_ready";return 0;}
     var plan=new Dictionary<string,object>{{"schemaVersion",1},{"operationId",operation},{"operation","qualification_existing_workplane_then_world"},{"copyId",copy},{"ownershipSha256",owner},{"before",baseline},{"sourceAuditSha256",Hash(source)},{"approvalSha256",Hash(approval)},{"maximumSetterCalls",2},{"noAutomaticRecovery",true},{"createdUtc",DateTime.UtcNow.ToString("o")}};
@@ -195,6 +196,7 @@ internal static class QualifyOwnedWorkplaneSwitch {
   string fence=Path.Combine(native.Root,"workingcopies",(string)report["copyId"],"mutation-fence.json");
   using(var serial=new FileStream(Path.Combine(native.Root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None))
   using(var lease=native.Hold((string)report["copyId"],(string)report["ownershipSha256"])){
+   native.Recheck(lease);
    string working=(string)lease.GetType().GetField("WorkingPath",All).GetValue(lease);var model=Map(Map(before["observation"])["model"]);var activeWindow=Map(Map(before["windows"])["activeWindow"]);Need(SamePath((string)model["path"],working)&&SamePath((string)activeWindow["modelPath"],working)&&Equals(activeWindow["modelId"],model["id"]),"Verified evidence is not the leased owned working document.");
    foreach(var item in Map(report["protectedHashes"]))Need(Hash(item.Key)==(string)item.Value,"Protected file changed before independent verification.");
    Need(Hash((string)report["claimPath"])==(string)report["claimSha256"],"Original one-use claim changed.");var claim=Load((string)report["claimPath"]);Need(claim.Count==5&&Equals(claim["operationId"],operation)&&Equals(claim["planSha256"],sha)&&Equals(claim["approvalSha256"],plan["approvalSha256"])&&Equals(claim["automaticReplayForbidden"],true)&&SamePath((string)claim["qualificationRoot"],folder),"Claim policy differs.");
@@ -203,6 +205,7 @@ internal static class QualifyOwnedWorkplaneSwitch {
    var returned=(Dictionary<string,object>)type.GetField("CommandReturnedDetails",All).GetValue(journal);Need(returned.Count==5&&Equals(returned["nativeRequestId"],operation)&&Equals(returned["activationReturnSha256"],pair["activationReturnSha256"])&&Equals(returned["worldReturnSha256"],pair["worldReturnSha256"])&&Equals(returned["worldActivationReturned"],true)&&Equals(returned["setterCalls"],2),"Original authoritative return differs.");
    var evidence=new[]{new Dictionary<string,object>{{"requestId",operation},{"sha256",Hash(resultPath)}},new Dictionary<string,object>{{"requestId",operation},{"sha256",Hash(readPath)}}};
    native.Append(journal,"succeeded_verified",new Dictionary<string,object>{{"evidence",evidence},{"noCommandReplay",true},{"qualificationOnly",true}});
+   native.Recheck(lease);
    Need(Hash(fence)==(string)report["executionFenceSha256"],"Fence changed during verification.");File.Delete(fence);
    Freeze(output,new{state="owned_workplane_switch_qualification_verified",operationId=operation,resultSha256=Hash(resultPath),independentReadSha256=Hash(readPath),recordedJournalState="succeeded_verified",matchingCopyFenceReleased=true,noCommandReplay=true,protectedHashChecks=Map(report["protectedHashes"]).Count,scope="one existing workplane then WORLD; native API qualification only, not a published MCP tool or saved active-context claim",timestampUtc=DateTime.UtcNow.ToString("o")});
   }
