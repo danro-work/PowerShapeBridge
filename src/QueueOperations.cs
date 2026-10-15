@@ -11,6 +11,10 @@ namespace PowerShapeBridge {
   Config c=Program.ReadConfig();
   if(r.Count!=3||!Equals(r["requestId"],id)||!r.ContainsKey("arguments"))throw new ArgumentException("Invalid envelope.");
   var a=r["arguments"] as Dictionary<string,object>;if(a==null)throw new ArgumentException("Invalid arguments.");string op=(string)r["operation"];
+  if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedLevelMoveOperations.Recipes.Contains(a["recipeId"] as string)) {
+   if(!c.IsGeneralCore||!c.ownedLevelMovesExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned level move disabled or invalid envelope.");
+   OwnedLevelMoveOperations.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;
+  }
   if(c.IsGeneralCore&&c.ownedRotationPlansExperimental&&op=="recipe.prepare"&&a.Count==2&&Equals(a.ContainsKey("recipeId")?a["recipeId"]:null,"prepare_owned_rotation")&&a.ContainsKey("parameters")&&a["parameters"] is Dictionary<string,object>){OwnedRotationPlans.Validate((Dictionary<string,object>)a["parameters"]);return;}
   if(c.IsGeneralCore&&c.ownedUniformScalePlansExperimental&&op=="recipe.prepare"&&a.Count==2&&Equals(a.ContainsKey("recipeId")?a["recipeId"]:null,"prepare_owned_uniform_scale")&&a.ContainsKey("parameters")&&a["parameters"] is Dictionary<string,object>){OwnedUniformScalePlans.Validate((Dictionary<string,object>)a["parameters"]);return;}
   if(c.IsGeneralCore&&c.ownedDgkTargetsExperimental&&op=="recipe.prepare"&&a.Count==2&&Equals(a.ContainsKey("recipeId")?a["recipeId"]:null,"prepare_owned_dgk_export")&&a.ContainsKey("parameters")&&a["parameters"] is Dictionary<string,object>){OwnedDgkTargets.Validate((Dictionary<string,object>)a["parameters"]);return;}
@@ -60,6 +64,7 @@ namespace PowerShapeBridge {
  Config c=Program.ReadConfig();Guid g;if(!Guid.TryParseExact(id,"N",out g))throw new ArgumentException("Invalid request ID.");
  var request=FileRequests.Parse(id,File.ReadAllText(Path.Combine(Program.Root,"requests",id+".json.processing"),Encoding.UTF8));
  var readArgs=(Dictionary<string,object>)request["arguments"];
+ if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedLevelMoveOperations.Recipes.Contains(readArgs["recipeId"] as string))return OwnedLevelMoveOperations.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&new[]{"prepare_checkpoint_recovery","create_checkpoint_working_copy"}.Contains(readArgs["recipeId"] as string))return CheckpointRecovery.Run(id,(Dictionary<string,object>)readArgs["parameters"],Equals(readArgs["recipeId"],"create_checkpoint_working_copy"));
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"prepare_owned_save_as"))return OwnedSaveTargets.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"prepare_owned_saved_reopen"))return OwnedSavedReopen.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
@@ -83,7 +88,7 @@ namespace PowerShapeBridge {
   if(((Dictionary<string,object>)readArgs["parameters"]).Count!=0)throw new ArgumentException("Document listing takes no parameters.");return DocumentSession.List();
  }
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"inspect_model_levels")) {
-  if(!c.IsGeneralCore||!c.levelReadingExperimental||((Dictionary<string,object>)readArgs["parameters"]).Count!=0)throw new ArgumentException("Passive level reading disabled or unexpected parameters.");return NativeLevelReading.Run();
+  if(!c.IsGeneralCore||!c.levelReadingExperimental||((Dictionary<string,object>)readArgs["parameters"]).Count!=0)throw new ArgumentException("Passive level reading disabled or unexpected parameters.");var levels=NativeLevelReading.Run();levels["bridgeRequestId"]=id;return levels;
  }
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"activate_document"))return DocumentSession.Activate(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"inspect_active_model"))

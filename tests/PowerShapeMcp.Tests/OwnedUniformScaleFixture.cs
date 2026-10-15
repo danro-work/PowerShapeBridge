@@ -11,8 +11,9 @@ internal sealed class OwnedUniformScaleFixture
     internal readonly CandidateStore Candidates;internal readonly WorkingCopyStore Copies;internal readonly DocumentBindingStore Bindings;
     internal readonly UniformScalePlanStore Plans;internal readonly OwnedUniformScaleStore Store;
     internal readonly JsonObject Source,BindingPacket,Parameters;internal readonly string Plan,Binding,Working,Checkpoint,OwnerPath;
-    internal OwnedUniformScaleFixture(bool mixed=false)
+    internal OwnedUniformScaleFixture(bool mixed=false,DateTimeOffset? utc=null,Action<JsonObject>? sourceSetup=null)
     {
+        if(utc is not null)Utc=utc.Value;
         Candidates=new(()=>Time,()=>Utc);Copies=new(()=>Time,()=>Utc);Bindings=new(Root,Candidates,Copies,()=>Time,()=>Utc);
         Plans=new(Root,Candidates,()=>Time,()=>Utc);Store=new(Root,Plans,Bindings,()=>Time,()=>Utc);
         var copyId=Guid.NewGuid().ToString("N");Working=FileArtifacts.FixedPath(Root,"workingcopies",copyId,"Working_"+copyId+".psmodel");
@@ -26,6 +27,7 @@ internal sealed class OwnedUniformScaleFixture
         OwnerPath=FileArtifacts.FixedPath(Root,"workingcopies",copyId,"ownership.json");var ownerSha=ArtifactProof.Freeze(Root,Path.GetRelativePath(Root,OwnerPath),owner);
         var copy=Copies.Issue(new(){["state"]="working_copy_prepared_disk",["copyId"]=copyId,["bridgeRequestId"]=copyId,["ownershipSha256"]=ownerSha,["timestampUtc"]=LeaseTime.Format(Utc)})["workingCopyHandle"]!.GetValue<string>();
         Source=new SafetyFixture().Source.DeepClone().AsObject();Source["timestampUtc"]=LeaseTime.Format(Utc);Source["model"]!["path"]=Working;
+        sourceSetup?.Invoke(Source);
         var sourceId=Guid.NewGuid().ToString("N");Source["bridgeRequestId"]=sourceId;var sourceSha=ArtifactProof.Freeze(Root,"responses/"+sourceId+".json",Source);
         var document=Candidates.Issue(Source,sourceSha)["candidateDocumentHandle"]!.GetValue<string>();
         var bindingId=Guid.NewGuid().ToString("N");var bindingParameters=Bindings.PrepareParameters(document,copy);BindingPacket=bindingParameters.DeepClone().AsObject();

@@ -104,6 +104,7 @@ if($LASTEXITCODE -ne 0){throw 'Native DGK target SDK compatibility failed.'}
 & (Join-Path $taskRoot 'verify-native-levels-reading.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-native-levels') -EvidenceDirectory (Join-Path $taskEvidence 'native-levels-reading')
 & (Join-Path $taskRoot 'verify-owned-level-move-plans.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-level-moves') -EvidenceDirectory (Join-Path $taskEvidence 'owned-level-move-plans')
 & (Join-Path $taskRoot 'verify-owned-level-move-execution.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-level-execution') -EvidenceDirectory (Join-Path $taskEvidence 'owned-level-move-execution')
+& (Join-Path $taskRoot 'verify-owned-level-move-wire.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-level-wire') -EvidenceDirectory (Join-Path $taskEvidence 'owned-level-move-wire')
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
 $taskInspectorConfig = Join-Path $taskFixture 'inspector.json'
@@ -168,6 +169,7 @@ $taskFiles += @('src\NativeLevelReading.cs','src\NativeLevelReadingTests.cs','sr
 $taskFiles += @('src\PowerShapeMcp.Host\LevelReadTools.cs','tests\PowerShapeMcp.Tests\LevelReadToolsTests.cs','config\general-levels-read.json','tools\ReadNativeLevelRecipe.cs','tools\qualify_levels_live_stdio.py','tools\audit_levels_live_stdio.py')
 $taskFiles += @('src\OwnedLevelMovePlans.cs','src\OwnedLevelMovePlanTests.cs','src\audit_owned_level_move_plans.py','verify-owned-level-move-plans.ps1')
 $taskFiles += @('src\LevelMovePostconditions.cs','src\OwnedLevelMoveExecution.cs','src\OwnedLevelMoveExecutionTests.cs','src\audit_owned_level_move_execution.py','verify-owned-level-move-execution.ps1')
+$taskFiles += @('src\OwnedLevelMoveOperations.cs','src\OwnedLevelMoveWireFixture.cs','src\PowerShapeMcp.Host\OwnedLevelMoveStore.cs','src\PowerShapeMcp.Host\OwnedLevelMoveTools.cs','tests\PowerShapeMcp.Tests\OwnedLevelMoveStoreTests.cs','config\general-owned-level-moves.json','src\test_sdk_owned_level_move_wire_stdio.py','src\audit_owned_level_move_wire_stdio.py','verify-owned-level-move-wire.ps1')
 $taskFiles += @('src\DgkBundleVerifier.cs','src\DgkBundleFiles.cs','src\DgkBundleFilesTests.cs','tools\audit_dgk_bundle.py')
 $taskFiles += @('src\OwnedDgkTargets.cs','src\OwnedDgkTargetTests.cs','src\audit_owned_dgk_targets.py','verify-owned-dgk-targets.ps1')
 $taskFiles += @('src\OwnedWorkingBytePin.cs','src\OwnedWorkingBytePinTests.cs')

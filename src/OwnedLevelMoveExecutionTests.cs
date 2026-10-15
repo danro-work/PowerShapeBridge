@@ -12,6 +12,7 @@ namespace PowerShapeBridge {
   internal sealed class Context : OwnedLevelMoveExecution.IContext {
    internal Dictionary<string,object> Snapshot,Listing;internal string Fault,WorkingPath;internal bool Moved,DoubleFlags;internal int Calls;internal double BoundShift;
    internal Context(OwnedOperationPlanTests.Fixture fixture){WorkingPath=fixture.Working;Snapshot=Clone(fixture.Snapshot);Listing=Clone(fixture.Listing);Snapshot["levelsContainingEntities"]=new[]{new Dictionary<string,object>{{"number",0},{"name","General"},{"activeRaw",1}}};}
+   internal Context(Dictionary<string,object> snapshot,Dictionary<string,object> listing,string working){WorkingPath=working;Snapshot=Clone(snapshot);Listing=Clone(listing);}
    public Dictionary<string,object> Observation(){if(Moved&&Fault=="post_read_error"){Fault=null;throw new IOException("Own injected lost post-read.");}var result=Clone(Snapshot);result["timestampUtc"]=DateTime.UtcNow.ToString("o");return result;}
    public Dictionary<string,object> Windows(){return Clone(Listing);}
    public void ConfirmDocument(){if(Fault=="retained")throw new IOException("Own retained context refusal.");}
