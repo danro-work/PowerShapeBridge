@@ -105,6 +105,7 @@ if($LASTEXITCODE -ne 0){throw 'Native DGK target SDK compatibility failed.'}
 & (Join-Path $taskRoot 'verify-owned-level-move-plans.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-level-moves') -EvidenceDirectory (Join-Path $taskEvidence 'owned-level-move-plans')
 & (Join-Path $taskRoot 'verify-owned-level-move-execution.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-level-execution') -EvidenceDirectory (Join-Path $taskEvidence 'owned-level-move-execution')
 & (Join-Path $taskRoot 'verify-owned-level-move-wire.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-level-wire') -EvidenceDirectory (Join-Path $taskEvidence 'owned-level-move-wire')
+& (Join-Path $taskRoot 'verify-owned-workplanes.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-workplanes') -EvidenceDirectory (Join-Path $taskEvidence 'owned-workplanes')
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
 $taskInspectorConfig = Join-Path $taskFixture 'inspector.json'
@@ -177,6 +178,7 @@ $taskFiles += @('src\OwnedDgkExport.cs','src\OwnedDgkExportTests.cs','src\audit_
 $taskFiles += @('src\OwnedDgkExportVerification.cs','src\OwnedDgkExportVerificationTests.cs','src\audit_owned_dgk_verification.py','verify-owned-dgk-verification.ps1')
 $taskFiles += @('tools\NativeFixtureCheck\DgkTargetCheck.cs','config\general-owned-dgk-targets.json')
 $taskFiles += @('src\OwnedDgkTargetWireFixture.cs','src\test_sdk_owned_dgk_wire_stdio.py','src\audit_owned_dgk_wire_stdio.py','verify-owned-dgk-wire.ps1')
+$taskFiles += @('src\WorkplaneFrame.cs','src\OwnedWorkplanePlans.cs','src\OwnedWorkplaneExecution.cs','src\OwnedWorkplaneOperations.cs','src\OwnedWorkplaneTests.cs','src\OwnedWorkplaneWireFixture.cs','src\PowerShapeMcp.Host\OwnedWorkplaneStore.cs','src\PowerShapeMcp.Host\OwnedWorkplaneTools.cs','tests\PowerShapeMcp.Tests\OwnedWorkplaneTests.cs','config\general-owned-workplanes.json','verify-owned-workplanes.ps1','src\test_sdk_owned_workplane_wire_stdio.py','src\audit_owned_workplanes.py','src\audit_owned_workplane_wire_stdio.py','src\test_sdk_owned_workplane_transport.py','src\audit_owned_workplane_transport.py')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'
