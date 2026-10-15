@@ -4,7 +4,11 @@
 40 isolated cases / 10 controls / 30 refusals и independent audit1177hashchecks
 passed. Общая проверка sourceSDK39.8/native34.5 завершилась успешно:
 678.NET/531native/175compatibility/Inspector; evidence/K8-level-move-sdk-final.
-Исполнение, публичный MCP-инструмент и живая квалификация ещё не реализованы.
+Внутренний executor и independent verifier реализованы следующим блоком,
+native `ComContext.SetItemsLevel` добавлен, но не вызывался на PowerShape.
+Итоговая матрица42cases/1928audit hashes и общая regression
+678.NET/531native/175compatibility/Inspector passed. Нет публичного MCP-инструмента,
+queue admission или живой квалификации.
 Этот документ не разрешает изменение CAD.
 
 ## Первый принимаемый сценарий
@@ -38,6 +42,8 @@ composite не используется без текущего сопостав
 Параметры: `targetLevelNumber`, ожидаемые имя и raw-флаг активности этого слоя,
 `selectionAfterPolicy=cleared_by_documented_api`, `mode=move_in_place`.
 Тело уже на целевом слое отклоняется как отсутствие изменения.
+План должен показывать видимость слоя назначения: при activeRaw=0 перенесённый
+объект может скрыться. Исполнитель не включает слой автоматически.
 Подготовка не вызывает SetItemsLevel, не меняет выделение и выдаёт
 `executionEnabled=false`, `nativeProviderQualified=false` до приёмки провайдера.
 Сейчас доступна только внутренняя `OwnedLevelMovePlans.Check`: режимы
