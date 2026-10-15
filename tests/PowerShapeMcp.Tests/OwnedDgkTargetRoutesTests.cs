@@ -34,7 +34,14 @@ public sealed class OwnedDgkTargetRoutesTests
         {
             var folder=Path.Combine(Data.Root,"requests");string? path=null;
             for(var n=0;n<500&&path is null;n++){path=Directory.Exists(folder)?Directory.GetFiles(folder,"*.json").SingleOrDefault():null;if(path is null)await Task.Delay(10,stop.Token);}
-            Assert.NotNull(path);var request=JsonNode.Parse(File.ReadAllText(path!))!.AsObject();Assert.Equal("prepare_owned_dgk_export",request["arguments"]!["recipeId"]!.GetValue<string>());
+            Assert.NotNull(path);string requestText;
+            // Publication may briefly retain a Windows rename/scan handle.
+            // Re-read only this immutable request; never invoke the handler twice.
+            for(int retry=0;;retry++) {
+                try{requestText=File.ReadAllText(path!);break;}
+                catch(IOException error)when(((error.HResult&0xffff) is 32 or 33)&&retry<99){await Task.Delay(10,stop.Token);}
+            }
+            var request=JsonNode.Parse(requestText)!.AsObject();Assert.Equal("prepare_owned_dgk_export",request["arguments"]!["recipeId"]!.GetValue<string>());
             Assert.True(JsonNode.DeepEquals(Data.Request,request["arguments"]!["parameters"]));var id=request["requestId"]!.GetValue<string>();
             var reply=Data.Native(id);if(tamper)reply["nativeProviderQualified"]=true;
             Directory.CreateDirectory(Path.Combine(Data.Root,"responses"));File.WriteAllText(Path.Combine(Data.Root,"responses",id+".json"),reply.ToJsonString());

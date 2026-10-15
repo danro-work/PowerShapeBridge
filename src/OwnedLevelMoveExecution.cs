@@ -63,7 +63,7 @@ namespace PowerShapeBridge {
   internal static Dictionary<string,object> Verify(string root,Dictionary<string,object> arguments,IReadContext context) {
    var result=Result("owned_level_move_verification_rejected");OwnedOperationPlans.Proofs fenceProofs=null;
    try {
-    Need(arguments!=null&&arguments.Count==11&&arguments.ContainsKey("levelInspectionRequestId")&&arguments.ContainsKey("levelInspectionSha256")&&EntitySets.Hex(arguments["levelInspectionRequestId"],32)&&EntitySets.Hex(arguments["levelInspectionSha256"],64),"Exact independent level verification arguments required.");
+    ValidateVerification(arguments);
     var args=Clone(arguments);var common=args.Where(pair=>!pair.Key.StartsWith("levelInspection",StringComparison.Ordinal)).ToDictionary(pair=>pair.Key,pair=>pair.Value);OwnedTranslation.ValidateVerification(common);
     string id=(string)args["executionRequestId"];
     using(var serial=new FileStream(Path.Combine(root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None))
@@ -105,6 +105,10 @@ namespace PowerShapeBridge {
    }catch(Exception error){result["error"]=error.Message;result["recoveryInstructions"]="Never replay the command or clear/repair the fence automatically; inspect journal and immutable receipts.";}
    finally{if(fenceProofs!=null)fenceProofs.Dispose();}
    result["timestampUtc"]=DateTime.UtcNow.ToString("o");return result;
+  }
+  internal static void ValidateVerification(Dictionary<string,object> arguments) {
+   Need(arguments!=null&&arguments.Count==11&&arguments.ContainsKey("levelInspectionRequestId")&&arguments.ContainsKey("levelInspectionSha256")&&EntitySets.Hex(arguments["levelInspectionRequestId"],32)&&EntitySets.Hex(arguments["levelInspectionSha256"],64),"Exact independent level verification arguments required.");
+   OwnedTranslation.ValidateVerification(arguments.Where(pair=>!pair.Key.StartsWith("levelInspection",StringComparison.Ordinal)).ToDictionary(pair=>pair.Key,pair=>pair.Value));
   }
  }
 }

@@ -26,6 +26,7 @@ public sealed class BridgeSession : IDisposable
     internal UniformScalePlanStore ScalePlans { get; }
     internal OwnedUniformScaleStore OwnedScales { get; }
     internal OwnedDgkTargetStore DgkTargets { get; }
+    internal OwnedLevelMoveStore LevelMoves { get; }
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     public bool LevelReadingEnabled { get; }
@@ -52,6 +53,7 @@ public sealed class BridgeSession : IDisposable
         ScalePlans=new(options.BridgeRoot,Candidates,clock,utcClock);
         OwnedScales=new(options.BridgeRoot,ScalePlans,Bindings,clock,utcClock);
         DgkTargets=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
+        LevelMoves=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         var config=Options.ReadConfiguration();
         LevelReadingEnabled=config.TryGetProperty("levelReadingExperimental",out var levelFlag)&&levelFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
@@ -66,6 +68,7 @@ public sealed class BridgeSession : IDisposable
                 ("uniformScalePlansExperimental",new[]{"prepare_uniform_scale_plan"}),
                 ("ownedUniformScalePlansExperimental",new[]{"prepare_owned_uniform_scale"}),
                 ("ownedDgkTargetsExperimental",new[]{"prepare_owned_dgk_export"}),
+                ("ownedLevelMovesExperimental",new[]{"prepare_owned_level_move"}),
                 ("ownedRotationPlansExperimental",new[]{"prepare_owned_rotation"}),
                 ("entitySetsExperimental",new[]{"prepare_entity_set","validate_entity_set"}),
                 ("operationPlansExperimental",new[]{"prepare_operation_plan","inspect_operation_plan"}),
@@ -80,6 +83,7 @@ public sealed class BridgeSession : IDisposable
         }
         if(!options.ReadOnly&&config.TryGetProperty("checkpointRecoveryExperimental",out var recoveryCopy)&&recoveryCopy.ValueKind==System.Text.Json.JsonValueKind.True)
             prepared.UnionWith(new[]{"prepare_checkpoint_recovery","create_checkpoint_working_copy"});
+        if(!options.ReadOnly&&config.TryGetProperty("ownedLevelMovesExperimental",out var levelMoves)&&levelMoves.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_level_move","verify_owned_level_move"});
     }
     public void AssertToolAllowed(string name)
     {
@@ -103,6 +107,7 @@ public sealed class BridgeSession : IDisposable
         ScalePlans.Clear();
         OwnedScales.Clear();
         DgkTargets.Clear();
+        LevelMoves.ClearPrepared();
         SaveTargets.Clear();
         Reopens.Clear();
         if(consumeOwned){Plans.Clear();Owned.Clear();}
@@ -141,6 +146,7 @@ public sealed class BridgeSession : IDisposable
         if(config.TryGetProperty("checkpointRecoveryExperimental",out _))result["checkpointRecovery"]=PreparedEnabled("prepare_checkpoint_recovery")?"experimental_new_owned_saved_byte_copy_no_open":"disabled";
         if(config.TryGetProperty("uniformScalePlansExperimental",out _))result["uniformScalePlans"]=PreparedEnabled("prepare_uniform_scale_plan")?"experimental_local_plan_only_execution_disabled":"disabled";
         if(config.TryGetProperty("ownedUniformScalePlansExperimental",out _))result["ownedUniformScalePlans"]=PreparedEnabled("prepare_owned_uniform_scale")?"experimental_passive_owned_guard_execution_disabled":"disabled";
+        if(config.TryGetProperty("ownedLevelMovesExperimental",out _))result["ownedLevelMoves"]=PreparedEnabled("prepare_owned_level_move")?"experimental_owned_solid_level_move_not_live_qualified":"disabled";
         foreach (var (file, key) in new[] { ("deployment-current.json", "installedDeployment"), ("panel-status.json", "lastPanelReport"), ("worker-stage.json", "lastWorkerStage") })
         {
             if (!File.Exists(FileArtifacts.FixedPath(Options.BridgeRoot, "reports", file))) continue;
@@ -149,5 +155,5 @@ public sealed class BridgeSession : IDisposable
         }
         return result;
     }
-    public void Dispose(){DgkTargets.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
+    public void Dispose(){LevelMoves.Clear();DgkTargets.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
 }

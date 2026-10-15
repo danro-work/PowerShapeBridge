@@ -1,14 +1,18 @@
 # К8 — перенос собственного объекта на другой слой
 
-Статус: внутренняя подготовка и повторная проверка плана реализованы;
-40 isolated cases / 10 controls / 30 refusals и independent audit1177hashchecks
-passed. Общая проверка sourceSDK39.8/native34.5 завершилась успешно:
-678.NET/531native/175compatibility/Inspector; evidence/K8-level-move-sdk-final.
-Внутренний executor и independent verifier реализованы следующим блоком,
-native `ComContext.SetItemsLevel` добавлен, но не вызывался на PowerShape.
-Итоговая матрица42cases/1928audit hashes и общая regression
-678.NET/531native/175compatibility/Inspector passed. Нет публичного MCP-инструмента,
-queue admission или живой квалификации.
+Статус: подготовка, native executor/verifier и публичные C# MCP-инструменты
+реализованы в source SDK0.40.0/native0.34.7. Строгий opt-in флаг
+`ownedLevelMovesExperimental` включает фиксированные native queue recipes
+и `prepare_owned_level_move`, `execute_owned_level_move`, `verify_owned_level_move`
+только в полном сервере. Регистрация: `OwnedLevelMoveTools.Create(session)`
+в `ToolCatalog.Create(session)`. Схемы и ограничения: SDK-OWNED-LEVEL-MOVES.md.
+40 внутренних plan cases/1177 audit hashes и42 executor cases/1928 hashes
+прошли ранее; новые29 SDK tests и5 actual STDIO/native сценариев на simulated CAD
+прошли отдельно и повторены в общей regression:707.NET/531native/
+175compatibility/0mismatches/Inspector,338 hashes; полный marker
+`evidence/K8-level-sdk-final-short/sdk-verification.json` passed.
+Реальный SetItemsLevel на PowerShape не вызывался; живая квалификация,
+saved/reopen и восстановление verification после SDK reconnect ещё впереди.
 Этот документ не разрешает изменение CAD.
 
 ## Первый принимаемый сценарий
@@ -46,10 +50,12 @@ composite не используется без текущего сопостав
 объект может скрыться. Исполнитель не включает слой автоматически.
 Подготовка не вызывает SetItemsLevel, не меняет выделение и выдаёт
 `executionEnabled=false`, `nativeProviderQualified=false` до приёмки провайдера.
-Сейчас доступна только внутренняя `OwnedLevelMovePlans.Check`: режимы
-prepare и revalidate, receipt/plan SHA, retained proofs, два native level scans
-до и после публикации, journal только prepared. Нет production COM entry point,
-queue recipe или публичного SDK tool. Default full/read-only catalogs сохранены.
+`OwnedLevelMovePlans.Check` выполняет prepare/revalidate, проверяет receipt/plan
+SHA и retained proofs, два native level scans до и после публикации; journal
+на подготовке содержит только prepared. Публичная SDK-подготовка сама получает
+свежий raw receipt слоёв и выдаёт opaque handle текущего соединения. Native
+queue проверяет точный envelope до COM. Default profiles сохранены; в отдельном
+read-only сервере отсутствуют все три инструмента переноса.
 
 Перед публикацией плана нужны свежие stable model/process/window observations,
 полное покрытие native inventory, два совпадающих чтения слоёв, отсутствие

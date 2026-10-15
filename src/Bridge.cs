@@ -48,6 +48,7 @@ namespace PowerShapeBridge
         public bool ownedUniformScalePlansExperimental { get; set; }
         public bool ownedDgkTargetsExperimental { get; set; }
         public bool levelReadingExperimental { get; set; }
+        public bool ownedLevelMovesExperimental { get; set; }
         public bool IsGeneralCore { get { return coreProfile == "general-v1"; } }
         public bool CoreTransportEnabled { get { return IsGeneralCore || (mcpMutationsPanel && recipeOperationsPanel); } }
         public string qualificationOperationId { get; set; }
@@ -75,6 +76,7 @@ namespace PowerShapeBridge
             if(ownedUniformScalePlansExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned uniform scale preparation requires general sets, copies and bindings.");
             if(ownedDgkTargetsExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned DGK targets require general sets, copies and bindings.");
             if(levelReadingExperimental&&!IsGeneralCore)throw new ArgumentException("Passive level reading requires general core.");
+            if(ownedLevelMovesExperimental&&(!IsGeneralCore||!levelReadingExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned level moves require general sets/copies/bindings/level reads.");
             if (IsGeneralCore) {
                 if (captureViewport || translationTestPanel || checkpointTestPanel || parameterizedTranslationPanel || diskVerificationPanel || mcpMutationsPanel || recipeOperationsPanel ||
                     !string.IsNullOrEmpty(expectedProject) || !string.IsNullOrEmpty(sourceStep) || !string.IsNullOrEmpty(protectedProject) || !string.IsNullOrEmpty(qualificationOperationId) ||
@@ -93,7 +95,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.34.6-dev";
+        public const string ReleaseVersion = "0.34.7-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -103,6 +105,12 @@ namespace PowerShapeBridge
         internal static Config ParseConfig(string text)
         {
             var raw=Json.Deserialize<Dictionary<string,object>>(text);object enabled;
+            if(raw!=null&&raw.TryGetValue("ownedLevelMovesExperimental",out enabled)) {
+                if(!(enabled is bool))throw new ArgumentException("Owned level move flag must be JSON boolean.");
+                if((bool)enabled)foreach(string flag in new[]{"levelReadingExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {
+                    object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Owned level move dependencies must be true JSON booleans.");
+                }
+            }
             if(raw!=null&&raw.TryGetValue("levelReadingExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Level reading flag must be JSON boolean.");
                 if((bool)enabled&&(!raw.ContainsKey("coreProfile")||!Equals(raw["coreProfile"],"general-v1")))throw new ArgumentException("Level reading requires general core.");
@@ -219,6 +227,13 @@ namespace PowerShapeBridge
             if(args.Length==2&&new[]{"--uniform-scale-wire-seed","--uniform-scale-wire-request"}.Contains(args[0])) {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{Console.WriteLine(Json.Serialize(args[0]=="--uniform-scale-wire-seed"?OwnedUniformScaleWireFixture.Seed(args[1]):OwnedUniformScaleWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==2&&new[]{"--level-move-wire-seed","--level-move-wire-request"}.Contains(args[0])) {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{Console.WriteLine(Json.Serialize(args[0]=="--level-move-wire-seed"?OwnedLevelMoveWireFixture.Seed(args[1]):OwnedLevelMoveWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--level-move-admission-test") {
+                try{Console.WriteLine(Json.Serialize(OwnedLevelMoveWireFixture.Admission()));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
             if(args.Length==2&&new[]{"--dgk-target-wire-seed","--dgk-target-wire-request"}.Contains(args[0])) {
                 Console.OutputEncoding=new UTF8Encoding(false);
