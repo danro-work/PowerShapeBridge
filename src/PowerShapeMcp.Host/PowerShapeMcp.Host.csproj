@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <Version>0.40.2-dev</Version>
+    <Version>0.41.0-dev</Version>
   </PropertyGroup>
   <ItemGroup><InternalsVisibleTo Include="NativeFixtureCheck" /></ItemGroup>
   <ItemGroup>
@@ -22,5 +22,6 @@
     <Compile Include="../UniformScaleSampleVerifier.cs" Link="UniformScaleSampleVerifier.cs" />
     <Compile Include="../DmtMeshReader.cs" Link="DmtMeshReader.cs" />
     <Compile Include="../DgkBundleVerifier.cs" Link="DgkBundleVerifier.cs" />
+    <Compile Include="../WorkplaneFrame.cs" Link="WorkplaneFrame.cs" />
   </ItemGroup>
 </Project>

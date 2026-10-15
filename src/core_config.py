@@ -18,6 +18,9 @@ def general_core(settings):
     copies = settings.get('workingCopiesExperimental', False)
     bindings = settings.get('documentBindingsExperimental', False)
     level_moves = settings.get('ownedLevelMovesExperimental', False)
+    workplanes = settings.get('ownedWorkplanesExperimental', False)
+    if type(workplanes) is not bool or workplanes and (profile != 'general-v1' or experimental is not True or copies is not True or bindings is not True):
+        raise ValueError('Owned workplanes require general sets/copies/bindings and a boolean flag')
     if type(level_moves) is not bool or level_moves and (profile != 'general-v1' or levels is not True or experimental is not True or copies is not True or bindings is not True):
         raise ValueError('Owned level moves require general sets/copies/bindings/level reads')
     opens = settings.get('workingCopyOpenExperimental', False)

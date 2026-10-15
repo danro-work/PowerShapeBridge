@@ -17,7 +17,7 @@ namespace PowerShapeBridge {
    Dictionary<string,object> Observation();
    void ConfirmDocument();
   }
-  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext {
+  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext {
    object application,document;
    internal ComContext(Config config) {
     try {application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("No active model document.");document=ps.ActiveDocument;ConfirmDocument();}
@@ -27,6 +27,11 @@ namespace PowerShapeBridge {
    public Dictionary<string,object> Observation(){return Probe.ReadInContext(application,document);}
    public object ModelItems(){ConfirmDocument();dynamic doc=document;return doc.GetModelItems();}
    public object SelectedItems(){ConfirmDocument();dynamic doc=document;return doc.GetSelectedItems();}
+   public object WorkplaneIds(){ConfirmDocument();dynamic doc=document;return doc.GetWorkplanes((object)3,(object)"",(object)"");}
+   public object WorkplaneInfo(int composite){if(composite<=0)throw new ArgumentException("Positive workplane composite required.");ConfirmDocument();dynamic doc=document;return doc.GetWorkplaneInfo(composite);}
+   public int ActiveWorkplane(){ConfirmDocument();dynamic doc=document;return Program.StrictInt(doc.ActiveWorkplane);}
+   public object CreateWorkplane(double[] frame){PowerShape.Shared.WorkplaneFrame.Validate(frame);ConfirmDocument();dynamic doc=document;return doc.CreateWorkplane(frame.Cast<object>().ToArray());}
+   public void ActivateWorld(){ConfirmDocument();dynamic doc=document;doc.ActiveWorkplane=0;}
    public object LevelFields(){ConfirmDocument();dynamic ps=application;object[] substitutions=Enumerable.Range(0,1000).Select(number=>(object)number.ToString(CultureInfo.InvariantCulture)).ToArray();return new object[]{ps.EvaluateArray("LEVEL[*].NAME",1000,substitutions),ps.EvaluateArray("LEVEL[*].USED",1000,substitutions),ps.EvaluateArray("LEVEL[*].ACTIVE",1000,substitutions)};}
    public object LevelFilters(){ConfirmDocument();dynamic ps=application;return new object[]{ps.Evaluate("LEVEL.FILTERED.USED"),ps.Evaluate("LEVEL.FILTERED.NAMED"),ps.Evaluate("LEVEL.FILTERED.ON")};}
    public object LevelSample(int number){if(number<0||number>999)throw new ArgumentException("Native level number outside range.");ConfirmDocument();dynamic ps=application;string prefix="LEVEL["+number.ToString(CultureInfo.InvariantCulture)+"]";return new object[]{ps.Evaluate(prefix+".NAME"),ps.Evaluate(prefix+".USED"),ps.Evaluate(prefix+".ACTIVE")};}
