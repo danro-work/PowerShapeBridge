@@ -43,6 +43,15 @@ namespace PowerShapeBridge {
   }
   static Dictionary<string,object> BaseResult(){return new Dictionary<string,object>{{"state","owned_level_move_preparation_rejected"},{"bridgeVersion",Program.ReleaseVersion},{"executionEnabled",false},{"nativeProviderQualified",false},{"geometryMutationAttempted",false},{"contextChangeAttempted",false},{"cadSaveAttempted",false}};}
   internal static Dictionary<string,object> Check(string root,string requestId,Dictionary<string,object> arguments,bool prepare,NativeLevelReading.IContext context) {
+   return CheckCore(root,requestId,arguments,prepare,context,null);
+  }
+  // The executor callback runs only after successful revalidation, while all
+  // proof, working-byte and executor leases are retained. No public entry point.
+  internal static void WithValidated(string root,string requestId,Dictionary<string,object> handle,NativeLevelReading.IContext context,Action<Dictionary<string,object>,Dictionary<string,object>,Dictionary<string,object>,OwnedCopies.OwnershipLease,OwnedOperationPlans.Proofs> callback) {
+   var checkedResult=CheckCore(root,requestId,handle,false,context,callback);
+   if(!Equals(checkedResult["state"],"owned_level_move_validated_observed"))throw new InvalidDataException(checkedResult.ContainsKey("error")?(string)checkedResult["error"]:"Level execution guard rejected.");
+  }
+  static Dictionary<string,object> CheckCore(string root,string requestId,Dictionary<string,object> arguments,bool prepare,NativeLevelReading.IContext context,Action<Dictionary<string,object>,Dictionary<string,object>,Dictionary<string,object>,OwnedCopies.OwnershipLease,OwnedOperationPlans.Proofs> callback) {
    var result=BaseResult();
    try {
     Need(EntitySets.Hex(requestId,32),"Invalid request ID.");ValidateArguments(arguments,prepare);
@@ -95,6 +104,7 @@ namespace PowerShapeBridge {
       var final=NativeLevelReading.Read(expected,expires,context);Need(Equals(final["state"],"native_levels_read_unqualified"),"Final native level read rejected.");
       foreach(string key in new[]{"levelSlots","filterFlagsRaw","filterOrder"})Need(EntitySets.Canonical(fresh[key])==EntitySets.Canonical(final[key]),"Level context changed during publication.");
       NoFence(root,binding,lease);lease.Recheck();context.ConfirmDocument();Need(DateTime.UtcNow<expires&&DocumentBindings.WindowDigest(context.Windows())==(string)binding["windowContextSha256"],"Final level lifetime/window changed.");
+      if(callback!=null)callback(Clone(packet),Clone(expected),Clone(final),lease,proofs);
       result["state"]=prepare?"owned_level_move_prepared_observed":"owned_level_move_validated_observed";result["ownedLevelMoveId"]=id;result["ownedLevelMoveSha256"]=sha;result["ownedLevelMove"]=Clone(packet);result["copyId"]=binding["copyId"];result["expiresUtc"]=expires.ToString("o");
      }
     }
