@@ -26,3 +26,11 @@ if($LASTEXITCODE -ne 0){throw 'Disabled native level admission failed.'}
 if($LASTEXITCODE -ne 0){throw 'SDK/native level wire failed; preserve artifacts.'}
 & $PythonPath (Join-Path $PSScriptRoot 'src\audit_owned_level_move_wire_stdio.py') --stage $StageDirectory --evidence $EvidenceDirectory --output (Join-Path $EvidenceDirectory 'wire-audit.json')
 if($LASTEXITCODE -ne 0){throw 'Independent level wire audit failed.'}
+$taskReconnect=Join-Path $EvidenceDirectory 'reconnect'
+New-Item -ItemType Directory -Path $taskReconnect | Out-Null
+# Same unchanged staged configuration/admission evidence; fresh owned fixture per case.
+Copy-Item -LiteralPath (Join-Path $EvidenceDirectory 'admission.json'),(Join-Path $EvidenceDirectory 'admission-disabled.json') -Destination $taskReconnect
+& $PythonPath (Join-Path $PSScriptRoot 'src\test_sdk_owned_level_move_wire_stdio.py') --dotnet $DotnetPath --host $HostPath --stage $StageDirectory --evidence $taskReconnect --reconnect
+if($LASTEXITCODE -ne 0){throw 'SDK/native level reconnect wire failed; preserve artifacts.'}
+& $PythonPath (Join-Path $PSScriptRoot 'src\audit_owned_level_move_wire_stdio.py') --stage $StageDirectory --evidence $taskReconnect --output (Join-Path $taskReconnect 'wire-audit.json')
+if($LASTEXITCODE -ne 0){throw 'Independent reconnect level wire audit failed.'}

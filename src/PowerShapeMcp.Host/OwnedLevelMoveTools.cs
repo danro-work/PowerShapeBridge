@@ -10,6 +10,12 @@ namespace PowerShapeMcp;
 [McpServerToolType]
 public sealed class OwnedLevelMoveTools(BridgeSession session)
 {
+    [McpServerTool(Name="adopt_owned_level_move_execution",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false)]
+    [Description("After MCP reconnect, obtain a connection-local verification-only handle for an original recorded owned level transfer. Requires the original request ID and exact raw receipt SHA, immutable prepared/execution plans, native Boolean return, journal/once proof and owned files. Does not contact CAD, revive a prepared intent, execute, retry or clear a fence. Use fresh inspection/listing handles with verify_owned_level_move afterwards. Full server only.")]
+    public Task<CallToolResult> Adopt(
+        [Description("Original lowercase 32-hex level-transfer execution request ID; never a path.")]string executionRequestId,
+        [Description("SHA256 of the original immutable raw native response; lowercase 64-hex.")]string executionReceiptSha256,
+        CancellationToken cancellationToken)=>Run("adopt_owned_level_move_execution",new(){["executionRequestId"]=executionRequestId,["executionReceiptSha256"]=executionReceiptSha256},cancellationToken);
     [McpServerTool(Name="prepare_owned_level_move",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false)]
     [Description("Experimental: prepare one owned SOLID's transfer to an explicitly named existing level. Shows target visibility and the documented selection clear. Reads fresh level data and creates a disabled plan only; no CAD change. Requires this connection's entity set and owned binding; absent from read-only mode.")]
     public Task<CallToolResult> Prepare(
@@ -41,6 +47,11 @@ public sealed class OwnedLevelMoveTools(BridgeSession session)
             if(name=="prepare_owned_level_move")_=OwnedLevelMoveStore.Parameters(input["parameters"]!.AsObject());
             acquired=await session.ReferenceGate.WaitAsync(session.Options.Timeout,cancellationToken);if(!acquired)return Failed("queue_timeout_before_submission",false);
             cancellationToken.ThrowIfCancellationRequested();if(File.Exists(FileArtifacts.FixedPath(session.Options.BridgeRoot,"maintenance.json")))return Failed("maintenance_before_submission",false);
+            if(name=="adopt_owned_level_move_execution")
+            {
+                var adopted=session.LevelMoves.AdoptExecution(input["executionRequestId"]!.GetValue<string>(),input["executionReceiptSha256"]!.GetValue<string>());
+                cancellationToken.ThrowIfCancellationRequested();return DiagnosticTools.Result(adopted);
+            }
             if(name=="prepare_owned_level_move")
             {
                 var set=input["entitySetHandle"]!.GetValue<string>();var binding=input["workingDocumentBindingHandle"]!.GetValue<string>();
@@ -73,7 +84,7 @@ public sealed class OwnedLevelMoveTools(BridgeSession session)
             result["levelMoveExecutionHandle"]=execution;return DiagnosticTools.Result(result,result["state"]?.GetValue<string>()!="owned_level_move_verified_observed");
         }
         catch(OperationCanceledException)when(cancellationToken.IsCancellationRequested){return Failed(submitted?"owned_level_move_outcome_unknown":"cancelled_before_submission",submitted,execution);}
-        catch(Exception error)when(error is ReferenceRejected or IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException or FormatException)
+        catch(Exception error)when(error is ReferenceRejected or IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException or FormatException or NullReferenceException)
         {return Failed(submitted?"owned_level_move_outcome_unknown":"owned_level_move_rejected_before_submission",submitted,execution,error is ReferenceRejected rejected?rejected.Code:"owned_level_move_proof_unavailable");}
         finally{if(acquired)session.ReferenceGate.Release();}
     }
@@ -85,10 +96,11 @@ public sealed class OwnedLevelMoveTools(BridgeSession session)
     public static McpServerTool[] Create(BridgeSession session)
     {
         if(!session.PreparedEnabled("prepare_owned_level_move"))return[];var tools=new OwnedLevelMoveTools(session);
-        JsonNode Token(string name)=>StrictTool.Token(name,name switch{"entitySetHandle"=>"This connection's observed entity set containing exactly one SOLID.","workingDocumentBindingHandle"=>"Fresh binding of the owned working document in this connection.","levelMoveExecutionHandle"=>"Execution handle from the original one-use level transfer, including unknown outcomes.","candidateDocumentHandle"=>"New candidate document inspection after command return.","activeDocumentHandle"=>"New one-use active-document choice from a listing after command return.",_=>"Opaque handle issued by this connection."})["properties"]![name]!.DeepClone();
+        JsonNode Token(string name)=>StrictTool.Token(name,name switch{"executionRequestId"=>"Original native level-transfer execution request ID, not a new intent.","entitySetHandle"=>"This connection's observed entity set containing exactly one SOLID.","workingDocumentBindingHandle"=>"Fresh binding of the owned working document in this connection.","levelMoveExecutionHandle"=>"Execution handle from the original one-use level transfer, including unknown outcomes.","candidateDocumentHandle"=>"New candidate document inspection after command return.","activeDocumentHandle"=>"New one-use active-document choice from a listing after command return.",_=>"Opaque handle issued by this connection."})["properties"]![name]!.DeepClone();
         JsonObject Schema(params (string Name,JsonNode Value)[] fields){var props=new JsonObject();var required=new JsonArray();foreach(var (key,value) in fields){props[key]=value;required.Add(key);}return new(){["type"]="object",["properties"]=props,["required"]=required,["additionalProperties"]=false};}
         var parameters=JsonNode.Parse("""{"type":"object","properties":{"targetLevelNumber":{"type":"integer","minimum":0,"maximum":997},"targetLevelName":{"type":"string","minLength":1,"maxLength":4096},"targetActiveRaw":{"type":"integer","enum":[0,1]},"selectionAfterPolicy":{"type":"string","enum":["cleared_by_documented_api"]},"mode":{"type":"string","enum":["move_in_place"]}},"required":["targetLevelNumber","targetLevelName","targetActiveRaw","selectionAfterPolicy","mode"],"additionalProperties":false}""")!;
-        return [new StrictTool(McpServerTool.Create(tools.Prepare),session,Schema(("entitySetHandle",Token("entitySetHandle")),("workingDocumentBindingHandle",Token("workingDocumentBindingHandle")),("parameters",parameters)),args=>_=OwnedLevelMoveStore.Parameters(args["parameters"]!.AsObject())),
+        return [new StrictTool(McpServerTool.Create(tools.Adopt),session,Schema(("executionRequestId",Token("executionRequestId")),("executionReceiptSha256",JsonNode.Parse("""{"type":"string","pattern":"^[0-9a-f]{64}$","description":"Exact original raw native response SHA256."}""")!))),
+            new StrictTool(McpServerTool.Create(tools.Prepare),session,Schema(("entitySetHandle",Token("entitySetHandle")),("workingDocumentBindingHandle",Token("workingDocumentBindingHandle")),("parameters",parameters)),args=>_=OwnedLevelMoveStore.Parameters(args["parameters"]!.AsObject())),
             new StrictTool(McpServerTool.Create(tools.Execute),session,StrictTool.Token("ownedLevelMoveHandle","Prepared owned single-SOLID level move in this connection.")),
             new StrictTool(McpServerTool.Create(tools.Verify),session,Schema(("levelMoveExecutionHandle",Token("levelMoveExecutionHandle")),("candidateDocumentHandle",Token("candidateDocumentHandle")),("activeDocumentHandle",Token("activeDocumentHandle"))))];
     }

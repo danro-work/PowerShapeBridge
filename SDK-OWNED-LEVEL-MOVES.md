@@ -1,6 +1,7 @@
 # SDK: перенос одного собственного SOLID между слоями
 
-Source SDK0.40.0/nativePython0.34.7. Opt-in profile:
+Source SDK0.40.1/nativePython0.34.7. Frozen live package пока SDK0.40.0/PR53;
+новый source не установлен. Opt-in profile:
 `config/general-owned-level-moves.json`. Default profiles не изменены.
 Флаг `ownedLevelMovesExperimental` — strict boolean, только general-v1,
 зависит от entity sets, owned working copies, document bindings и level reading.
@@ -8,7 +9,7 @@ Python валидирует конфигурацию; новые публичн�
 
 Регистрация: `ToolCatalog.Create(session)` включает
 `OwnedLevelMoveTools.Create(session)`; Program.WithTools(ToolCatalog.Create(session)).
-Все три инструмента отсутствуют и отвергаются в read-only:
+Все четыре инструмента отсутствуют и отвергаются в read-only:
 
 - `prepare_owned_level_move(entitySetHandle, workingDocumentBindingHandle, parameters)`
   принимает ровно один SOLID, fresh binding и явно заданный именованный слой0–997.
@@ -25,6 +26,13 @@ Python валидирует конфигурацию; новые публичн�
   использует новые inspection/listing handles после return и новый level read;
   проверяет native result/plan/once claim/journal/evidence и снятие собственной
   fence. Не вызывает CAD setter. Metadata recheck не является replay команды.
+- `adopt_owned_level_move_execution(executionRequestId,executionReceiptSha256)`
+  после reconnect читает original raw response, immutable execution/prepared
+  plans, ownership/checkpoint/working bytes, exact once claim и native journal.
+  Только подтверждённый native Boolean true допускает verification-only handle.
+  Prepared lease/TTL не возрождается; этим handle невозможно выполнить перенос.
+  Ни native queue, ни COM, ни journal/fence при adoption не изменяются.
+  Дальше нужны новые candidate/listing handles и отдельный verifier.
 
 SDK store ограничен этой connection, TTL не продлевается, чужие handles,
 tampered packets/working bytes, coercion/extra fields и повторный intent
@@ -53,6 +61,7 @@ Evidence: `evidence/K8-level-sdk-final-short/sdk-verification.json`;
 
 Ограничения: один SOLID; live setter, saved-result/reopen, разные модели,
 остальные операции К8 и полная К9–К11 ещё не приняты. Native journal/once/fence
-переживают SDK restart, opaque execution handle — connection-local;
-отдельный historical verification/adoption путь после reconnect ещё требуется
-перед общей приёмкой v1. Не снимать native fence для обхода этого ограничения.
+переживают SDK restart, opaque execution handle — connection-local. Новый
+source0.40.1 добавляет explicit verification-only adoption; live qualification
+этого пути и общий recovery-reader/resolution coverage ещё не приняты.
+Не снимать native fence для обхода незавершённых требований.

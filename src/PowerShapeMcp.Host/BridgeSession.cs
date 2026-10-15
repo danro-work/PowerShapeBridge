@@ -83,7 +83,7 @@ public sealed class BridgeSession : IDisposable
         }
         if(!options.ReadOnly&&config.TryGetProperty("checkpointRecoveryExperimental",out var recoveryCopy)&&recoveryCopy.ValueKind==System.Text.Json.JsonValueKind.True)
             prepared.UnionWith(new[]{"prepare_checkpoint_recovery","create_checkpoint_working_copy"});
-        if(!options.ReadOnly&&config.TryGetProperty("ownedLevelMovesExperimental",out var levelMoves)&&levelMoves.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_level_move","verify_owned_level_move"});
+        if(!options.ReadOnly&&config.TryGetProperty("ownedLevelMovesExperimental",out var levelMoves)&&levelMoves.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_level_move","verify_owned_level_move","adopt_owned_level_move_execution"});
     }
     public void AssertToolAllowed(string name)
     {

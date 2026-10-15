@@ -62,7 +62,7 @@ def case(args, fault):
     try:
         tools = initialize(client, 'owned-level-move-native-wire')
         names = {item['name'] for item in tools}
-        operations = {'prepare_owned_level_move', 'execute_owned_level_move', 'verify_owned_level_move'}
+        operations = {'prepare_owned_level_move', 'execute_owned_level_move', 'verify_owned_level_move', 'adopt_owned_level_move_execution'}
         assert operations <= names
         assert all(item['inputSchema']['additionalProperties'] is False for item in tools if item['name'] in operations)
         copy = ok('prepare_working_copy', {'sourcePath': seed['sourcePath'], 'sourceSha256': sha(Path(seed['sourcePath']))})
@@ -84,7 +84,8 @@ def case(args, fault):
             foreign.close()
         assert inventory(root) == before
         prepared = call('prepare_owned_level_move', parameters)['result']
-        execution = verification = None
+        execution = verification = adoption = None
+        previous_transcript = rejected_old = rejected_execute = None
         if fault == 'packet_tamper':
             assert prepared['isError'] and 'ownedLevelMoveHandle' not in prepared['structuredContent']
         else:
@@ -103,9 +104,37 @@ def case(args, fault):
                 unpublished = root / 'responses' / (original['requestId'] + '.unpublished')
                 assert unpublished.is_file()
                 unpublished.rename(root / 'responses' / (original['requestId'] + '.json'))
+            if args.reconnect:
+                previous_transcript = client.transcript
+                client.close()
+                client = Client(command)
+                initialize(client, 'level-move-reconnect-verification-only')
             post = ok('inspect_entity_candidates', {})
             listing = ok('list_documents', {})
-            verification = call('verify_owned_level_move', {'levelMoveExecutionHandle': output['levelMoveExecutionHandle'],
+            verification_handle = output['levelMoveExecutionHandle']
+            if args.reconnect:
+                passive_before = inventory(root)
+                old_args = {'levelMoveExecutionHandle': verification_handle, 'candidateDocumentHandle': post['candidateDocumentHandle'], 'activeDocumentHandle': listing['documents'][0]['documentHandle']}
+                rejected_old = call('verify_owned_level_move', old_args)['result']
+                assert rejected_old['isError'] and inventory(root) == passive_before
+                original_id = next(item['requestId'] for item in panel.calls if item['recipe'] == 'execute_owned_level_move')
+                adoption_args = {'executionRequestId': original_id, 'executionReceiptSha256': sha(root / 'responses' / (original_id + '.json'))}
+                denied = call('adopt_owned_level_move_execution', dict(adoption_args, executionReceiptSha256='0' * 64))['result']
+                assert denied['isError'] and inventory(root) == passive_before
+                extra = call('adopt_owned_level_move_execution', dict(adoption_args, command='MOVE'))
+                assert extra['error']['code'] == -32602 and inventory(root) == passive_before
+                adoption = call('adopt_owned_level_move_execution', adoption_args)['result']
+                assert inventory(root) == passive_before, 'Adoption touched native artifacts or submitted a request'
+                if fault == 'return_false':
+                    assert adoption['isError'] and 'levelMoveExecutionHandle' not in adoption['structuredContent']
+                else:
+                    assert not adoption.get('isError', False), adoption
+                    adopted = adoption['structuredContent']
+                    assert adopted['verificationOnly'] is True and adopted['executionAuthorized'] is adopted['retryAllowed'] is False
+                    verification_handle = adopted['levelMoveExecutionHandle']
+                    rejected_execute = call('execute_owned_level_move', {'ownedLevelMoveHandle': verification_handle})['result']
+                    assert rejected_execute['isError'] and inventory(root) == passive_before
+            verification = call('verify_owned_level_move', {'levelMoveExecutionHandle': verification_handle,
                                 'candidateDocumentHandle': post['candidateDocumentHandle'], 'activeDocumentHandle': listing['documents'][0]['documentHandle']})['result']
             if fault in ('control', 'lost_reply'):
                 assert not verification.get('isError', False), verification
@@ -132,6 +161,8 @@ def case(args, fault):
         assert inventory(root) == before_readonly
         return {'state': 'passed', 'fault': fault, 'root': str(root), 'seed': seed, 'copy': copy, 'prepared': prepared,
                 'execution': execution, 'verification': verification, 'nativeRequests': panel.calls,
+                'reconnectRequested': args.reconnect, 'adoption': adoption, 'previousTranscript': previous_transcript,
+                'oldConnectionHandleRejected': rejected_old, 'verificationHandleExecutionRejected': rejected_execute,
                 'transcript': client.transcript, 'artifactHashes': inventory(root), 'commandCalls': state['commandCalls'],
                 'cadConnectionAttempted': False}
     finally:
@@ -144,6 +175,7 @@ if __name__ == '__main__':
     for name in ('dotnet', 'host', 'stage', 'evidence'):
         parser.add_argument('--' + name, required=True)
     parser.add_argument('--fault', choices=FAULTS)
+    parser.add_argument('--reconnect', action='store_true')
     args = parser.parse_args()
     evidence = Path(args.evidence).resolve()
     evidence.mkdir(parents=True, exist_ok=True)
