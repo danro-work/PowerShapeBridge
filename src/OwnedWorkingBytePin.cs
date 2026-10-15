@@ -13,22 +13,27 @@ namespace PowerShapeBridge {
   [DllImport("kernel32.dll",SetLastError=true)] static extern bool LockFileEx(SafeFileHandle file,uint flags,uint reserved,uint low,uint high,ref Offset offset);
   [DllImport("kernel32.dll",SetLastError=true)] static extern bool UnlockFileEx(SafeFileHandle file,uint reserved,uint low,uint high,ref Offset offset);
   internal FileStream Stream {get;private set;}
+  // Every supported data byte, including allowed growth, is below this bound.
+  // Do not lock CFB's reserved 0x7FFFFF00..0x7FFFFFFF transaction/lock sector.
+  const uint DataLockBytes=(uint)OwnedCopies.MaximumBytes;
   Offset offset;bool locked;
   internal OwnedWorkingBytePin(string path) {
    try {
     OwnedCopies.NoReparse(path);
     Stream=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.ReadWrite);
+    if(Stream.Length<1||Stream.Length>OwnedCopies.MaximumBytes)throw new IOException("Owned working file outside supported data size.");
     // Fail immediately; no GUI wait or blocking retry. No EXCLUSIVE_LOCK flag:
     // all readers can continue, including other retained ownership handles.
-    if(!LockFileEx(Stream.SafeFileHandle,1,0,uint.MaxValue,0x7fffffff,ref offset))
-     throw new IOException("Owned working byte lock unavailable.",new Win32Exception(Marshal.GetLastWin32Error()));
+    if(!LockFileEx(Stream.SafeFileHandle,1,0,DataLockBytes,0,ref offset)) {
+     int code=Marshal.GetLastWin32Error();throw new IOException("Owned working byte lock unavailable (Win32 "+code+").",new Win32Exception(code));
+    }
     locked=true;
    }catch{Dispose();throw;}
   }
   public void Dispose() {
    if(Stream==null)return;
    int error=0;
-   try {if(locked&&!UnlockFileEx(Stream.SafeFileHandle,0,uint.MaxValue,0x7fffffff,ref offset))error=Marshal.GetLastWin32Error();}
+   try {if(locked&&!UnlockFileEx(Stream.SafeFileHandle,0,DataLockBytes,0,ref offset))error=Marshal.GetLastWin32Error();}
    finally {locked=false;Stream.Dispose();Stream=null;}
    if(error!=0)throw new IOException("Owned working byte unlock failed; handle closed.",new Win32Exception(error));
   }

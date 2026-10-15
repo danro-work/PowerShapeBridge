@@ -37,7 +37,19 @@ namespace PowerShapeBridge {
     try {Refuse(()=>{using(var rejected=new OwnedWorkingBytePin(path)){} });}
     finally {writer.Unlock(0,100);}
     pass("exclusive_lock_refused");
+    // Simulate a live Compound File storage's exclusive transaction/lock bytes.
+    // They contain no document data and lie above the supported 1-GiB data bound.
+    writer.Lock(0x7fffff00,256);
+    try {
+     using(var pin=new OwnedWorkingBytePin(path)) {
+      Require(OwnedCopies.Digest(pin.Stream)==initial,"CFB metadata lock blocked supported data pin.");pass("cfb_reserved_lock_compatible");
+      Refuse(()=>{writer.Position=0;writer.Write(new byte[]{255},0,1);writer.Flush(true);});pass("cfb_data_overwrite_blocked");
+      Refuse(()=>{writer.Position=OwnedCopies.MaximumBytes-1;writer.Write(new byte[]{255},0,1);writer.Flush(true);});pass("cfb_supported_last_byte_blocked");
+      using(var observer=new FileStream(path,FileMode.Open,FileAccess.ReadWrite,FileShare.ReadWrite,1))Refuse(()=>observer.Lock(0x7fffff00,256));pass("cfb_reserved_lock_preserved");
+     }
+    }finally{writer.Unlock(0x7fffff00,256);}
    }
+   string empty=Path.Combine(folder,"empty.bin");File.WriteAllBytes(empty,new byte[0]);Refuse(()=>{using(var pin=new OwnedWorkingBytePin(empty)){} });pass("empty_file_refused");
    return rows.ToArray();
   }
  }
