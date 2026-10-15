@@ -129,11 +129,13 @@ internal sealed class OwnedWorkplaneStore(string root,DocumentBindingStore bindi
         var plan=receipt["plan"]!.AsObject();var bytes=FileArtifacts.ReadBytes(root,Path.Combine("workingcopies",Text(plan,"copyId"),"mutation-fence.json"),65536);Need(FileArtifacts.Sha256(bytes)==Text(receipt,"executionFenceSha256"));
         var fence=JsonNode.Parse(FileArtifacts.Parse(bytes).GetRawText())!.AsObject();Need(Text(fence,"operationId")==id&&Text(fence,"planSha256")==Text(receipt,"planSha256")&&Text(fence,"copyId")==Text(plan,"copyId"));
     }
-    public void CheckVerified(string handle,JsonObject reply,JsonObject args)
+    public JsonObject CheckVerified(string handle,JsonObject reply,JsonObject args)
     {
         var proof=ExecutionProof(handle);string id=Text(proof,"executionRequestId");Need(Text(reply,"state")=="owned_workplane_verified_observed"&&Text(reply,"executionOperationId")==id&&Text(reply,"recordedJournalState")=="succeeded_verified"&&ArtifactProof.Boolean(reply["copyFenceReleased"],true)&&ArtifactProof.Boolean(reply["noCommandReplay"],true));
         foreach(var flag in new[]{"cadMutationAttempted","geometryMutationAttempted","contextChangeAttempted","cadSaveAttempted"})Need(ArtifactProof.Boolean(reply[flag],false));
         var receipt=ArtifactProof.Verified(root,"responses",id,Text(proof,"executionReceiptSha256"),16000000);Need(Text(ArtifactProof.Journal(root,id),"state")=="succeeded_verified");var fence=FileArtifacts.FixedPath(root,"workingcopies",Text(receipt["plan"]!.AsObject(),"copyId"),"mutation-fence.json");Need(!File.Exists(fence)&&!Directory.Exists(fence));
         var expected=new JsonArray();foreach(var pair in new[]{("executionRequestId","executionReceiptSha256"),("inspectionRequestId","inspectionSha256"),("listingRequestId","listingSha256")})expected.Add(new JsonObject{["requestId"]=args[pair.Item1]!.DeepClone(),["sha256"]=args[pair.Item2]!.DeepClone()});Need(JsonNode.DeepEquals(expected,reply["evidence"]));
+        // Identity comes from the original frozen execution, not caller input.
+        var plan=receipt["plan"]!.AsObject();return new(){["copyId"]=plan["copyId"]!.DeepClone(),["ownershipSha256"]=plan["ownershipSha256"]!.DeepClone()};
     }
 }

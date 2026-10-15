@@ -1,5 +1,6 @@
 """Independent audit of bounded synthetic workplane native evidence. No CAD calls."""
 import argparse,hashlib,json,math
+from datetime import datetime
 from pathlib import Path
 def read(path):return json.loads(path.read_text(encoding='utf-8-sig'))
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -23,6 +24,10 @@ def audit(stage):
         op=case['operationId'];receipt_path=root/'responses'/(op+'.json');assert sha(receipt_path)==case['receiptSha256'];hashes+=1
         assert read(receipt_path)==e
         plan_path=root/'workplaneexecutions'/(op+'.json');assert sha(plan_path)==e['planSha256'];hashes+=1;plan=read(plan_path);assert plan==e['plan']
+        if fault=='control':
+            historical=case['historicalBaselineChecks'];assert historical['matchingAccepted'] is historical['changedRejected'] is historical['originalPlanUnchanged'] is True
+            old=datetime.fromisoformat(historical['beforeTimestampUtc'].replace('Z','+00:00'));created=datetime.fromisoformat(plan['createdUtc'].replace('Z','+00:00'))
+            assert (created-old).total_seconds()>7000
         claim_path=root/'ownedworkplanes'/(prepared['ownedWorkplaneId']+'.execution-once.json');assert sha(claim_path)==e['claimSha256'];hashes+=1
         claim=read(claim_path);assert claim=={'operationId':op,'planSha256':e['planSha256'],'ownedWorkplaneId':prepared['ownedWorkplaneId'],'copyId':plan['copyId'],'automaticReplayForbidden':True}
         for p,digest in plan['savedFileHashesBefore'].items():assert sha(Path(p))==digest;hashes+=1

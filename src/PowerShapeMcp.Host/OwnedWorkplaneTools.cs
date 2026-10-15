@@ -22,7 +22,7 @@ public sealed class OwnedWorkplaneTools(BridgeSession session)
     public Task<CallToolResult> Execute([Description("Unconsumed prepared ownedWorkplaneHandle in this connection; a verification handle is rejected.")]string ownedWorkplaneHandle,CancellationToken cancellationToken)=>Run("execute_owned_workplane",new(){["ownedWorkplaneHandle"]=ownedWorkplaneHandle},cancellationToken);
 
     [McpServerTool(Name="verify_owned_workplane",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false)]
-    [Description("Independently verify the original creation and declared world return using fresh candidate/listing receipts, native getters, old object properties/world bounds and saved files. Appends successful evidence/releases only the matching fence. Does not create or activate a workplane, replay, save or certify topology. Full server only.")]
+    [Description("Independently verify the original creation and declared world return using fresh candidate/listing receipts, native getters, old object properties/world bounds and saved files. Appends successful evidence/releases only the matching fence. On checked success, issues a fresh connection-scoped workingCopyHandle for binding the current owned document; this is not an OPEN or save/execution authority. Does not create or activate a workplane, replay, save or certify topology. Full server only.")]
     public Task<CallToolResult> Verify([Description("This connection's workplaneExecutionHandle, including an adopted verification-only handle.")]string workplaneExecutionHandle,
         [Description("Fresh candidateDocumentHandle read after command return.")]string candidateDocumentHandle,
         [Description("Fresh one-use active document handle from list_documents after command return.")]string activeDocumentHandle,
@@ -76,7 +76,14 @@ public sealed class OwnedWorkplaneTools(BridgeSession session)
             execution=input["workplaneExecutionHandle"]!.GetValue<string>();var proof=session.Workplanes.ExecutionProof(execution);
             proof["candidateDocumentHandle"]=input["candidateDocumentHandle"]!.DeepClone();proof["activeDocumentHandle"]=input["activeDocumentHandle"]!.DeepClone();var verification=OwnedExecutionProof.VerificationParameters(proof,session.Candidates,session.Documents,true);
             cancellationToken.ThrowIfCancellationRequested();submitted=true;var reply=await Submit(name,verification);if(cancellationToken.IsCancellationRequested||Budget()<=TimeSpan.Zero)return Failed("owned_workplane_verification_outcome_unknown",true);
-            if(reply["state"]?.GetValue<string>()=="owned_workplane_verified_observed")session.Workplanes.CheckVerified(execution,reply,verification);reply["workplaneExecutionHandle"]=execution;return DiagnosticTools.Result(reply,reply["state"]?.GetValue<string>()!="owned_workplane_verified_observed");
+            if(reply["state"]?.GetValue<string>()=="owned_workplane_verified_observed")
+            {
+                var ownedCopy=session.Workplanes.CheckVerified(execution,reply,verification);
+                var issued=session.Copies.IssueVerifiedWorkplane(reply,ownedCopy,LeaseTime.Parse(verification["expiresUtc"]!.GetValue<string>(),"verified_workplane_copy_expired"));
+                foreach(var field in new[]{"workingCopyHandle","workingCopyLifetimeSeconds"})reply[field]=issued[field]!.DeepClone();
+                reply["workingCopyLeaseScope"]="Existing owned saved files and independently observed current document. Unsaved workplane is not claimed to be persisted; bind with a fresh candidate before a separately approved next action.";
+            }
+            reply["workplaneExecutionHandle"]=execution;return DiagnosticTools.Result(reply,reply["state"]?.GetValue<string>()!="owned_workplane_verified_observed");
         }
         catch(OperationCanceledException)when(cancellationToken.IsCancellationRequested){return Failed(submitted?"owned_workplane_outcome_unknown":"cancelled_before_submission",submitted);}
         catch(Exception error)when(error is ReferenceRejected or IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException or FormatException or NullReferenceException)

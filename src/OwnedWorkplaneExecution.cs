@@ -24,7 +24,11 @@ namespace PowerShapeBridge {
    normalized["workplanes"]=((IEnumerable)normalized["workplanes"]).Cast<object>().Select(v=>(Dictionary<string,object>)v).Where(wp=>!Equals(wp["nativeId"],native)).ToArray();
    var levels=old.Select(e=>(int)e["levelNumber"]).Distinct().ToArray();
    normalized["levelsContainingEntities"]=((IEnumerable)normalized["levelsContainingEntities"]).Cast<object>().Select(v=>(Dictionary<string,object>)v).Where(row=>levels.Contains((int)row["number"])).ToArray();
-   EntitySets.CheckObserved(before,normalized,new int[0][],DateTime.UtcNow.AddSeconds(30),DateTime.UtcNow);
+   // The immutable before-state is historical evidence, not a live lease.
+   // Execute checks its original lease; Verify separately requires fresh
+   // candidate/listing receipts. Compare all observed content without renewing
+   // or rewriting the historical timestamp or the original execution intent.
+   Need(EntitySets.ObservedDigest(before)==EntitySets.ObservedDigest(normalized),"Original observed entities, context, properties or units changed.");
    var expectedFrame=OwnedWorkplanePlans.Frame((Dictionary<string,object>)plan["parameters"]);var actual=OwnedWorkplanePlans.Info(context.WorkplaneInfo(composite));
    Need(WorkplaneFrame.Same(expectedFrame,actual),"Created world origin/Z/Y differ from requested values.");
    var priorFrames=((IEnumerable)plan["framesBefore"]).Cast<object>().Select(v=>(Dictionary<string,object>)v).ToArray();
