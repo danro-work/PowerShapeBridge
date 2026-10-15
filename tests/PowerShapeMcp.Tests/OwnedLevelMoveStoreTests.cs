@@ -73,7 +73,7 @@ public sealed class OwnedLevelMoveStoreTests
     {
         var files=new Fixture();files.Write("bridge.config.json","""{"coreProfile":"general-v1","expectedVersion":"23.2.2","timeoutSeconds":40,"operationTimeoutSeconds":80,"maxEntities":10000,"captureViewport":false,"levelReadingExperimental":true,"entitySetsExperimental":true,"workingCopiesExperimental":true,"documentBindingsExperimental":true,"ownedLevelMovesExperimental":true}""");
         using var session=new BridgeSession(new(files.Root,TimeSpan.FromSeconds(1),readOnly));var names=ToolCatalog.Create(session).Select(t=>t.ProtocolTool.Name).ToHashSet();
-        foreach(var name in new[]{"prepare_owned_level_move","execute_owned_level_move","verify_owned_level_move"}){Assert.Equal(!readOnly,names.Contains(name));if(readOnly)Assert.ThrowsAny<Exception>(()=>session.AssertToolAllowed(name));}
+        foreach(var name in new[]{"prepare_owned_level_move","execute_owned_level_move","verify_owned_level_move","adopt_owned_level_move_execution"}){Assert.Equal(!readOnly,names.Contains(name));if(readOnly)Assert.ThrowsAny<Exception>(()=>session.AssertToolAllowed(name));}
         Assert.Equal(0,Directory.Exists(Path.Combine(files.Root,"requests"))?Directory.GetFiles(Path.Combine(files.Root,"requests")).Length:0);
     }
     [Fact] public void ActiveWorkingWriterDoesNotPreventPlanReceiptChecks()
@@ -98,6 +98,11 @@ public sealed class OwnedLevelMoveStoreTests
             await Assert.ThrowsAnyAsync<Exception>(()=>client.CallToolAsync("prepare_owned_level_move",new Dictionary<string,object?>{{"entitySetHandle",new string('a',32)},{"workingDocumentBindingHandle",new string('b',32)},{"parameters",parameters}},cancellationToken:stop.Token).AsTask());
             await Assert.ThrowsAnyAsync<Exception>(()=>client.CallToolAsync("execute_owned_level_move",new Dictionary<string,object?>{{"ownedLevelMoveHandle",new string('a',32)},{"command","MOVE"}},cancellationToken:stop.Token).AsTask());
             var rejected=await client.CallToolAsync("execute_owned_level_move",new Dictionary<string,object?>{{"ownedLevelMoveHandle",new string('a',32)}},cancellationToken:stop.Token);Assert.True(rejected.IsError);
+            await Assert.ThrowsAnyAsync<Exception>(()=>client.CallToolAsync("adopt_owned_level_move_execution",new Dictionary<string,object?>{{"executionRequestId",true},{"executionReceiptSha256",new string('a',64)}},cancellationToken:stop.Token).AsTask());
+            await Assert.ThrowsAnyAsync<Exception>(()=>client.CallToolAsync("adopt_owned_level_move_execution",new Dictionary<string,object?>{{"executionRequestId",new string('a',32)},{"executionReceiptSha256",new string('a',63)}},cancellationToken:stop.Token).AsTask());
+            await Assert.ThrowsAnyAsync<Exception>(()=>client.CallToolAsync("adopt_owned_level_move_execution",new Dictionary<string,object?>{{"executionRequestId",new string('a',32)},{"executionReceiptSha256",new string('a',64)},{"command","MOVE"}},cancellationToken:stop.Token).AsTask());
+            var missing=await client.CallToolAsync("adopt_owned_level_move_execution",new Dictionary<string,object?>{{"executionRequestId",new string('a',32)},{"executionReceiptSha256",new string('a',64)}},cancellationToken:stop.Token);Assert.True(missing.IsError);
+            Assert.False(Directory.Exists(Path.Combine(fixture.Root,"requests")));
             Assert.False(Directory.Exists(Path.Combine(fixture.Root,"requests")));
         }finally{await client.DisposeAsync();stop.Cancel();try{await run;}catch(OperationCanceledException){}}
     }

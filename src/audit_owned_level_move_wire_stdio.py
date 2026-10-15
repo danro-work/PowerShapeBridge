@@ -81,6 +81,19 @@ for fault in faults:
     assert response['cadSaveAttempted'] is False and response['retryAllowed'] is False
     assert response['state'] == ('owned_level_move_executed_unverified' if fault in ('control', 'lost_reply') else 'owned_level_move_outcome_unknown')
     execution_id = executed[0]['requestId']
+    if case.get('reconnectRequested'):
+        assert case['previousTranscript'] and case['oldConnectionHandleRejected']['isError'] is True
+        adoption = case['adoption']
+        if fault == 'return_false':
+            assert adoption['isError'] is True and 'levelMoveExecutionHandle' not in adoption['structuredContent']
+        else:
+            adopted = adoption['structuredContent']
+            assert adopted['state'] == 'owned_level_move_execution_adopted_for_verification'
+            assert adopted['executionRequestId'] == execution_id and adopted['executionReceiptSha256'] == sha(root / 'responses' / (execution_id + '.json'))
+            assert adopted['verificationOnly'] is True and adopted['executionAuthorized'] is adopted['retryAllowed'] is False
+            assert case['verificationHandleExecutionRejected']['isError'] is True
+            verify_request = next(call for call in calls if call['recipe'] == 'verify_owned_level_move')
+            assert read(root / 'requests' / (verify_request['requestId'] + '.json.processing'))['arguments']['parameters']['executionRequestId'] == execution_id
     events = sorted((root / 'operations' / execution_id).glob('*.json'))
     previous = None
     states = []
@@ -113,6 +126,7 @@ for fault in faults:
         assert sha(Path(case['copy']['ownership'][field]['path'])) == sha(Path(case['seed']['sourcePath']))
 
 report = {'state': 'passed', 'cases': len(faults), 'nativeRequests': request_count, 'hashChecks': hash_count,
+          'reconnectCases': sum(read(evidence / (fault + '.json')).get('reconnectRequested', False) for fault in faults),
           'configurationParityCases': len(variants), 'nativeAdmissionCases': 30,
           'cadConnectionAttempted': False, 'runtimeDeploymentPerformed': False}
 args.output.parent.mkdir(parents=True, exist_ok=True)

@@ -105,6 +105,30 @@ internal sealed class OwnedLevelMoveStore(string root,CandidateStore candidates,
         var record=executions[handle];if(response["bridgeRequestId"] is JsonValue token&&token.TryGetValue<string>(out var id)&&FileArtifacts.Token(id))record.Request=id;
         if(record.Request is not null&&File.Exists(FileArtifacts.FixedPath(root,"responses",record.Request+".json")))record.Sha=FileArtifacts.Sha256(FileArtifacts.ReadBytes(root,Path.Combine("responses",record.Request+".json"),16000000));
     }
+    public JsonObject AdoptExecution(string request,string receiptSha)
+    {
+        Need(FileArtifacts.Token(request)&&FileArtifacts.Token(receiptSha,64),"owned_level_move_adoption_arguments_invalid");
+        Need(executions.Count<128,"owned_level_move_execution_limit");
+        var receipt=ArtifactProof.Verified(root,"responses",request,receiptSha,16000000);
+        Need(receipt["plan"] is JsonObject);var plan=receipt["plan"]!.AsObject();var reference=new JsonObject();
+        foreach(var field in new[]{"ownedLevelMoveId","ownedLevelMoveSha256"})reference[field]=Text(plan,field);
+        Need(FileArtifacts.Token(Text(reference,"ownedLevelMoveId"))&&FileArtifacts.Token(Text(reference,"ownedLevelMoveSha256"),64));
+        var packet=ArtifactProof.Verified(root,"ownedlevelmoves",Text(reference,"ownedLevelMoveId"),Text(reference,"ownedLevelMoveSha256"),16000000);
+        Need(ArtifactProof.IntegerIs(packet["schemaVersion"],1)&&Text(packet,"ownedLevelMoveId")==Text(reference,"ownedLevelMoveId")&&Text(packet,"operation")=="move_entity_to_level"&&ArtifactProof.Boolean(packet["executionEnabled"],false));
+        foreach(var field in new[]{"copyId","ownershipSha256","workingSha256","sourceLevelNumber","windowContextSha256"})Need(JsonNode.DeepEquals(plan[field],packet[field]));
+        Need(packet["entityKeys"] is JsonArray keys&&keys.Count==1&&ArtifactProof.IntegerIs(keys[0]![0],40)&&JsonNode.DeepEquals(keys[0]![1],plan["nativeId"]));
+        var definition=Parameters(packet["arguments"]!["parameters"]!.AsObject());Need(JsonNode.DeepEquals(definition["targetLevelNumber"],plan["targetLevelNumber"])&&JsonNode.DeepEquals(packet["arguments"]!["bindingId"],plan["bindingId"]));
+        Ownership(packet,plan["before"]!.AsObject());
+        // No prepared lease is revived. Only the verification dictionary gets a handle.
+        var handle=Guid.NewGuid().ToString("N");executions[handle]=new(reference){Request=request,Sha=receiptSha};
+        try
+        {
+            _=ExecutionProof(handle);
+            return new(){["state"]="owned_level_move_execution_adopted_for_verification",["levelMoveExecutionHandle"]=handle,["executionRequestId"]=request,["executionReceiptSha256"]=receiptSha,
+                ["verificationOnly"]=true,["executionAuthorized"]=false,["retryAllowed"]=false,["cadMutationAttempted"]=false,["contextChangeAttempted"]=false,["cadSaveAttempted"]=false};
+        }
+        catch{executions.Remove(handle);throw;}
+    }
     public JsonObject ExecutionProof(string handle)
     {
         Need(executions.TryGetValue(handle,out var entry)&&entry.Request is not null,"owned_level_move_execution_unknown");var record=entry!;var bytes=FileArtifacts.ReadBytes(root,Path.Combine("responses",record.Request+".json"),16000000);var sha=FileArtifacts.Sha256(bytes);Need(record.Sha is null||record.Sha==sha);record.Sha=sha;
@@ -114,7 +138,7 @@ internal sealed class OwnedLevelMoveStore(string root,CandidateStore candidates,
         Need(ArtifactProof.Boolean(receipt["cadMutationAttempted"],true)&&ArtifactProof.Boolean(receipt["contextChangeAttempted"],true)&&ArtifactProof.Boolean(receipt["cadSaveAttempted"],false)&&ArtifactProof.IntegerIs(receipt["returnCode"],1)&&Text(receipt,"nativeReturnType")=="System.Boolean");
         var plan=ArtifactProof.Verified(root,"levelmoveexecutions",record.Request!,Text(receipt,"planSha256"),16000000);Need(JsonNode.DeepEquals(plan,receipt["plan"])&&Text(plan,"operationId")==record.Request&&Text(plan,"operation")=="move_owned_solid_to_level");
         var claimRaw=FileArtifacts.ReadBytes(root,Path.Combine("ownedlevelmoves",Text(plan,"ownedLevelMoveId")+".execution-once.json"),65536);Need(FileArtifacts.Sha256(claimRaw)==Text(receipt,"claimSha256"));var claim=JsonNode.Parse(FileArtifacts.Parse(claimRaw).GetRawText())!.AsObject();
-        Need(Text(claim,"operationId")==record.Request&&Text(claim,"planSha256")==Text(receipt,"planSha256")&&Text(claim,"copyId")==Text(plan,"copyId")&&ArtifactProof.Boolean(claim["automaticReplayForbidden"],true));
+        Need(ArtifactProof.Fields(claim,"operationId","planSha256","ownedLevelMoveId","copyId","automaticReplayForbidden")&&Text(claim,"operationId")==record.Request&&Text(claim,"planSha256")==Text(receipt,"planSha256")&&Text(claim,"ownedLevelMoveId")==Text(plan,"ownedLevelMoveId")&&Text(claim,"copyId")==Text(plan,"copyId")&&ArtifactProof.Boolean(claim["automaticReplayForbidden"],true));
         var journal=ArtifactProof.Journal(root,record.Request!);Need(Text(journal,"planSha256")==Text(receipt,"planSha256")&&ArtifactProof.Boolean(journal["writerLockPresent"],false));
         var returned=journal["events"]!.AsArray().Single(item=>item!["state"]!.GetValue<string>()=="command_returned")!["details"]!.AsObject();Need(ArtifactProof.IntegerIs(returned["returnCode"],1)&&Text(returned,"nativeReturnType")=="System.Boolean");
         return new(){["executionRequestId"]=record.Request,["executionReceiptSha256"]=sha};
