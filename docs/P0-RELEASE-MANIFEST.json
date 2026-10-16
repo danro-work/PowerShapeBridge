@@ -1,0 +1,31 @@
+{
+  "candidate": "P0-20261016.1",
+  "status": "technical_live_passed_user_acceptance_pending",
+  "nativeVersion": "0.37.0-dev",
+  "sdkHostVersion": "0.43.0-dev",
+  "runtimeFramework": ".NET 10",
+  "modelContextProtocol": "2.2.0",
+  "microsoftExtensionsHosting": "10.0.12",
+  "qualifiedCodeCommit": "e7387d99b6969f0079fa2fc74d4da2f689a2d37d",
+  "sdkBinaryRebuiltForP0": false,
+  "ordinaryAllowedTools": 28,
+  "readOnlyTools": 8,
+  "representativeModelLivePassed": true,
+  "commandCounts": {
+    "initialOwnedOpen": 1,
+    "worldSolidTranslation": 1,
+    "newSaveAs": 1,
+    "savedResultOwnedOpen": 1
+  },
+  "vectorWorldMm": [
+    1,
+    2,
+    3
+  ],
+  "protectedFilesVerified": 199,
+  "unchangedRegressionFiles": 379,
+  "fullV1Accepted": false,
+  "newMachineInstallQualified": false,
+  "localBundle": "work/P0-candidate-370-430",
+  "localEvidence": "evidence/P0-user-model-20261016a/independent-audit.json"
+}
