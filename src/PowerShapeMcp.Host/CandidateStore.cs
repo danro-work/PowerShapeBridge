@@ -60,6 +60,17 @@ public sealed class CandidateStore(Func<double>? clock=null,Func<DateTimeOffset>
         return found.Parameters.DeepClone().AsObject();
     }
     public double DocumentRemaining(string document){DocumentParameters(document);return documents[document].Expires-now();}
+    internal JsonObject WorkplaneTarget(string handle,JsonObject binding)
+    {
+        Purge();
+        if(!candidates.TryGetValue(handle,out var candidate)||candidate.Key.Type!=54)
+            throw new ReferenceRejected("workplane_candidate_unknown_or_wrong_type");
+        var source=DocumentParameters(candidate.Document);
+        foreach(var field in new[]{"inspectionRequestId","inspectionSha256"})
+            if(!JsonNode.DeepEquals(source[field],binding[field]))throw new ReferenceRejected("workplane_candidate_wrong_binding");
+        if(candidate.Key.Id>int.MaxValue)throw new ReferenceRejected("workplane_candidate_identity_out_of_range");
+        return new(){["mode"]="existing",["nativeId"]=(int)candidate.Key.Id};
+    }
     public JsonObject IssueSet(JsonObject result)
     {
         var id=ArtifactProof.String(result,"entitySetId","entity_set_receipt_invalid");

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,6 +11,10 @@ namespace PowerShapeBridge {
   Config c=Program.ReadConfig();
   if(r.Count!=3||!Equals(r["requestId"],id)||!r.ContainsKey("arguments"))throw new ArgumentException("Invalid envelope.");
   var a=r["arguments"] as Dictionary<string,object>;if(a==null)throw new ArgumentException("Invalid arguments.");string op=(string)r["operation"];
+  if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedWorkplaneActivation.Recipes.Contains(a["recipeId"] as string)) {
+   if(!c.IsGeneralCore||!c.ownedWorkplaneActivationExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned activation disabled or invalid envelope.");
+   OwnedWorkplaneActivation.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;
+  }
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedWorkplaneOperations.Recipes.Contains(a["recipeId"] as string)) {
    if(!c.IsGeneralCore||!c.ownedWorkplanesExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned workplane disabled or invalid envelope.");
    OwnedWorkplaneOperations.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;
@@ -68,6 +72,7 @@ namespace PowerShapeBridge {
  Config c=Program.ReadConfig();Guid g;if(!Guid.TryParseExact(id,"N",out g))throw new ArgumentException("Invalid request ID.");
  var request=FileRequests.Parse(id,File.ReadAllText(Path.Combine(Program.Root,"requests",id+".json.processing"),Encoding.UTF8));
  var readArgs=(Dictionary<string,object>)request["arguments"];
+ if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedWorkplaneActivation.Recipes.Contains(readArgs["recipeId"] as string))return OwnedWorkplaneActivation.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedWorkplaneOperations.Recipes.Contains(readArgs["recipeId"] as string))return OwnedWorkplaneOperations.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedLevelMoveOperations.Recipes.Contains(readArgs["recipeId"] as string))return OwnedLevelMoveOperations.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&new[]{"prepare_checkpoint_recovery","create_checkpoint_working_copy"}.Contains(readArgs["recipeId"] as string))return CheckpointRecovery.Run(id,(Dictionary<string,object>)readArgs["parameters"],Equals(readArgs["recipeId"],"create_checkpoint_working_copy"));

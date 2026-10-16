@@ -106,6 +106,7 @@ if($LASTEXITCODE -ne 0){throw 'Native DGK target SDK compatibility failed.'}
 & (Join-Path $taskRoot 'verify-owned-level-move-execution.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-level-execution') -EvidenceDirectory (Join-Path $taskEvidence 'owned-level-move-execution')
 & (Join-Path $taskRoot 'verify-owned-level-move-wire.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-level-wire') -EvidenceDirectory (Join-Path $taskEvidence 'owned-level-move-wire')
 & (Join-Path $taskRoot 'verify-owned-workplanes.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-workplanes') -EvidenceDirectory (Join-Path $taskEvidence 'owned-workplanes')
+& (Join-Path $taskRoot 'verify-workplane-activation.ps1') -PythonPath $PythonPath -DotnetPath $DotnetPath -HostPath $taskHost -StageDirectory ($NativeStageDirectory+'-workplane-activation') -EvidenceDirectory (Join-Path $taskEvidence 'workplane-activation')
 New-Item -ItemType Directory -Path $taskFixture | Out-Null
 Copy-Item -LiteralPath (Join-Path $taskRoot 'config\general-owned-translations.json') -Destination (Join-Path $taskFixture 'bridge.config.json')
 $taskInspectorConfig = Join-Path $taskFixture 'inspector.json'
@@ -123,7 +124,15 @@ foreach ($taskMethod in @('tools/list','tools/call')) {
     } elseif ($taskResult.isError -or $taskResult.structuredContent.panelLiveness -ne 'not_verified' -or $taskResult.structuredContent.geometryMutations -ne 'disabled') { throw 'Inspector diagnostic result differs.' }
 }
 $taskFiles = @('global.json','src\PowerShapeMcp.Host\PowerShapeMcp.Host.csproj','src\PowerShapeMcp.Host\packages.lock.json','tests\PowerShapeMcp.Tests\packages.lock.json','src\test_sdk_stdio.py','verify-sdk.ps1')
-$taskFiles += @(Get-ChildItem -LiteralPath (Join-Path $taskRoot 'src\PowerShapeMcp.Host'),(Join-Path $taskRoot 'tests\PowerShapeMcp.Tests') -File -Recurse | Where-Object { $_.Extension -eq '.cs' -and $_.FullName -notmatch '[\\/](bin|obj)[\\/]' } | ForEach-Object { [IO.Path]::GetRelativePath($taskRoot,$_.FullName) })
+function Get-SdkSourceFiles([string]$Directory) {
+    Get-ChildItem -LiteralPath $Directory -File -Filter '*.cs'
+    foreach ($taskSourceDirectory in (Get-ChildItem -LiteralPath $Directory -Directory)) {
+        if ($taskSourceDirectory.Name -notin @('bin','obj')) { Get-SdkSourceFiles $taskSourceDirectory.FullName }
+    }
+}
+$taskFiles += @(foreach ($taskSourceRoot in @('src\PowerShapeMcp.Host','tests\PowerShapeMcp.Tests')) {
+    Get-SdkSourceFiles (Join-Path $taskRoot $taskSourceRoot) | ForEach-Object { [IO.Path]::GetRelativePath($taskRoot,$_.FullName) }
+})
 $taskFiles += @('src\mcp_server.py','src\operation_plans.py','src\entity_references.py','src\PowerShapeMcp.Host\bin\Release\net10.0\PowerShapeMcp.Host.dll','src\PowerShapeMcp.Host\bin\Release\net10.0\PowerShapeMcp.Host.deps.json','src\PowerShapeMcp.Host\bin\Release\net10.0\PowerShapeMcp.Host.runtimeconfig.json')
 $taskFiles += @('src\document_handles.py','src\entity_sets.py','src\test_sdk_readonly.py','src\generate_observation_fixtures.py','tests\PowerShapeMcp.Tests\fixtures\observations.json')
 $taskFiles += @('src\test_sdk_prepared.py','src\native_fixture_oracle.py','src\generate_tool_schemas.py','src\PowerShapeMcp.Host\Schemas\prepared-tools.json','tools\NativeFixtureCheck\Program.cs','tools\NativeFixtureCheck\NativeFixtureCheck.csproj','tools\NativeFixtureCheck\packages.lock.json')
@@ -179,6 +188,8 @@ $taskFiles += @('src\OwnedDgkExportVerification.cs','src\OwnedDgkExportVerificat
 $taskFiles += @('tools\NativeFixtureCheck\DgkTargetCheck.cs','config\general-owned-dgk-targets.json')
 $taskFiles += @('src\OwnedDgkTargetWireFixture.cs','src\test_sdk_owned_dgk_wire_stdio.py','src\audit_owned_dgk_wire_stdio.py','verify-owned-dgk-wire.ps1')
 $taskFiles += @('src\WorkplaneFrame.cs','src\OwnedWorkplanePlans.cs','src\OwnedWorkplaneExecution.cs','src\OwnedWorkplaneOperations.cs','src\OwnedWorkplaneTests.cs','src\OwnedWorkplaneWireFixture.cs','src\PowerShapeMcp.Host\OwnedWorkplaneStore.cs','src\PowerShapeMcp.Host\OwnedWorkplaneTools.cs','tests\PowerShapeMcp.Tests\OwnedWorkplaneTests.cs','config\general-owned-workplanes.json','verify-owned-workplanes.ps1','src\test_sdk_owned_workplane_wire_stdio.py','src\audit_owned_workplanes.py','src\audit_owned_workplane_wire_stdio.py','src\test_sdk_owned_workplane_transport.py','src\audit_owned_workplane_transport.py')
+$taskFiles += @('src\OwnedWorkplaneActivation.cs','src\OwnedWorkplaneActivationTests.cs','src\WorkplaneActivationWireFixture.cs','src\PowerShapeMcp.Host\OwnedWorkplaneActivationStore.cs','src\PowerShapeMcp.Host\OwnedWorkplaneActivationTools.cs','tests\PowerShapeMcp.Tests\WorkplaneActivationTests.cs','config\general-workplane-activation.json','verify-workplane-activation.ps1','src\test_sdk_workplane_activation_stdio.py','src\audit_workplane_activation_stdio.py','src\test_sdk_workplane_activation_transport.py','src\audit_workplane_activation_transport.py')
+$taskFiles += @('tools\audit_live_workplane_activation.py','tools\verify_live_activation_audit.py')
 $taskHashes = @($taskFiles | ForEach-Object { @{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $taskRoot $_)).Hash.ToLowerInvariant()} })
 [ordered]@{schema='psbridge.sdk-verification.v1';finishedUtc=[DateTime]::UtcNow.ToString('o');passed=$true;version=$taskResult.structuredContent.adapterVersion;scope='SDK/read-only/prepared fake-panel; Python byte/schema parity; actual Framework synthetic artifact compatibility; Inspector CLI';cadConnectionAttempted=$false;runtimeDeploymentPerformed=$false;files=$taskHashes} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskEvidence 'sdk-verification.json') -Encoding utf8
 Write-Output 'PASS: SDK build/tests, independent STDIO client and Inspector CLI; no CAD or deployment.'

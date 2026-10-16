@@ -7,7 +7,7 @@ namespace PowerShapeMcp;
 // Recorded artifact inspection only. Never grants execution or changes a journal.
 public sealed class RecoveryInspection(string root)
 {
-    private static readonly string[] PlanFolders=["ownedexecutions","saveexecutions","copyopenplans","levelmoveexecutions","workplaneexecutions"];
+    private static readonly string[] PlanFolders=["ownedexecutions","saveexecutions","copyopenplans","levelmoveexecutions","workplaneexecutions","workplaneactivationexecutions"];
     private static string Text(JsonObject data,string key)=>ArtifactProof.String(data,key,"recovery_artifact_invalid");
     private static void Require(bool ok,string code){if(!ok)throw new ReferenceRejected(code);}
     public JsonObject Read(string operationId,TimeSpan budget,CancellationToken cancellationToken=default)
@@ -28,14 +28,15 @@ public sealed class RecoveryInspection(string root)
             Require(plans.Length==1,"recovery_plan_missing_or_ambiguous");Deadline();
             // Level and workplane plans retain the complete model observation.
             // Keep the original small limit for other supported formats.
-            int planLimit=plans[0].Folder is "levelmoveexecutions" or "workplaneexecutions"?16000000:65536;
+            int planLimit=plans[0].Folder is "levelmoveexecutions" or "workplaneexecutions" or "workplaneactivationexecutions"?16000000:65536;
             var planRaw=FileArtifacts.ReadBytes(root,Path.GetRelativePath(root,plans[0].Path),planLimit);var planSha=FileArtifacts.Sha256(planRaw);
             Require(Text(journal,"planSha256")==planSha,"recovery_plan_sha_differs");var plan=JsonNode.Parse(FileArtifacts.Parse(planRaw).GetRawText())!.AsObject();
             Require(Text(plan,"operationId")==operationId&&ArtifactProof.IntegerIs(plan["schemaVersion"],1)&&FileArtifacts.Token(Text(plan,"copyId"))&&FileArtifacts.Token(Text(plan,"ownershipSha256"),64),"recovery_plan_identity_invalid");
-            var operation=Text(plan,"operation");Require(operation is "translate_owned_solid" or "save_owned_document_as" or "open_working_copy" or "open_owned_saved_result" or "move_owned_solid_to_level" or "create_owned_world_workplane","recovery_operation_unsupported");
-            Require((operation=="translate_owned_solid"&&plans[0].Folder=="ownedexecutions")||(operation=="save_owned_document_as"&&plans[0].Folder=="saveexecutions")||(operation is "open_working_copy" or "open_owned_saved_result"&&plans[0].Folder=="copyopenplans")||(operation=="move_owned_solid_to_level"&&plans[0].Folder=="levelmoveexecutions")||(operation=="create_owned_world_workplane"&&plans[0].Folder=="workplaneexecutions"),"recovery_plan_location_invalid");
+            var operation=Text(plan,"operation");Require(operation is "translate_owned_solid" or "save_owned_document_as" or "open_working_copy" or "open_owned_saved_result" or "move_owned_solid_to_level" or "create_owned_world_workplane" or "activate_owned_workplane","recovery_operation_unsupported");
+            Require((operation=="translate_owned_solid"&&plans[0].Folder=="ownedexecutions")||(operation=="save_owned_document_as"&&plans[0].Folder=="saveexecutions")||(operation is "open_working_copy" or "open_owned_saved_result"&&plans[0].Folder=="copyopenplans")||(operation=="move_owned_solid_to_level"&&plans[0].Folder=="levelmoveexecutions")||(operation=="create_owned_world_workplane"&&plans[0].Folder=="workplaneexecutions")||(operation=="activate_owned_workplane"&&plans[0].Folder=="workplaneactivationexecutions"),"recovery_plan_location_invalid");
             if(operation=="move_owned_solid_to_level")output["requiredNextStep"]="Use adopt_owned_level_move_execution in a full-server connection, then fresh CAD inspection/listing and verify_owned_level_move. This recorded inspection does not resolve today's CAD state or authorize a retry/checkpoint restore.";
             if(operation=="create_owned_world_workplane")output["requiredNextStep"]="Both creation and declared world-return proof are required. Use adopt_owned_workplane_execution and a fresh operation-specific verifier in a full connection. Missing authoritative return remains unknown; this read never authorizes creation, activation or checkpoint restore.";
+            if(operation=="activate_owned_workplane")output["requiredNextStep"]="Use adopt_owned_workplane_activation_execution and fresh independent verification in a full connection. No replay or automatic WORLD return. Missing authoritative setter return remains unknown.";
             output["operation"]=operation;output["planSha256"]=planSha;output["plan"]=plan.DeepClone();
             JsonObject Json(string relative,string? expectedSha=null)
             {
@@ -85,6 +86,13 @@ public sealed class RecoveryInspection(string root)
                     authoritative=returnCode>0&&Text(details,"nativeReturnType")=="System.Int32"&&Text(creation,"nativeReturnType")=="System.Int32"&&ArtifactProof.Boolean(details["worldActivationReturned"],true);
                     output["recordedNativeReturnType"]=details["nativeReturnType"]!.DeepClone();output["declaredWorldReturnRecorded"]=details["worldActivationReturned"]!.DeepClone();
                 }
+                else if(operation=="activate_owned_workplane")
+                {
+                    Require(ArtifactProof.Fields(details,"nativeRequestId","targetCompositeId","setterCalls","setterReceiptSha256")&&ArtifactProof.IntegerIs(details["setterCalls"],1)&&JsonNode.DeepEquals(details["targetCompositeId"],plan["targetCompositeId"]),"recovery_activation_return_invalid");
+                    var setter=Json("workplaneactivationexecutions/"+operationId+".setter-return.json",Text(details,"setterReceiptSha256"));
+                    Require(ArtifactProof.Fields(setter,"schemaVersion","operationId","planSha256","targetCompositeId","activeRaw","setterCalls","setterReturned","timestampUtc")&&ArtifactProof.IntegerIs(setter["schemaVersion"],1)&&Text(setter,"operationId")==operationId&&Text(setter,"planSha256")==planSha&&JsonNode.DeepEquals(setter["targetCompositeId"],plan["targetCompositeId"])&&JsonNode.DeepEquals(setter["activeRaw"],plan["targetCompositeId"])&&ArtifactProof.IntegerIs(setter["setterCalls"],1)&&ArtifactProof.Boolean(setter["setterReturned"],true),"recovery_activation_setter_proof_invalid");
+                    authoritative=true;
+                }
                 else if(operation=="save_owned_document_as")authoritative=ArtifactProof.Fields(details,"nativeRequestId","saveCommandReturned")&&ArtifactProof.Boolean(details["saveCommandReturned"],true);
                 else authoritative=ArtifactProof.Fields(details,"nativeRequestId");
             }
@@ -108,6 +116,12 @@ public sealed class RecoveryInspection(string root)
                 Require(Text(packet,"operation")=="create_world_workplane"&&JsonNode.DeepEquals(packet["ownedWorkplaneId"],plan["ownedWorkplaneId"])&&JsonNode.DeepEquals(packet["copyId"],plan["copyId"])&&JsonNode.DeepEquals(packet["ownershipSha256"],plan["ownershipSha256"]),"recovery_packet_identity_invalid");
                 claimPath="ownedworkplanes/"+Text(plan,"ownedWorkplaneId")+".execution-once.json";
             }
+            else if(operation=="activate_owned_workplane")
+            {
+                var packet=ArtifactProof.Verified(root,"workplaneactivations",Text(plan,"activationId"),Text(plan,"activationSha256"),65536);
+                Require(Text(packet,"operation")=="activate_existing_workplane_or_world"&&JsonNode.DeepEquals(packet["activationId"],plan["activationId"])&&JsonNode.DeepEquals(packet["copyId"],plan["copyId"])&&JsonNode.DeepEquals(packet["ownershipSha256"],plan["ownershipSha256"])&&JsonNode.DeepEquals(packet["targetCompositeId"],plan["targetCompositeId"]),"recovery_packet_identity_invalid");
+                claimPath="workplaneactivations/"+Text(plan,"activationId")+".execution-once.json";
+            }
             else if(operation=="save_owned_document_as")
             {Require(FileArtifacts.Token(Text(plan,"targetId")),"recovery_save_target_invalid");claimPath="savedresults/"+Text(plan,"targetId")+"/save-once.json";}
             else claimPath="workingcopies/"+copy+"/open-once.json";
@@ -117,6 +131,7 @@ public sealed class RecoveryInspection(string root)
                 Require(operation=="translate_owned_solid"?ArtifactProof.Fields(claim,"operationId","planSha256","ownedOperationId","copyId","automaticReplayForbidden")&&JsonNode.DeepEquals(claim["ownedOperationId"],plan["ownedOperationId"]):
                     operation=="move_owned_solid_to_level"?ArtifactProof.Fields(claim,"operationId","planSha256","ownedLevelMoveId","copyId","automaticReplayForbidden")&&JsonNode.DeepEquals(claim["ownedLevelMoveId"],plan["ownedLevelMoveId"]):
                     operation=="create_owned_world_workplane"?ArtifactProof.Fields(claim,"operationId","planSha256","ownedWorkplaneId","copyId","automaticReplayForbidden")&&JsonNode.DeepEquals(claim["ownedWorkplaneId"],plan["ownedWorkplaneId"]):
+                    operation=="activate_owned_workplane"?ArtifactProof.Fields(claim,"operationId","planSha256","activationId","copyId","automaticReplayForbidden")&&JsonNode.DeepEquals(claim["activationId"],plan["activationId"]):
                     operation=="save_owned_document_as"?ArtifactProof.Fields(claim,"operationId","planSha256","targetId","automaticReplayForbidden"):
                     ArtifactProof.Fields(claim,"operationId","planSha256","copyId","ownershipSha256","automaticReplayForbidden")&&JsonNode.DeepEquals(claim["ownershipSha256"],plan["ownershipSha256"]),"recovery_claim_schema_or_dependency_invalid");
                 Require(operation=="save_owned_document_as"?JsonNode.DeepEquals(claim["targetId"],plan["targetId"]):JsonNode.DeepEquals(claim["copyId"],plan["copyId"]),"recovery_claim_owner_differs");
@@ -129,7 +144,7 @@ public sealed class RecoveryInspection(string root)
                     Text(fence,"operationId")==operationId&&Text(fence,"planSha256")==planSha&&Text(fence,"copyId")==copy&&Text(fence,"ownershipSha256")==Text(plan,"ownershipSha256")&&ArtifactProof.Boolean(fence["automaticReplayForbidden"],true),"recovery_fence_foreign_or_invalid");
             }
             Require(recorded=="prepared"||recorded=="rejected_before_change"||claimPresent,"recovery_claim_missing");
-            bool usesFence=operation is "translate_owned_solid" or "save_owned_document_as" or "move_owned_solid_to_level" or "create_owned_world_workplane";
+            bool usesFence=operation is "translate_owned_solid" or "save_owned_document_as" or "move_owned_solid_to_level" or "create_owned_world_workplane" or "activate_owned_workplane";
             bool terminal=recorded=="succeeded_verified"||recorded=="rejected_before_change";
             if(terminal)
             {

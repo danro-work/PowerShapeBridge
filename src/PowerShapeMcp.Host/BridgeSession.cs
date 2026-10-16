@@ -28,6 +28,7 @@ public sealed class BridgeSession : IDisposable
     internal OwnedDgkTargetStore DgkTargets { get; }
     internal OwnedLevelMoveStore LevelMoves { get; }
     internal OwnedWorkplaneStore Workplanes { get; }
+    internal OwnedWorkplaneActivationStore WorkplaneActivations { get; }
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     public bool LevelReadingEnabled { get; }
@@ -56,6 +57,7 @@ public sealed class BridgeSession : IDisposable
         DgkTargets=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         LevelMoves=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         Workplanes=new(options.BridgeRoot,Bindings,clock,utcClock);
+        WorkplaneActivations=new(options.BridgeRoot,Bindings,Candidates,clock,utcClock);
         var config=Options.ReadConfiguration();
         LevelReadingEnabled=config.TryGetProperty("levelReadingExperimental",out var levelFlag)&&levelFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
@@ -72,6 +74,7 @@ public sealed class BridgeSession : IDisposable
                 ("ownedDgkTargetsExperimental",new[]{"prepare_owned_dgk_export"}),
                 ("ownedLevelMovesExperimental",new[]{"prepare_owned_level_move"}),
                 ("ownedWorkplanesExperimental",new[]{"prepare_owned_workplane"}),
+                ("ownedWorkplaneActivationExperimental",new[]{"prepare_owned_workplane_activation"}),
                 ("ownedRotationPlansExperimental",new[]{"prepare_owned_rotation"}),
                 ("entitySetsExperimental",new[]{"prepare_entity_set","validate_entity_set"}),
                 ("operationPlansExperimental",new[]{"prepare_operation_plan","inspect_operation_plan"}),
@@ -88,6 +91,7 @@ public sealed class BridgeSession : IDisposable
             prepared.UnionWith(new[]{"prepare_checkpoint_recovery","create_checkpoint_working_copy"});
         if(!options.ReadOnly&&config.TryGetProperty("ownedLevelMovesExperimental",out var levelMoves)&&levelMoves.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_level_move","verify_owned_level_move","adopt_owned_level_move_execution"});
         if(!options.ReadOnly&&config.TryGetProperty("ownedWorkplanesExperimental",out var workplanes)&&workplanes.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_workplane","verify_owned_workplane","adopt_owned_workplane_execution"});
+        if(!options.ReadOnly&&config.TryGetProperty("ownedWorkplaneActivationExperimental",out var activation)&&activation.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_workplane_activation","verify_owned_workplane_activation","adopt_owned_workplane_activation_execution"});
     }
     public void AssertToolAllowed(string name)
     {
@@ -113,6 +117,7 @@ public sealed class BridgeSession : IDisposable
         DgkTargets.Clear();
         LevelMoves.ClearPrepared();
         Workplanes.ClearPrepared();
+        WorkplaneActivations.ClearPrepared();
         SaveTargets.Clear();
         Reopens.Clear();
         if(consumeOwned){Plans.Clear();Owned.Clear();}
@@ -160,5 +165,5 @@ public sealed class BridgeSession : IDisposable
         }
         return result;
     }
-    public void Dispose(){Workplanes.Clear();LevelMoves.Clear();DgkTargets.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
+    public void Dispose(){WorkplaneActivations.Clear();Workplanes.Clear();LevelMoves.Clear();DgkTargets.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
 }

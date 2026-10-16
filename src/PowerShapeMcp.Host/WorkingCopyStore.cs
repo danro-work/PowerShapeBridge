@@ -57,6 +57,21 @@ public sealed class WorkingCopyStore(Func<double>? clock=null,Func<DateTimeOffse
         if(seconds<=0)throw new ReferenceRejected(code);
         return IssueLease(ownedCopy,seconds);
     }
+    internal JsonObject IssueVerifiedWorkplaneActivation(JsonObject result,JsonObject ownedCopy,DateTimeOffset expiry)
+    {
+        const string code="verified_activation_copy_lease_invalid";
+        if(!ArtifactProof.Fields(ownedCopy,"copyId","ownershipSha256")||!FileArtifacts.Token(ownedCopy["copyId"]?.GetValue<string>())||!FileArtifacts.Token(ownedCopy["ownershipSha256"]?.GetValue<string>(),64)||
+            result["state"]?.GetValue<string>()!="owned_workplane_activation_verified_observed"||result["recordedJournalState"]?.GetValue<string>()!="succeeded_verified"||
+            !FileArtifacts.Token(result["bridgeRequestId"]?.GetValue<string>())||!FileArtifacts.Token(result["executionOperationId"]?.GetValue<string>())||
+            !ArtifactProof.Boolean(result["copyFenceReleased"],true)||!ArtifactProof.Boolean(result["noCommandReplay"],true)||
+            new[]{"cadMutationAttempted","geometryMutationAttempted","contextChangeAttempted","cadSaveAttempted"}.Any(k=>!ArtifactProof.Boolean(result[k],false)))throw new ReferenceRejected(code);
+        var time=LeaseTime.Remaining(ArtifactProof.String(result,"timestampUtc",code),utcNow(),code);
+        var current=LeaseTime.PythonPrecision(utcNow());expiry=LeaseTime.PythonPrecision(expiry);
+        if(expiry>time.Expiry||expiry>current.AddSeconds(300))throw new ReferenceRejected(code);
+        double seconds=Math.Min(Math.Min(time.Remaining,300),(expiry-current).TotalSeconds);
+        if(seconds<=0)throw new ReferenceRejected(code);
+        return IssueLease(ownedCopy,seconds);
+    }
     private JsonObject IssueLease(JsonObject result,double seconds)
     {
         Purge();if(copies.Count>=128)Clear();var handle=Guid.NewGuid().ToString("N");

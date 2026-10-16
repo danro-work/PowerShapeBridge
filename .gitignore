@@ -33,6 +33,8 @@
 /savedreopens/
 /recoveryresolutions/
 /workingcopies/
+/workplaneactivations/
+/workplaneactivationexecutions/
 /maintenance.json
 /deployment.lock
 
