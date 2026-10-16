@@ -30,28 +30,46 @@ namespace PowerShapeBridge {
   static double[] Vector(object v){var a=v as IEnumerable;Need(a!=null&&!(v is string),"Numeric vector required.");var r=a.Cast<object>().Select(Program.StrictDouble).ToArray();Need(r.Length==3,"Three finite coordinates required.");return r;}
   static double[][] Axes(double[] f){WorkplaneFrame.Validate(f);var z=f.Skip(3).Take(3).ToArray();var y=f.Skip(6).Take(3).ToArray();var x=new[]{y[1]*z[2]-y[2]*z[1],y[2]*z[0]-y[0]*z[2],y[0]*z[1]-y[1]*z[0]};return new[]{x,y,z};}
   internal static double[] ConvertPoint(double[] p,double[] frame,int source,int target){
-   Need(p!=null&&p.Length==3&&p.All(v=>!double.IsNaN(v)&&!double.IsInfinity(v)),"Finite COG required.");var axes=Axes(frame);var world=p.ToArray();
-   if(source!=0)for(int i=0;i<3;i++)world[i]=frame[i]+Enumerable.Range(0,3).Sum(j=>axes[j][i]*p[j]);
-   return target==0?world:axes.Select(a=>Enumerable.Range(0,3).Sum(i=>a[i]*(world[i]-frame[i]))).ToArray();
+   return ConvertPoint(p,source==0?null:frame,target==0?null:frame);
+  }
+  internal static double[] ConvertPoint(double[] p,double[] sourceFrame,double[] targetFrame){
+   Need(p!=null&&p.Length==3&&p.All(v=>!double.IsNaN(v)&&!double.IsInfinity(v)),"Finite COG required.");var world=p.ToArray();
+   if(sourceFrame!=null){var sourceAxes=Axes(sourceFrame);for(int i=0;i<3;i++)world[i]=sourceFrame[i]+Enumerable.Range(0,3).Sum(j=>sourceAxes[j][i]*p[j]);}
+   Need(world.All(v=>!double.IsNaN(v)&&!double.IsInfinity(v)),"COG conversion overflowed the WORLD frame.");if(targetFrame==null)return world;var targetAxes=Axes(targetFrame);
+   var result=targetAxes.Select(a=>Enumerable.Range(0,3).Sum(i=>a[i]*(world[i]-targetFrame[i]))).ToArray();Need(result.All(v=>!double.IsNaN(v)&&!double.IsInfinity(v)),"COG conversion overflowed the target frame.");return result;
+  }
+  // One-plane v1 records keep their original shape and verification semantics.
+  static int Schema(Dictionary<string,object> capture){return capture.ContainsKey("planes")?2:1;}
+  static Dictionary<string,object>[] Planes(Dictionary<string,object> capture){
+   bool multiple=Schema(capture)==2;OwnedWorkplanePlans.Fields(capture,"sourceActive",multiple?"planes":"plane","bounds");
+   var rows=multiple?((IEnumerable)capture["planes"]).Cast<object>().Select(v=>(Dictionary<string,object>)v).ToArray():new[]{(Dictionary<string,object>)capture["plane"]};
+   Need(multiple?rows.Length>1:rows.Length==1,"Capture schema/workplane count differs.");
+   foreach(var row in rows){OwnedWorkplanePlans.Fields(row,"nativeId","compositeId","worldInfo");Need(row["nativeId"] is int&&(int)row["nativeId"]>=0&&row["compositeId"] is int&&(int)row["compositeId"]>0,"Invalid captured workplane mapping.");OwnedWorkplanePlans.Info(((IEnumerable)row["worldInfo"]).Cast<object>().ToArray());}
+   Need(rows.Select(v=>(int)v["nativeId"]).Distinct().Count()==rows.Length&&rows.Select(v=>(int)v["compositeId"]).Distinct().Count()==rows.Length,"Captured workplane mappings are not unique.");
+   Need(capture["sourceActive"] is int&&((int)capture["sourceActive"]==0||rows.Any(v=>Equals(v["compositeId"],capture["sourceActive"]))),"Source workplane is absent from captured frames.");return rows;
+  }
+  static double[] Frame(Dictionary<string,object>[] planes,int composite){
+   if(composite==0)return null;var matches=planes.Where(p=>Equals(p["compositeId"],composite)).ToArray();Need(matches.Length==1,"Source or target workplane is absent from captured frames.");
+   return OwnedWorkplanePlans.Info(((IEnumerable)matches[0]["worldInfo"]).Cast<object>().ToArray());
   }
   static bool Near(double[] a,double[] b){return a.Length==b.Length&&a.Zip(b,(x,y)=>Math.Abs(x-y)<=1e-9+1e-12*Math.Max(Math.Abs(x),Math.Abs(y))).All(v=>v);}
   internal static void Empty(Dictionary<string,object> o,int active,IContext c){
    Need(active>=0&&c.ActiveWorkplane()==active&&EntitySets.Canonical(o["contextBefore"])==EntitySets.Canonical(new[]{0,active})&&EntitySets.Canonical(o["contextAfter"])==EntitySets.Canonical(new[]{0,active})&&EntitySets.Canonical(o["selectionBefore"])=="[]"&&EntitySets.Canonical(o["selectionAfter"])=="[]","Stable declared workplane and empty selection required.");
   }
   internal static Dictionary<string,object> Capture(Dictionary<string,object> o,IContext c){
-   var entities=EntitySets.Inventory(o);Need(entities.Length==2&&entities.Count(e=>Equals(e["nativeTypeCode"],40))==1&&entities.Count(e=>Equals(e["nativeTypeCode"],54))==1,"First activation provider supports exactly one SOLID and one WORKPLANE; other v1 classes remain unqualified.");
-   var frames=OwnedWorkplanePlans.Frames(o,c);var rows=((IEnumerable)frames["frames"]).Cast<object>().Select(v=>(Dictionary<string,object>)v).ToArray();Need(rows.Length==1,"One direct workplane required.");int composite=(int)rows[0]["compositeId"],active=c.ActiveWorkplane();
-   Need(active==0||active==composite,"Source workplane is not the observed WORLD or existing workplane.");Empty(o,active,c);
+   var entities=EntitySets.Inventory(o);int count=entities.Count(e=>Equals(e["nativeTypeCode"],54));Need(count>0&&entities.Length==count+1&&entities.Count(e=>Equals(e["nativeTypeCode"],40))==1,"Activation provider supports exactly one SOLID and one or more WORKPLANEs; other v1 classes remain unqualified.");
+   var frames=OwnedWorkplanePlans.Frames(o,c);var rows=((IEnumerable)frames["frames"]).Cast<object>().Select(v=>(Dictionary<string,object>)v).ToArray();Need(rows.Length==count,"Direct workplane count differs.");int active=c.ActiveWorkplane();
+   Need(active==0||rows.Any(p=>Equals(p["compositeId"],active)),"Source workplane is not an observed WORLD or existing workplane.");Empty(o,active,c);
    var body=entities.Single(e=>Equals(e["nativeTypeCode"],40));var geometry=body["geometry"] as Dictionary<string,object>;Need(geometry!=null&&geometry.ContainsKey("cogRaw")&&Equals(geometry["coordinateFrame"],active==0?"world":"active_workplane_unqualified"),"Qualified COG frame label required.");Vector(geometry["cogRaw"]);
-   return new Dictionary<string,object>{{"sourceActive",active},{"plane",rows[0]},{"bounds",OwnedWorkplanePlans.Bounds(o,c)}};
+   var capture=new Dictionary<string,object>{{"sourceActive",active},{"bounds",OwnedWorkplanePlans.Bounds(o,c)}};if(rows.Length==1)capture["plane"]=rows[0];else capture["planes"]=rows;Planes(capture);return capture;
   }
   internal static void Postconditions(Dictionary<string,object> plan,Dictionary<string,object> after,IContext c){
-   var before=(Dictionary<string,object>)plan["before"];var captured=(Dictionary<string,object>)plan["captureBefore"];var plane=(Dictionary<string,object>)captured["plane"];
+   var before=(Dictionary<string,object>)plan["before"];var captured=(Dictionary<string,object>)plan["captureBefore"];var planes=Planes(captured);Need(Equals(plan["schemaVersion"],Schema(captured)),"Execution capture schema differs.");
    int source=(int)captured["sourceActive"],target=(int)plan["targetCompositeId"];Empty(after,target,c);
-   var current=Capture(after,c);Need(EntitySets.Canonical(current["plane"])==EntitySets.Canonical(plane)&&EntitySets.Canonical(current["bounds"])==EntitySets.Canonical(captured["bounds"]),"World workplane frame, numeric mapping or explicit WORLD bounds changed.");
+   var current=Capture(after,c);Need(EntitySets.Canonical(Planes(current))==EntitySets.Canonical(planes)&&EntitySets.Canonical(current["bounds"])==EntitySets.Canonical(captured["bounds"]),"World workplane frames, numeric mappings or explicit WORLD bounds changed.");
    var oldBody=EntitySets.Inventory(before).Single(e=>Equals(e["nativeTypeCode"],40));var normalized=Clone(after);var body=EntitySets.Inventory(normalized).Single(e=>Equals(e["nativeTypeCode"],40));
    var oldGeometry=(Dictionary<string,object>)oldBody["geometry"];var geometry=(Dictionary<string,object>)body["geometry"];
-   var frame=OwnedWorkplanePlans.Info(((IEnumerable)plane["worldInfo"]).Cast<object>().ToArray());var expected=ConvertPoint(Vector(oldGeometry["cogRaw"]),frame,source,target);
+   var expected=ConvertPoint(Vector(oldGeometry["cogRaw"]),Frame(planes,source),Frame(planes,target));
    Need(Near(expected,Vector(geometry["cogRaw"])),"COG differs from the mathematically expected active-frame conversion.");
    geometry["cogRaw"]=oldGeometry["cogRaw"];geometry["coordinateFrame"]=oldGeometry["coordinateFrame"];
    normalized["contextBefore"]=before["contextBefore"];normalized["contextAfter"]=before["contextAfter"];
@@ -76,9 +94,10 @@ namespace PowerShapeBridge {
      EntitySets.CheckObserved(before,before,new int[0][],expiry,DateTime.UtcNow);
      using(var lease=OwnedCopies.Hold(root,(string)binding["copyId"],(string)binding["ownershipSha256"]))
      using(var bytes=new OwnedWorkingBytePin(lease.WorkingPath)){
-      OwnedSaveTargets.NoFence(root,(string)binding["copyId"]);DocumentBindings.Check(lease,before,expiry,c,result,(string)binding["windowContextSha256"]);var capture=Capture(before,c);var plane=(Dictionary<string,object>)capture["plane"];var p=(Dictionary<string,object>)args["parameters"];
-      int target=Equals(p["mode"],"world")?0:(int)plane["compositeId"];Need(target!=(int)capture["sourceActive"],"Target already active; no setter is needed.");if(target!=0)Need(Equals(p["nativeId"],plane["nativeId"]),"Requested workplane is absent or belongs to another observation.");
-      var computed=new Dictionary<string,object>{{"schemaVersion",1},{"activationId",packetId},{"operation","activate_existing_workplane_or_world"},{"preparedUtc",prepare?DateTime.UtcNow.ToString("o"):packet["preparedUtc"]},{"expiresUtc",expiry.ToString("o")},{"executionEnabled",false},{"arguments",args},{"copyId",binding["copyId"]},{"ownershipSha256",binding["ownershipSha256"]},{"workingSha256",lease.Inspection["workingSha256"]},{"nativeObservedPropertiesSha256",EntitySets.ObservedDigest(before)},{"windowContextSha256",binding["windowContextSha256"]},{"targetCompositeId",target},{"captureBefore",capture}};
+      OwnedSaveTargets.NoFence(root,(string)binding["copyId"]);DocumentBindings.Check(lease,before,expiry,c,result,(string)binding["windowContextSha256"]);var capture=Capture(before,c);var planes=Planes(capture);var p=(Dictionary<string,object>)args["parameters"];
+      int target=0;if(!Equals(p["mode"],"world")){var matches=planes.Where(row=>Equals(p["nativeId"],row["nativeId"])).ToArray();Need(matches.Length==1,"Requested workplane is absent or belongs to another observation.");target=(int)matches[0]["compositeId"];}Need(target!=(int)capture["sourceActive"],"Target already active; no setter is needed.");
+      var body=EntitySets.Inventory(before).Single(e=>Equals(e["nativeTypeCode"],40));ConvertPoint(Vector(((Dictionary<string,object>)body["geometry"])["cogRaw"]),Frame(planes,(int)capture["sourceActive"]),Frame(planes,target));
+      var computed=new Dictionary<string,object>{{"schemaVersion",Schema(capture)},{"activationId",packetId},{"operation","activate_existing_workplane_or_world"},{"preparedUtc",prepare?DateTime.UtcNow.ToString("o"):packet["preparedUtc"]},{"expiresUtc",expiry.ToString("o")},{"executionEnabled",false},{"arguments",args},{"copyId",binding["copyId"]},{"ownershipSha256",binding["ownershipSha256"]},{"workingSha256",lease.Inspection["workingSha256"]},{"nativeObservedPropertiesSha256",EntitySets.ObservedDigest(before)},{"windowContextSha256",binding["windowContextSha256"]},{"targetCompositeId",target},{"captureBefore",capture}};
       Need(OwnedCopies.Digest(bytes.Stream)==(string)computed["workingSha256"],"Saved working bytes changed under pin.");
       if(prepare){string path=Artifact(root,"workplaneactivations",packetId);Directory.CreateDirectory(Path.GetDirectoryName(path));packetSha=NativeJournal.Freeze(path,computed);new NativeJournal(root,packetId,packetSha).Append("prepared",new Dictionary<string,object>{{"executionEnabled",false}});packet=proofs.Json(path,packetSha);}
       else Need(EntitySets.Canonical(computed)==EntitySets.Canonical(packet),"Activation preparation dependencies changed.");
@@ -95,7 +114,7 @@ namespace PowerShapeBridge {
     var guarded=Check(root,id,args,false,c,(packet,before,lease,proofs)=>{
      var windows=c.Windows();Need(DocumentBindings.WindowDigest(windows)==(string)packet["windowContextSha256"],"Bound window context changed.");
      string claim=Path.Combine(root,"workplaneactivations",(string)args["activationId"]+".execution-once.json");Need(!File.Exists(claim)&&!Directory.Exists(claim),"Intent already claimed; replay forbidden.");
-     var plan=new Dictionary<string,object>{{"schemaVersion",1},{"operationId",id},{"operation","activate_owned_workplane"},{"activationId",args["activationId"]},{"activationSha256",args["activationSha256"]},{"copyId",packet["copyId"]},{"ownershipSha256",packet["ownershipSha256"]},{"workingSha256",packet["workingSha256"]},{"parameters",((Dictionary<string,object>)packet["arguments"])["parameters"]},{"before",before},{"beforeWindows",windows},{"windowContextSha256",packet["windowContextSha256"]},{"captureBefore",packet["captureBefore"]},{"targetCompositeId",packet["targetCompositeId"]},{"savedFileHashesBefore",WorkingCopyOpen.SavedHashes(windows)},{"createdUtc",DateTime.UtcNow.ToString("o")}};
+     var plan=new Dictionary<string,object>{{"schemaVersion",packet["schemaVersion"]},{"operationId",id},{"operation","activate_owned_workplane"},{"activationId",args["activationId"]},{"activationSha256",args["activationSha256"]},{"copyId",packet["copyId"]},{"ownershipSha256",packet["ownershipSha256"]},{"workingSha256",packet["workingSha256"]},{"parameters",((Dictionary<string,object>)packet["arguments"])["parameters"]},{"before",before},{"beforeWindows",windows},{"windowContextSha256",packet["windowContextSha256"]},{"captureBefore",packet["captureBefore"]},{"targetCompositeId",packet["targetCompositeId"]},{"savedFileHashesBefore",WorkingCopyOpen.SavedHashes(windows)},{"createdUtc",DateTime.UtcNow.ToString("o")}};
      string path=Artifact(root,"workplaneactivationexecutions",id);Directory.CreateDirectory(Path.GetDirectoryName(path));string sha=NativeJournal.Freeze(path,plan);result["operationId"]=id;result["plan"]=plan;result["planSha256"]=sha;result["copyId"]=packet["copyId"];
      journal=new NativeJournal(root,id,sha);journal.Append("prepared",new Dictionary<string,object>{{"operation","activate_owned_workplane"}});
      fence=OwnedTranslation.FencePath(root,(string)packet["copyId"]);string fenceSha=NativeJournal.Freeze(fence,new Dictionary<string,object>{{"schemaVersion",1},{"operationId",id},{"planSha256",sha},{"copyId",packet["copyId"]},{"ownershipSha256",packet["ownershipSha256"]},{"automaticReplayForbidden",true}});result["executionFenceSha256"]=fenceSha;
@@ -120,7 +139,7 @@ namespace PowerShapeBridge {
     using(var proofs=new OwnedOperationPlans.Proofs()){
      var receipt=proofs.Json(Artifact(root,"responses",id),(string)args["executionReceiptSha256"],16000000);Need(Equals(receipt["operationId"],id)&&new[]{"owned_workplane_activation_executed_unverified","owned_workplane_activation_outcome_unknown"}.Contains((string)receipt["state"])&&Equals(receipt["cadSaveAttempted"],false),"Original activation execution required.");
      var plan=proofs.Json(Artifact(root,"workplaneactivationexecutions",id),(string)receipt["planSha256"],16000000);Need(EntitySets.Canonical(plan)==EntitySets.Canonical(receipt["plan"])&&Equals(plan["operationId"],id)&&Equals(plan["operation"],"activate_owned_workplane"),"Frozen activation execution differs.");
-     var packet=proofs.Json(Artifact(root,"workplaneactivations",plan["activationId"]),(string)plan["activationSha256"]);Need(Equals(packet["operation"],"activate_existing_workplane_or_world")&&Equals(packet["targetCompositeId"],plan["targetCompositeId"]),"Original activation intent differs.");
+     var packet=proofs.Json(Artifact(root,"workplaneactivations",plan["activationId"]),(string)plan["activationSha256"]);Need(Equals(packet["operation"],"activate_existing_workplane_or_world")&&Equals(packet["targetCompositeId"],plan["targetCompositeId"])&&Equals(packet["schemaVersion"],plan["schemaVersion"])&&Equals(plan["schemaVersion"],Schema((Dictionary<string,object>)plan["captureBefore"])),"Original activation intent or schema differs.");
      foreach(string field in new[]{"copyId","ownershipSha256","workingSha256","windowContextSha256","captureBefore"})Need(EntitySets.Canonical(packet[field])==EntitySets.Canonical(plan[field]),"Frozen activation dependency differs: "+field);
      var originalArgs=(Dictionary<string,object>)packet["arguments"];Need(EntitySets.Canonical(originalArgs["parameters"])==EntitySets.Canonical(plan["parameters"]),"Original activation parameters differ.");var originalBinding=proofs.Json(Artifact(root,"documentbindings",originalArgs["bindingId"]),(string)originalArgs["bindingSha256"]);var originalBefore=proofs.Json(Artifact(root,"responses",originalBinding["inspectionRequestId"]),(string)originalBinding["inspectionSha256"],16000000);Need(EntitySets.Canonical(originalBefore)==EntitySets.Canonical(plan["before"]),"Original observed baseline differs.");
      var journal=NativeJournal.ForVerification(root,id,(string)receipt["planSha256"]);var returned=journal.CommandReturnedDetails;OwnedWorkplanePlans.Fields(returned,"nativeRequestId","targetCompositeId","setterCalls","setterReceiptSha256");Need(Equals(returned["nativeRequestId"],id)&&Equals(returned["targetCompositeId"],plan["targetCompositeId"])&&Equals(returned["setterCalls"],1),"Authoritative setter return required.");

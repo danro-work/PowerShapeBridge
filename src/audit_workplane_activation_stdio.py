@@ -11,7 +11,7 @@ def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def audit(folder):
     report = read(folder / 'result.json')
     assert report['state'] == 'passed' and report['cadConnectionAttempted'] is False
-    assert report['setterCalls'] == 2 and report['reconnectedWithoutReplay'] is True
+    assert report['setterCalls'] == (3 if report.get('multiple', False) else 2) and report['reconnectedWithoutReplay'] is True
     root = Path(report['root']).resolve()
     count = 0
     for path, digest in report['artifactHashes'].items():
@@ -22,7 +22,12 @@ def audit(folder):
         assert sha(path) == digest
         count += 1
     ids = []
-    for mode, target, old_cog, new_cog in [('existing', 1080000011, [0,0,10], [2,6,-3]), ('world', 0, [2,6,-3], [0,0,10])]:
+    multiple = report.get('multiple', False)
+    steps = [('existing', 1080000011, [0,0,10], [2,6,-3])]
+    if multiple:
+        steps.append(('other', 1080000012, [2,6,-3], [-4,-5,4]))
+    steps.append(('world', 0, [-4,-5,4] if multiple else [2,6,-3], [0,0,10]))
+    for mode, target, old_cog, new_cog in steps:
         item = report[mode]
         execution = item['execution']
         op = execution['operationId']
@@ -37,6 +42,15 @@ def audit(folder):
         packet = read(root / 'workplaneactivations' / (plan['activationId'] + '.json'))
         assert sha(root / 'workplaneactivations' / (plan['activationId'] + '.json')) == plan['activationSha256']
         assert plan['targetCompositeId'] == target and packet['targetCompositeId'] == target
+        assert plan['schemaVersion'] == packet['schemaVersion'] == (2 if multiple else 1)
+        capture = plan['captureBefore']
+        if multiple:
+            assert len(capture['planes']) == 3 and 'plane' not in capture
+            expected_frames = {11:[2,3,4,0,1,0,0,0,1],12:[-4,5,6,1,0,0,0,1,0],13:[9,-2,3,0,0,1,0,1,0]}
+            assert {p['nativeId']:p['worldInfo'] for p in capture['planes']} == expected_frames
+            assert [p['compositeId'] for p in capture['planes']] == [1080000011,1080000012,1080000013]
+        else:
+            assert 'plane' in capture and 'planes' not in capture
         claim_path = root / 'workplaneactivations' / (plan['activationId'] + '.execution-once.json')
         assert sha(claim_path) == raw['claimSha256']
         assert read(claim_path) == {'operationId':op, 'planSha256':raw['planSha256'], 'activationId':plan['activationId'], 'copyId':plan['copyId'], 'automaticReplayForbidden':True}
@@ -76,12 +90,17 @@ def audit(folder):
             assert sha(root / 'responses' / (proof['requestId'] + '.json')) == proof['sha256']
             count += 1
         assert not (root / 'workingcopies' / plan['copyId'] / 'mutation-fence.json').exists()
-    assert len(set(ids)) == 2
-    assert sum(c['recipe'] == 'execute_owned_workplane_activation' for c in report['nativeRequests']) == 2
+    count_steps = len(steps)
+    assert len(set(ids)) == count_steps
+    assert sum(c['recipe'] == 'execute_owned_workplane_activation' for c in report['nativeRequests']) == count_steps
     assert report['adoption']['verificationOnly'] is True and report['adoption']['executionAuthorized'] is False
     final = read(sorted((root / 'wire-contexts').glob('*.json'))[-1])
-    assert final['setterCalls'] == 2 and final['active'] == 0
-    return {'state':'passed','hashChecks':count,'setterCalls':2,'separateIntents':True,'reconnectedWithoutReplay':True,'cadConnectionAttempted':False,'reportSha256':sha(folder/'result.json')}
+    assert final['setterCalls'] == count_steps and final['active'] == 0
+    if report.get('legacyUpgrade', False):
+        assert report['legacyWorkerSha256'] != report['upgradedWorkerSha256'] == sha(root/'PSBridge.Worker.exe')
+        assert report['legacyExecutionBridgeVersion'] == report['existing']['execution']['bridgeVersion']
+        assert report['existing']['execution']['bridgeVersion'] != report['existing']['verification']['bridgeVersion']
+    return {'state':'passed','hashChecks':count,'setterCalls':count_steps,'multiple':multiple,'legacyUpgrade':report.get('legacyUpgrade',False),'separateIntents':True,'reconnectedWithoutReplay':True,'cadConnectionAttempted':False,'reportSha256':sha(folder/'result.json')}
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)

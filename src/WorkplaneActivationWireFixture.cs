@@ -7,13 +7,13 @@ namespace PowerShapeBridge {
  internal static class WorkplaneActivationWireFixture {
   static void Need(bool ok,string why){OwnedWorkplanePlans.Need(ok,why);}
   static Dictionary<string,object> Read(string path){OwnedCopies.NoReparse(path);return Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(path));}
-  internal static Dictionary<string,object> Seed(){
+  internal static Dictionary<string,object> Seed(bool multiple=false,bool active=false){
    Need(File.Exists(Path.Combine(Program.Root,".workplane-activation-wire-fixture")),"Isolated activation wire marker required; no CAD.");
-   var f=new OwnedOperationPlanTests.Fixture(true,true);var c=OwnedWorkplaneActivationTests.Seed(f,false);c.Snapshot["busy"]=false;
+   var f=new OwnedOperationPlanTests.Fixture(true,true);var c=multiple?OwnedWorkplaneActivationTests.SeedMultiple(f,3,active?OwnedWorkplaneActivationTests.Context.Plane:0):OwnedWorkplaneActivationTests.Seed(f,false);c.Snapshot["busy"]=false;
    var protectedHashes=Directory.GetFiles(f.Root,"*",SearchOption.AllDirectories).ToDictionary(p=>p,p=>Program.Hash(p));
    File.Copy(Path.Combine(Program.Root,"PSBridge.Worker.exe"),Path.Combine(f.Root,"PSBridge.Worker.exe"));File.Copy(Path.Combine(Program.Root,"bridge.config.json"),Path.Combine(f.Root,"bridge.config.json"));
    var marker=new Dictionary<string,object>{{"schema","psbridge.workplane-activation-wire.v1"},{"cadConnectionAttempted",false},{"sourcePath",Path.Combine(f.Root,"Source.psmodel")},{"protectedHashes",protectedHashes}};NativeJournal.Freeze(Path.Combine(f.Root,".workplane-activation-wire.json"),marker);Directory.CreateDirectory(Path.Combine(f.Root,"wire-contexts"));
-   NativeJournal.Freeze(Path.Combine(f.Root,"wire-contexts","000000.json"),new Dictionary<string,object>{{"snapshot",c.Snapshot},{"listing",c.Listing},{"setterCalls",0},{"active",0}});marker["root"]=f.Root;return marker;
+   NativeJournal.Freeze(Path.Combine(f.Root,"wire-contexts","000000.json"),new Dictionary<string,object>{{"snapshot",c.Snapshot},{"listing",c.Listing},{"setterCalls",0},{"active",c.Active}});marker["root"]=f.Root;return marker;
   }
   internal static Dictionary<string,object> Run(string id){
    Need(EntitySets.Hex(id,32),"Invalid wire request identity.");var marker=Read(Path.Combine(Program.Root,".workplane-activation-wire.json"));Need(Equals(marker["schema"],"psbridge.workplane-activation-wire.v1")&&Equals(marker["cadConnectionAttempted"],false),"Synthetic wire only.");
