@@ -11,7 +11,7 @@ namespace PowerShapeMcp;
 public sealed class OwnedWorkplaneActivationTools(BridgeSession session)
 {
     [McpServerTool(Name="prepare_owned_workplane_activation",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false)]
-    [Description("Prepare one owned existing-workplane activation or WORLD return without changing CAD. First provider accepts one SOLID and one WORKPLANE, empty selection, WORLD or that workplane as source. Target is a fresh typed candidate or explicit world mode; names/paths/native IDs are not accepted. Full server only.")]
+    [Description("Prepare one owned existing-workplane activation or WORLD return without changing CAD. Provider accepts one SOLID and one or more WORKPLANEs, empty selection, WORLD or an observed workplane as source. Preserves all observed frames; source and target may differ. Target is a fresh typed candidate or explicit world mode; names/paths/native IDs are not accepted. Full server only.")]
     public Task<CallToolResult> Prepare(
         [Description("Fresh owned working-document binding handle in this connection.")]string workingDocumentBindingHandle,
         [Description("Exact target: {mode:world} or {mode:existing,workplaneCandidateHandle:...} from the same fresh inspection as the binding. Target must differ from current context.")]JsonElement parameters,

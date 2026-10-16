@@ -27,10 +27,10 @@ class Panel(BasePanel):
             self.stop.wait(.01)
 
 def case(args,fault,output):
-    stage=Path(args.stage).resolve();seed=native(stage/'PSBridge.Worker.exe','--workplane-activation-wire-seed');root=Path(seed['root']).resolve()
+    stage=Path(args.stage).resolve();seed=native(stage/'PSBridge.Worker.exe','--multi-workplane-activation-active-wire-seed' if args.multiple else '--workplane-activation-wire-seed');root=Path(seed['root']).resolve()
     assert root.is_relative_to(stage/'work')
     panel=Panel(root,fault);command=[args.dotnet,str(Path(args.host).resolve()),'--bridge-root',str(root),'--timeout','8']
-    client=Client(command);sequence=10;report={'state':'started','fault':fault,'root':str(root),'seed':seed,'cadConnectionAttempted':False}
+    client=Client(command);sequence=10;report={'state':'started','fault':fault,'root':str(root),'seed':seed,'cadConnectionAttempted':False,'multiple':args.multiple}
     def save():
         report.update(transcript=client.transcript,nativeRequests=panel.calls)
         (output/(fault+'.json')).write_text(json.dumps(report,indent=2),encoding='utf-8')
@@ -46,7 +46,7 @@ def case(args,fault,output):
         candidate=ok('inspect_entity_candidates',{})
         bound=ok('bind_working_document',{'candidateDocumentHandle':candidate['candidateDocumentHandle'],'workingCopyHandle':copy['workingCopyHandle']})
         prepared=ok('prepare_owned_workplane_activation',{'workingDocumentBindingHandle':bound['workingDocumentBindingHandle'],
-          'parameters':{'mode':'existing','workplaneCandidateHandle':next(e for e in candidate['entities'] if e['nativeTypeCode']==54)['candidateEntityHandle']}})
+          'parameters':{'mode':'existing','workplaneCandidateHandle':next(e for e in candidate['entities'] if e['nativeTypeCode']==54 and (not args.multiple or e['nativeId']==12))['candidateEntityHandle']}})
         arguments={'workplaneActivationHandle':prepared['workplaneActivationHandle']};report.update(copy=copy,prepared=prepared)
         if fault=='lost_reply':
             executed=call('execute_owned_workplane_activation',arguments)['result'];report['executeResponse']=executed;save()
@@ -77,7 +77,7 @@ def case(args,fault,output):
         adoption=call('adopt_owned_workplane_activation_execution',{'executionRequestId':op,'executionReceiptSha256':sha(unpublished)})['result']
         assert adoption['isError'] and 'activationExecutionHandle' not in adoption['structuredContent'] and inventory(root)==before
         report['missingOriginalReceiptAdoptionRejected']=adoption
-        context=read(sorted((root/'wire-contexts').glob('*.json'))[-1]);assert context['setterCalls']==1 and context['active']==1080000011
+        context=read(sorted((root/'wire-contexts').glob('*.json'))[-1]);assert context['setterCalls']==1 and context['active']==(1080000012 if args.multiple else 1080000011)
         assert sum(c['recipe']=='execute_owned_workplane_activation' for c in panel.calls)==1
         for path,digest in seed['protectedHashes'].items():assert sha(Path(path))==digest,path
         assert (root/'workingcopies'/copy['copyId']/'mutation-fence.json').is_file()
@@ -93,6 +93,7 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     for name in ('stage','host','dotnet','evidence'):parser.add_argument('--'+name,required=True)
     parser.add_argument('--fault',choices=('lost_reply','cancel_after_effect'))
+    parser.add_argument('--multiple',action='store_true')
     args=parser.parse_args();output=Path(args.evidence).resolve();assert not output.exists();output.mkdir(parents=True)
     results=[case(args,fault,output) for fault in ((args.fault,) if args.fault else ('lost_reply','cancel_after_effect'))]
     (output/'summary.json').write_text(json.dumps({'state':'passed','cases':results},indent=2),encoding='utf-8');print(json.dumps({'state':'passed','cases':len(results),'cadConnectionAttempted':False}))

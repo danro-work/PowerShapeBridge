@@ -19,12 +19,12 @@ def verify(folder, output):
         state="passive_owned_workplane_observed", before=copy.deepcopy(final), after=copy.deepcopy(final),
         windowsBefore=copy.deepcopy(windows), windowsAfter=copy.deepcopy(windows),
         activeWorkplaneRaw=0, boundsWorldRaw=capture["bounds"][0]["boundsWorldRaw"],
-        boundsWorldRawAgain=capture["bounds"][0]["boundsWorldRaw"], frames=[capture["plane"]],
+        boundsWorldRawAgain=capture["bounds"][0]["boundsWorldRaw"], frames=capture["planes"] if wire.get("multiple", False) else [capture["plane"]],
         cadMutationAttempted=False, selectionChangesAttempted=False, contextChangeAttempted=False,
         cadSaveAttempted=False, workerStarted=False,
     )
     pair = {}
-    for mode in ("existing", "world"):
+    for mode in (("existing", "other", "world") if wire.get("multiple", False) else ("existing", "world")):
         pair[mode] = copy.deepcopy(wire[mode])
         identifier = pair[mode]["execution"]["operationId"]
         pair[mode]["executionReceiptSha256"] = sha(runtime / "responses" / (identifier + ".json"))
@@ -44,7 +44,7 @@ def verify(folder, output):
         accepted = True
         result = None
         try:
-            result = audit_pair(runtime, data, baseline, reader, 1, evidence_kind="synthetic_file_control")
+            result = audit_pair(runtime, data, baseline, reader, 1, evidence_kind="synthetic_file_control", multiple=wire.get("multiple", False))
         except AssertionError:
             accepted = False
         assert accepted is (fault == "control"), fault

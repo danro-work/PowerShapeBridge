@@ -32,6 +32,12 @@ internal sealed class OwnedWorkplaneActivationStore(string root,DocumentBindingS
         args["parameters"]=Text(target,"mode")=="world"?new JsonObject{["mode"]="world"}:candidates.WorkplaneTarget(Text(target,"workplaneCandidateHandle"),binding);
         return args;
     }
+    internal static bool CaptureSchema(JsonObject packet)
+    {
+        if(packet["captureBefore"] is not JsonObject capture)return false;
+        if(ArtifactProof.IntegerIs(packet["schemaVersion"],1))return ArtifactProof.Fields(capture,"sourceActive","plane","bounds")&&capture["plane"] is JsonObject;
+        return ArtifactProof.IntegerIs(packet["schemaVersion"],2)&&ArtifactProof.Fields(capture,"sourceActive","planes","bounds")&&capture["planes"] is JsonArray planes&&planes.Count>1&&planes.All(p=>p is JsonObject);
+    }
     private void Ownership(JsonObject packet,JsonObject before)
     {
         string id=Text(packet,"copyId");Need(FileArtifacts.Token(id)&&FileArtifacts.Token(Text(packet,"ownershipSha256"),64));
@@ -51,7 +57,7 @@ internal sealed class OwnedWorkplaneActivationStore(string root,DocumentBindingS
         string id=Text(reply,"activationId"),sha=Text(reply,"activationSha256");Need(FileArtifacts.Token(id)&&FileArtifacts.Token(sha,64)&&Text(reply,"bridgeRequestId")==id&&Text(reply,"state")=="owned_workplane_activation_prepared_observed");
         foreach(var flag in new[]{"executionEnabled","nativeProviderQualified","geometryMutationAttempted","contextChangeAttempted","cadSaveAttempted"})Need(ArtifactProof.Boolean(reply[flag],false));
         var p=ArtifactProof.Verified(root,"workplaneactivations",id,sha,65536);
-        Need(ArtifactProof.Fields(p,"schemaVersion","activationId","operation","preparedUtc","expiresUtc","executionEnabled","arguments","copyId","ownershipSha256","workingSha256","nativeObservedPropertiesSha256","windowContextSha256","targetCompositeId","captureBefore")&&ArtifactProof.IntegerIs(p["schemaVersion"],1)&&Text(p,"activationId")==id&&Text(p,"operation")=="activate_existing_workplane_or_world"&&ArtifactProof.Boolean(p["executionEnabled"],false));
+        Need(ArtifactProof.Fields(p,"schemaVersion","activationId","operation","preparedUtc","expiresUtc","executionEnabled","arguments","copyId","ownershipSha256","workingSha256","nativeObservedPropertiesSha256","windowContextSha256","targetCompositeId","captureBefore")&&CaptureSchema(p)&&Text(p,"activationId")==id&&Text(p,"operation")=="activate_existing_workplane_or_world"&&ArtifactProof.Boolean(p["executionEnabled"],false));
         Need(JsonNode.DeepEquals(p,reply["activation"])&&JsonNode.DeepEquals(p["arguments"],args));
         var binding=ArtifactProof.Verified(root,"documentbindings",Text(args,"bindingId"),Text(args,"bindingSha256"),65536);
         foreach(var field in new[]{"copyId","ownershipSha256","windowContextSha256"})Need(JsonNode.DeepEquals(p[field],binding[field]));
@@ -92,7 +98,7 @@ internal sealed class OwnedWorkplaneActivationStore(string root,DocumentBindingS
         var packetReply=new JsonObject{["activationId"]=plan["activationId"]!.DeepClone(),["activationSha256"]=plan["activationSha256"]!.DeepClone(),["bridgeRequestId"]=plan["activationId"]!.DeepClone(),["activation"]=packet.DeepClone(),["state"]="owned_workplane_activation_prepared_observed"};
         foreach(var flag in new[]{"executionEnabled","nativeProviderQualified","geometryMutationAttempted","contextChangeAttempted","cadSaveAttempted"})packetReply[flag]=false;
         Packet(packetReply,packet["arguments"]!.AsObject(),false);
-        foreach(var field in new[]{"copyId","ownershipSha256","workingSha256","windowContextSha256","captureBefore","targetCompositeId"})Need(JsonNode.DeepEquals(packet[field],plan[field]));
+        foreach(var field in new[]{"schemaVersion","copyId","ownershipSha256","workingSha256","windowContextSha256","captureBefore","targetCompositeId"})Need(JsonNode.DeepEquals(packet[field],plan[field]));
         Need(JsonNode.DeepEquals(packet["arguments"]!["parameters"],plan["parameters"]));
         var bindingArgs=packet["arguments"]!.AsObject();var binding=ArtifactProof.Verified(root,"documentbindings",Text(bindingArgs,"bindingId"),Text(bindingArgs,"bindingSha256"),65536);
         Need(JsonNode.DeepEquals(plan["before"],ArtifactProof.Verified(root,"responses",Text(binding,"inspectionRequestId"),Text(binding,"inspectionSha256"),16000000)));

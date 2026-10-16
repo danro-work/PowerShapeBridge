@@ -99,7 +99,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.36.0-dev";
+        public const string ReleaseVersion = "0.37.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -213,8 +213,8 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--workplane-activation-test") {
                 try{OwnedWorkplaneActivationTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
-            if(args.Length==1&&args[0]=="--workplane-activation-wire-seed") {
-                try{Console.WriteLine(Json.Serialize(WorkplaneActivationWireFixture.Seed()));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            if(args.Length==1&&new[]{"--workplane-activation-wire-seed","--multi-workplane-activation-wire-seed","--multi-workplane-activation-active-wire-seed"}.Contains(args[0])) {
+                try{Console.WriteLine(Json.Serialize(WorkplaneActivationWireFixture.Seed(args[0]!="--workplane-activation-wire-seed",args[0]=="--multi-workplane-activation-active-wire-seed")));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
             if(args.Length==2&&args[0]=="--workplane-activation-wire-request") {
                 try{Console.WriteLine(Json.Serialize(WorkplaneActivationWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}

@@ -41,7 +41,7 @@ def converted_point(point, frame, source, target):
     return [sum(axis[i]*(world[i]-origin[i]) for i in range(3)) for axis in axes] if target else world
 
 
-def audit_pair(runtime, pair, baseline, independent, expected_windows, *, evidence_kind):
+def audit_pair(runtime, pair, baseline, independent, expected_windows, *, evidence_kind, multiple=False):
     """Pure file audit, also exercised with explicitly labelled synthetic controls."""
     assert evidence_kind in ("live_recorded_evidence", "synthetic_file_control")
     runtime = Path(runtime).resolve()
@@ -50,7 +50,9 @@ def audit_pair(runtime, pair, baseline, independent, expected_windows, *, eviden
     previous_after = baseline
     first_verified_at = None
     plane_id = None
-    for mode in ("existing", "world"):
+    modes = ("existing", "other", "world") if multiple else ("existing", "world")
+    targets = []
+    for mode in modes:
         execution = pair[mode]["execution"]
         identifier = execution["operationId"]
         assert len(identifier) == 32 and all(c in "0123456789abcdef" for c in identifier)
@@ -68,22 +70,35 @@ def audit_pair(runtime, pair, baseline, independent, expected_windows, *, eviden
         assert sha(runtime / "workplaneactivationexecutions" / (identifier + ".json")) == receipt["planSha256"]
         assert plan["operationId"] == identifier and plan["operation"] == "activate_owned_workplane"
         same_observation(plan["before"], previous_after)
-        assert plan["parameters"]["mode"] == mode
+        assert plan["parameters"]["mode"] == ("world" if mode == "world" else "existing")
         capture = plan["captureBefore"]
-        plane = capture["plane"]
-        if mode == "existing":
-            plane_id = plane["compositeId"]
-            assert type(plane_id) is int and plane_id > 0
-        assert plane["compositeId"] == plane_id
-        target = plane_id if mode == "existing" else 0
-        source = 0 if mode == "existing" else plane_id
+        planes = capture["planes"] if multiple else [capture["plane"]]
+        assert plan["schemaVersion"] == (2 if multiple else 1)
+        assert len(planes) >= 2 if multiple else len(planes) == 1
+        assert len({p["compositeId"] for p in planes}) == len({p["nativeId"] for p in planes}) == len(planes)
+        for plane in planes:
+            assert type(plane["compositeId"]) is int and plane["compositeId"] > 0
+            assert type(plane["nativeId"]) is int and plane["nativeId"] >= 0
+            converted_point([0, 0, 0], plane["worldInfo"], 0, 0)
+        if mode == "world":
+            target = 0
+        else:
+            selected = [p for p in planes if p["nativeId"] == plan["parameters"]["nativeId"]]
+            assert len(selected) == 1
+            target = selected[0]["compositeId"]
+        source = previous_after["contextAfter"][1]
+        assert (source == 0 if mode == "existing" else source == targets[-1])
+        if mode == "other":
+            assert target != targets[0] and target > 0
+        targets.append(target)
+        assert source != target
         assert capture["sourceActive"] == source and plan["targetCompositeId"] == target
         assert plan["beforeWindows"]["windowCount"] == expected_windows
         packet_path = runtime / "workplaneactivations" / (plan["activationId"] + ".json")
         assert sha(packet_path) == plan["activationSha256"]
         packet = read(packet_path)
         assert packet["operation"] == "activate_existing_workplane_or_world"
-        for key in ("copyId", "ownershipSha256", "workingSha256", "windowContextSha256", "captureBefore", "targetCompositeId"):
+        for key in ("schemaVersion", "copyId", "ownershipSha256", "workingSha256", "windowContextSha256", "captureBefore", "targetCompositeId"):
             assert packet[key] == plan[key], key
         assert packet["arguments"]["parameters"] == plan["parameters"]
         claim_path = runtime / "workplaneactivations" / (plan["activationId"] + ".execution-once.json")
@@ -101,10 +116,9 @@ def audit_pair(runtime, pair, baseline, independent, expected_windows, *, eviden
             checks += 1
         assert [e["state"] for e in events] == ["prepared", "execution_claimed", "command_started", "command_returned", "executed_unverified", "succeeded_verified"]
         assert events[2]["details"]["maximumSetterCalls"] == 1
-        if mode == "existing":
-            first_verified_at = datetime.fromisoformat(events[-1]["timestampUtc"].replace("Z", "+00:00"))
-        else:
+        if first_verified_at is not None:
             assert datetime.fromisoformat(events[2]["timestampUtc"].replace("Z", "+00:00")) > first_verified_at
+        first_verified_at = datetime.fromisoformat(events[-1]["timestampUtc"].replace("Z", "+00:00"))
         returned = events[3]["details"]
         assert returned["nativeRequestId"] == identifier and returned["setterCalls"] == 1
         setter_path = runtime / "workplaneactivationexecutions" / (identifier + ".setter-return.json")
@@ -118,11 +132,16 @@ def audit_pair(runtime, pair, baseline, independent, expected_windows, *, eviden
         assert after["selectionBefore"] == after["selectionAfter"] == []
         normalized = copy.deepcopy(after)
         for observation in (plan["before"], after):
-            assert observation["entityCount"] == len(observation["entities"]) == 2
-            assert sorted(e["nativeTypeCode"] for e in observation["entities"]) == [40, 54]
+            assert observation["entityCount"] == len(observation["entities"]) == len(planes) + 1
+            assert sorted(e["nativeTypeCode"] for e in observation["entities"]) == [40] + [54]*len(planes)
+            assert sorted(e["nativeId"] for e in observation["entities"] if e["nativeTypeCode"] == 54) == sorted(p["nativeId"] for p in planes)
         old_body = next(e for e in plan["before"]["entities"] if e["nativeTypeCode"] == 40)
         body = next(e for e in normalized["entities"] if e["nativeTypeCode"] == 40)
-        expected = converted_point(old_body["geometry"]["cogRaw"], plane["worldInfo"], source, target)
+        expected = old_body["geometry"]["cogRaw"]
+        if source:
+            expected = converted_point(expected, next(p["worldInfo"] for p in planes if p["compositeId"] == source), source, 0)
+        if target:
+            expected = converted_point(expected, next(p["worldInfo"] for p in planes if p["compositeId"] == target), 0, target)
         assert len(body["geometry"]["cogRaw"]) == 3
         assert all(type(n) in (int, float) and math.isfinite(n) for n in body["geometry"]["cogRaw"])
         assert all(math.isclose(a, b, rel_tol=1e-12, abs_tol=1e-9) for a, b in zip(body["geometry"]["cogRaw"], expected))
@@ -147,7 +166,7 @@ def audit_pair(runtime, pair, baseline, independent, expected_windows, *, eviden
             checks += 1
         assert not (runtime / "workingcopies" / plan["copyId"] / "mutation-fence.json").exists()
         previous_after = after
-    assert len(set(identifiers)) == 2
+    assert len(set(identifiers)) == len(modes)
     same_observation(previous_after, baseline)
     assert independent["state"] == "passive_owned_workplane_observed"
     for key in ("cadMutationAttempted", "selectionChangesAttempted", "contextChangeAttempted", "cadSaveAttempted", "workerStarted"):
@@ -158,10 +177,10 @@ def audit_pair(runtime, pair, baseline, independent, expected_windows, *, eviden
     assert independent["windowsAfter"]["windowCount"] == expected_windows
     assert independent["activeWorkplaneRaw"] == 0
     assert independent["boundsWorldRaw"] == independent["boundsWorldRawAgain"] == pair["world"]["execution"]["plan"]["captureBefore"]["bounds"][0]["boundsWorldRaw"]
-    assert len(independent["frames"]) == 1
-    assert independent["frames"][0]["worldInfo"] == pair["world"]["execution"]["plan"]["captureBefore"]["plane"]["worldInfo"]
-    assert independent["frames"][0]["compositeId"] == plane_id
-    return dict(state="passed", evidenceKind=evidence_kind, setterCalls=2, distinctOperationJournals=2, hashChecks=checks, cadConnectionAttempted=False, scope="one existing workplane and separately verified WORLD; recorded observations and protected bytes, not complete topology")
+    assert len(independent["frames"]) == len(planes)
+    frame_key = lambda p: (p["nativeId"], p["compositeId"], tuple(p["worldInfo"]))
+    assert sorted(map(frame_key, independent["frames"])) == sorted(map(frame_key, planes))
+    return dict(state="passed", evidenceKind=evidence_kind, setterCalls=len(modes), distinctOperationJournals=len(modes), hashChecks=checks, cadConnectionAttempted=False, scope="existing workplane context changes and separately verified WORLD; recorded observations and protected bytes, not complete topology")
 
 
 def audit_live(folder, runtime, baseline_path, qualification_path, once_path):

@@ -57,4 +57,26 @@ public sealed class WorkplaneActivationTests
         if(fault!="valid"){Assert.Throws<ReferenceRejected>(()=>copies.IssueVerifiedWorkplaneActivation(receipt,owner,expiry));return;}
         var result=copies.IssueVerifiedWorkplaneActivation(receipt,owner,expiry);Assert.True(JsonNode.DeepEquals(owner,copies.InspectParameters(result["workingCopyHandle"]!.GetValue<string>())));Assert.Null(result["executionAuthorized"]);
     }
+    [Fact]
+    public void SecondWorkplaneCandidateResolvesItsOwnNativeIdentity()
+    {
+        var utc=DateTimeOffset.UtcNow;var source=Source(utc);source["entityCount"]=3;
+        source["entities"]!.AsArray().Add(new JsonObject{["nativeTypeCode"]=54,["nativeId"]=12,["type"]="WORKPLANE",["name"]="Other plane",["levelNumber"]=0});
+        var candidates=new CandidateStore(utcClock:()=>utc);string sha=new('b',64);var issued=candidates.Issue(source,sha);
+        var second=issued["entities"]!.AsArray()[2]!["candidateEntityHandle"]!.GetValue<string>();
+        var binding=new JsonObject{["inspectionRequestId"]=source["bridgeRequestId"]!.DeepClone(),["inspectionSha256"]=sha};
+        Assert.True(JsonNode.DeepEquals(new JsonObject{["mode"]="existing",["nativeId"]=12},candidates.WorkplaneTarget(second,binding)));
+    }
+    [Theory][InlineData("legacy",true)][InlineData("multiple",true)][InlineData("future",false)][InlineData("wrong_count",false)][InlineData("mixed_shapes",false)][InlineData("legacy_multiple",false)]
+    public void CaptureSchemasKeepOldReceiptsAndRejectAmbiguousVersions(string kind,bool accepted)
+    {
+        bool legacy=kind is "legacy" or "legacy_multiple";var capture=new JsonObject{["sourceActive"]=0,["bounds"]=new JsonArray()};
+        if(legacy)capture["plane"]=new JsonObject();else capture["planes"]=new JsonArray(new JsonObject(),new JsonObject());
+        var packet=new JsonObject{["schemaVersion"]=legacy?1:2,["captureBefore"]=capture};
+        if(kind=="future")packet["schemaVersion"]=3;
+        if(kind=="wrong_count")capture["planes"]!.AsArray().RemoveAt(1);
+        if(kind=="mixed_shapes")capture["plane"]=new JsonObject();
+        if(kind=="legacy_multiple")packet["schemaVersion"]=2;
+        Assert.Equal(accepted,OwnedWorkplaneActivationStore.CaptureSchema(packet));
+    }
 }

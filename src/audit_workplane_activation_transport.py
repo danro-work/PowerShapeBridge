@@ -29,7 +29,11 @@ def audit(folder):
         assert receipt['geometryMutationAttempted'] is receipt['cadSaveAttempted'] is False
         plan=receipt['plan']
         assert sha(root/'workplaneactivationexecutions'/(op+'.json'))==receipt['planSha256']
-        assert plan['targetCompositeId']==1080000011
+        multiple=r.get('multiple',False)
+        assert plan['targetCompositeId']==(1080000012 if multiple else 1080000011)
+        assert plan['schemaVersion']==(2 if multiple else 1)
+        assert plan['captureBefore']['sourceActive']==(1080000011 if multiple else 0)
+        if multiple:assert len(plan['captureBefore']['planes'])==3
         events=[]
         previous=None
         for i,name in enumerate(sorted((root/'operations'/op).glob('*.json'))):
@@ -58,7 +62,7 @@ def audit(folder):
         else:
             assert r['cancelNotification']['method']=='notifications/cancelled' and r['recoveryReadSeconds']<4
         context=read(sorted((root/'wire-contexts').glob('*.json'))[-1])
-        assert context['setterCalls']==1 and context['active']==1080000011
+        assert context['setterCalls']==1 and context['active']==(1080000012 if multiple else 1080000011)
         cases.append({'fault':fault,'reportSha256':sha(path),'fenceRetained':True,'automaticWorldCalls':0,'replays':0})
     return {'state':'passed','cases':cases,'hashChecks':hashes,'cadConnectionAttempted':False}
 
