@@ -19,10 +19,15 @@ jobs:
       - name: Build and verify isolated baseline
         shell: pwsh
         run: ./verify-baseline.ps1 -PythonPath (Get-Command python.exe).Source
+      - name: Check workplane switch coordinate and no-replay boundaries
+        shell: pwsh
+        run: ./verify-workplane-switch.ps1
       - name: Preserve verification evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: K1-baseline
-          path: evidence/K1-baseline
+          path: |
+            evidence/K1-baseline
+            evidence/workplane-switch-ci
           if-no-files-found: error

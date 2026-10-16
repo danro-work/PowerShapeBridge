@@ -1,0 +1,28 @@
+{
+  "fixtureOnly": true,
+  "state": "passive_owned_workplane_observed",
+  "bodyCompositeId": 800000001,
+  "boundsWorldRaw": [-10, 10, -10, 10, 0, 20],
+  "frames": [{"compositeId": 1080000001, "worldInfo": [2, 3, 4, 0, 1, 0, 0, 0, 1]}],
+  "windowsAfter": {"fixtureOnly": true, "windows": [{"id": 1, "modelName": "Synthetic"}]},
+  "after": {
+    "model": {"id": 1, "name": "Synthetic", "path": "synthetic.psmodel"},
+    "processId": 1, "processStartedUtc": "2026-01-01T00:00:00Z",
+    "windowsSessionId": 1, "productVersion": "synthetic",
+    "entityCount": 2, "countsByType": {"SOLID": 1, "WORKPLANE": 1},
+    "levelsContainingEntities": [0, 1],
+    "lengthUnitsRaw": 0, "lengthUnitNameRaw": "fixture_raw", "lengthUnitFactorRaw": 1,
+    "areaUnitNameRaw": "fixture_raw", "areaUnitFactorRaw": 1,
+    "volumeUnitNameRaw": "fixture_raw", "volumeUnitFactorRaw": 1,
+    "generalToleranceRaw": 0.001,
+    "contextBefore": [0, 0], "contextAfter": [0, 0],
+    "selectionBefore": [], "selectionAfter": [],
+    "entities": [
+      {"nativeTypeCode": 40, "nativeId": 1, "name": "SyntheticSolid", "levelNumber": 1,
+       "geometry": {"coordinateFrame": "world", "cogRaw": [0, 0, 10]}},
+      {"nativeTypeCode": 54, "nativeId": 1, "name": "SyntheticWorkplane", "levelNumber": 0}
+    ],
+    "workplanes": [{"nativeId": 1, "originRaw": [2, 3, 4], "xaxisRaw": [-1, 0, 0],
+                    "yaxisRaw": [0, 0, 1], "zaxisRaw": [0, 1, 0]}]
+  }
+}
