@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -50,6 +50,7 @@ namespace PowerShapeBridge
         public bool levelReadingExperimental { get; set; }
         public bool ownedLevelMovesExperimental { get; set; }
         public bool ownedWorkplanesExperimental { get; set; }
+        public bool ownedWorkplaneActivationExperimental { get; set; }
         public bool IsGeneralCore { get { return coreProfile == "general-v1"; } }
         public bool CoreTransportEnabled { get { return IsGeneralCore || (mcpMutationsPanel && recipeOperationsPanel); } }
         public string qualificationOperationId { get; set; }
@@ -79,6 +80,7 @@ namespace PowerShapeBridge
             if(levelReadingExperimental&&!IsGeneralCore)throw new ArgumentException("Passive level reading requires general core.");
             if(ownedLevelMovesExperimental&&(!IsGeneralCore||!levelReadingExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned level moves require general sets/copies/bindings/level reads.");
             if(ownedWorkplanesExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned workplanes require general sets/copies/bindings.");
+            if(ownedWorkplaneActivationExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned workplane activation requires general sets/copies/bindings.");
             if (IsGeneralCore) {
                 if (captureViewport || translationTestPanel || checkpointTestPanel || parameterizedTranslationPanel || diskVerificationPanel || mcpMutationsPanel || recipeOperationsPanel ||
                     !string.IsNullOrEmpty(expectedProject) || !string.IsNullOrEmpty(sourceStep) || !string.IsNullOrEmpty(protectedProject) || !string.IsNullOrEmpty(qualificationOperationId) ||
@@ -97,7 +99,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.35.1-dev";
+        public const string ReleaseVersion = "0.36.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -107,6 +109,12 @@ namespace PowerShapeBridge
         internal static Config ParseConfig(string text)
         {
             var raw=Json.Deserialize<Dictionary<string,object>>(text);object enabled;
+            if(raw!=null&&raw.TryGetValue("ownedWorkplaneActivationExperimental",out enabled)) {
+                if(!(enabled is bool))throw new ArgumentException("Owned activation flag must be JSON boolean.");
+                if((bool)enabled)foreach(string flag in new[]{"entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {
+                    object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Owned activation dependencies must be true JSON booleans.");
+                }
+            }
             if(raw!=null&&raw.TryGetValue("ownedWorkplanesExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Owned workplane flag must be JSON boolean.");
                 if((bool)enabled)foreach(string flag in new[]{"entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {
@@ -201,6 +209,15 @@ namespace PowerShapeBridge
             }
             if(args.Length==1&&args[0]=="--owned-workplane-test") {
                 try{OwnedWorkplaneTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--workplane-activation-test") {
+                try{OwnedWorkplaneActivationTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--workplane-activation-wire-seed") {
+                try{Console.WriteLine(Json.Serialize(WorkplaneActivationWireFixture.Seed()));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==2&&args[0]=="--workplane-activation-wire-request") {
+                try{Console.WriteLine(Json.Serialize(WorkplaneActivationWireFixture.Run(args[1])));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
             if(args.Length==1&&args[0]=="--owned-rotation-plan-test") {
                 try{OwnedRotationPlanTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
