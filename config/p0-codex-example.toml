@@ -1,0 +1,20 @@
+# P0 proposal template only. Replace __PROJECT_DIR__ with the absolute project directory.
+# No deployment/CAD commands. Preserve unrelated user settings; back up before applying.
+
+[mcp_servers.powershape_bridge]
+command = "C:\\Program Files\\dotnet\\dotnet.exe"
+args = ["__PROJECT_DIR__\\work\\P0-candidate-370-430\\sdk\\PowerShapeMcp.Host.dll", "--bridge-root", "__PROJECT_DIR__\\releases\\P2.6", "--timeout", "120"]
+cwd = "__PROJECT_DIR__\\releases\\P2.6"
+enabled = true
+startup_timeout_sec = 30
+tool_timeout_sec = 180
+enabled_tools = ["bind_working_document", "bridge_status", "execute_owned_save_as", "execute_owned_saved_reopen", "execute_owned_translation", "inspect_active_model", "inspect_entity_candidates", "inspect_model_levels", "inspect_operation_plan", "inspect_operation_recovery", "inspect_working_copy", "list_documents", "open_working_copy", "operation_result", "prepare_entity_set", "prepare_operation_plan", "prepare_owned_operation", "prepare_owned_save_as", "prepare_owned_saved_reopen", "prepare_working_copy", "resolve_entity_references", "validate_entity_set", "validate_owned_operation", "validate_working_document_binding", "verify_owned_save_as", "verify_owned_saved_reopen", "verify_owned_translation", "verify_working_copy_open"]
+
+[mcp_servers.powershape_bridge_readonly]
+command = "C:\\Program Files\\dotnet\\dotnet.exe"
+args = ["__PROJECT_DIR__\\work\\P0-candidate-370-430\\sdk\\PowerShapeMcp.Host.dll", "--bridge-root", "__PROJECT_DIR__\\releases\\P2.6", "--timeout", "120", "--read-only"]
+cwd = "__PROJECT_DIR__\\releases\\P2.6"
+enabled = true
+startup_timeout_sec = 30
+tool_timeout_sec = 180
+enabled_tools = ["bridge_status", "inspect_active_model", "inspect_entity_candidates", "inspect_model_levels", "inspect_operation_recovery", "list_documents", "operation_result", "resolve_entity_references"]
