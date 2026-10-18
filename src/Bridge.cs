@@ -249,6 +249,10 @@ namespace PowerShapeBridge
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{RotationMeasurementTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
+            if(args.Length==1&&args[0]=="--solid-face-measurement-test") {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{SolidFaceMeasurementTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
             if(args.Length==1&&args[0]=="--rotation-measurement-record-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{RotationMeasurementRecordTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}

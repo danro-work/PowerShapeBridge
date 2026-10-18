@@ -17,7 +17,7 @@ namespace PowerShapeBridge {
    Dictionary<string,object> Observation();
    void ConfirmDocument();
   }
-  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext {
+  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,SolidFaceMeasurements.IContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext {
    object application,document;
    internal ComContext(Config config) {
     try {application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("No active model document.");document=ps.ActiveDocument;ConfirmDocument();}
@@ -45,6 +45,9 @@ namespace PowerShapeBridge {
    public object SetItemsLevel(int composite,int level){if(level<0||level>997)throw new ArgumentException("Level outside qualified candidate range.");ConfirmDocument();dynamic doc=document;return doc.SetItemsLevel(composite,level);}
    public object SurfacePoints(string name,double tStart,double tEnd,int tCount,double uStart,double uEnd,int uCount){ConfirmDocument();dynamic doc=document;return doc.GetSurfacePoints(name,1,tStart,tEnd,tCount,uStart,uEnd,uCount);}
    public object CurvePoints(string name,int start,int end){ConfirmDocument();dynamic doc=document;return doc.GetCompCurvePointData(name,start,end,1);}
+   public object ClosestSolidFace(int nativeId,double[] point){if(nativeId<0)throw new ArgumentException("Explicit SOLID ID required.");string xyz=SolidFaceMeasurements.Coordinates(point);ConfirmDocument();dynamic ps=application;return ps.Evaluate("SOLID[ID "+nativeId.ToString(CultureInfo.InvariantCulture)+"].CLOSEST_FACE("+xyz+")");}
+   public object FaceNear(string face,double[] point){face=SolidFaceMeasurements.FaceName(face);string xyz=SolidFaceMeasurements.Coordinates(point);ConfirmDocument();dynamic ps=application;return ps.Evaluate("SURFACE['"+face+"'].NEAR("+xyz+")");}
+   public object FacePoint(string face,double t,double u,bool normal){face=SolidFaceMeasurements.FaceName(face);SolidFaceMeasurements.Vector(new[]{t,u,0});ConfirmDocument();dynamic ps=application;return ps.Evaluate("SURFACE['"+face+"'].EVALUATE("+t.ToString("R",CultureInfo.InvariantCulture)+";"+u.ToString("R",CultureInfo.InvariantCulture)+")."+(normal?"NORMAL":"POSITION"));}
    public void SaveAs(string path){ConfirmDocument();WorkingCopyOpen.CommandPath(path);dynamic ps=application;ps.Exec("FILE SAVEASPATH "+path);}
    public void ConfirmDocument() {
     dynamic ps=application;if(Convert.ToBoolean(ps.Busy())||!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("Active COM document unavailable/busy.");
