@@ -6,11 +6,18 @@ internal static class SolidQuarterTurnProof
 {
     internal const string Scope="one_solid_world_z_plus_90_mm_observed_samples";
     internal const string PivotedScope="one_solid_world_z_signed_quarter_turn_mm_observed_samples";
+    internal const string PrincipalScope="one_solid_world_principal_signed_quarter_turn_mm_observed_samples";
     internal static string ScopeFor(JsonObject parameters)
     {
         var definition=RotationDefinition.Read(parameters);
-        Need((definition.AngleDegrees==90||definition.AngleDegrees==-90)&&definition.UnitDirection.SequenceEqual(new double[]{0,0,1}));
+        Need((definition.AngleDegrees==90||definition.AngleDegrees==-90)&&definition.UnitDirection.Count(v=>Math.Abs(v)==1)==1&&definition.UnitDirection.Count(v=>v==0)==2);
+        if(!definition.UnitDirection.SequenceEqual(new double[]{0,0,1}))return PrincipalScope;
         return definition.AngleDegrees==90&&definition.Origin.All(v=>v==0)?Scope:PivotedScope;
+    }
+    internal static string VerificationStateFor(string scope)
+    {
+        Need(scope==Scope||scope==PivotedScope||scope==PrincipalScope);
+        return scope==PrincipalScope?"owned_solid_principal_quarter_turn_verified_observed":"owned_solid_world_z_quarter_turn_verified_observed";
     }
     internal static string ExecutionScope(JsonObject plan)
     {
@@ -60,7 +67,7 @@ internal static class SolidQuarterTurnProof
     internal static void CheckedVerification(string root,JsonObject result,JsonObject args)
     {
         var id=Text(args,"executionRequestId");var original=Execution(root,id,Text(args,"executionReceiptSha256"),true);var plan=original["plan"]!.AsObject();
-        Need(result["state"]?.GetValue<string>()=="owned_solid_world_z_quarter_turn_verified_observed"&&JsonNode.DeepEquals(result["qualificationScope"],original["qualificationScope"])&&Text(result,"executionRequestId")==id&&Text(result,"recordedJournalState")=="succeeded_verified"&&ArtifactProof.Boolean(result["copyFenceReleased"],true)&&ArtifactProof.Boolean(result["nativeConventionQualified"],true)&&ArtifactProof.Boolean(result["samplePostconditionsPassed"],true));
+        Need(result["state"]?.GetValue<string>()==VerificationStateFor(Text(original,"qualificationScope"))&&JsonNode.DeepEquals(result["qualificationScope"],original["qualificationScope"])&&Text(result,"executionRequestId")==id&&Text(result,"recordedJournalState")=="succeeded_verified"&&ArtifactProof.Boolean(result["copyFenceReleased"],true)&&ArtifactProof.Boolean(result["nativeConventionQualified"],true)&&ArtifactProof.Boolean(result["samplePostconditionsPassed"],true));
         foreach(var key in new[]{"geometryMutationAttempted","contextChangeAttempted","cadSaveAttempted","retryAllowed"})Need(ArtifactProof.Boolean(result[key],false));
         foreach(var key in new[]{"copyId","ownershipSha256"})Need(JsonNode.DeepEquals(result[key],plan[key]));
         var verificationId=Text(result,"verificationId");Need(verificationId==Text(result,"bridgeRequestId"));

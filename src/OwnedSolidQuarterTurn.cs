@@ -10,15 +10,17 @@ namespace PowerShapeBridge {
  internal static class OwnedSolidQuarterTurn {
   internal const string Scope="one_solid_world_z_plus_90_mm_observed_samples";
   internal const string PivotedScope="one_solid_world_z_signed_quarter_turn_mm_observed_samples";
-  internal static bool Supported(int angle,double[] axis){return (angle==90||angle==-90)&&axis!=null&&axis.Length==6&&axis.All(v=>!double.IsNaN(v)&&!double.IsInfinity(v)&&Math.Abs(v)<=1000000)&&axis.Skip(3).SequenceEqual(new double[]{0,0,1});}
-  internal static string ScopeFor(int angle,double[] axis){Need(Supported(angle,axis),"Only signed WORLD Z quarter turns with explicit bounded pivot are supported.");return angle==90&&axis.Take(3).All(v=>v==0)?Scope:PivotedScope;}
+  internal const string PrincipalScope="one_solid_world_principal_signed_quarter_turn_mm_observed_samples";
+  internal static bool Supported(int angle,double[] axis){return (angle==90||angle==-90)&&axis!=null&&axis.Length==6&&axis.All(v=>!double.IsNaN(v)&&!double.IsInfinity(v)&&Math.Abs(v)<=1000000)&&axis.Skip(3).Count(v=>Math.Abs(v)==1)==1&&axis.Skip(3).Count(v=>v==0)==2;}
+  internal static string ScopeFor(int angle,double[] axis){Need(Supported(angle,axis),"Only signed WORLD principal-axis quarter turns with explicit bounded pivot are supported.");if(!axis.Skip(3).SequenceEqual(new double[]{0,0,1}))return PrincipalScope;return angle==90&&axis.Take(3).All(v=>v==0)?Scope:PivotedScope;}
+  internal static string VerificationStateFor(string scope){Need(scope==Scope||scope==PivotedScope||scope==PrincipalScope,"Unsupported verification scope.");return scope==PrincipalScope?"owned_solid_principal_quarter_turn_verified_observed":"owned_solid_world_z_quarter_turn_verified_observed";}
   internal static readonly string[] Recipes={"prepare_owned_solid_quarter_turn","execute_owned_solid_quarter_turn","verify_owned_solid_quarter_turn"};
   static void Need(bool ok,string why){if(!ok)throw new InvalidDataException(why);}
   static string PathFor(string root,string folder,object id){Need(EntitySets.Hex(id,32),"Fixed quarter-turn proof identity required.");string path=Path.Combine(root,folder,(string)id+".json");OwnedCopies.NoReparse(path);return path;}
   static Dictionary<string,object> Object(Dictionary<string,object> d,string key){var value=d[key] as Dictionary<string,object>;Need(value!=null,"Object proof required: "+key);return value;}
   internal static void CheckScope(Dictionary<string,object> plan,Dictionary<string,object> expected){
    var p=Object(plan,"parameters");var keys=EntitySets.Keys(plan["entityKeys"]);
-   Need((Equals(p["angleDegrees"],90)||Equals(p["angleDegrees"],-90))&&Supported((int)p["angleDegrees"],OwnedRotationPlans.Axis(p))&&keys.Length==1&&keys[0][0]==40&&EntitySets.Inventory(expected).Length==1&&Equals(expected["lengthUnitsRaw"],"mm")&&Program.StrictDouble(expected["lengthUnitFactorRaw"])==1,"Only one SOLID +/-90 WORLD Z with explicit pivot in mm/factor1 is supported.");
+   Need((Equals(p["angleDegrees"],90)||Equals(p["angleDegrees"],-90))&&Supported((int)p["angleDegrees"],OwnedRotationPlans.Axis(p))&&keys.Length==1&&keys[0][0]==40&&EntitySets.Inventory(expected).Length==1&&Equals(expected["lengthUnitsRaw"],"mm")&&Program.StrictDouble(expected["lengthUnitFactorRaw"])==1,"Only one SOLID +/-90 WORLD principal axis with explicit pivot in mm/factor1 is supported.");
   }
   internal static void Validate(string recipe,Dictionary<string,object> args){
    Need(Recipes.Contains(recipe),"Unknown solid quarter-turn recipe.");
