@@ -142,7 +142,7 @@ public sealed class BridgeSession : IDisposable
         {
             ["adapterVersion"] = HostOptions.Version, ["bridgeRoot"] = Options.BridgeRoot,
             ["configurationPresent"] = true, ["panelLiveness"] = "not_verified",
-            ["solidQuarterTurns"] = PreparedEnabled("execute_owned_solid_quarter_turn")?"experimental_one_owned_solid_world_z_plus90_mm":"disabled",
+            ["solidQuarterTurns"] = PreparedEnabled("execute_owned_solid_quarter_turn")?"experimental_one_owned_solid_world_z_signed_quarter_turn_mm":"disabled",
             ["geometryMutations"] = PreparedEnabled("execute_owned_solid_quarter_turn")?(ExecutionEnabled("execute_owned_translation")?"experimental_owned_solid_translation_and_world_z_quarter_turn":"experimental_owned_solid_world_z_quarter_turn"):ExecutionEnabled("execute_owned_translation")?"experimental_owned_solid_translation_only":"disabled", ["transport"] = "stdio",
             ["serverMode"] = Options.ReadOnly ? "read_only" : "general_core",
             ["configurationProfile"] = "general-v1", ["entitySets"] = CandidatesEnabled?"experimental_observations_only":"disabled", ["operationPlans"] = PreparedEnabled("prepare_operation_plan")?"experimental_local_only_execution_disabled":"disabled",
