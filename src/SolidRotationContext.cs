@@ -5,7 +5,7 @@ using System.Linq;
 using PowerShapeGeometry;
 
 namespace PowerShapeBridge {
- // Internal adapter. Live-qualified scope is limited to one SOLID +90 WORLD Z/mm.
+ // Internal adapter for the separately qualified one-SOLID WORLD Z quarter turns.
  // No queue route, MCP tool or independent
  // execution authority. Ownership/checkpoint/journal/claim/fence remain mandatory
  // in OwnedRotationExecution. The retained context is borrowed from its caller.
@@ -30,13 +30,16 @@ namespace PowerShapeBridge {
    void Target(int composite){Need(composite==compositeId,"Foreign rotation composite target.");}
    internal bool IsNativeProvider {get{return context is DocumentBindings.ComContext;}}
    internal string PinnedDescriptor {get{return EntitySets.Canonical(descriptor);}}
-   internal void Guard(){
+   void ReadGuard(out Dictionary<string,object> observation,out Dictionary<string,object> windowObservation){
     Need(!disposed,"Rotation read adapter was disposed.");context.ConfirmDocument();
-    OwnedRotationExecution.PreserveOthers(expected,context.Observation(),new[]{new[]{40,nativeId}});
-    Need(DocumentBindings.WindowDigest(context.Windows())==windows&&context.Composite(40,nativeId)==compositeId,"Pinned rotation document/window/mapping changed.");context.ConfirmDocument();
+    observation=context.Observation();OwnedRotationExecution.PreserveOthers(expected,observation,new[]{new[]{40,nativeId}});
+    windowObservation=context.Windows();Need(DocumentBindings.WindowDigest(windowObservation)==windows&&context.Composite(40,nativeId)==compositeId,"Pinned rotation document/window/mapping changed.");context.ConfirmDocument();
    }
-   public Dictionary<string,object> Observation(){Guard();return context.Observation();}
-   public Dictionary<string,object> Windows(){Guard();return context.Windows();}
+   internal void Guard(){Dictionary<string,object> observation,windowObservation;ReadGuard(out observation,out windowObservation);}
+   // Return this call's guarded snapshot. Do not read an unguarded second copy,
+   // and never cache either snapshot across separate calls or commands.
+   public Dictionary<string,object> Observation(){Dictionary<string,object> observation,windowObservation;ReadGuard(out observation,out windowObservation);return observation;}
+   public Dictionary<string,object> Windows(){Dictionary<string,object> observation,windowObservation;ReadGuard(out observation,out windowObservation);return windowObservation;}
    public void ConfirmDocument(){Guard();}
    public int Composite(int type,int id){Need(type==40&&id==nativeId,"Only the pinned SOLID key is accepted.");Guard();return compositeId;}
    public double[] Bounds(int composite){Target(composite);Guard();return context.Bounds(composite);}

@@ -10,6 +10,18 @@ namespace PowerShapeBridge {
    Need(File.Exists(Path.Combine(Program.Root,".solid-rotation-context-fixture")),"Explicit own rotation adapter fixture marker required; no COM.");
    int checks=0;Action<bool> check=ok=>{Need(ok,"Adapter check failed: "+checks);checks++;};
    Action<Action> rejects=action=>{bool failed=false;try{action();}catch(InvalidDataException){failed=true;}catch(IOException){failed=true;}catch(ArgumentException){failed=true;}catch(InvalidOperationException){failed=true;}check(failed);};
+   var counted=new SolidFaceMeasurementTests.Context();var countedExpected=counted.Observation();var countedDescriptor=SolidFaceMeasurements.Capture(countedExpected,5,counted);
+   using(var reader=new SolidRotationContext.ReadContext(counted,countedExpected,countedDescriptor,DocumentBindings.WindowDigest(counted.Windows()))){
+    counted.ObservationCalls=counted.WindowCalls=counted.ConfirmationCalls=0;reader.Observation();
+    check(counted.ObservationCalls==1&&counted.WindowCalls==1&&counted.ConfirmationCalls==2&&counted.RotateCalls==0);
+    counted.ObservationCalls=counted.WindowCalls=counted.ConfirmationCalls=0;reader.Windows();
+    check(counted.ObservationCalls==1&&counted.WindowCalls==1&&counted.ConfirmationCalls==2);
+    ((System.Collections.Generic.Dictionary<string,object>)EntitySets.Inventory(counted.Snapshot)[0]["geometry"])["cogRaw"]=new[]{5,10,16};
+    var fresh=reader.Observation();var cog=(System.Collections.IEnumerable)((System.Collections.Generic.Dictionary<string,object>)EntitySets.Inventory(fresh)[0]["geometry"])["cogRaw"];
+    check(cog.Cast<object>().Select(Program.StrictDouble).SequenceEqual(new double[]{5,10,16})&&counted.ObservationCalls==2);
+    counted.Snapshot["processId"]=99;rejects(()=>reader.Observation());
+    counted.Snapshot["processId"]=countedExpected["processId"];counted.Listing["windowCount"]=99;rejects(()=>reader.Windows());
+   }
    var c=new SolidFaceMeasurementTests.Context();var expected=c.Observation();var d=SolidFaceMeasurements.Capture(expected,5,c);string windows=DocumentBindings.WindowDigest(c.Windows());
    var execution=new SolidRotationContext.ExecutionContext(c,expected,d,windows);var before=execution.Measurements(40);double[] axis={0,0,0,0,0,1};
    check(execution.Rotate(40,90,axis)==1&&c.RotateCalls==1&&c.LastAngle==90&&c.LastAxis.SequenceEqual(axis));
