@@ -23,7 +23,7 @@ public sealed class SafetyFixture
     public string[] Sets { get; }
     public JsonObject BindingReceipt { get; }
     public string Root=>Files.Root;
-    public SafetyFixture()
+    public SafetyFixture(bool singleSolid=false)
     {
         Candidates=new(()=>Time,()=>Utc);Copies=new(()=>Time,()=>Utc);Plans=new(Root,Candidates,()=>Time,()=>Utc);Bindings=new(Root,Candidates,Copies,()=>Time,()=>Utc);Owned=new(Root,Plans,Bindings,()=>Time,()=>Utc);
         using var data=JsonDocument.Parse(File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory,"fixtures","observations.json")));
@@ -31,9 +31,9 @@ public sealed class SafetyFixture
         foreach(var field in JsonNode.Parse(data.RootElement[0].GetProperty("snapshot").GetRawText())!.AsObject())Source[field.Key]=field.Value?.DeepClone();
         Source["productVersion"]="23.2.2";Source["modelScope"]="active_document_read_only";Source["timestampUtc"]=LeaseTime.Format(Utc);
         Source["contextAfter"]=new JsonArray(0,0);Source["selectionBefore"]=new JsonArray();Source["selectionAfter"]=new JsonArray();Source["levelsContainingEntities"]=new JsonArray();
-        Source["entities"]!.AsArray().Add(JsonNode.Parse("{\"nativeTypeCode\":21,\"nativeId\":8,\"type\":\"SURFACE\",\"name\":\"Plane\",\"levelNumber\":0}"));
-        Source["entities"]!.AsArray().Add(JsonNode.Parse("{\"nativeTypeCode\":59,\"nativeId\":10,\"type\":\"COMPCURVE\",\"name\":\"Curve\",\"levelNumber\":0}"));
-        Source["entityCount"]=3;SourceId=Guid.NewGuid().ToString("N");Source["bridgeRequestId"]=SourceId;
+        if(!singleSolid)Source["entities"]!.AsArray().Add(JsonNode.Parse("{\"nativeTypeCode\":21,\"nativeId\":8,\"type\":\"SURFACE\",\"name\":\"Plane\",\"levelNumber\":0}"));
+        if(!singleSolid)Source["entities"]!.AsArray().Add(JsonNode.Parse("{\"nativeTypeCode\":59,\"nativeId\":10,\"type\":\"COMPCURVE\",\"name\":\"Curve\",\"levelNumber\":0}"));
+        Source["entityCount"]=singleSolid?1:3;SourceId=Guid.NewGuid().ToString("N");Source["bridgeRequestId"]=SourceId;
         SourceSha=ArtifactProof.Freeze(Root,"responses/"+SourceId+".json",Source);
         Document=Candidates.Issue(Source,SourceSha)["candidateDocumentHandle"]!.GetValue<string>();
         var copyId=Guid.NewGuid().ToString("N");

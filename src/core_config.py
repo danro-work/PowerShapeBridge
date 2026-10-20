@@ -34,6 +34,9 @@ def general_core(settings):
     reopens = settings.get('ownedSavedReopenExperimental', False)
     recovery = settings.get('checkpointRecoveryExperimental', False)
     owned_rotations = settings.get('ownedRotationPlansExperimental', False)
+    quarter_turns = settings.get('ownedSolidQuarterTurnsExperimental', False)
+    if type(quarter_turns) is not bool or quarter_turns and (profile != 'general-v1' or owned_rotations is not True or plans is not True):
+        raise ValueError('Solid quarter turns require general owned rotation and operation plans')
     owned_scales = settings.get('ownedUniformScalePlansExperimental', False)
     dgk_targets = settings.get('ownedDgkTargetsExperimental', False)
     if type(dgk_targets) is not bool or dgk_targets and (profile != 'general-v1' or copies is not True or bindings is not True or experimental is not True):
