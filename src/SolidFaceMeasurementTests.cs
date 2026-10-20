@@ -11,9 +11,10 @@ namespace PowerShapeBridge {
   internal sealed class Context : SolidRotationContext.IWriteContext {
    internal Dictionary<string,object> Snapshot,Listing;internal string Fault;internal int ClosestCalls,NearCalls,PointCalls;internal bool Rotated;
    internal Context(){var f=new OwnedOperationPlanTests.Fixture(true,true);Snapshot=Clone(f.Snapshot);Listing=Clone(f.Listing);Snapshot["generalToleranceRaw"]=0.01;var g=(Dictionary<string,object>)EntitySets.Inventory(Snapshot)[0]["geometry"];g["cogRaw"]=new[]{5,10,15};foreach(string k in new[]{"nlinks_open","closedRaw","connectedRaw","watertightRaw","trimming_validRaw"})g[k]=k=="nlinks_open"?0:1;}
-   public Dictionary<string,object> Observation(){return Clone(Snapshot);}
-   public Dictionary<string,object> Windows(){return Clone(Listing);}
-   public void ConfirmDocument(){}
+   internal int ObservationCalls,WindowCalls,ConfirmationCalls;
+   public Dictionary<string,object> Observation(){ObservationCalls++;return Clone(Snapshot);}
+   public Dictionary<string,object> Windows(){WindowCalls++;return Clone(Listing);}
+   public void ConfirmDocument(){ConfirmationCalls++;}
    public void Dispose(){}
    public int Composite(int type,int id){Need(type==40&&id==5,"Wrong explicit target.");return Fault=="mapping"&&PointCalls>0?999:40;}
    public double[] Bounds(int composite){return Rotated?new double[]{-20,0,0,10,0,30}:new double[]{0,10,0,20,0,30};}
