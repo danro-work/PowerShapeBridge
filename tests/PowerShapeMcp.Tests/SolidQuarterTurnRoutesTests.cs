@@ -27,7 +27,7 @@ public sealed class SolidQuarterTurnRoutesTests
     public async Task CatalogAndDirectCallsEnforceServerReadOnlyAndFeatureFlag(bool readOnly,bool enabled,bool present)
     {
         await using var c=await OwnedRotationRoutesTests.Connection.Create(readOnly,enabled,true);var tools=await c.Client.ListToolsAsync();
-        Assert.Equal(present?"experimental_one_owned_solid_world_z_signed_quarter_turn_mm":"disabled",c.Session.Status()["solidQuarterTurns"]!.GetValue<string>());
+        Assert.Equal(present?"experimental_one_owned_solid_world_principal_quarter_turn_mm":"disabled",c.Session.Status()["solidQuarterTurns"]!.GetValue<string>());
         foreach(var name in Names){Assert.Equal(present,tools.Any(t=>t.Name==name));await Assert.ThrowsAsync<McpProtocolException>(()=>c.Client.CallToolAsync(name,new Dictionary<string,object?>{["command"]="NeverRun"}).AsTask());}
         Assert.False(Directory.Exists(Path.Combine(c.Data.Root,"requests")));
     }
@@ -37,30 +37,51 @@ public sealed class SolidQuarterTurnRoutesTests
         await using var c=await OwnedRotationRoutesTests.Connection.Create(quarterTurn:true);var handle=await Prepare(c);Assert.NotNull(c.Session.OwnedRotations.ValidationParameters(handle));Assert.Single(Directory.GetFiles(Path.Combine(c.Data.Root,"requests")));
     }
     [Theory]
-    [InlineData(90)]
-    [InlineData(-90)]
-    public async Task ExplicitPivotAndSignedAngleArePinnedToThePreparation(int angle)
+    [InlineData(90,"[0,0,1]",SolidQuarterTurnProof.PivotedScope)]
+    [InlineData(-90,"[0,0,1]",SolidQuarterTurnProof.PivotedScope)]
+    [InlineData(90,"[1,0,0]",SolidQuarterTurnProof.PrincipalScope)]
+    [InlineData(-90,"[0,1,0]",SolidQuarterTurnProof.PrincipalScope)]
+    [InlineData(90,"[0,-1,0]",SolidQuarterTurnProof.PrincipalScope)]
+    [InlineData(90,"[0,0,-1]",SolidQuarterTurnProof.PrincipalScope)]
+    public async Task ExplicitPivotAndSignedAngleArePinnedToThePreparation(int angle,string direction,string expectedScope)
     {
-        var parameters=JsonNode.Parse("""{"angleDegrees":90,"origin":[2,3,4],"direction":[0,0,1],"coordinateFrame":"world","lengthUnits":"document_raw"}""")!.AsObject();parameters["angleDegrees"]=angle;
+        var parameters=JsonNode.Parse("""{"angleDegrees":90,"origin":[2,3,4],"direction":[0,0,1],"coordinateFrame":"world","lengthUnits":"document_raw"}""")!.AsObject();parameters["angleDegrees"]=angle;parameters["direction"]=JsonNode.Parse(direction);
         await using var c=await OwnedRotationRoutesTests.Connection.Create(quarterTurn:true,quarterTurnParameters:parameters);var handle=await Prepare(c);
         var proofs=c.Session.SolidQuarterTurns.Consume(handle);var prepared=SolidQuarterTurnProof.Raw(c.Data.Root,proofs["ownedRotationId"]!.GetValue<string>()).Value;
-        Assert.Equal(SolidQuarterTurnProof.PivotedScope,prepared["qualificationScope"]!.GetValue<string>());Assert.Equal(4,proofs.Count);
+        Assert.Equal(expectedScope,prepared["qualificationScope"]!.GetValue<string>());Assert.Equal(4,proofs.Count);
         Assert.Throws<ReferenceRejected>(()=>c.Session.SolidQuarterTurns.Consume(handle));Assert.Single(Directory.GetFiles(Path.Combine(c.Data.Root,"requests")));
     }
     [Theory]
-    [InlineData(90,"[0,0,0,0,0,1]",false)]
-    [InlineData(-90,"[2,3,4,0,0,1]",false)]
-    [InlineData(90,"[2,3,4,0,0,1]",false)]
-    [InlineData(45,"[2,3,4,0,0,1]",true)]
-    [InlineData(-90,"[2,3,4,1,0,0]",true)]
-    [InlineData(-90,"[2,3,4,0,0,2]",true)]
-    [InlineData(-90,"[1000001,3,4,0,0,1]",true)]
-    public void ExecutionProofScopeChecksActualNormalizedAxisAndSignedAngle(int angle,string axis,bool rejects)
+    [InlineData(90,"[0,0,0,0,0,1]",SolidQuarterTurnProof.Scope)]
+    [InlineData(-90,"[2,3,4,0,0,1]",SolidQuarterTurnProof.PivotedScope)]
+    [InlineData(90,"[2,3,4,0,0,1]",SolidQuarterTurnProof.PivotedScope)]
+    [InlineData(45,"[2,3,4,0,0,1]",null)]
+    [InlineData(-90,"[2,3,4,1,0,0]",SolidQuarterTurnProof.PrincipalScope)]
+    [InlineData(90,"[2,3,4,0,1,0]",SolidQuarterTurnProof.PrincipalScope)]
+    [InlineData(90,"[2,3,4,0,-1,0]",SolidQuarterTurnProof.PrincipalScope)]
+    [InlineData(-90,"[2,3,4,0,0,2]",null)]
+    [InlineData(-90,"[2,3,4,1,1,0]",null)]
+    [InlineData(-90,"[1000001,3,4,0,0,1]",null)]
+    public void ExecutionProofScopeChecksActualNormalizedAxisAndSignedAngle(int angle,string axis,string? expectedScope)
     {
         var plan=new JsonObject{["angleDegrees"]=angle,["nativeAxis"]=JsonNode.Parse(axis)};
-        if(rejects)Assert.Throws<ReferenceRejected>(()=>SolidQuarterTurnProof.ExecutionScope(plan));
-        else Assert.Equal(angle==90&&axis=="[0,0,0,0,0,1]"?SolidQuarterTurnProof.Scope:SolidQuarterTurnProof.PivotedScope,SolidQuarterTurnProof.ExecutionScope(plan));
+        if(expectedScope is null)Assert.Throws<ReferenceRejected>(()=>SolidQuarterTurnProof.ExecutionScope(plan));
+        else Assert.Equal(expectedScope,SolidQuarterTurnProof.ExecutionScope(plan));
     }
+    [Fact]
+    public async Task PrincipalPreparationCannotMasqueradeAsPreviousZScope()
+    {
+        var parameters=JsonNode.Parse("""{"angleDegrees":90,"origin":[2,3,4],"direction":[1,0,0],"coordinateFrame":"world","lengthUnits":"document_raw"}""")!.AsObject();
+        await using var c=await OwnedRotationRoutesTests.Connection.Create(quarterTurn:true,quarterTurnParameters:parameters);
+        var pending=c.Client.CallToolAsync(Names[0],c.Args()).AsTask();var path=await c.Data.Files.ClaimRequest();var id=Path.GetFileNameWithoutExtension(path);var request=JsonNode.Parse(await c.Data.Files.ReadClaimedRequest(path))!;
+        var native=c.Reply(id,request["arguments"]!["parameters"]!.AsObject());native["qualificationScope"]=SolidQuarterTurnProof.PivotedScope;c.Data.Files.Write("responses/"+id+".json",native.ToJsonString());
+        var result=await pending;Assert.True(result.IsError);Assert.Null(Value(result)["ownedRotationHandle"]);Assert.Single(Directory.GetFiles(Path.Combine(c.Data.Root,"requests")));
+    }
+    [Theory]
+    [InlineData(SolidQuarterTurnProof.Scope,"owned_solid_world_z_quarter_turn_verified_observed")]
+    [InlineData(SolidQuarterTurnProof.PivotedScope,"owned_solid_world_z_quarter_turn_verified_observed")]
+    [InlineData(SolidQuarterTurnProof.PrincipalScope,"owned_solid_principal_quarter_turn_verified_observed")]
+    public void VerificationStatePreservesOldZProofsAndDistinguishesPrincipalAxes(string scope,string state)=>Assert.Equal(state,SolidQuarterTurnProof.VerificationStateFor(scope));
     [Fact]
     public async Task ChangedDescriptorCannotIssuePreparedHandle()
     {await using var c=await OwnedRotationRoutesTests.Connection.Create(quarterTurn:true);await Prepare(c,true);Assert.Single(Directory.GetFiles(Path.Combine(c.Data.Root,"requests")));}
