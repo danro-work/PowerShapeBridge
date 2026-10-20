@@ -15,19 +15,19 @@ public sealed class OwnedRotationRoutesTests
     {
         internal readonly SafetyFixture Data;private readonly bool quarterTurn;internal readonly BridgeSession Session;internal readonly string Plan,Binding;
         internal McpClient Client=null!;private readonly McpServer server;private readonly Task run;private readonly StreamClientTransport transport;private readonly CancellationTokenSource stop=new(TimeSpan.FromSeconds(30));
-        private Connection(bool readOnly,bool enabled,bool quarterTurn=false)
+        private Connection(bool readOnly,bool enabled,bool quarterTurn=false,JsonObject? quarterTurnParameters=null)
         {
             Data=new(quarterTurn);this.quarterTurn=quarterTurn;
             foreach(var flag in new[]{"entitySetsExperimental","operationPlansExperimental","rotationPlansExperimental","workingCopiesExperimental","documentBindingsExperimental"})Data.Files.Config[flag]=true;
             Data.Files.Config["ownedRotationPlansExperimental"]=enabled;Data.Files.Config["ownedSolidQuarterTurnsExperimental"]=enabled&&quarterTurn;Data.Files.SaveConfig();Data.Files.Write("PSBridge.Worker.exe","Fake marker; never executed");
             Session=new(Data.Files.Options(readOnly,5),()=>Data.Time,()=>Data.Utc);var candidates=Session.Candidates.Issue(Data.Source,Data.SourceSha);var doc=candidates["candidateDocumentHandle"]!.GetValue<string>();
             var nativeSet=Data.Candidates.SetParameters(Data.Sets[0]);var set=Session.Candidates.IssueSet(new(){["state"]="entity_set_prepared_observed",["entitySetId"]=nativeSet["entitySetId"]!.DeepClone(),["entitySetSha256"]=nativeSet["entitySetSha256"]!.DeepClone(),["expiresUtc"]=LeaseTime.Format(Data.Utc.AddSeconds(300))})["entitySetHandle"]!.GetValue<string>();
-            Plan=Session.RotationPlans.Prepare(set,(quarterTurn?JsonNode.Parse("""{"angleDegrees":90,"origin":[0,0,0],"direction":[0,0,1],"coordinateFrame":"world","lengthUnits":"document_raw"}""")!.AsObject():RotationPlanTests.Parameters()))["rotationPlanHandle"]!.GetValue<string>();
+            Plan=Session.RotationPlans.Prepare(set,(quarterTurn?(quarterTurnParameters??JsonNode.Parse("""{"angleDegrees":90,"origin":[0,0,0],"direction":[0,0,1],"coordinateFrame":"world","lengthUnits":"document_raw"}""")!.AsObject()):RotationPlanTests.Parameters()))["rotationPlanHandle"]!.GetValue<string>();
             var copyId=Data.BindingReceipt["binding"]!["copyId"]!.GetValue<string>();var copy=Session.Copies.Issue(new(){["state"]="working_copy_prepared_disk",["copyId"]=copyId,["bridgeRequestId"]=copyId,["ownershipSha256"]=new string('d',64),["timestampUtc"]=LeaseTime.Format(Data.Utc)})["workingCopyHandle"]!.GetValue<string>();
             Binding=Session.Bindings.Issue(Data.BindingReceipt,Session.Bindings.PrepareParameters(doc,copy),doc,copy)["workingDocumentBindingHandle"]!.GetValue<string>();
             var input=new Pipe();var output=new Pipe();server=McpServer.Create(new StreamServerTransport(input.Reader.AsStream(),output.Writer.AsStream()),new(){ToolCollection=[..ToolCatalog.Create(Session)]});run=server.RunAsync(stop.Token);transport=new(input.Writer.AsStream(),output.Reader.AsStream());
         }
-        internal static async Task<Connection> Create(bool readOnly=false,bool enabled=true,bool quarterTurn=false){var value=new Connection(readOnly,enabled,quarterTurn);value.Client=await McpClient.CreateAsync(value.transport,cancellationToken:value.stop.Token);return value;}
+        internal static async Task<Connection> Create(bool readOnly=false,bool enabled=true,bool quarterTurn=false,JsonObject? quarterTurnParameters=null){var value=new Connection(readOnly,enabled,quarterTurn,quarterTurnParameters);value.Client=await McpClient.CreateAsync(value.transport,cancellationToken:value.stop.Token);return value;}
         internal Dictionary<string,object?> Args()=>new(){["rotationPlanHandle"]=Plan,["workingDocumentBindingHandle"]=Binding};
         internal JsonObject Reply(string id,JsonObject parameters)
         {
@@ -35,7 +35,7 @@ public sealed class OwnedRotationRoutesTests
             packet["nativeObservedPropertiesSha256"]=binding["observedPropertiesSha256"]!.DeepClone();packet["windowContextSha256"]=binding["windowContextSha256"]!.DeepClone();packet["workingSha256"]=new string('a',64);packet["copyId"]=binding["copyId"]!.DeepClone();packet["ownershipSha256"]=binding["ownershipSha256"]!.DeepClone();
             var sha=ArtifactProof.Freeze(Data.Root,"ownedrotations/"+id+".json",packet);PreparedJournal.Create(Data.Root,id,sha,Data.Utc,new(){["executionEnabled"]=false});
             var reply=new JsonObject{["state"]="owned_rotation_prepared_observed",["bridgeRequestId"]=id,["ownedRotationId"]=id,["ownedRotationSha256"]=sha,["ownedRotation"]=packet,["expiresUtc"]=packet["expiresUtc"]!.DeepClone(),["executionEnabled"]=false,["geometryMutationAttempted"]=false,["contextChangeAttempted"]=false,["cadSaveAttempted"]=false};
-            if(quarterTurn){var bundle=new JsonObject{["ownedRotationId"]=id,["ownedRotationSha256"]=sha};foreach(var key in new[]{"bindingId","bindingSha256","copyId","ownershipSha256","windowContextSha256"})bundle[key]=packet[key]!.DeepClone();bundle["descriptor"]=new JsonObject();reply["solidWitnessBundleSha256"]=ArtifactProof.Freeze(Data.Root,"solidrotationdescriptors/"+id+".json",bundle);reply["qualificationScope"]="one_solid_world_z_plus_90_mm_observed_samples";}
+            if(quarterTurn){var bundle=new JsonObject{["ownedRotationId"]=id,["ownedRotationSha256"]=sha};foreach(var key in new[]{"bindingId","bindingSha256","copyId","ownershipSha256","windowContextSha256"})bundle[key]=packet[key]!.DeepClone();bundle["descriptor"]=new JsonObject();reply["solidWitnessBundleSha256"]=ArtifactProof.Freeze(Data.Root,"solidrotationdescriptors/"+id+".json",bundle);reply["qualificationScope"]=SolidQuarterTurnProof.ScopeFor(Session.RotationPlans.Inspect(Plan)["parameters"]!.AsObject());}
             return reply;
         }
         public async ValueTask DisposeAsync(){await Client.DisposeAsync();stop.Cancel();await server.DisposeAsync();try{await run;}catch(OperationCanceledException){}Session.Dispose();stop.Dispose();}

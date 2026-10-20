@@ -32,7 +32,7 @@ namespace PowerShapeBridge {
   }
   internal static bool NativeQuarterTurnScope(IContext context,Dictionary<string,object> plan,int[][] keys,Dictionary<string,object> expected) {
    var native=context as SolidRotationContext.ReadContext;
-   return native!=null&&native.IsNativeProvider&&Equals(plan["angleDegrees"],90)&&Numbers(plan["nativeAxis"]).SequenceEqual(new double[]{0,0,0,0,0,1})&&keys.Length==1&&keys[0][0]==40&&EntitySets.Inventory(expected).Length==1&&Equals(expected["lengthUnitsRaw"],"mm")&&Program.StrictDouble(expected["lengthUnitFactorRaw"])==1;
+   return native!=null&&native.IsNativeProvider&&(Equals(plan["angleDegrees"],90)||Equals(plan["angleDegrees"],-90))&&OwnedSolidQuarterTurn.Supported((int)plan["angleDegrees"],Numbers(plan["nativeAxis"]))&&keys.Length==1&&keys[0][0]==40&&EntitySets.Inventory(expected).Length==1&&Equals(expected["lengthUnitsRaw"],"mm")&&Program.StrictDouble(expected["lengthUnitFactorRaw"])==1;
   }
   static Dictionary<string,object> VerifyCore(string root,string verificationId,Dictionary<string,object> args,IContext context,bool qualifyQuarterTurn) {
    var result=new Dictionary<string,object>{{"state","owned_rotation_verification_rejected"},{"geometryMutationAttempted",false},{"contextChangeAttempted",false},{"cadSaveAttempted",false},{"retryAllowed",false},{"copyFenceReleased",false},{"nativeConventionQualified",false},{"verificationId",verificationId}};
@@ -74,15 +74,15 @@ namespace PowerShapeBridge {
       var diagnostic=new Dictionary<string,object>{{"schemaVersion",1},{"verificationId",verificationId},{"executionRequestId",id},{"executionReceiptSha256",args["executionReceiptSha256"]},{"planSha256",receipt["planSha256"]},{"inspectionRequestId",args["inspectionRequestId"]},{"inspectionSha256",args["inspectionSha256"]},{"listingRequestId",args["listingRequestId"]},{"listingSha256",args["listingSha256"]},{"targetCount",targets.Length},{"measuredTargets",measuredTargets},{"state","observed_rotation_samples_match_unqualified"},{"nativeConventionQualified",false},{"copyFenceReleased",false},{"qualification","Observed anchored samples/invariants/bounds; no full topology or qualified native convention"}};
       string path=Artifact(root,"rotationverifications",verificationId);Directory.CreateDirectory(Path.GetDirectoryName(path));string sha=NativeJournal.Freeze(path,diagnostic);result["state"]=diagnostic["state"];result["diagnosticSha256"]=sha;result["targetCount"]=targets.Length;result["samplePostconditionsPassed"]=true;result["executionRequestId"]=id;result["recordedJournalState"]=journal.State;
       if(qualifyQuarterTurn) {
-       Require(NativeQuarterTurnScope(context,plan,keys,expected),"Outside the live-qualified one-SOLID +90 WORLD Z/mm scope.");
+       Require(NativeQuarterTurnScope(context,plan,keys,expected),"Outside the one-SOLID signed quarter-turn WORLD Z/mm scope.");
        Require(receipt.ContainsKey("solidWitnessBundleSha256")&&EntitySets.Hex(receipt["solidWitnessBundleSha256"],64),"Pinned native solid witness bundle required.");
        var bundle=proofs.Json(Artifact(root,"solidrotationdescriptors",(string)plan["ownedRotationId"]),(string)receipt["solidWitnessBundleSha256"],16000000);
        foreach(string key in new[]{"ownedRotationId","ownedRotationSha256","bindingId","bindingSha256","copyId","ownershipSha256","windowContextSha256"})Require(Equals(bundle[key],plan[key]),"Qualified witness bundle differs from original execution: "+key);
        Require(EntitySets.Canonical(bundle["descriptor"])==((SolidRotationContext.ReadContext)context).PinnedDescriptor,"Qualified reader descriptor differs.");
        var evidence=new[]{new Dictionary<string,object>{{"requestId",id},{"sha256",args["executionReceiptSha256"]}},new Dictionary<string,object>{{"requestId",args["inspectionRequestId"]},{"sha256",args["inspectionSha256"]}},new Dictionary<string,object>{{"requestId",args["listingRequestId"]},{"sha256",args["listingSha256"]}}};
-       journal.Append("succeeded_verified",new Dictionary<string,object>{{"evidence",evidence},{"noCommandReplay",true},{"diagnosticSha256",sha},{"verificationScope","one SOLID +90 WORLD Z in mm; pinned face UV positions/normals, COG/invariants/bounds, ownership/files/context; no full topology"}});
+       journal.Append("succeeded_verified",new Dictionary<string,object>{{"evidence",evidence},{"noCommandReplay",true},{"diagnosticSha256",sha},{"verificationScope","one SOLID signed quarter-turn WORLD Z with explicit pivot in mm; pinned face UV positions/normals, COG/invariants/bounds, ownership/files/context; no full topology"}});
        fenceProofs.Dispose();fenceProofs=null;NativeJournal.VerifiedJson(fencePath,(string)receipt["executionFenceSha256"],65536);File.Delete(fencePath);
-       result["state"]="owned_solid_world_z_quarter_turn_verified_observed";result["copyFenceReleased"]=true;result["nativeConventionQualified"]=true;result["qualificationScope"]="one_solid_world_z_plus_90_mm_observed_samples";result["recordedJournalState"]=journal.State;result["copyId"]=plan["copyId"];result["ownershipSha256"]=plan["ownershipSha256"];
+       result["state"]="owned_solid_world_z_quarter_turn_verified_observed";result["copyFenceReleased"]=true;result["nativeConventionQualified"]=true;result["qualificationScope"]=OwnedSolidQuarterTurn.ScopeFor((int)plan["angleDegrees"],Numbers(plan["nativeAxis"]));result["recordedJournalState"]=journal.State;result["copyId"]=plan["copyId"];result["ownershipSha256"]=plan["ownershipSha256"];
       }
      }
     }

@@ -5,6 +5,19 @@ namespace PowerShapeMcp;
 internal static class SolidQuarterTurnProof
 {
     internal const string Scope="one_solid_world_z_plus_90_mm_observed_samples";
+    internal const string PivotedScope="one_solid_world_z_signed_quarter_turn_mm_observed_samples";
+    internal static string ScopeFor(JsonObject parameters)
+    {
+        var definition=RotationDefinition.Read(parameters);
+        Need((definition.AngleDegrees==90||definition.AngleDegrees==-90)&&definition.UnitDirection.SequenceEqual(new double[]{0,0,1}));
+        return definition.AngleDegrees==90&&definition.Origin.All(v=>v==0)?Scope:PivotedScope;
+    }
+    internal static string ExecutionScope(JsonObject plan)
+    {
+        Need(plan["nativeAxis"] is JsonArray a&&a.Count==6);var axis=plan["nativeAxis"]!.AsArray();
+        var parameters=new JsonObject{["angleDegrees"]=plan["angleDegrees"]!.DeepClone(),["origin"]=new JsonArray(axis.Take(3).Select(v=>v!.DeepClone()).ToArray()),["direction"]=new JsonArray(axis.Skip(3).Select(v=>v!.DeepClone()).ToArray()),["coordinateFrame"]="world",["lengthUnits"]="document_raw"};
+        Need(JsonNode.DeepEquals(RotationDefinition.Read(parameters).NativeAxis(),axis));return ScopeFor(parameters);
+    }
     static void Need(bool ok){if(!ok)throw new ReferenceRejected("solid_quarter_turn_proof_differs");}
     static string Text(JsonObject o,string key)=>ArtifactProof.String(o,key,"solid_quarter_turn_proof_invalid");
     internal static (JsonObject Value,string Sha) Raw(string root,string id,string? sha=null)
@@ -17,8 +30,10 @@ internal static class SolidQuarterTurnProof
     internal static JsonObject Preparation(string root,JsonObject args)
     {
         var id=Text(args,"ownedRotationId");var (receipt,sha)=Raw(root,id);
-        Need(receipt["state"]?.GetValue<string>()=="owned_rotation_prepared_observed"&&receipt["qualificationScope"]?.GetValue<string>()==Scope&&JsonNode.DeepEquals(receipt["ownedRotationSha256"],args["ownedRotationSha256"]));
+        Need(receipt["state"]?.GetValue<string>()=="owned_rotation_prepared_observed"&&JsonNode.DeepEquals(receipt["ownedRotationSha256"],args["ownedRotationSha256"]));
         var packet=ArtifactProof.Verified(root,"ownedrotations",id,Text(args,"ownedRotationSha256"),65536);Need(JsonNode.DeepEquals(packet,receipt["ownedRotation"]));
+        var plan=ArtifactProof.Verified(root,"rotationplans",Text(packet,"rotationPlanId"),Text(packet,"rotationPlanSha256"),65536);
+        Need(receipt["qualificationScope"]?.GetValue<string>()==ScopeFor(plan["parameters"]!.AsObject()));
         var bundle=ArtifactProof.Verified(root,"solidrotationdescriptors",id,Text(receipt,"solidWitnessBundleSha256"),16000000);
         Need(JsonNode.DeepEquals(bundle["ownedRotationId"],args["ownedRotationId"])&&JsonNode.DeepEquals(bundle["ownedRotationSha256"],args["ownedRotationSha256"]));
         foreach(var key in new[]{"bindingId","bindingSha256","copyId","ownershipSha256","windowContextSha256"})Need(JsonNode.DeepEquals(bundle[key],packet[key]));
@@ -26,11 +41,11 @@ internal static class SolidQuarterTurnProof
     }
     internal static JsonObject Execution(string root,string id,string sha,bool terminal=false)
     {
-        var (receipt,_)=Raw(root,id,sha);Need(receipt["state"]?.GetValue<string>()=="owned_rotation_executed_unverified"&&Text(receipt,"operationId")==id&&receipt["qualificationScope"]?.GetValue<string>()==Scope&&ArtifactProof.Boolean(receipt["geometryMutationAttempted"],true)&&ArtifactProof.Boolean(receipt["contextChangeAttempted"],false)&&ArtifactProof.Boolean(receipt["cadSaveAttempted"],false)&&ArtifactProof.Boolean(receipt["geometryVerified"],false)&&ArtifactProof.IntegerIs(receipt["returnCode"],1)&&ArtifactProof.IntegerIs(receipt["commandCallsAttempted"],1));
+        var (receipt,_)=Raw(root,id,sha);Need(receipt["state"]?.GetValue<string>()=="owned_rotation_executed_unverified"&&Text(receipt,"operationId")==id&&ArtifactProof.Boolean(receipt["geometryMutationAttempted"],true)&&ArtifactProof.Boolean(receipt["contextChangeAttempted"],false)&&ArtifactProof.Boolean(receipt["cadSaveAttempted"],false)&&ArtifactProof.Boolean(receipt["geometryVerified"],false)&&ArtifactProof.IntegerIs(receipt["returnCode"],1)&&ArtifactProof.IntegerIs(receipt["commandCallsAttempted"],1));
         var plan=ArtifactProof.Verified(root,"rotationexecutions",id,Text(receipt,"planSha256"),16000000);
-        Need(JsonNode.DeepEquals(plan,receipt["plan"])&&Text(plan,"operationId")==id&&Text(plan,"operation")=="rotate_owned_entities"&&ArtifactProof.IntegerIs(plan["schemaVersion"],2)&&ArtifactProof.IntegerIs(plan["angleDegrees"],90)&&JsonNode.DeepEquals(plan["nativeAxis"],JsonNode.Parse("[0,0,0,0,0,1]"))&&plan["targets"] is JsonArray targets&&targets.Count==1);
+        Need(JsonNode.DeepEquals(plan,receipt["plan"])&&Text(plan,"operationId")==id&&Text(plan,"operation")=="rotate_owned_entities"&&ArtifactProof.IntegerIs(plan["schemaVersion"],2)&&plan["targets"] is JsonArray targets&&targets.Count==1&&receipt["qualificationScope"]?.GetValue<string>()==ExecutionScope(plan));
         var prepared=Raw(root,Text(plan,"ownedRotationId"),Text(receipt,"preparationReceiptSha256")).Value;
-        Need(JsonNode.DeepEquals(prepared["ownedRotationSha256"],plan["ownedRotationSha256"])&&JsonNode.DeepEquals(prepared["solidWitnessBundleSha256"],receipt["solidWitnessBundleSha256"]));
+        Need(JsonNode.DeepEquals(prepared["ownedRotationSha256"],plan["ownedRotationSha256"])&&JsonNode.DeepEquals(prepared["solidWitnessBundleSha256"],receipt["solidWitnessBundleSha256"])&&JsonNode.DeepEquals(prepared["qualificationScope"],receipt["qualificationScope"]));
         var journal=ArtifactProof.Journal(root,id);Need(Text(journal,"state")== (terminal?"succeeded_verified":"executed_unverified")&&ArtifactProof.Boolean(journal["writerLockPresent"],false)&&Text(journal,"planSha256")==Text(receipt,"planSha256"));
         return receipt;
     }
@@ -45,7 +60,7 @@ internal static class SolidQuarterTurnProof
     internal static void CheckedVerification(string root,JsonObject result,JsonObject args)
     {
         var id=Text(args,"executionRequestId");var original=Execution(root,id,Text(args,"executionReceiptSha256"),true);var plan=original["plan"]!.AsObject();
-        Need(result["state"]?.GetValue<string>()=="owned_solid_world_z_quarter_turn_verified_observed"&&result["qualificationScope"]?.GetValue<string>()==Scope&&Text(result,"executionRequestId")==id&&Text(result,"recordedJournalState")=="succeeded_verified"&&ArtifactProof.Boolean(result["copyFenceReleased"],true)&&ArtifactProof.Boolean(result["nativeConventionQualified"],true)&&ArtifactProof.Boolean(result["samplePostconditionsPassed"],true));
+        Need(result["state"]?.GetValue<string>()=="owned_solid_world_z_quarter_turn_verified_observed"&&JsonNode.DeepEquals(result["qualificationScope"],original["qualificationScope"])&&Text(result,"executionRequestId")==id&&Text(result,"recordedJournalState")=="succeeded_verified"&&ArtifactProof.Boolean(result["copyFenceReleased"],true)&&ArtifactProof.Boolean(result["nativeConventionQualified"],true)&&ArtifactProof.Boolean(result["samplePostconditionsPassed"],true));
         foreach(var key in new[]{"geometryMutationAttempted","contextChangeAttempted","cadSaveAttempted","retryAllowed"})Need(ArtifactProof.Boolean(result[key],false));
         foreach(var key in new[]{"copyId","ownershipSha256"})Need(JsonNode.DeepEquals(result[key],plan[key]));
         var verificationId=Text(result,"verificationId");Need(verificationId==Text(result,"bridgeRequestId"));
