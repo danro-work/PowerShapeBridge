@@ -59,6 +59,24 @@ class CoreConfiguration(unittest.TestCase):
         self.assertTrue(general_core(prepared))
         self.assertTrue(general_core({**prepared, 'ownedSavesExperimental': True}))
 
+    def test_solid_quarter_turn_flag_is_strict_without_legacy_mutation_facades(self):
+        valid = json.loads((Path(__file__).parents[1] / 'config/general-solid-quarter-turn.json').read_text())
+        self.assertTrue(general_core(valid))
+        for value in (1, 'true', None):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                general_core({**valid, 'ownedSolidQuarterTurnsExperimental': value})
+        for field in ('ownedRotationPlansExperimental', 'operationPlansExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                general_core({**valid, field: False})
+        root = Path(__file__).parents[1] / 'work' / ('quarter-turn-config-' + uuid.uuid4().hex)
+        root.mkdir(parents=True)
+        (root / 'bridge.config.json').write_text(json.dumps(valid))
+        for read_only in (False, True):
+            names = {tool['name'] for tool in Server(root, read_only=read_only).tools}
+            self.assertFalse({'prepare_owned_solid_quarter_turn', 'execute_owned_solid_quarter_turn',
+                              'verify_owned_solid_quarter_turn'} & names)
+        self.assertFalse((root / 'requests').exists())
+
     def test_native_save_profile_does_not_enable_python_save_facades(self):
         root = Path(__file__).parents[1] / 'work' / ('save-profile-test-' + uuid.uuid4().hex)
         root.mkdir(parents=True)
