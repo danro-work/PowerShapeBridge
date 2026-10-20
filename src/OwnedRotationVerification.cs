@@ -6,7 +6,8 @@ using System.Linq;
 using PowerShapeGeometry;
 
 namespace PowerShapeBridge {
- // Independent read context only. Qualification gate intentionally does not release real fences yet.
+ // Independent read context only. Generic verification retains fences; the native-backed
+ // one-SOLID +90 WORLD Z/mm entry point can release only its fully verified matching fence.
  internal static class OwnedRotationVerification {
   internal interface IContext : DocumentBindings.IContext {
    int Composite(int type,int id);
@@ -23,7 +24,19 @@ namespace PowerShapeBridge {
    Require(args.Count==9&&ids.All(k=>args.ContainsKey(k)&&EntitySets.Hex(args[k],32))&&shas.All(k=>args.ContainsKey(k)&&EntitySets.Hex(args[k],64))&&args.ContainsKey("windowNumber")&&args["windowNumber"] is int&&args.ContainsKey("modelId")&&args["modelId"] is int&&args.ContainsKey("expiresUtc"),"Exact independent rotation references required.");EntitySets.Expiry(args["expiresUtc"]);
   }
   internal static Dictionary<string,object> Verify(string root,string verificationId,Dictionary<string,object> args,IContext context) {
+   return VerifyCore(root,verificationId,args,context,false);
+  }
+  // First bounded live qualification. Other angles/axes/types retain the unqualified fence.
+  internal static Dictionary<string,object> VerifyQualifiedSolidQuarterTurn(string root,string verificationId,Dictionary<string,object> args,SolidRotationContext.ReadContext context) {
+   return VerifyCore(root,verificationId,args,context,true);
+  }
+  internal static bool NativeQuarterTurnScope(IContext context,Dictionary<string,object> plan,int[][] keys,Dictionary<string,object> expected) {
+   var native=context as SolidRotationContext.ReadContext;
+   return native!=null&&native.IsNativeProvider&&Equals(plan["angleDegrees"],90)&&Numbers(plan["nativeAxis"]).SequenceEqual(new double[]{0,0,0,0,0,1})&&keys.Length==1&&keys[0][0]==40&&EntitySets.Inventory(expected).Length==1&&Equals(expected["lengthUnitsRaw"],"mm")&&Program.StrictDouble(expected["lengthUnitFactorRaw"])==1;
+  }
+  static Dictionary<string,object> VerifyCore(string root,string verificationId,Dictionary<string,object> args,IContext context,bool qualifyQuarterTurn) {
    var result=new Dictionary<string,object>{{"state","owned_rotation_verification_rejected"},{"geometryMutationAttempted",false},{"contextChangeAttempted",false},{"cadSaveAttempted",false},{"retryAllowed",false},{"copyFenceReleased",false},{"nativeConventionQualified",false},{"verificationId",verificationId}};
+   OwnedOperationPlans.Proofs fenceProofs=null;
    try {
     Validate(args);Require(EntitySets.Hex(verificationId,32),"Verification identity required.");
     using(var serial=new FileStream(Path.Combine(root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None))using(var proofs=new OwnedOperationPlans.Proofs()) {
@@ -38,7 +51,7 @@ namespace PowerShapeBridge {
      var active=(Dictionary<string,object>)listing["activeWindow"];Require(Equals(active["windowNumber"],args["windowNumber"])&&Equals(active["modelId"],args["modelId"])&&DocumentBindings.WindowDigest(listing)==(string)plan["windowContextSha256"],"Fresh active listing differs.");OwnedRotationExecution.PreserveOthers(before,expected,keys);
      var provenance=(Dictionary<string,object>)plan["measurementProvenance"];Require(Equals(provenance["copyId"],plan["copyId"])&&Equals(provenance["ownershipSha256"],plan["ownershipSha256"])&&Equals(provenance["workingSha256"],plan["workingSha256"]),"Measurement owner differs.");
      using(var lease=OwnedCopies.Hold(root,(string)plan["copyId"],(string)plan["ownershipSha256"])) {
-      Require(Equals(lease.Inspection["workingSha256"],plan["workingSha256"]),"Saved working bytes changed.");string fencePath=OwnedTranslation.FencePath(root,(string)plan["copyId"]);var fence=proofs.Json(fencePath,(string)receipt["executionFenceSha256"]);Require(Equals(fence["operationId"],id)&&Equals(fence["planSha256"],receipt["planSha256"])&&Equals(fence["copyId"],plan["copyId"])&&Equals(fence["ownershipSha256"],plan["ownershipSha256"]),"Original fence differs.");
+      Require(Equals(lease.Inspection["workingSha256"],plan["workingSha256"]),"Saved working bytes changed.");string fencePath=OwnedTranslation.FencePath(root,(string)plan["copyId"]);fenceProofs=new OwnedOperationPlans.Proofs();var fence=fenceProofs.Json(fencePath,(string)receipt["executionFenceSha256"]);Require(Equals(fence["operationId"],id)&&Equals(fence["planSha256"],receipt["planSha256"])&&Equals(fence["copyId"],plan["copyId"])&&Equals(fence["ownershipSha256"],plan["ownershipSha256"])&&Equals(fence["automaticReplayForbidden"],true),"Original fence differs.");
       var claim=proofs.Json(Path.Combine(root,"rotationplans",(string)plan["rotationPlanId"]+".execution-once.json"),null);Require(Equals(claim["operationId"],id)&&Equals(claim["planSha256"],receipt["planSha256"])&&Equals(claim["copyId"],plan["copyId"])&&Equals(claim["automaticReplayForbidden"],true),"Original one-use claim differs.");
       DocumentBindings.Check(lease,expected,expiry,context,result,(string)plan["windowContextSha256"]);
       var measuredTargets=new List<Dictionary<string,object>>();
@@ -60,10 +73,20 @@ namespace PowerShapeBridge {
       Require(DateTime.UtcNow<expiry&&DocumentBindings.WindowDigest(context.Windows())==(string)plan["windowContextSha256"],"Verification context/expiry changed before publication.");
       var diagnostic=new Dictionary<string,object>{{"schemaVersion",1},{"verificationId",verificationId},{"executionRequestId",id},{"executionReceiptSha256",args["executionReceiptSha256"]},{"planSha256",receipt["planSha256"]},{"inspectionRequestId",args["inspectionRequestId"]},{"inspectionSha256",args["inspectionSha256"]},{"listingRequestId",args["listingRequestId"]},{"listingSha256",args["listingSha256"]},{"targetCount",targets.Length},{"measuredTargets",measuredTargets},{"state","observed_rotation_samples_match_unqualified"},{"nativeConventionQualified",false},{"copyFenceReleased",false},{"qualification","Observed anchored samples/invariants/bounds; no full topology or qualified native convention"}};
       string path=Artifact(root,"rotationverifications",verificationId);Directory.CreateDirectory(Path.GetDirectoryName(path));string sha=NativeJournal.Freeze(path,diagnostic);result["state"]=diagnostic["state"];result["diagnosticSha256"]=sha;result["targetCount"]=targets.Length;result["samplePostconditionsPassed"]=true;result["executionRequestId"]=id;result["recordedJournalState"]=journal.State;
-      // Native provider/convention qualification is still missing. Never append succeeded_verified or remove a fence here.
+      if(qualifyQuarterTurn) {
+       Require(NativeQuarterTurnScope(context,plan,keys,expected),"Outside the live-qualified one-SOLID +90 WORLD Z/mm scope.");
+       Require(receipt.ContainsKey("solidWitnessBundleSha256")&&EntitySets.Hex(receipt["solidWitnessBundleSha256"],64),"Pinned native solid witness bundle required.");
+       var bundle=proofs.Json(Artifact(root,"solidrotationdescriptors",(string)plan["ownedRotationId"]),(string)receipt["solidWitnessBundleSha256"],16000000);
+       foreach(string key in new[]{"ownedRotationId","ownedRotationSha256","bindingId","bindingSha256","copyId","ownershipSha256","windowContextSha256"})Require(Equals(bundle[key],plan[key]),"Qualified witness bundle differs from original execution: "+key);
+       Require(EntitySets.Canonical(bundle["descriptor"])==((SolidRotationContext.ReadContext)context).PinnedDescriptor,"Qualified reader descriptor differs.");
+       var evidence=new[]{new Dictionary<string,object>{{"requestId",id},{"sha256",args["executionReceiptSha256"]}},new Dictionary<string,object>{{"requestId",args["inspectionRequestId"]},{"sha256",args["inspectionSha256"]}},new Dictionary<string,object>{{"requestId",args["listingRequestId"]},{"sha256",args["listingSha256"]}}};
+       journal.Append("succeeded_verified",new Dictionary<string,object>{{"evidence",evidence},{"noCommandReplay",true},{"diagnosticSha256",sha},{"verificationScope","one SOLID +90 WORLD Z in mm; pinned face UV positions/normals, COG/invariants/bounds, ownership/files/context; no full topology"}});
+       fenceProofs.Dispose();fenceProofs=null;NativeJournal.VerifiedJson(fencePath,(string)receipt["executionFenceSha256"],65536);File.Delete(fencePath);
+       result["state"]="owned_solid_world_z_quarter_turn_verified_observed";result["copyFenceReleased"]=true;result["nativeConventionQualified"]=true;result["qualificationScope"]="one_solid_world_z_plus_90_mm_observed_samples";result["recordedJournalState"]=journal.State;result["copyId"]=plan["copyId"];result["ownershipSha256"]=plan["ownershipSha256"];
+      }
      }
     }
-   }catch(Exception error){result["error"]=error.Message;}
+   }catch(Exception error){result["error"]=error.Message;}finally{if(fenceProofs!=null)fenceProofs.Dispose();}
    result["timestampUtc"]=DateTime.UtcNow.ToString("o");return result;
   }
  }

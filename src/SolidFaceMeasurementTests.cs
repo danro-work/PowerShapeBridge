@@ -8,7 +8,7 @@ namespace PowerShapeBridge {
  internal static class SolidFaceMeasurementTests {
   static void Need(bool yes,string why){if(!yes)throw new InvalidOperationException(why);}
   static Dictionary<string,object> Clone(Dictionary<string,object> value){return Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(value));}
-  sealed class Context : SolidFaceMeasurements.IContext {
+  internal sealed class Context : SolidRotationContext.IWriteContext {
    internal Dictionary<string,object> Snapshot,Listing;internal string Fault;internal int ClosestCalls,NearCalls,PointCalls;internal bool Rotated;
    internal Context(){var f=new OwnedOperationPlanTests.Fixture(true,true);Snapshot=Clone(f.Snapshot);Listing=Clone(f.Listing);Snapshot["generalToleranceRaw"]=0.01;var g=(Dictionary<string,object>)EntitySets.Inventory(Snapshot)[0]["geometry"];g["cogRaw"]=new[]{5,10,15};foreach(string k in new[]{"nlinks_open","closedRaw","connectedRaw","watertightRaw","trimming_validRaw"})g[k]=k=="nlinks_open"?0:1;}
    public Dictionary<string,object> Observation(){return Clone(Snapshot);}
@@ -27,6 +27,8 @@ namespace PowerShapeBridge {
     return Rotated?new[]{-p[1],p[0],p[2]}:p;
    }
    internal void RotateAnalytically(){Rotated=true;((Dictionary<string,object>)EntitySets.Inventory(Snapshot)[0]["geometry"])["cogRaw"]=new[]{-10,5,15};}
+   internal int RotateCalls;internal int LastAngle;internal double[] LastAxis;
+   public int Rotate(int composite,int angle,double[] axis){RotateCalls++;LastAngle=angle;LastAxis=axis.ToArray();Need(composite==40,"Fake received foreign target.");if(Fault=="throw")throw new IOException("Synthetic COM callback exception.");if(Fault=="zero")return 0;RotateAnalytically();return 1;}
   }
   internal static int Run(){
    Need(File.Exists(Path.Combine(Program.Root,".solid-face-measurement-fixture")),"Explicit own fixture marker required; never connect CAD.");

@@ -17,7 +17,7 @@ namespace PowerShapeBridge {
    Dictionary<string,object> Observation();
    void ConfirmDocument();
   }
-  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,SolidFaceMeasurements.IContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext {
+  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,SolidRotationContext.IWriteContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext {
    object application,document;
    internal ComContext(Config config) {
     try {application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("No active model document.");document=ps.ActiveDocument;ConfirmDocument();}
@@ -42,6 +42,8 @@ namespace PowerShapeBridge {
    }
    public double[] Bounds(int composite){ConfirmDocument();dynamic doc=document;return TranslationTest.Bounds(doc.GetItemBoundingBox(composite,false));}
    public int Translate(int composite,double[] vector){ConfirmDocument();dynamic doc=document;return Program.StrictInt(doc.TranslateItem(composite,vector[0],vector[1],vector[2]));}
+   // Called only through the internal guarded rotation adapter; no public queue route yet.
+   public int Rotate(int composite,int angle,double[] axis){if(composite<=0||axis==null||axis.Length!=6||axis.Any(v=>double.IsNaN(v)||double.IsInfinity(v))||Math.Abs(axis.Skip(3).Sum(v=>v*v)-1)>1e-12||angle%360==0||Math.Abs((long)angle)>1000000)throw new ArgumentException("Explicit finite normalized rotation required.");ConfirmDocument();dynamic doc=document;return Program.StrictInt(doc.RotateItem(composite,angle,axis.Cast<object>().ToArray()));}
    public object SetItemsLevel(int composite,int level){if(level<0||level>997)throw new ArgumentException("Level outside qualified candidate range.");ConfirmDocument();dynamic doc=document;return doc.SetItemsLevel(composite,level);}
    public object SurfacePoints(string name,double tStart,double tEnd,int tCount,double uStart,double uEnd,int uCount){ConfirmDocument();dynamic doc=document;return doc.GetSurfacePoints(name,1,tStart,tEnd,tCount,uStart,uEnd,uCount);}
    public object CurvePoints(string name,int start,int end){ConfirmDocument();dynamic doc=document;return doc.GetCompCurvePointData(name,start,end,1);}

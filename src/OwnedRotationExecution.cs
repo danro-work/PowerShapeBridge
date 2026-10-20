@@ -41,7 +41,9 @@ namespace PowerShapeBridge {
    Require(EntitySets.ObservedDigest(before)==EntitySets.ObservedDigest(normalized),"Untargeted observation/context/units changed during rotation.");
   }
   static Dictionary<string,object> Stable(OwnedRotationPlans.Dependencies d,OwnedCopies.OwnershipLease lease,IContext context,Dictionary<string,object> expected,int[][] allowed,Dictionary<string,string> saved) {
-   var first=context.Observation();var second=context.Observation();PreserveOthers(expected,first,allowed);PreserveOthers(expected,second,allowed);
+   // Real Probe model DTOs are anonymous CLR objects; receipts/fixtures are JSON dictionaries.
+   // Normalize both guard reads before accessing model.path or returning the snapshot.
+   var first=Clone(context.Observation());var second=Clone(context.Observation());PreserveOthers(expected,first,allowed);PreserveOthers(expected,second,allowed);
    Require(EntitySets.ObservedDigest(first)==EntitySets.ObservedDigest(second),"Observation changed between rotation guard reads.");
    lease.CheckPath((string)((Dictionary<string,object>)second["model"])["path"]);lease.Recheck();context.ConfirmDocument();
    var windows=context.Windows();Require(DocumentBindings.WindowDigest(windows)==(string)d.Binding["windowContextSha256"]&&DateTime.UtcNow<d.Expires,"Rotation window context/lease changed.");var freshSaved=WorkingCopyOpen.SavedHashes(windows);

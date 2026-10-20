@@ -5,13 +5,13 @@ from pathlib import Path
 
 from audit_checkpoint_recovered_open import journal, read, require, sha
 
-FAULTS = {'control', 'mixed_targets', 'noop_success', 'negative_angle', 'oblique_axis',
+FAULTS = {'control', 'native_dto', 'mixed_targets', 'noop_success', 'negative_angle', 'oblique_axis',
           'throw_before_effect', 'throw_after_effect', 'return_zero', 'partial_second_throw',
           'partial_second_zero', 'untargeted_changed', 'changed_process_after', 'late_context',
           'alias_mapping', 'invalid_bounds', 'packet_sha', 'fenced_copy', 'busy_executor',
           'previous_target_changed', 'after_start_context', 'mapping_after_command',
           'before_measurement_bad', 'before_measurement_drift', 'after_measurement_bad'}
-CONTROLS = {'control', 'mixed_targets', 'noop_success', 'negative_angle', 'oblique_axis'}
+CONTROLS = {'control', 'native_dto', 'mixed_targets', 'noop_success', 'negative_angle', 'oblique_axis'}
 PREFLIGHT = {'late_context', 'alias_mapping', 'invalid_bounds', 'packet_sha', 'fenced_copy', 'busy_executor', 'before_measurement_bad'}
 
 
