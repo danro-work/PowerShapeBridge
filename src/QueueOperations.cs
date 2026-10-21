@@ -11,6 +11,10 @@ namespace PowerShapeBridge {
   Config c=Program.ReadConfig();
   if(r.Count!=3||!Equals(r["requestId"],id)||!r.ContainsKey("arguments"))throw new ArgumentException("Invalid envelope.");
   var a=r["arguments"] as Dictionary<string,object>;if(a==null)throw new ArgumentException("Invalid arguments.");string op=(string)r["operation"];
+  if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedSolidScale.Recipes.Contains(a["recipeId"] as string)) {
+   if(!c.IsGeneralCore||!c.ownedSolidScalesExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned SOLID scale disabled or invalid envelope.");
+   OwnedSolidScale.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;
+  }
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedSolidQuarterTurn.RotationRecipes.Contains(a["recipeId"] as string)) {
    if(!c.IsGeneralCore||!c.ownedSolidRotationsExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned solid rotation disabled or invalid envelope.");
    OwnedSolidQuarterTurn.ValidateRotation((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;
@@ -80,6 +84,7 @@ namespace PowerShapeBridge {
  Config c=Program.ReadConfig();Guid g;if(!Guid.TryParseExact(id,"N",out g))throw new ArgumentException("Invalid request ID.");
  var request=FileRequests.Parse(id,File.ReadAllText(Path.Combine(Program.Root,"requests",id+".json.processing"),Encoding.UTF8));
  var readArgs=(Dictionary<string,object>)request["arguments"];
+ if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSolidScale.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSolidScale.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSolidQuarterTurn.RotationRecipes.Contains(readArgs["recipeId"] as string))return OwnedSolidQuarterTurn.RunRotation(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSolidQuarterTurn.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSolidQuarterTurn.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedWorkplaneActivation.Recipes.Contains(readArgs["recipeId"] as string))return OwnedWorkplaneActivation.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);

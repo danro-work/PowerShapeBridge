@@ -41,6 +41,9 @@ def general_core(settings):
     if type(quarter_turns) is not bool or quarter_turns and (profile != 'general-v1' or owned_rotations is not True or plans is not True):
         raise ValueError('Solid quarter turns require general owned rotation and operation plans')
     owned_scales = settings.get('ownedUniformScalePlansExperimental', False)
+    solid_scales = settings.get('ownedSolidScalesExperimental', False)
+    if type(solid_scales) is not bool or solid_scales and (profile != 'general-v1' or owned_scales is not True or plans is not True or settings.get('uniformScalePlansExperimental') is not True):
+        raise ValueError('Owned SOLID scales require general owned uniform scale and operation plans')
     dgk_targets = settings.get('ownedDgkTargetsExperimental', False)
     if type(dgk_targets) is not bool or dgk_targets and (profile != 'general-v1' or copies is not True or bindings is not True or experimental is not True):
         raise ValueError('Owned DGK targets require general sets, copies and bindings')

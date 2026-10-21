@@ -47,6 +47,7 @@ namespace PowerShapeBridge
         public bool ownedRotationPlansExperimental { get; set; }
         public bool ownedSolidQuarterTurnsExperimental { get; set; }
         public bool ownedSolidRotationsExperimental { get; set; }
+        public bool ownedSolidScalesExperimental { get; set; }
         public bool ownedUniformScalePlansExperimental { get; set; }
         public bool ownedDgkTargetsExperimental { get; set; }
         public bool levelReadingExperimental { get; set; }
@@ -77,6 +78,7 @@ namespace PowerShapeBridge
             if(ownedSavedReopenExperimental&&(!IsGeneralCore||!ownedSavesExperimental||!workingCopyOpenExperimental))throw new ArgumentException("Saved reopen requires owned SaveAs and owned copy open.");
             if(checkpointRecoveryExperimental&&(!IsGeneralCore||!workingCopiesExperimental))throw new ArgumentException("Checkpoint recovery requires general owned working copies.");
             if(ownedSolidRotationsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!operationPlansExperimental))throw new ArgumentException("Solid rotations require general owned rotation and operation plans.");
+            if(ownedSolidScalesExperimental&&(!IsGeneralCore||!ownedUniformScalePlansExperimental||!operationPlansExperimental))throw new ArgumentException("Solid scales require general owned scale and operation plans.");
             if(ownedSolidQuarterTurnsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!operationPlansExperimental))throw new ArgumentException("Solid quarter turns require general owned rotation plans and operation plans.");
             if(ownedRotationPlansExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned rotation preparation requires general sets, copies and bindings.");
             if(ownedUniformScalePlansExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned uniform scale preparation requires general sets, copies and bindings.");
@@ -103,7 +105,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.42.0-dev";
+        public const string ReleaseVersion = "0.43.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -113,6 +115,12 @@ namespace PowerShapeBridge
         internal static Config ParseConfig(string text)
         {
             var raw=Json.Deserialize<Dictionary<string,object>>(text);object enabled;
+            if(raw!=null&&raw.TryGetValue("ownedSolidScalesExperimental",out enabled)) {
+                if(!(enabled is bool))throw new ArgumentException("Owned SOLID scale flag must be JSON boolean.");
+                if((bool)enabled)foreach(string flag in new[]{"ownedUniformScalePlansExperimental","uniformScalePlansExperimental","operationPlansExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {
+                    object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Owned SOLID scale dependencies must be true JSON booleans.");
+                }
+            }
             if(raw!=null&&raw.TryGetValue("ownedWorkplaneActivationExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Owned activation flag must be JSON boolean.");
                 if((bool)enabled)foreach(string flag in new[]{"entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {
@@ -260,6 +268,10 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--solid-scale-measurement-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{SolidScaleMembershipMeasurementTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--owned-solid-scale-test") {
+                Console.OutputEncoding=new UTF8Encoding(false);
+                try{OwnedSolidScaleTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
             if(args.Length==1&&args[0]=="--solid-rotation-context-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
