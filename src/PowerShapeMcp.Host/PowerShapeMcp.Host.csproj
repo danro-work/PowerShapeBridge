@@ -20,6 +20,7 @@
   <ItemGroup>
     <Compile Include="../RotationSampleVerifier.cs" Link="RotationSampleVerifier.cs" />
     <Compile Include="../UniformScaleSampleVerifier.cs" Link="UniformScaleSampleVerifier.cs" />
+    <Compile Include="../SolidScaleMembershipVerifier.cs" Link="SolidScaleMembershipVerifier.cs" />
     <Compile Include="../DmtMeshReader.cs" Link="DmtMeshReader.cs" />
     <Compile Include="../DgkBundleVerifier.cs" Link="DgkBundleVerifier.cs" />
     <Compile Include="../WorkplaneFrame.cs" Link="WorkplaneFrame.cs" />
