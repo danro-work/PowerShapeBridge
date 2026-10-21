@@ -7,23 +7,29 @@ internal static class SolidQuarterTurnProof
     internal const string Scope="one_solid_world_z_plus_90_mm_observed_samples";
     internal const string PivotedScope="one_solid_world_z_signed_quarter_turn_mm_observed_samples";
     internal const string PrincipalScope="one_solid_world_principal_signed_quarter_turn_mm_observed_samples";
+    internal const string ObliqueScope="one_solid_world_oblique_signed_quarter_turn_mm_observed_samples";
     internal static string ScopeFor(JsonObject parameters)
     {
         var definition=RotationDefinition.Read(parameters);
-        Need((definition.AngleDegrees==90||definition.AngleDegrees==-90)&&definition.UnitDirection.Count(v=>Math.Abs(v)==1)==1&&definition.UnitDirection.Count(v=>v==0)==2);
+        Need(definition.AngleDegrees==90||definition.AngleDegrees==-90);
+        if(definition.UnitDirection.Count(v=>Math.Abs(v)==1)!=1||definition.UnitDirection.Count(v=>v==0)!=2)return ObliqueScope;
         if(!definition.UnitDirection.SequenceEqual(new double[]{0,0,1}))return PrincipalScope;
         return definition.AngleDegrees==90&&definition.Origin.All(v=>v==0)?Scope:PivotedScope;
     }
     internal static string VerificationStateFor(string scope)
     {
-        Need(scope==Scope||scope==PivotedScope||scope==PrincipalScope);
-        return scope==PrincipalScope?"owned_solid_principal_quarter_turn_verified_observed":"owned_solid_world_z_quarter_turn_verified_observed";
+        Need(scope==Scope||scope==PivotedScope||scope==PrincipalScope||scope==ObliqueScope);
+        return scope==ObliqueScope?"owned_solid_oblique_quarter_turn_verified_observed":scope==PrincipalScope?"owned_solid_principal_quarter_turn_verified_observed":"owned_solid_world_z_quarter_turn_verified_observed";
     }
     internal static string ExecutionScope(JsonObject plan)
     {
         Need(plan["nativeAxis"] is JsonArray a&&a.Count==6);var axis=plan["nativeAxis"]!.AsArray();
         var parameters=new JsonObject{["angleDegrees"]=plan["angleDegrees"]!.DeepClone(),["origin"]=new JsonArray(axis.Take(3).Select(v=>v!.DeepClone()).ToArray()),["direction"]=new JsonArray(axis.Skip(3).Select(v=>v!.DeepClone()).ToArray()),["coordinateFrame"]="world",["lengthUnits"]="document_raw"};
-        Need(JsonNode.DeepEquals(RotationDefinition.Read(parameters).NativeAxis(),axis));return ScopeFor(parameters);
+        var definition=RotationDefinition.Read(parameters);var actual=axis.Select(v=>v!.GetValue<double>()).ToArray();
+        // Unit length is numeric, not textual/canonical JSON equality. Normalizing
+        // an already unit oblique vector can change its last floating-point bit.
+        Need(actual.All(double.IsFinite)&&Math.Abs(actual.Skip(3).Sum(v=>v*v)-1)<=1e-12);
+        return ScopeFor(parameters);
     }
     static void Need(bool ok){if(!ok)throw new ReferenceRejected("solid_quarter_turn_proof_differs");}
     static string Text(JsonObject o,string key)=>ArtifactProof.String(o,key,"solid_quarter_turn_proof_invalid");
@@ -53,6 +59,9 @@ internal static class SolidQuarterTurnProof
         Need(JsonNode.DeepEquals(plan,receipt["plan"])&&Text(plan,"operationId")==id&&Text(plan,"operation")=="rotate_owned_entities"&&ArtifactProof.IntegerIs(plan["schemaVersion"],2)&&plan["targets"] is JsonArray targets&&targets.Count==1&&receipt["qualificationScope"]?.GetValue<string>()==ExecutionScope(plan));
         var prepared=Raw(root,Text(plan,"ownedRotationId"),Text(receipt,"preparationReceiptSha256")).Value;
         Need(JsonNode.DeepEquals(prepared["ownedRotationSha256"],plan["ownedRotationSha256"])&&JsonNode.DeepEquals(prepared["solidWitnessBundleSha256"],receipt["solidWitnessBundleSha256"])&&JsonNode.DeepEquals(prepared["qualificationScope"],receipt["qualificationScope"]));
+        var packet=ArtifactProof.Verified(root,"ownedrotations",Text(plan,"ownedRotationId"),Text(plan,"ownedRotationSha256"),65536);
+        var originalPlan=ArtifactProof.Verified(root,"rotationplans",Text(packet,"rotationPlanId"),Text(packet,"rotationPlanSha256"),65536);
+        Need(JsonNode.DeepEquals(plan["nativeAxis"],originalPlan["nativeAxis"])&&JsonNode.DeepEquals(plan["angleDegrees"],originalPlan["parameters"]!["angleDegrees"]));
         var journal=ArtifactProof.Journal(root,id);Need(Text(journal,"state")== (terminal?"succeeded_verified":"executed_unverified")&&ArtifactProof.Boolean(journal["writerLockPresent"],false)&&Text(journal,"planSha256")==Text(receipt,"planSha256"));
         return receipt;
     }
@@ -73,6 +82,10 @@ internal static class SolidQuarterTurnProof
         var verificationId=Text(result,"verificationId");Need(verificationId==Text(result,"bridgeRequestId"));
         var raw=Raw(root,verificationId);Need(JsonNode.DeepEquals(raw.Value,result));
         var diagnostic=ArtifactProof.Verified(root,"rotationverifications",verificationId,Text(result,"diagnosticSha256"),16000000);
+        if(Text(original,"qualificationScope")==ObliqueScope){
+            var profile=JsonNode.Parse("""{"name":"solid_oblique_mass_properties_v1","facePositionAbsoluteMm":0.000001,"normalAbsolute":0.000001,"cogAbsoluteMm":0.00001,"volumeAbsoluteRaw":0.000001,"volumeRelative":0.000001,"otherRelative":0.000000001,"fullTopologyEquivalent":false}""");
+            Need(JsonNode.DeepEquals(result["numericVerificationProfile"],profile)&&JsonNode.DeepEquals(diagnostic["numericVerificationProfile"],profile));
+        }
         foreach(var key in new[]{"executionRequestId","executionReceiptSha256","inspectionRequestId","inspectionSha256","listingRequestId","listingSha256"})Need(JsonNode.DeepEquals(diagnostic[key],args[key]));
         var journal=ArtifactProof.Journal(root,id);var last=journal["events"]!.AsArray().Last()!["details"]!.AsObject();Need(JsonNode.DeepEquals(last["diagnosticSha256"],result["diagnosticSha256"]));
         Need(!File.Exists(FileArtifacts.FixedPath(root,Path.Combine("workingcopies",Text(plan,"copyId"),"mutation-fence.json"))));
