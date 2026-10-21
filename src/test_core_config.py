@@ -37,6 +37,24 @@ class CoreConfiguration(unittest.TestCase):
             with self.subTest(flag=flag), self.assertRaises(ValueError):
                 general_core({**full, flag: False})
 
+    def test_owned_open_adoption_config_is_strict_and_sdk_only(self):
+        valid = json.loads((Path(__file__).parents[1] / 'config/general-open-adoption.json').read_text())
+        self.assertTrue(general_core(valid))
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                general_core({**valid, 'ownedOpenAdoptionExperimental': value})
+        for flag in ('workingCopyOpenExperimental', 'workingCopiesExperimental',
+                     'entitySetsExperimental', 'documentBindingsExperimental'):
+            with self.subTest(flag=flag), self.assertRaises(ValueError):
+                general_core({**valid, flag: False})
+        root = Path(__file__).parents[1] / 'work' / ('adoption-config-' + uuid.uuid4().hex)
+        root.mkdir(parents=True)
+        (root / 'bridge.config.json').write_text(json.dumps(valid))
+        for read_only in (False, True):
+            names = {tool['name'] for tool in Server(root, read_only=read_only).tools}
+            self.assertFalse({'adopt_owned_open_document', 'restore_owned_open_adoption'} & names)
+        self.assertFalse((root / 'requests').exists())
+
     def test_owned_dgk_flag_is_strict_and_does_not_add_legacy_python_tools(self):
         full = {**self.settings, 'entitySetsExperimental': True, 'workingCopiesExperimental': True,
                 'documentBindingsExperimental': True, 'ownedDgkTargetsExperimental': True}

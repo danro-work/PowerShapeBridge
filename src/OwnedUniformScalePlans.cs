@@ -54,7 +54,7 @@ namespace PowerShapeBridge {
      foreach(string field in new[]{"contextBefore","contextAfter"})Require(EntitySets.Canonical(expected[field])==EntitySets.Canonical(new[]{0,0}),"World frame and empty selection required.");
      foreach(string field in new[]{"selectionBefore","selectionAfter"})Require(((IList)expected[field]).Count==0,"Empty selection required.");
      using(var lease=OwnedCopies.Hold(root,(string)binding["copyId"],(string)binding["ownershipSha256"]))
-     using(var workingPin=new FileStream(lease.WorkingPath,FileMode.Open,FileAccess.Read,FileShare.Read)) {
+     using(var workingPin=new OwnedWorkingBytePin(lease.WorkingPath)) {
       // Preparation does not save CAD: pin current saved bytes against writes,
       // without requiring them to equal ownership's historic initial bytes.
       lease.Recheck();NoFence(root,binding,lease);DocumentBindings.Check(lease,expected,expiry,context,result,(string)binding["windowContextSha256"]);

@@ -72,6 +72,14 @@ public sealed class WorkingCopyStore(Func<double>? clock=null,Func<DateTimeOffse
         if(seconds<=0)throw new ReferenceRejected(code);
         return IssueLease(ownedCopy,seconds);
     }
+    internal JsonObject IssueAdoptedOpen(string root,JsonObject result,JsonObject parameters)
+    {
+        OwnedOpenAdoptionProof.Check(root,result,parameters);
+        var time=LeaseTime.Remaining(ArtifactProof.String(result,"timestampUtc","adoption_expired"),utcNow(),"adoption_expired");
+        var expiry=LeaseTime.Parse(ArtifactProof.String(result,"expiresUtc","adoption_expired"),"adoption_expired");
+        double seconds=Math.Min(Math.Min(time.Remaining,300),(expiry-LeaseTime.PythonPrecision(utcNow())).TotalSeconds);
+        if(seconds<=0)throw new ReferenceRejected("adoption_expired");return IssueLease(result,seconds);
+    }
     private JsonObject IssueLease(JsonObject result,double seconds)
     {
         Purge();if(copies.Count>=128)Clear();var handle=Guid.NewGuid().ToString("N");
