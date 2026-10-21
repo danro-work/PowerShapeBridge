@@ -34,6 +34,9 @@ def general_core(settings):
     reopens = settings.get('ownedSavedReopenExperimental', False)
     recovery = settings.get('checkpointRecoveryExperimental', False)
     owned_rotations = settings.get('ownedRotationPlansExperimental', False)
+    solid_rotations = settings.get('ownedSolidRotationsExperimental', False)
+    if type(solid_rotations) is not bool or solid_rotations and (profile != 'general-v1' or owned_rotations is not True or plans is not True):
+        raise ValueError('Solid rotations require general owned rotation and operation plans')
     quarter_turns = settings.get('ownedSolidQuarterTurnsExperimental', False)
     if type(quarter_turns) is not bool or quarter_turns and (profile != 'general-v1' or owned_rotations is not True or plans is not True):
         raise ValueError('Solid quarter turns require general owned rotation and operation plans')

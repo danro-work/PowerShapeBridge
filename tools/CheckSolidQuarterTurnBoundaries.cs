@@ -51,6 +51,17 @@ class CheckSolidQuarterTurnBoundaries {
   Call("OwnedSolidQuarterTurn","Validate","execute_owned_solid_quarter_turn",execute);Need(true,"Pinned execution schema");
   foreach(string field in execute.Keys.ToArray()){var bad=new Dictionary<string,object>(execute);bad.Remove(field);Reject(()=>Call("OwnedSolidQuarterTurn","Validate","execute_owned_solid_quarter_turn",bad));}
   var extra=new Dictionary<string,object>(execute){{"command","NeverRun"}};Reject(()=>Call("OwnedSolidQuarterTurn","Validate","execute_owned_solid_quarter_turn",extra));
+  var activeConfig=Call("Program","ReadConfig");
+  if((bool)activeConfig.GetType().GetProperty("ownedSolidRotationsExperimental").GetValue(activeConfig,null)){
+   foreach(int angle in new[]{45,-45,180,-180,359,-359}){
+    var p=plan();((Dictionary<string,object>)p["parameters"])["angleDegrees"]=angle;Call("OwnedSolidQuarterTurn","CheckRotationScope",p,observation());Need(true,"Bounded integer plan");Reject(()=>Call("OwnedSolidQuarterTurn","CheckScope",p,observation()));
+    Need((string)Call("OwnedSolidQuarterTurn","ScopeForMode",angle,new double[]{2,3,4,0,0,1},true)=="one_solid_world_integer_rotation_mm_observed_samples","Separate integer scope");
+   }
+   foreach(int angle in new[]{0,360,-360,1000}){var p=plan();((Dictionary<string,object>)p["parameters"])["angleDegrees"]=angle;Reject(()=>Call("OwnedSolidQuarterTurn","CheckRotationScope",p,observation()));}
+   var fractional=plan();((Dictionary<string,object>)fractional["parameters"])["angleDegrees"]=45.5;Reject(()=>Call("OwnedSolidQuarterTurn","CheckRotationScope",fractional,observation()));
+   Call("OwnedSolidQuarterTurn","ValidateRotation","execute_owned_solid_rotation",execute);Need(true,"Fixed general execution envelope");Reject(()=>Call("OwnedSolidQuarterTurn","Validate","execute_owned_solid_rotation",execute));Reject(()=>Call("OwnedSolidQuarterTurn","ValidateRotation","execute_owned_solid_quarter_turn",execute));
+   var integerId=new string('e',32);var integerEnvelope=new Dictionary<string,object>{{"requestId",integerId},{"operation","recipe.prepare"},{"arguments",new Dictionary<string,object>{{"recipeId","execute_owned_solid_rotation"},{"parameters",execute}}}};Call("FileRequests","Parse",integerId,Json.Serialize(integerEnvelope));Need(true,"Configured integer native route");
+  }
   string id=new string('a',32);var envelope=new Dictionary<string,object>{{"requestId",id},{"operation","recipe.prepare"},{"arguments",new Dictionary<string,object>{{"recipeId","execute_owned_solid_quarter_turn"},{"parameters",execute}}}};Call("FileRequests","Parse",id,Json.Serialize(envelope));Need(true,"Configured fixed native route");
   var config=Call("Program","ReadConfig");var flag=config.GetType().GetProperty("ownedRotationPlansExperimental");flag.SetValue(config,false,null);Reject(()=>{config.GetType().GetMethod("Validate").Invoke(config,null);});
   Console.WriteLine("PASS: "+Count+" native quarter-turn scope/envelope boundaries; no CAD or worker loop.");return 0;

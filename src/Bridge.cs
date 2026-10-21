@@ -46,6 +46,7 @@ namespace PowerShapeBridge
         public bool checkpointRecoveryExperimental { get; set; }
         public bool ownedRotationPlansExperimental { get; set; }
         public bool ownedSolidQuarterTurnsExperimental { get; set; }
+        public bool ownedSolidRotationsExperimental { get; set; }
         public bool ownedUniformScalePlansExperimental { get; set; }
         public bool ownedDgkTargetsExperimental { get; set; }
         public bool levelReadingExperimental { get; set; }
@@ -75,6 +76,7 @@ namespace PowerShapeBridge
             if(ownedSavesExperimental&&(!IsGeneralCore||!ownedSaveTargetsExperimental))throw new ArgumentException("Owned SaveAs execution requires prepared owned targets.");
             if(ownedSavedReopenExperimental&&(!IsGeneralCore||!ownedSavesExperimental||!workingCopyOpenExperimental))throw new ArgumentException("Saved reopen requires owned SaveAs and owned copy open.");
             if(checkpointRecoveryExperimental&&(!IsGeneralCore||!workingCopiesExperimental))throw new ArgumentException("Checkpoint recovery requires general owned working copies.");
+            if(ownedSolidRotationsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!operationPlansExperimental))throw new ArgumentException("Solid rotations require general owned rotation and operation plans.");
             if(ownedSolidQuarterTurnsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!operationPlansExperimental))throw new ArgumentException("Solid quarter turns require general owned rotation plans and operation plans.");
             if(ownedRotationPlansExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned rotation preparation requires general sets, copies and bindings.");
             if(ownedUniformScalePlansExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned uniform scale preparation requires general sets, copies and bindings.");
@@ -101,7 +103,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.41.1-dev";
+        public const string ReleaseVersion = "0.42.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
