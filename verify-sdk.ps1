@@ -27,6 +27,7 @@ try {
 & (Join-Path $taskRoot 'verify-rotation-samples.ps1') -StageDirectory ($NativeStageDirectory+'-sample-predicate') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-sample-predicate')
 & (Join-Path $taskRoot 'verify-uniform-scale-samples.ps1') -StageDirectory ($NativeStageDirectory+'-uniform-scale-predicate') -EvidenceDirectory (Join-Path $taskEvidence 'uniform-scale-predicate')
 & (Join-Path $taskRoot 'verify-solid-scale-membership.ps1') -StageDirectory ($NativeStageDirectory+'-solid-scale-membership') -EvidenceDirectory (Join-Path $taskEvidence 'solid-scale-membership')
+& (Join-Path $taskRoot 'verify-solid-scale-measurements.ps1') -StageDirectory ($NativeStageDirectory+'-solid-scale-measurements') -EvidenceDirectory (Join-Path $taskEvidence 'solid-scale-measurements')
 & (Join-Path $taskRoot 'verify-dmt-reader.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-dmt-reader') -EvidenceDirectory (Join-Path $taskEvidence 'dmt-reader')
 & $PythonPath (Join-Path $taskRoot 'src\audit_sdk_transport_faults.py') --evidence $taskTransportEvidence --output (Join-Path $taskEvidence 'transport-fault-audit.json') --exercise-rejections
 if ($LASTEXITCODE -ne 0) { throw 'SDK transport fault evidence audit failed.' }
@@ -174,6 +175,7 @@ $taskFiles += @('src\PowerShapeMcp.Host\UniformScalePlanStore.cs','tests\PowerSh
 $taskFiles += @('src\PowerShapeMcp.Host\UniformScalePlanTools.cs','tests\PowerShapeMcp.Tests\UniformScalePlanRoutesTests.cs','src\test_sdk_uniform_scale_stdio.py','config\general-uniform-scale-plans.json')
 $taskFiles += @('src\RotationMeasurements.cs','src\RotationMeasurementTests.cs','src\audit_rotation_measurements.py','verify-rotation-measurements.ps1')
 $taskFiles += @('src\SolidFaceMeasurements.cs','src\SolidFaceMeasurementTests.cs','verify-solid-face-measurements.ps1')
+$taskFiles += @('src\SolidScaleMembershipMeasurements.cs','src\SolidScaleMembershipMeasurementTests.cs','tools\ReadNativeScaleSource.cs','verify-solid-scale-measurements.ps1')
 $taskFiles += @('src\OwnedSolidQuarterTurn.cs','src\PowerShapeMcp.Host\SolidQuarterTurnTools.cs','src\PowerShapeMcp.Host\SolidQuarterTurnProof.cs','src\PowerShapeMcp.Host\SolidQuarterTurnStore.cs','tests\PowerShapeMcp.Tests\SolidQuarterTurnRoutesTests.cs','tools\CheckSolidQuarterTurnBoundaries.cs','verify-solid-quarter-turn.ps1','config\general-solid-quarter-turn.json')
 $taskFiles += @('src\PowerShapeMcp.Host\SolidRotationTools.cs','tests\PowerShapeMcp.Tests\SolidRotationRoutesTests.cs','config\general-solid-rotation.json')
 $taskFiles += @('src\SolidRotationContext.cs','src\SolidRotationContextTests.cs','tools\ReadGuardedRotationSnapshots.cs','verify-solid-rotation-context.ps1')

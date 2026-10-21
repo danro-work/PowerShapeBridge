@@ -6,6 +6,8 @@
 
 ## Подтверждённые компоненты
 
+21 октября: Native getter-адаптер `SolidScaleMembershipMeasurements` собран в staging и реально захватил восемь исходных XYZ на собственной текущей копии, без выделения/изменения/сохранения. Отдельный аудит подтвердил неизменность наблюдений, 24 открытых сохранённых файлов и пяти закреплённых source/checkpoint/working/ownership/fence файлов. Целевые отказы адаптера и прежние face/rotation context checks прошли. Обе exact-head CI PR71 успешны. Новый адаптер не установлен как runtime и не даёт execution authority; after-scale ветвь нового адаптера пока проверена fake getters, её реальный тест входит в следующий guarded Native/SDK route-block. Public MCP масштабирования ещё не включён; прежний исследовательский fence сохранён. Точные доказательства и публикация — в верхе локальной карты.
+
 | Компонент | Состояние |
 |---|---|
 | Native | 0.42.0-dev, releases/P2.6; отдельный bounded integer WORLD rotation route, прежние quarter-turn scopes сохранены; установлен с резервом и одним штатным перезапуском |

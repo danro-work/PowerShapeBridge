@@ -34,6 +34,10 @@
 
 Нужны независимые доказательства одного retained process/document/window context, владения рабочей копией и отдельным checkpoint, точного Native tuple/name/level, происхождения исходных XYZ и raw unit observations. Перед записью нужны свежие guards, one-use intent, пофазный журнал и mutation fence. После — новый независимый COM-контекст, проверка состояния всех окон/сохранённых байтов и полный результат предиката.
 
+`SolidScaleMembershipMeasurements` реализует getter-only Native часть. `CaptureSource` принимает закреплённое исходное наблюдение и window digest, получает direct bounds и восемь XYZ через CLOSEST_FACE/NEAR/EVALUATE без выделения. Bundle связывает исходный observation digest, Native tuple/composite, window digest, габариты и ordered XYZ/face-label digest. `Source` проверяет строгую схему. `MeasureTarget` заново ищет точки только на указанном SOLID рядом с преобразованными исходными XYZ и применяет общий предикат; прежние UV не переиспользуются. До face getters проверяются единицы, здоровье тела, допустимый исходный допуск и параметры, после — неизменность наблюдения, окон, mapping и габаритов во время чтения.
+
+Bundle сам по себе не является доверенным: qualified wrapper должен закрепить его точные байты/SHA вместе с исходным observation receipt, ownership/checkpoint/working-byte proofs и журналом. Адаптер не проверяет владение файлами, не выдаёт execution leases, не вызывает NativeJournal и не снимает fence. Его численный результат не заменяет полный независимый verifier исполнения. Проверка внутреннего composite ID намеренно строгая; изменение mapping требует отдельной квалификации, даже если имя тела сохранилось.
+
 Смена context/metadata/source-witness hashes, единиц/допуска, порядка anchors, типа или Native ID запрещена. Context SHA не является persistent model/topology identity. Никакие чистые math results или выход диагностического reader не снимают fence и не заменяют проверку полного execution receipt/journal.
 
 ## Проверка реализации
@@ -41,6 +45,8 @@
 - Общий C# источник компилируется .NET10 в host и Framework4.8 в отдельный reader. Ни один из них не меняет установленный runtime автоматически.
 - Целевые проверки покрывают явный pivot, увеличение/уменьшение, смену наблюдаемых face labels, отдельные геометрические отказы, подмену доказательств/единиц/допуска и отказ на неразличимом изменении. Прежние тесты UV-предиката сохранены.
 - `verify-solid-scale-membership.ps1` только компилирует reader в новый work staging и проверяет отказ без входных данных. В CI нет CAD/COM-доступа или мутационного self-test.
+- `verify-solid-scale-measurements.ps1` собирает Native только в fresh staging, проверяет отказ диагностического reader без доказательств и отказ fixture без специального marker, затем выполняет fake-getter проверки нового адаптера. Тестовый путь не подключается к PowerShape.
+- `tools/ReadNativeScaleSource.cs` проверяет `CaptureSource` из доверенного staged Native на явно закреплённой собственной копии. Он проверяет конфигурацию, исходник/checkpoint/сохранённые bytes/ownership/fence до и после, фиксированные окна и неизменность наблюдений. У него нет команд изменения CAD или очистки fence. Этот reader подтверждает захват исходных XYZ; after-scale часть нового адаптера должна отдельно пройти будущий реальный сценарий исполнения.
 - `tools/ReadSolidScaleMembership.cs` — локальный диагностический reader для отдельно проверенного исследовательского пакета. Его нельзя запускать с произвольными внешними spec/assembly; нужны доверенные локальные файлы и отдельная авторизация доступа к выбранной модели. Он содержит только getter-whitelist, не имеет Exec/setter/очистки или переходов NativeJournal.
 - Ранняя реальная проверка нового профиля выполнена на уже полученном результате одного ×2. Геометрия повторно не изменялась. Начальный strict refusal, последующие чтения, исходный fence и ограничения сохранены локально.
 
