@@ -26,6 +26,7 @@ try {
 } finally { $env:PSBRIDGE_TEST_EVIDENCE = $taskPreviousTransportEvidence }
 & (Join-Path $taskRoot 'verify-rotation-samples.ps1') -StageDirectory ($NativeStageDirectory+'-sample-predicate') -EvidenceDirectory (Join-Path $taskEvidence 'rotation-sample-predicate')
 & (Join-Path $taskRoot 'verify-uniform-scale-samples.ps1') -StageDirectory ($NativeStageDirectory+'-uniform-scale-predicate') -EvidenceDirectory (Join-Path $taskEvidence 'uniform-scale-predicate')
+& (Join-Path $taskRoot 'verify-solid-scale-membership.ps1') -StageDirectory ($NativeStageDirectory+'-solid-scale-membership') -EvidenceDirectory (Join-Path $taskEvidence 'solid-scale-membership')
 & (Join-Path $taskRoot 'verify-dmt-reader.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-dmt-reader') -EvidenceDirectory (Join-Path $taskEvidence 'dmt-reader')
 & $PythonPath (Join-Path $taskRoot 'src\audit_sdk_transport_faults.py') --evidence $taskTransportEvidence --output (Join-Path $taskEvidence 'transport-fault-audit.json') --exercise-rejections
 if ($LASTEXITCODE -ne 0) { throw 'SDK transport fault evidence audit failed.' }
