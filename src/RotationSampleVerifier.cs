@@ -50,12 +50,20 @@ namespace PowerShapeGeometry {
    Require(Enumerable.Range(0,3).All(i=>bounds[2*i]>=envelope[2*i]-tolerance&&bounds[2*i+1]<=envelope[2*i+1]+tolerance),"Bounds escape rigid-motion envelope.");
   }
   internal static void Verify(Samples before,Samples after,int angle,double[] axis,double absoluteTolerance,double relativeTolerance) {
+   VerifyWithTolerances(before,after,angle,axis,absoluteTolerance,relativeTolerance,new double[0],new double[0]);
+  }
+  // Explicit per-position/invariant absolute budgets. The default verifier above
+  // retains its old strict policy. Units are those recorded with each sample.
+  internal static void VerifyWithTolerances(Samples before,Samples after,int angle,double[] axis,double absoluteTolerance,double relativeTolerance,double[] positionAbsoluteTolerances,double[] invariantAbsoluteTolerances) {
    Require(Finite(absoluteTolerance)&&absoluteTolerance>0&&absoluteTolerance<=1&&Finite(relativeTolerance)&&relativeTolerance>=0&&relativeTolerance<=1e-6,"Explicit bounded raw tolerances required.");Validate(before);Validate(after);
+   if(positionAbsoluteTolerances.Length!=0)Require(positionAbsoluteTolerances.Length==before.Positions.Length&&positionAbsoluteTolerances.All(t=>Finite(t)&&t>0&&t<=1),"Bounded absolute tolerance for every position required.");
+   if(invariantAbsoluteTolerances.Length!=0)Require(invariantAbsoluteTolerances.Length==before.Invariants.Length&&invariantAbsoluteTolerances.All(t=>Finite(t)&&t>0&&t<=1),"Bounded absolute tolerance for every invariant required.");
    Require(before.Type==after.Type&&before.NativeId==after.NativeId&&before.DescriptorSha256==after.DescriptorSha256,"Measurement identity/domain changed.");
    Require(before.Positions.Select(p=>p.Key).SequenceEqual(after.Positions.Select(p=>p.Key))&&before.Directions.Select(p=>p.Key).SequenceEqual(after.Directions.Select(p=>p.Key)),"Witness anchors/order changed.");
-   for(int i=0;i<before.Positions.Length;i++)Require(Near(Transform(before.Positions[i].Value,angle,axis),after.Positions[i].Value,absoluteTolerance,relativeTolerance),"Point does not match explicit rotation.");
+   for(int i=0;i<before.Positions.Length;i++)Require(Near(Transform(before.Positions[i].Value,angle,axis),after.Positions[i].Value,positionAbsoluteTolerances.Length==0?absoluteTolerance:positionAbsoluteTolerances[i],relativeTolerance),"Point does not match explicit rotation.");
    for(int i=0;i<before.Directions.Length;i++)Require(Near(Transform(before.Directions[i].Value,angle,axis,true),after.Directions[i].Value,absoluteTolerance,relativeTolerance),"Direction does not match rotation; pivot must not translate it.");
-   Require(Near(before.Invariants,after.Invariants,absoluteTolerance,relativeTolerance),"Rigid-motion invariant changed.");
+   for(int i=0;i<before.Invariants.Length;i++)Require(i<after.Invariants.Length&&Near(new[]{before.Invariants[i]},new[]{after.Invariants[i]},invariantAbsoluteTolerances.Length==0?absoluteTolerance:invariantAbsoluteTolerances[i],relativeTolerance),"Rigid-motion invariant changed.");
+   Require(before.Invariants.Length==after.Invariants.Length,"Rigid-motion invariant count changed.");
    var expected=Envelope(before.BoundsPaired,angle,axis);double span=Enumerable.Range(0,3).Max(i=>Math.Max(before.BoundsPaired[2*i+1]-before.BoundsPaired[2*i],after.BoundsPaired[2*i+1]-after.BoundsPaired[2*i]));double boundsTolerance=absoluteTolerance+relativeTolerance*span;
    Require(Finite(span)&&Finite(boundsTolerance),"Bounds tolerance overflow.");
    if(ExactBounds(angle,axis))Require(expected.Zip(after.BoundsPaired,(e,a)=>Math.Abs(e-a)<=boundsTolerance).All(ok=>ok),"Exact signed-permutation bounds differ.");

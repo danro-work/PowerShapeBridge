@@ -55,6 +55,18 @@ public sealed class RotationSampleVerifierTests
     [Theory]
     [InlineData(0)][InlineData(2)][InlineData(double.NaN)]
     public void UnboundedOrMissingToleranceCannotAuthorizeVerification(double tolerance)=>Assert.Throws<ArgumentException>(()=>RotationSampleVerifier.Verify(Before(),After(),90,Axis,tolerance,1e-9));
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ObliqueQuarterTurnChecksIndependentMatrixSamplesWithoutClaimingExactBox(bool wrongDirection)
+    {
+        double[] axis=[2,3,4,.6,.8,0];
+        var before=new S(40,5,"world","document_raw",new string('a',64),[new W("p0",[3,3,4]),new W("p1",[2,4,4]),new W("p2",[2,3,5])],[new W("n0",[1,0,0])],[1,2],[1,3,2,4,3,5]);
+        var after=new S(40,5,"world","document_raw",new string('a',64),[new W("p0",[2.36,3.48,3.2]),new W("p1",[2.48,3.64,4.6]),new W("p2",[2.8,2.4,4])],[new W("n0",[.36,.48,-.8])],[1,2],[1,3,2,4,3,5]);
+        Assert.False(RotationSampleVerifier.ExactBounds(90,axis));
+        if(wrongDirection){after.Directions[0].Value[2]=.8;Assert.Throws<ArgumentException>(()=>RotationSampleVerifier.Verify(before,after,90,axis,1e-6,1e-9));}
+        else RotationSampleVerifier.Verify(before,after,90,axis,1e-6,1e-9);
+    }
     [Fact]
     public void FiniteEndpointsCannotTurnOverflowedBoundsSpanIntoInfiniteTolerance()
     {

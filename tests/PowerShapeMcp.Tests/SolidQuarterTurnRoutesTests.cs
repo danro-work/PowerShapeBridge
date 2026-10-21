@@ -27,7 +27,7 @@ public sealed class SolidQuarterTurnRoutesTests
     public async Task CatalogAndDirectCallsEnforceServerReadOnlyAndFeatureFlag(bool readOnly,bool enabled,bool present)
     {
         await using var c=await OwnedRotationRoutesTests.Connection.Create(readOnly,enabled,true);var tools=await c.Client.ListToolsAsync();
-        Assert.Equal(present?"experimental_one_owned_solid_world_principal_quarter_turn_mm":"disabled",c.Session.Status()["solidQuarterTurns"]!.GetValue<string>());
+        Assert.Equal(present?"experimental_one_owned_solid_world_quarter_turn_mm":"disabled",c.Session.Status()["solidQuarterTurns"]!.GetValue<string>());
         foreach(var name in Names){Assert.Equal(present,tools.Any(t=>t.Name==name));await Assert.ThrowsAsync<McpProtocolException>(()=>c.Client.CallToolAsync(name,new Dictionary<string,object?>{["command"]="NeverRun"}).AsTask());}
         Assert.False(Directory.Exists(Path.Combine(c.Data.Root,"requests")));
     }
@@ -43,6 +43,8 @@ public sealed class SolidQuarterTurnRoutesTests
     [InlineData(-90,"[0,1,0]",SolidQuarterTurnProof.PrincipalScope)]
     [InlineData(90,"[0,-1,0]",SolidQuarterTurnProof.PrincipalScope)]
     [InlineData(90,"[0,0,-1]",SolidQuarterTurnProof.PrincipalScope)]
+    [InlineData(90,"[3,4,0]",SolidQuarterTurnProof.ObliqueScope)]
+    [InlineData(-90,"[1,1,1]",SolidQuarterTurnProof.ObliqueScope)]
     public async Task ExplicitPivotAndSignedAngleArePinnedToThePreparation(int angle,string direction,string expectedScope)
     {
         var parameters=JsonNode.Parse("""{"angleDegrees":90,"origin":[2,3,4],"direction":[0,0,1],"coordinateFrame":"world","lengthUnits":"document_raw"}""")!.AsObject();parameters["angleDegrees"]=angle;parameters["direction"]=JsonNode.Parse(direction);
@@ -61,6 +63,8 @@ public sealed class SolidQuarterTurnRoutesTests
     [InlineData(90,"[2,3,4,0,-1,0]",SolidQuarterTurnProof.PrincipalScope)]
     [InlineData(-90,"[2,3,4,0,0,2]",null)]
     [InlineData(-90,"[2,3,4,1,1,0]",null)]
+    [InlineData(90,"[2,3,4,0.6,0.8,0]",SolidQuarterTurnProof.ObliqueScope)]
+    [InlineData(-90,"[2,3,4,-0.6,0.8,0]",SolidQuarterTurnProof.ObliqueScope)]
     [InlineData(-90,"[1000001,3,4,0,0,1]",null)]
     public void ExecutionProofScopeChecksActualNormalizedAxisAndSignedAngle(int angle,string axis,string? expectedScope)
     {
@@ -78,9 +82,21 @@ public sealed class SolidQuarterTurnRoutesTests
         var result=await pending;Assert.True(result.IsError);Assert.Null(Value(result)["ownedRotationHandle"]);Assert.Single(Directory.GetFiles(Path.Combine(c.Data.Root,"requests")));
     }
     [Theory]
+    [InlineData(SolidQuarterTurnProof.PrincipalScope)]
+    [InlineData(SolidQuarterTurnProof.PivotedScope)]
+    public async Task ObliquePreparationCannotMasqueradeAsAnOlderScope(string forgedScope)
+    {
+        var parameters=JsonNode.Parse("""{"angleDegrees":90,"origin":[2,3,4],"direction":[3,4,0],"coordinateFrame":"world","lengthUnits":"document_raw"}""")!.AsObject();
+        await using var c=await OwnedRotationRoutesTests.Connection.Create(quarterTurn:true,quarterTurnParameters:parameters);
+        var pending=c.Client.CallToolAsync(Names[0],c.Args()).AsTask();var path=await c.Data.Files.ClaimRequest();var id=Path.GetFileNameWithoutExtension(path);var request=JsonNode.Parse(await c.Data.Files.ReadClaimedRequest(path))!;
+        var native=c.Reply(id,request["arguments"]!["parameters"]!.AsObject());native["qualificationScope"]=forgedScope;c.Data.Files.Write("responses/"+id+".json",native.ToJsonString());
+        var result=await pending;Assert.True(result.IsError);Assert.Null(Value(result)["ownedRotationHandle"]);Assert.Single(Directory.GetFiles(Path.Combine(c.Data.Root,"requests")));
+    }
+    [Theory]
     [InlineData(SolidQuarterTurnProof.Scope,"owned_solid_world_z_quarter_turn_verified_observed")]
     [InlineData(SolidQuarterTurnProof.PivotedScope,"owned_solid_world_z_quarter_turn_verified_observed")]
     [InlineData(SolidQuarterTurnProof.PrincipalScope,"owned_solid_principal_quarter_turn_verified_observed")]
+    [InlineData(SolidQuarterTurnProof.ObliqueScope,"owned_solid_oblique_quarter_turn_verified_observed")]
     public void VerificationStatePreservesOldZProofsAndDistinguishesPrincipalAxes(string scope,string state)=>Assert.Equal(state,SolidQuarterTurnProof.VerificationStateFor(scope));
     [Fact]
     public async Task ChangedDescriptorCannotIssuePreparedHandle()
