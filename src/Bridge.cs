@@ -275,6 +275,10 @@ namespace PowerShapeBridge
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{SolidScaleMembershipMeasurementTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
+            if(args.Length==1&&args[0]=="--saved-result-observation-test") {
+                try{int checks=SavedResultObservationTests.Run();Console.WriteLine(Json.Serialize(new{state="passed_saved_result_observation_guards",checks=checks,cadCommands=0}));return 0;}
+                catch(Exception error){Console.WriteLine(Json.Serialize(new{state="saved_result_observation_tests_rejected",error=error.ToString(),cadCommands=0}));return 3;}
+            }
             if(args.Length==1&&args[0]=="--owned-open-adoption-test") {
                 if(!File.Exists(Path.Combine(Root,".owned-open-adoption-fixture"))){Console.Error.WriteLine("Own synthetic adoption fixture marker required; no CAD access.");return 3;}
                 try{Console.WriteLine(Json.Serialize(new{state="passed_owned_open_adoption_fake_guards",checks=OwnedOpenAdoptionTests.SelfTest(),cadCommands=0}));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
