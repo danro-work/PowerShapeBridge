@@ -14,7 +14,11 @@ namespace PowerShapeBridge {
     var c=f.Save.Context();
     var evidence=(System.Collections.IList)f.Verified["evidence"];string inspection=(string)((Dictionary<string,object>)evidence[1])["requestId"],listingId=(string)((Dictionary<string,object>)evidence[2])["requestId"];
     c.Snapshot=Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(root,"responses",inspection+".json")));c.Listing=Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(root,"responses",listingId+".json")));
-    c.Snapshot["timestampUtc"]=DateTime.UtcNow.ToString("o");c.Listing["timestampUtc"]=DateTime.UtcNow.ToString("o");
+    // The existing SaveAs fixture declares its source at UtcNow + 1ms.
+    // Declare the next observation after that source even on a coarse clock;
+    // production chronology checks stay unchanged.
+    DateTime observedAt=DateTime.UtcNow,sourceAt=EntitySets.Expiry(c.Snapshot["timestampUtc"]);if(observedAt<=sourceAt)observedAt=sourceAt.AddMilliseconds(1);
+    c.Snapshot["timestampUtc"]=observedAt.ToString("o");c.Listing["timestampUtc"]=observedAt.ToString("o");
     if(fault=="different_other_windows"){
      string other=Path.Combine(root,"Other.psmodel");File.WriteAllText(other,"Own independent saved bytes");var w=Clone((Dictionary<string,object>)c.Listing["activeWindow"]);w["windowNumber"]=2;w["nativeWindowId"]=77;w["modelId"]=88;w["modelPath"]=other;w["modelName"]="Other";w["selectedRaw"]=0;
      c.Listing["windows"]=new[]{Clone((Dictionary<string,object>)c.Listing["activeWindow"]),w};c.Listing["windowCount"]=2;
@@ -32,7 +36,7 @@ namespace PowerShapeBridge {
     var args=new Dictionary<string,object>(f.Args){{"inspectionRequestId",freshInspection},{"inspectionSha256",NativeJournal.Freeze(Path.Combine(root,"responses",freshInspection+".json"),c.Snapshot)},{"listingRequestId",freshListing},{"listingSha256",NativeJournal.Freeze(Path.Combine(root,"responses",freshListing+".json"),c.Listing)},{"modelId",((Dictionary<string,object>)c.Snapshot["model"])["id"]},{"windowNumber",1},{"expiresUtc",DateTime.UtcNow.AddSeconds(240).ToString("o")}};
     if(fault=="wrong_source_sha")args["verificationReceiptSha256"]=new string('f',64);
     if(fault=="changed_result_bytes")File.AppendAllText(f.Save.ResultPath," changed result");
-    if(fault=="replaced_result"){byte[] b=File.ReadAllBytes(f.Save.ResultPath);File.Move(f.Save.ResultPath,f.Save.ResultPath+".old");File.WriteAllBytes(f.Save.ResultPath,b);}
+    if(fault=="replaced_result"){byte[] b=File.ReadAllBytes(f.Save.ResultPath);File.Move(f.Save.ResultPath,Path.Combine(Path.GetDirectoryName(f.Save.ResultPath),"old.psmodel"));File.WriteAllBytes(f.Save.ResultPath,b);}
     if(fault=="old_fence")File.WriteAllText(f.Save.Fence,"Unresolved own fixture fence");
     if(fault=="wrong_active_choice")args["windowNumber"]=2;
     if(fault=="expired")args["expiresUtc"]=DateTime.UtcNow.AddSeconds(-1).ToString("o");
