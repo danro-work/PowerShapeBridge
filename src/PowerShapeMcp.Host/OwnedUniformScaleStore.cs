@@ -35,12 +35,16 @@ internal sealed class OwnedUniformScaleStore(string root,UniformScalePlanStore p
         Require(raw.ValueKind==System.Text.Json.JsonValueKind.Number&&raw.TryGetInt64(out var n)&&n>0&&n<=1073741824,"owned_scale_owned_size_invalid");
         return raw.GetInt64();
     }
-    private static string HashHeld(string path,out long length)
+    private static string HashHeld(string path,out long length,bool sharedWorking=false)
     {
-        using var file=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read);
+        // Working files may already have a CAD writer handle. Keep replacement
+        // denied, check the same retained stream twice; this passive SDK read is
+        // byte validation, not the Native byte pin or later execution authority.
+        using var file=new FileStream(path,FileMode.Open,FileAccess.Read,sharedWorking?FileShare.ReadWrite:FileShare.Read);
         length=file.Length;Require(length>0&&length<=1073741824,"owned_scale_owned_size_invalid");
         var sha=Convert.ToHexString(SHA256.HashData(file)).ToLowerInvariant();
-        Require(file.Length==length,"owned_scale_owned_bytes_changed");return sha;
+        file.Position=0;var again=Convert.ToHexString(SHA256.HashData(file)).ToLowerInvariant();
+        Require(file.Length==length&&sha==again,"owned_scale_owned_bytes_changed");return sha;
     }
     private void Ownership(JsonObject packet,JsonObject source)
     {
@@ -59,7 +63,7 @@ internal sealed class OwnedUniformScaleStore(string root,UniformScalePlanStore p
         var sourceSha=Text(original,"sha256");Require(FileArtifacts.Token(sourceSha,64)&&Text(work,"initialSha256")==sourceSha&&Text(checkpoint,"sha256")==sourceSha&&
             Length(original,"length")==Length(work,"length")&&Length(original,"length")==Length(checkpoint,"length"),"owned_scale_initial_owned_bytes_differ");
         Require((File.GetAttributes(checkpointPath)&FileAttributes.ReadOnly)!=0,"owned_scale_checkpoint_writable");
-        Require(HashHeld(workPath,out _)==Text(packet,"workingSha256")&&HashHeld(checkpointPath,out var cpLength)==sourceSha&&cpLength==Length(checkpoint,"length"),"owned_scale_owned_bytes_differ");
+        Require(HashHeld(workPath,out _,true)==Text(packet,"workingSha256")&&HashHeld(checkpointPath,out var cpLength)==sourceSha&&cpLength==Length(checkpoint,"length"),"owned_scale_owned_bytes_differ");
         foreach(var name in new[]{"mutation-fence.json","geometry-export-fence.json"}) {
             var path=FileArtifacts.FixedPath(root,"workingcopies",id,name);Require(!File.Exists(path)&&!Directory.Exists(path),"owned_scale_copy_fenced");
         }

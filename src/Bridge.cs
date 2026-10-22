@@ -38,6 +38,7 @@ namespace PowerShapeBridge
         public bool workingCopiesExperimental { get; set; }
         public bool documentBindingsExperimental { get; set; }
         public bool workingCopyOpenExperimental { get; set; }
+        public bool ownedOpenAdoptionExperimental { get; set; }
         public bool ownedOperationPlansExperimental { get; set; }
         public bool ownedTranslationsExperimental { get; set; }
         public bool ownedSaveTargetsExperimental { get; set; }
@@ -70,6 +71,7 @@ namespace PowerShapeBridge
             if(operationPlansExperimental&&(!IsGeneralCore||!entitySetsExperimental))throw new ArgumentException("Operation plans require general core and entity sets.");
             if(workingCopiesExperimental&&!IsGeneralCore)throw new ArgumentException("Working copies require general core.");
             if(documentBindingsExperimental&&(!IsGeneralCore||!workingCopiesExperimental||!entitySetsExperimental))throw new ArgumentException("Document bindings require general core, working copies and entity candidates.");
+            if(ownedOpenAdoptionExperimental&&(!IsGeneralCore||!workingCopyOpenExperimental))throw new ArgumentException("Owned OPEN adoption requires the guarded owned OPEN route.");
             if(workingCopyOpenExperimental&&(!IsGeneralCore||!workingCopiesExperimental||!entitySetsExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned open requires general core, working copies, candidates and bindings.");
             if(ownedOperationPlansExperimental&&(!IsGeneralCore||!operationPlansExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Coupled plans require general core, plans, sets, copies and bindings.");
             if(ownedTranslationsExperimental&&(!IsGeneralCore||!ownedOperationPlansExperimental))throw new ArgumentException("Owned translations require general coupled plans.");
@@ -105,7 +107,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.43.0-dev";
+        public const string ReleaseVersion = "0.43.3-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -115,6 +117,10 @@ namespace PowerShapeBridge
         internal static Config ParseConfig(string text)
         {
             var raw=Json.Deserialize<Dictionary<string,object>>(text);object enabled;
+            if(raw!=null&&raw.TryGetValue("ownedOpenAdoptionExperimental",out enabled)) {
+                if(!(enabled is bool))throw new ArgumentException("Owned OPEN adoption flag must be JSON boolean.");
+                if((bool)enabled)foreach(string flag in new[]{"workingCopyOpenExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Owned OPEN adoption dependencies must be true JSON booleans.");}
+            }
             if(raw!=null&&raw.TryGetValue("ownedSolidScalesExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Owned SOLID scale flag must be JSON boolean.");
                 if((bool)enabled)foreach(string flag in new[]{"ownedUniformScalePlansExperimental","uniformScalePlansExperimental","operationPlansExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {
@@ -268,6 +274,10 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--solid-scale-measurement-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{SolidScaleMembershipMeasurementTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--owned-open-adoption-test") {
+                if(!File.Exists(Path.Combine(Root,".owned-open-adoption-fixture"))){Console.Error.WriteLine("Own synthetic adoption fixture marker required; no CAD access.");return 3;}
+                try{Console.WriteLine(Json.Serialize(new{state="passed_owned_open_adoption_fake_guards",checks=OwnedOpenAdoptionTests.SelfTest(),cadCommands=0}));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
             if(args.Length==1&&args[0]=="--owned-solid-scale-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);

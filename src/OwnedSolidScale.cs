@@ -55,9 +55,13 @@ namespace PowerShapeBridge {
    var result=OwnedUniformScalePlans.Prepare(root,id,args,c);if(!Equals(result["state"],"owned_uniform_scale_prepared_observed"))return result;
    try{using(var serial=new FileStream(Path.Combine(root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None))using(var proofs=new OwnedOperationPlans.Proofs()){
     var d=new Dependencies(root,result,proofs);using(var owner=OwnedCopies.Hold(root,(string)d.Packet["copyId"],(string)d.Packet["ownershipSha256"]))using(var pin=new OwnedWorkingBytePin(owner.WorkingPath)){
-     Unfenced(root,d);d.Check(owner,c,result);var measurement=SolidScaleMembershipMeasurements.CaptureSource(d.Expected,d.NativeId,(string)d.Packet["windowContextSha256"],c);var source=SolidScaleMembershipMeasurements.Source(measurement,d.Expected);SolidScaleMembershipMeasurements.CentreAndCheck(source,d.Factor,d.Centre);new SolidUniformScaleProgram(d.Name,d.Factor,d.Centre);
+     var qualifiedDiagnostics=new Dictionary<string,object>();Unfenced(root,d);d.Check(owner,c,qualifiedDiagnostics);var measurement=SolidScaleMembershipMeasurements.CaptureSource(d.Expected,d.NativeId,(string)d.Packet["windowContextSha256"],c);var source=SolidScaleMembershipMeasurements.Source(measurement,d.Expected);SolidScaleMembershipMeasurements.CentreAndCheck(source,d.Factor,d.Centre);new SolidUniformScaleProgram(d.Name,d.Factor,d.Centre);
      var bundle=new Dictionary<string,object>{{"schemaVersion",1},{"qualificationScope",Scope},{"ownedScaleId",id},{"ownedScaleSha256",result["ownedScaleSha256"]},{"bindingId",d.Packet["bindingId"]},{"bindingSha256",d.Packet["bindingSha256"]},{"copyId",d.Packet["copyId"]},{"ownershipSha256",d.Packet["ownershipSha256"]},{"workingSha256",d.Packet["workingSha256"]},{"windowContextSha256",d.Packet["windowContextSha256"]},{"measurement",measurement}};
-     string path=Artifact(root,"solidscalebundles",id);Directory.CreateDirectory(Path.GetDirectoryName(path));result["membershipBundleSha256"]=NativeJournal.Freeze(path,bundle);proofs.Json(path,(string)result["membershipBundleSha256"],16000000);d.Check(owner,c,result);Unfenced(root,d);owner.Recheck();result["qualificationScope"]=Scope;
+     string path=Artifact(root,"solidscalebundles",id);Directory.CreateDirectory(Path.GetDirectoryName(path));result["membershipBundleSha256"]=NativeJournal.Freeze(path,bundle);proofs.Json(path,(string)result["membershipBundleSha256"],16000000);d.Check(owner,c,qualifiedDiagnostics);Unfenced(root,d);owner.Recheck();result["qualificationScope"]=Scope;
+     // Preserve the passive packet's four-read receipt contract. These two extra
+     // retained-document guards are a separate wrapper observation, not a reset
+     // of its already completed checks or a total of measurement getter reads.
+     result["qualifiedPreparationGuardPasses"]=2;result["qualifiedPreparationSameContextObservationReads"]=4;result["qualifiedPreparationLastGuard"]=qualifiedDiagnostics;
     }
    }}catch(Exception error){result["state"]="owned_solid_scale_preparation_rejected";result["error"]=error.Message;result["retryAllowed"]=false;}return result;
   }

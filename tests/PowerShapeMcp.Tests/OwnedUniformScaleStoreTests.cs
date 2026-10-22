@@ -6,6 +6,15 @@ namespace PowerShapeMcp.Tests;
 
 public sealed class OwnedUniformScaleStoreTests
 {
+    [Fact]
+    public void OpenCadWriterIsCompatibleWithPassiveWorkingByteValidation()
+    {
+        var f=new OwnedUniformScaleFixture();var native=f.Native(Guid.NewGuid().ToString("N"));
+        using var writer=new FileStream(f.Working,FileMode.Open,FileAccess.ReadWrite,FileShare.ReadWrite);
+        var output=f.Store.Issue(native,f.Parameters,f.Plan,f.Binding);var handle=output["ownedScaleHandle"]!.GetValue<string>();
+        Assert.Equal(native["ownedScaleId"]!.GetValue<string>(),f.Store.ValidationParameters(handle)["ownedScaleId"]!.GetValue<string>());
+        Assert.False(output["executionEnabled"]!.GetValue<bool>());Assert.False(Directory.Exists(Path.Combine(f.Root,"requests")));
+    }
     [Theory][InlineData(false)][InlineData(true)]
     public void CompleteNativePacketIssuesOnlyConnectionScopedPassiveHandle(bool mixed)
     {

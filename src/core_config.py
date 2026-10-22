@@ -27,6 +27,9 @@ def general_core(settings):
     if type(level_moves) is not bool or level_moves and (profile != 'general-v1' or levels is not True or experimental is not True or copies is not True or bindings is not True):
         raise ValueError('Owned level moves require general sets/copies/bindings/level reads')
     opens = settings.get('workingCopyOpenExperimental', False)
+    adoption = settings.get('ownedOpenAdoptionExperimental', False)
+    if type(adoption) is not bool or adoption and (profile != 'general-v1' or opens is not True or experimental is not True or copies is not True or bindings is not True):
+        raise ValueError('Owned OPEN adoption requires guarded owned open and a boolean flag')
     owned_plans = settings.get('ownedOperationPlansExperimental', False)
     translations = settings.get('ownedTranslationsExperimental', False)
     save_targets = settings.get('ownedSaveTargetsExperimental', False)

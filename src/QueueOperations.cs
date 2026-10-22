@@ -11,6 +11,10 @@ namespace PowerShapeBridge {
   Config c=Program.ReadConfig();
   if(r.Count!=3||!Equals(r["requestId"],id)||!r.ContainsKey("arguments"))throw new ArgumentException("Invalid envelope.");
   var a=r["arguments"] as Dictionary<string,object>;if(a==null)throw new ArgumentException("Invalid arguments.");string op=(string)r["operation"];
+  if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&(Equals(a["recipeId"],OwnedOpenAdoption.Recipe)||Equals(a["recipeId"],OwnedOpenAdoption.RefreshRecipe))) {
+   if(!c.IsGeneralCore||!c.ownedOpenAdoptionExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned OPEN adoption disabled or invalid envelope.");
+   OwnedOpenAdoption.Validate((Dictionary<string,object>)a["parameters"],Equals(a["recipeId"],OwnedOpenAdoption.RefreshRecipe));return;
+  }
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedSolidScale.Recipes.Contains(a["recipeId"] as string)) {
    if(!c.IsGeneralCore||!c.ownedSolidScalesExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned SOLID scale disabled or invalid envelope.");
    OwnedSolidScale.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;
@@ -102,6 +106,7 @@ namespace PowerShapeBridge {
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"prepare_owned_uniform_scale"))return OwnedUniformScalePlans.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"prepare_owned_dgk_export"))return OwnedDgkTargets.Prepare(Program.Root,id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"open_working_copy"))return WorkingCopyOpen.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
+ if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&(Equals(readArgs["recipeId"],OwnedOpenAdoption.Recipe)||Equals(readArgs["recipeId"],OwnedOpenAdoption.RefreshRecipe)))return OwnedOpenAdoption.Run(id,(Dictionary<string,object>)readArgs["parameters"],Equals(readArgs["recipeId"],OwnedOpenAdoption.RefreshRecipe));
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"verify_working_copy_open"))return OwnedOpenVerification.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&new[]{"bind_working_document","validate_working_document_binding"}.Contains((string)readArgs["recipeId"]))
   return DocumentBindings.Run(id,(Dictionary<string,object>)readArgs["parameters"],Equals(readArgs["recipeId"],"bind_working_document"));

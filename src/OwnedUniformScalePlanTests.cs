@@ -20,7 +20,7 @@ namespace PowerShapeBridge {
     Require(denied,"Coerced scale configuration accepted.");configRefusals++;
    }
    var rows=new List<Dictionary<string,object>>();
-   foreach(string fault in new[]{"control","mixed_targets","shrink","caller_alias","held_proofs","saved_bytes_changed_before_prepare","working_write_during_guard","factor_bool","factor_string","factor_zero","factor_negative","factor_one","missing_centre","implicit_frame","keep_original","axis_lock","set_sha","binding_sha","set_expired","absent_target","source_drift","mutation_fence","mutation_fence_directory","export_fence","late_fence","changed_document","changed_units","changed_workplane","nonempty_selection","late_context","checkpoint_writable","busy_executor"}) {
+   foreach(string fault in new[]{"control","existing_writer","mixed_targets","shrink","caller_alias","held_proofs","saved_bytes_changed_before_prepare","working_write_during_guard","factor_bool","factor_string","factor_zero","factor_negative","factor_one","missing_centre","implicit_frame","keep_original","axis_lock","set_sha","binding_sha","set_expired","absent_target","source_drift","mutation_fence","mutation_fence_directory","export_fence","late_fence","changed_document","changed_units","changed_workplane","nonempty_selection","late_context","checkpoint_writable","busy_executor"}) {
     var f=new OwnedOperationPlanTests.Fixture(true,true);var context=f.NewContext();string root=f.Root,id=Guid.NewGuid().ToString("N");
     var set=Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(root,"entitysets",f.SetId+".json")));
     if(fault=="mixed_targets")set["entityKeys"]=new[]{new[]{40,5},new[]{21,8},new[]{59,10}};
@@ -69,8 +69,9 @@ namespace PowerShapeBridge {
     if(fault=="working_write_during_guard")context.DuringRead=n=>{if(n==1)File.AppendAllText(f.Working,"Denied change during current held lease.");};
     var submitted=Clone(args);var before=Hashes(root);FileStream busy=null;
     if(fault=="busy_executor")busy=new FileStream(Path.Combine(root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None);
-    Dictionary<string,object> result;try{result=OwnedUniformScalePlans.Prepare(root,id,args,context);}finally{if(busy!=null)busy.Dispose();}
-    bool control=new[]{"control","mixed_targets","shrink","caller_alias","held_proofs","saved_bytes_changed_before_prepare"}.Contains(fault);
+    FileStream existingWriter=fault=="existing_writer"?new FileStream(f.Working,FileMode.Open,FileAccess.ReadWrite,FileShare.ReadWrite):null;
+    Dictionary<string,object> result;try{result=OwnedUniformScalePlans.Prepare(root,id,args,context);}finally{if(existingWriter!=null)existingWriter.Dispose();if(busy!=null)busy.Dispose();}
+    bool control=new[]{"control","existing_writer","mixed_targets","shrink","caller_alias","held_proofs","saved_bytes_changed_before_prepare"}.Contains(fault);
     Require(Equals(result["state"],control?"owned_uniform_scale_prepared_observed":"owned_uniform_scale_preparation_rejected"),fault+": "+Program.Json.Serialize(result));
     Require(before.All(pair=>Program.Hash(pair.Key)==pair.Value),fault+": protected fixture bytes changed.");
     foreach(string flag in new[]{"executionEnabled","geometryMutationAttempted","contextChangeAttempted","cadSaveAttempted","nativeProviderQualified"})Require(Equals(result[flag],false),"Scale preparation gave action authority.");
