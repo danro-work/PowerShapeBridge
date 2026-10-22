@@ -30,6 +30,7 @@ try {
 & (Join-Path $taskRoot 'verify-solid-scale-measurements.ps1') -StageDirectory ($NativeStageDirectory+'-solid-scale-measurements') -EvidenceDirectory (Join-Path $taskEvidence 'solid-scale-measurements')
 & (Join-Path $taskRoot 'verify-owned-solid-scale.ps1') -StageDirectory ($NativeStageDirectory+'-owned-solid-scale') -EvidenceDirectory (Join-Path $taskEvidence 'owned-solid-scale')
 & (Join-Path $taskRoot 'verify-owned-open-adoption.ps1') -StageDirectory ($NativeStageDirectory+'-owned-open-adoption') -EvidenceDirectory (Join-Path $taskEvidence 'owned-open-adoption')
+& (Join-Path $taskRoot 'verify-saved-result-observation.ps1') -StageDirectory ($NativeStageDirectory+'-saved-result-observation') -EvidenceDirectory (Join-Path $taskEvidence 'saved-result-observation')
 & (Join-Path $taskRoot 'verify-dmt-reader.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-dmt-reader') -EvidenceDirectory (Join-Path $taskEvidence 'dmt-reader')
 & $PythonPath (Join-Path $taskRoot 'src\audit_sdk_transport_faults.py') --evidence $taskTransportEvidence --output (Join-Path $taskEvidence 'transport-fault-audit.json') --exercise-rejections
 if ($LASTEXITCODE -ne 0) { throw 'SDK transport fault evidence audit failed.' }
