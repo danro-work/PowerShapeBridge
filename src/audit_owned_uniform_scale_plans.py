@@ -5,7 +5,7 @@ from pathlib import Path
 from audit_checkpoint_recovered_open import journal, read, require, sha
 import json
 
-CONTROLS={'control','mixed_targets','shrink','caller_alias','held_proofs','saved_bytes_changed_before_prepare'}
+CONTROLS={'control','existing_writer','mixed_targets','shrink','caller_alias','held_proofs','saved_bytes_changed_before_prepare'}
 FAULTS=CONTROLS|{'factor_bool','factor_string','factor_zero','factor_negative','factor_one',
     'missing_centre','implicit_frame','keep_original','axis_lock','set_sha','binding_sha',
     'set_expired','absent_target','source_drift','mutation_fence','mutation_fence_directory','export_fence','late_fence',
