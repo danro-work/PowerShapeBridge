@@ -1,0 +1,41 @@
+using System.Text.Json.Nodes;
+using PowerShapeMcp;
+using Xunit;
+
+namespace PowerShapeMcp.Tests;
+
+public sealed class SavedResultRestoreTests
+{
+    internal sealed class Case
+    {
+        internal readonly OwnedSaveTargetTests.TargetFixture Target=new(saves:true,reopen:true,restore:true);
+        internal readonly SavedResultFixture Saved;
+        internal BridgeSession Session=>Target.Session;
+        internal string Root=>Target.Data.Root;
+        internal JsonObject Input=null!,Args=null!,Reply=null!;
+        internal readonly string VerificationId=Guid.NewGuid().ToString("N");
+        internal Case(){Saved=new(Target);Saved.Execute(Guid.NewGuid().ToString("N"));var input=Saved.FreshReads();Saved.Verify(VerificationId,OwnedExecutionProof.VerificationParameters(input,Session.Candidates,Session.Documents,false,true));Fresh();}
+        internal void Fresh(){var input=Saved.FreshReads();Input=new(){["verificationRequestId"]=VerificationId,["verificationReceiptSha256"]=FileArtifacts.Sha256(FileArtifacts.ReadBytes(Root,"responses/"+VerificationId+".json",16777216)),["candidateDocumentHandle"]=input["candidateDocumentHandle"]!.DeepClone(),["activeDocumentHandle"]=input["activeDocumentHandle"]!.DeepClone()};}
+        internal JsonObject Publish(string id,JsonObject args,Action<JsonObject>? alter=null)
+        {
+            Args=args.DeepClone().AsObject();var original=Saved.Verification;var report=new JsonObject{["schemaVersion"]=1,["observationId"]=id,["state"]="current_saved_result_observed",["qualificationScope"]=SavedResultObservationProof.Scope,["parameters"]=args.DeepClone(),["nativeProviderQualified"]=true,["sameContextObservationReads"]=2,["expiresUtc"]=args["expiresUtc"]!.DeepClone(),["timestampUtc"]=LeaseTime.Format(Target.Data.Utc),["originalVerificationRequestId"]=args["verificationRequestId"]!.DeepClone(),["originalVerificationReceiptSha256"]=args["verificationReceiptSha256"]!.DeepClone(),["observedPropertiesSha256"]=new string('a',64),["currentWindowContextSha256"]=new string('b',64),["currentSavedFileHashes"]=new JsonObject()};
+            foreach(string key in new[]{"saveOperationId","targetId","targetSha256","savedResult","copyId","ownershipSha256","model"})report[key]=original[key]!.DeepClone();
+            foreach(string key in new[]{"executionAuthority","sdkLeaseIssued","cadSaveAttempted","contextChangeAttempted","geometryMutationAttempted","originalJournalModified","historicalWindowInventoryRecertified","fullTopologyEquivalent"})report[key]=false;
+            alter?.Invoke(report);string sha=ArtifactProof.Freeze(Root,"savedresultobservations/"+id+".json",report);
+            Reply=new(){["bridgeRequestId"]=id,["state"]="current_saved_result_observed",["observationId"]=id,["observationSha256"]=sha,["observation"]=report,["nativeProviderQualified"]=true,["executionAuthority"]=false,["sdkLeaseIssued"]=false};
+            ArtifactProof.Freeze(Root,"responses/"+id+".json",Reply);return Reply;
+        }
+        internal JsonObject Issue(){Args=SavedResultObservationProof.Parameters(Input,Session.Candidates,Session.Documents);Publish(Guid.NewGuid().ToString("N"),Args);return Session.SavedResults.IssueObserved(Reply,Args,Input["candidateDocumentHandle"]!.GetValue<string>());}
+    }
+    [Theory][InlineData(false,true,true)][InlineData(true,true,false)][InlineData(false,false,false)]
+    public void SeparateFlagAndReadOnlyExclusion(bool readOnly,bool enabled,bool expected){var c=new Case();c.Target.Data.Files.Config["ownedSavedResultRestoreExperimental"]=enabled;c.Target.Data.Files.SaveConfig();using var s=new BridgeSession(c.Target.Data.Files.Options(readOnly));var names=ToolCatalog.Create(s).Select(t=>t.ProtocolTool.Name).ToArray();Assert.Equal(expected,names.Contains("restore_owned_saved_result"));}
+    [Theory][InlineData("\"true\"")][InlineData("1")][InlineData("null")]
+    public void StrictBooleanFlag(string value){var c=new Case();c.Target.Data.Files.Config["ownedSavedResultRestoreExperimental"]=JsonNode.Parse(value);c.Target.Data.Files.SaveConfig();Assert.Throws<InvalidDataException>(()=>c.Target.Data.Files.Options().ReadConfiguration());}
+    [Theory][InlineData("ownedSavedReopenExperimental")][InlineData("ownedSavesExperimental")][InlineData("entitySetsExperimental")]
+    public void MissingDependencyRefuses(string dependency){var c=new Case();c.Target.Data.Files.Config[dependency]=false;c.Target.Data.Files.SaveConfig();Assert.Throws<InvalidDataException>(()=>c.Target.Data.Files.Options().ReadConfiguration());}
+    [Fact]public void NewLeaseUsesExplicitCurrentReferencesAndExpires(){var c=new Case();var issued=c.Issue();var handle=issued["savedResultHandle"]!.GetValue<string>();var p=c.Session.SavedResults.Parameters(handle);Assert.True(ArtifactProof.Fields(p,"observationRequestId","observationReceiptSha256"));Assert.Throws<ReferenceRejected>(()=>c.Session.Documents.Consume(c.Input["activeDocumentHandle"]!.GetValue<string>()));c.Target.Data.Time+=301;c.Target.Data.Utc=c.Target.Data.Utc.AddSeconds(301);Assert.Throws<ReferenceRejected>(()=>c.Session.SavedResults.Parameters(handle));}
+    [Theory][InlineData("scope")][InlineData("unqualified")][InlineData("model")][InlineData("expiry")][InlineData("original")][InlineData("authority")][InlineData("file")][InlineData("report")][InlineData("candidate")]
+    public void RejectChangedProofsWithoutQueue(string fault){var c=new Case();var args=SavedResultObservationProof.Parameters(c.Input,c.Session.Candidates,c.Session.Documents);c.Publish(Guid.NewGuid().ToString("N"),args,p=>{switch(fault){case "scope":p["qualificationScope"]="other";break;case "unqualified":p["nativeProviderQualified"]=false;break;case "model":p["model"]!["id"]=900;break;case "expiry":p["expiresUtc"]=LeaseTime.Format(c.Target.Data.Utc.AddMinutes(9));break;case "original":p["originalVerificationRequestId"]=p["observationId"]!.DeepClone();break;case "authority":p["executionAuthority"]=true;break;}});if(fault=="file")File.AppendAllText(c.Target.Plan["resultPath"]!.GetValue<string>()," changed");if(fault=="report")File.AppendAllText(Path.Combine(c.Root,"savedresultobservations",c.Reply["observationId"]!.GetValue<string>()+".json")," ");if(fault=="candidate")c.Session.Candidates.Clear();Assert.Throws<ReferenceRejected>(()=>c.Session.SavedResults.IssueObserved(c.Reply,args,c.Input["candidateDocumentHandle"]!.GetValue<string>()));Assert.False(Directory.Exists(Path.Combine(c.Root,"requests")));}
+    [Fact]public async Task FullToolConsumesChoiceAndPublishesOnlyCheckedLease(){var c=new Case();c.Target.Data.Files.Write("PSBridge.Worker.exe","Opaque marker; never executed.");var task=new SavedResultRestoreTools(c.Session).Restore(c.VerificationId,c.Input["verificationReceiptSha256"]!.GetValue<string>(),c.Input["candidateDocumentHandle"]!.GetValue<string>(),c.Input["activeDocumentHandle"]!.GetValue<string>(),CancellationToken.None);var path=await c.Target.Data.Files.ClaimRequest();var request=JsonNode.Parse(await c.Target.Data.Files.ReadClaimedRequest(path))!;Assert.Equal("restore_owned_saved_result",request["arguments"]!["recipeId"]!.GetValue<string>());var args=request["arguments"]!["parameters"]!.AsObject();Assert.Equal(9,args.Count);c.Publish(Path.GetFileNameWithoutExtension(path),args);var result=await task;Assert.False(result.IsError,result.StructuredContent?.GetRawText());Assert.NotNull(result.StructuredContent!.Value.GetProperty("savedResultHandle").GetString());Assert.Equal(6,Directory.GetFiles(Path.Combine(c.Root,"operations",c.Saved.SaveId),"*.json").Length);}
+    [Fact]public async Task CancelledOrUnknownOriginalDoesNotSubmit(){var c=new Case();using var ct=new CancellationTokenSource();ct.Cancel();var tool=new SavedResultRestoreTools(c.Session);Assert.True((await tool.Restore(c.VerificationId,c.Input["verificationReceiptSha256"]!.GetValue<string>(),c.Saved.Candidate,c.Saved.Choice,ct.Token)).IsError);Assert.True((await tool.Restore(new string('a',32),new string('b',64),c.Saved.Candidate,c.Saved.Choice,CancellationToken.None)).IsError);Assert.False(Directory.Exists(Path.Combine(c.Root,"requests")));}
+}

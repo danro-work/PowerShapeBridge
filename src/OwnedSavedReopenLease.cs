@@ -8,7 +8,7 @@ namespace PowerShapeBridge {
  // Historical mode is ONLY for independent verification, never OPEN admission.
  internal sealed class OwnedSavedReopenLease : IDisposable {
   internal readonly Dictionary<string,object> Plan;
-  internal readonly OwnedSavedSource Source;
+  internal readonly SavedReopenSource Source;
   internal readonly OwnedCopies.OwnershipLease Copy;
   internal readonly DateTime Expires;
   readonly bool historical;readonly string seedPath;
@@ -24,15 +24,18 @@ namespace PowerShapeBridge {
     Validate(args);root=OwnedCopies.LocalPath(root.TrimEnd('\\','/'));string id=(string)args["reopenId"],folder=Path.Combine(root,"savedreopens",id);
     foreach(string path in new[]{root,Path.Combine(root,"savedreopens"),folder,Path.Combine(root,"workingcopies"),Path.Combine(root,"workingcopies",id),Path.Combine(root,"workingcopies",id,"checkpoint")})directories.Add(new OwnedDirectoryLease(path));
     Plan=proofs.Json(Path.Combine(folder,"reopen.json"),(string)args["reopenSha256"]);
+    bool current=Equals(Plan["schemaVersion"],2);string reference=current?"observationRequestId":"verificationRequestId",hash=current?"observationReceiptSha256":"verificationReceiptSha256";
     string[] fields={"schemaVersion","reopenId","operation","bridgeVersion","preparedUtc","expiresUtc","executionEnabled","verificationRequestId","verificationReceiptSha256","saveOperationId","targetId","targetSha256","savedResult","seed","copyId","ownershipSha256","workingPath","workingSha256","checkpointPath","checkpointSha256","directoryIdentity"};
-    if(Plan.Count!=fields.Length||fields.Any(k=>!Plan.ContainsKey(k))||!Equals(Plan["schemaVersion"],1)||!Equals(Plan["reopenId"],id)||!Equals(Plan["copyId"],id)||!Equals(Plan["operation"],"reopen_owned_saved_result")||!Equals(Plan["executionEnabled"],false))throw new IOException("Saved reopen plan differs.");
-    var sourceArgs=new Dictionary<string,object>{{"verificationRequestId",Plan["verificationRequestId"]},{"verificationReceiptSha256",Plan["verificationReceiptSha256"]}};
-    Source=new OwnedSavedSource(root,sourceArgs,historical);
+    if(current)fields=fields.Select(k=>k=="verificationRequestId"?reference:k=="verificationReceiptSha256"?hash:k).ToArray();
+    if(Plan.Count!=fields.Length||fields.Any(k=>!Plan.ContainsKey(k))||!Equals(Plan["schemaVersion"],current?2:1)||!Equals(Plan["reopenId"],id)||!Equals(Plan["copyId"],id)||!Equals(Plan["operation"],"reopen_owned_saved_result")||!Equals(Plan["executionEnabled"],false))throw new IOException("Saved reopen plan differs.");
+    var sourceArgs=new Dictionary<string,object>{{reference,Plan[reference]},{hash,Plan[hash]}};
+    bool enabled=current&&Program.ReadConfig().ownedSavedResultRestoreExperimental;
+    Source=new SavedReopenSource(root,sourceArgs,historical,enabled);
     foreach(string field in new[]{"saveOperationId","targetId","targetSha256","savedResult"})if(EntitySets.Canonical(Plan[field])!=EntitySets.Canonical(Source.Verified[field]))throw new IOException("Saved reopen provenance differs.");
     DateTime prepared=EntitySets.Expiry(Plan["preparedUtc"]);Expires=EntitySets.Expiry(Plan["expiresUtc"]);
     if(prepared>DateTime.UtcNow.AddSeconds(5)||prepared<EntitySets.Expiry(Source.Verified["timestampUtc"])||Expires!=Source.Expires||prepared>=Expires)throw new IOException("Saved reopen original lifetime differs.");
     var reservation=proofs.Json(folder+".reservation.json",null);
-    if(reservation.Count!=5||!Equals(reservation["schemaVersion"],1)||!Equals(reservation["reopenId"],id)||!Equals(reservation["automaticReplayForbidden"],true)||sourceArgs.Any(p=>!Equals(reservation[p.Key],p.Value)))throw new IOException("Saved reopen reservation differs.");
+    if(reservation.Count!=5||!Equals(reservation["schemaVersion"],current?2:1)||!Equals(reservation["reopenId"],id)||!Equals(reservation["automaticReplayForbidden"],true)||sourceArgs.Any(p=>!Equals(reservation[p.Key],p.Value)))throw new IOException("Saved reopen reservation differs.");
     if(EntitySets.Canonical(directories[2].Identity)!=EntitySets.Canonical(Plan["directoryIdentity"]))throw new IOException("Prepared saved reopen directory replaced.");
     var record=Plan["seed"] as Dictionary<string,object>;seedPath=Path.Combine(folder,"DiskReopen_"+id+".psmodel");
     if(record==null||record.Count!=4||!Equals(record["path"],seedPath)||!Equals(record["sha256"],Source.Saved["sha256"])||!Equals(Convert.ToInt64(record["length"]),Convert.ToInt64(Source.Saved["length"])))throw new IOException("Saved reopen seed differs.");

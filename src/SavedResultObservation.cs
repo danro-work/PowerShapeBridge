@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 
 namespace PowerShapeBridge {
- // Passive first stage for explicit reconnect. No queue recipe or SDK lease yet.
+ // Passive retained-document core with an explicitly gated queue wrapper.
  // Historical SaveAs proof remains historical; only the CURRENT retained saved
  // document is observed. Different unrelated windows do not rewrite that proof.
  internal static class SavedResultObservation {
+  internal const string Recipe="restore_owned_saved_result";
   internal const string Scope="current_saved_result_same_process_document_observation_v1";
   static Dictionary<string,object> Clone(Dictionary<string,object> d){return Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(d));}
   static void Need(bool ok,string why){if(!ok)throw new InvalidDataException(why);}
@@ -15,6 +16,17 @@ namespace PowerShapeBridge {
    string[] ids={"verificationRequestId","inspectionRequestId","listingRequestId"},hashes={"verificationReceiptSha256","inspectionSha256","listingSha256"};
    Need(args!=null&&args.Count==9&&ids.All(k=>args.ContainsKey(k)&&EntitySets.Hex(args[k],32))&&hashes.All(k=>args.ContainsKey(k)&&EntitySets.Hex(args[k],64))&&args.ContainsKey("windowNumber")&&args["windowNumber"] is int&&(int)args["windowNumber"]>0&&args.ContainsKey("modelId")&&args["modelId"] is int&&(int)args["modelId"]>0&&args.ContainsKey("expiresUtc"),"Exact current saved-result proof references required.");
    EntitySets.Expiry(args["expiresUtc"]);
+  }
+  internal static Dictionary<string,object> Run(string id,Dictionary<string,object> args){
+   try{
+    var config=Program.ReadConfig();Need(config.IsGeneralCore&&config.ownedSavedResultRestoreExperimental,"Current saved-result restoration disabled.");Validate(args);
+    string root=Program.Root;Directory.CreateDirectory(Path.Combine(root,"operations"));
+    using(var guard=new FileStream(Path.Combine(root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None))
+    using(var source=new OwnedSavedSource(root,new Dictionary<string,object>{{"verificationRequestId",args["verificationRequestId"]},{"verificationReceiptSha256",args["verificationReceiptSha256"]}},true)){
+     source.Recheck(); // File/journal dependencies before any COM attachment.
+     using(var context=new DocumentBindings.ComContext(config))return Observe(root,id,args,context);
+    }
+   }catch(Exception error){return new Dictionary<string,object>{{"state","current_saved_result_observation_rejected"},{"error",error.Message},{"executionAuthority",false},{"sdkLeaseIssued",false},{"cadSaveAttempted",false},{"contextChangeAttempted",false},{"geometryMutationAttempted",false},{"retryAllowed",false},{"localArtifactsMayExist",true},{"timestampUtc",DateTime.UtcNow.ToString("o")},{"bridgeVersion",Program.ReleaseVersion}};}
   }
   internal static Dictionary<string,object> Observe(string root,string id,Dictionary<string,object> args,DocumentBindings.IContext context){
    Validate(args);args=Clone(args);Need(EntitySets.Hex(id,32),"New observation identity required.");root=OwnedCopies.LocalPath(root.TrimEnd('\\','/'));

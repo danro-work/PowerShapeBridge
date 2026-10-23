@@ -11,7 +11,7 @@ public sealed class OwnedSavedResultStore(string root,OwnedSaveTargetStore targe
 {
     private readonly Func<double> now=clock??(()=> (double)Stopwatch.GetTimestamp()/Stopwatch.Frequency);
     private readonly Func<DateTimeOffset> utcNow=utcClock??(()=>DateTimeOffset.UtcNow);
-    private sealed record Lease(string Request,string Sha,JsonObject Parameters,double Expires);
+    private sealed record Lease(string Request,string Sha,JsonObject Parameters,double Expires,bool Observed=false);
     private readonly Dictionary<string,Lease> saved=[];
     public void Clear()=>saved.Clear();
     public void Revoke(string handle)=>saved.Remove(handle);
@@ -82,6 +82,26 @@ public sealed class OwnedSavedResultStore(string root,OwnedSaveTargetStore targe
         Require(receipt["savedResult"] is JsonObject,"saved_result_file_proof_invalid");FileProof(receipt["savedResult"]!.AsObject(),Text(plan,"targetId"));return plan;
     }
     public void CheckedExecution(JsonObject result,JsonObject parameters)=>Execution(result,parameters,false);
+    internal JsonObject VerifyHistorical(string id,string sha)
+    {
+        var verified=RawResponse(id,sha);Require(verified["state"]?.GetValue<string>()=="owned_save_as_verified_observed","saved_result_original_verifier_required");
+        Require(verified["evidence"] is JsonArray entries&&entries.Count==3&&entries.All(e=>e is JsonObject reference&&ArtifactProof.Fields(reference,"requestId","sha256")),"saved_result_original_evidence_invalid");
+        var evidence=verified["evidence"]!.AsArray();var listing=ArtifactProof.Verified(root,"responses",Text(evidence[2]!.AsObject(),"requestId"),Text(evidence[2]!.AsObject(),"sha256"),16777216);
+        var parameters=new JsonObject{["saveRequestId"]=verified["saveOperationId"]!.DeepClone(),["saveReceiptSha256"]=verified["saveReceiptSha256"]!.DeepClone(),["expiresUtc"]=verified["expiresUtc"]!.DeepClone(),["modelId"]=listing["activeWindow"]!["modelId"]!.DeepClone(),["windowNumber"]=listing["activeWindow"]!["windowNumber"]!.DeepClone()};
+        foreach(var pair in new[]{("inspectionRequestId","inspectionSha256",1),("listingRequestId","listingSha256",2)}){parameters[pair.Item1]=evidence[pair.Item3]!["requestId"]!.DeepClone();parameters[pair.Item2]=evidence[pair.Item3]!["sha256"]!.DeepClone();}
+        VerifyReceipt(verified,parameters);return verified;
+    }
+    public JsonObject VerifyObservedSource(JsonObject result,JsonObject parameters,bool fresh=true)=>SavedResultObservationProof.Check(root,result,parameters,this,utcNow(),fresh);
+    public JsonObject IssueObserved(JsonObject result,JsonObject parameters,string candidate)
+    {
+        var current=candidates.DocumentParameters(candidate);Require(new[]{"inspectionRequestId","inspectionSha256"}.All(k=>JsonNode.DeepEquals(current[k],parameters[k])),"saved_result_candidate_lost");
+        var report=VerifyObservedSource(result,parameters);double remaining=Math.Min(candidates.DocumentRemaining(candidate),(LeaseTime.Parse(Text(report,"expiresUtc"),"saved_result_expired")-LeaseTime.PythonPrecision(utcNow())).TotalSeconds);
+        remaining=Math.Min(remaining,LeaseTime.Remaining(Text(report,"timestampUtc"),utcNow(),"saved_result_expired").Remaining);Require(remaining>0&&remaining<=300,"saved_result_expired");
+        foreach(var token in saved.Where(p=>p.Value.Expires<=now()).Select(p=>p.Key).ToArray())saved.Remove(token);if(saved.Count>=128)Clear();
+        string handle=Guid.NewGuid().ToString("N"),id=Text(result,"bridgeRequestId");var raw=FileArtifacts.ReadBytes(root,Path.Combine("responses",id+".json"),16777216);
+        saved[handle]=new(id,FileArtifacts.Sha256(raw),parameters.DeepClone().AsObject(),now()+remaining,true);
+        var output=result.DeepClone().AsObject();output["savedResultHandle"]=handle;output["savedResultLifetimeSeconds"]=(int)remaining;output["savedResultSourceKind"]=SavedResultObservationProof.Scope;return output;
+    }
     public JsonObject VerifyReceipt(JsonObject result,JsonObject parameters)
     {
         var verifyId=Text(result,"bridgeRequestId");RawResponse(verifyId,received:result);
@@ -130,8 +150,9 @@ public sealed class OwnedSavedResultStore(string root,OwnedSaveTargetStore targe
     public JsonObject Parameters(string handle)
     {
         if(!saved.TryGetValue(handle,out var lease)||lease.Expires<=now()){saved.Remove(handle);throw new ReferenceRejected("saved_result_handle_unknown_or_expired");}
-        var receipt=RawResponse(lease.Request,lease.Sha);VerifyReceipt(receipt,lease.Parameters);
-        return new(){["verificationRequestId"]=lease.Request,["verificationReceiptSha256"]=lease.Sha};
+        var receipt=RawResponse(lease.Request,lease.Sha);
+        if(lease.Observed){VerifyObservedSource(receipt,lease.Parameters);return new(){["observationRequestId"]=lease.Request,["observationReceiptSha256"]=lease.Sha};}
+        VerifyReceipt(receipt,lease.Parameters);return new(){["verificationRequestId"]=lease.Request,["verificationReceiptSha256"]=lease.Sha};
     }
     public double Remaining(string handle)
     {

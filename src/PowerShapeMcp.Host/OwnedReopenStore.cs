@@ -22,17 +22,20 @@ public sealed class OwnedReopenStore(string root,OwnedSavedResultStore saved,Fun
         var raw=FileArtifacts.ReadBytes(root,Path.Combine("savedreopens",id,"reopen.json"),65536);
         Require(FileArtifacts.Sha256(raw)==Text(result,"reopenSha256"),"saved_reopen_artifact_sha_differs");
         var plan=JsonNode.Parse(FileArtifacts.Parse(raw).GetRawText())!.AsObject();
-        Require(ArtifactProof.Fields(plan,"schemaVersion","reopenId","operation","bridgeVersion","preparedUtc","expiresUtc","executionEnabled","verificationRequestId","verificationReceiptSha256","saveOperationId",
+        bool observed=ArtifactProof.IntegerIs(plan["schemaVersion"],2);var requestKey=observed?"observationRequestId":"verificationRequestId";var shaKey=observed?"observationReceiptSha256":"verificationReceiptSha256";
+        Require(ArtifactProof.Fields(plan,"schemaVersion","reopenId","operation","bridgeVersion","preparedUtc","expiresUtc","executionEnabled",requestKey,shaKey,"saveOperationId",
             "targetId","targetSha256","savedResult","seed","copyId","ownershipSha256","workingPath","workingSha256","checkpointPath","checkpointSha256","directoryIdentity")&&
-            ArtifactProof.IntegerIs(plan["schemaVersion"],1)&&ArtifactProof.Boolean(plan["executionEnabled"],false)&&Text(plan,"reopenId")==id&&Text(plan,"copyId")==id&&Text(plan,"operation")=="reopen_owned_saved_result"&&JsonNode.DeepEquals(plan,result["reopen"]),"saved_reopen_plan_invalid");
-        var source=new JsonObject{["verificationRequestId"]=plan["verificationRequestId"]!.DeepClone(),["verificationReceiptSha256"]=plan["verificationReceiptSha256"]!.DeepClone()};
+            ArtifactProof.IntegerIs(plan["schemaVersion"],observed?2:1)&&ArtifactProof.Boolean(plan["executionEnabled"],false)&&Text(plan,"reopenId")==id&&Text(plan,"copyId")==id&&Text(plan,"operation")=="reopen_owned_saved_result"&&JsonNode.DeepEquals(plan,result["reopen"]),"saved_reopen_plan_invalid");
+        var source=new JsonObject{[requestKey]=plan[requestKey]!.DeepClone(),[shaKey]=plan[shaKey]!.DeepClone()};
         if(parameters is not null)Require(JsonNode.DeepEquals(parameters,source),"saved_reopen_source_identity_differs");
-        var verified=ArtifactProof.Verified(root,"responses",Text(source,"verificationRequestId"),Text(source,"verificationReceiptSha256"),16777216);
+        var verified=ArtifactProof.Verified(root,"responses",Text(source,requestKey),Text(source,shaKey),16777216);
         // Native bodies need not carry the transport envelope ID. Use only the
         // already SHA-verified fixed filename, and reject a conflicting claim.
-        var verificationId=Text(source,"verificationRequestId");
+        var verificationId=Text(source,requestKey);
         if(verified["bridgeRequestId"] is not null)Require(Text(verified,"bridgeRequestId")==verificationId,"saved_reopen_source_response_identity_differs");
         verified["bridgeRequestId"]=verificationId;
+        if(observed)verified=saved.VerifyObservedSource(verified,verified["observation"]!["parameters"]!.AsObject(),false);
+        else {
         Require(verified["evidence"] is JsonArray entries&&entries.Count==3&&entries.All(e=>e is JsonObject reference&&ArtifactProof.Fields(reference,"requestId","sha256")),"saved_reopen_source_evidence_invalid");
         var evidence=verified["evidence"]!.AsArray();
         var listing=ArtifactProof.Verified(root,"responses",evidence[2]!["requestId"]!.GetValue<string>(),evidence[2]!["sha256"]!.GetValue<string>(),16777216);
@@ -40,6 +43,7 @@ public sealed class OwnedReopenStore(string root,OwnedSavedResultStore saved,Fun
             ["inspectionRequestId"]=evidence[1]!["requestId"]!.DeepClone(),["inspectionSha256"]=evidence[1]!["sha256"]!.DeepClone(),["listingRequestId"]=evidence[2]!["requestId"]!.DeepClone(),["listingSha256"]=evidence[2]!["sha256"]!.DeepClone(),
             ["modelId"]=listing["activeWindow"]!["modelId"]!.DeepClone(),["windowNumber"]=listing["activeWindow"]!["windowNumber"]!.DeepClone(),["expiresUtc"]=verified["expiresUtc"]!.DeepClone()};
         saved.VerifyReceipt(verified,proof);
+        }
         foreach(var field in new[]{"targetId","targetSha256","savedResult"})Require(JsonNode.DeepEquals(plan[field],verified[field]),"saved_reopen_saved_dependency_differs");
         Require(JsonNode.DeepEquals(plan["saveOperationId"],verified["saveOperationId"]),"saved_reopen_save_identity_differs");
         Require(plan["savedResult"] is JsonObject&&plan["seed"] is JsonObject&&plan["directoryIdentity"] is JsonObject,"saved_reopen_file_records_invalid");
