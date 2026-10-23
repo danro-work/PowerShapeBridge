@@ -6,6 +6,8 @@
 
 ## Подтверждённые компоненты
 
+23 октября: **full MCP restore сохранённого результата и filesystem-only подготовка его копии реально прошли**. Native0.44 установлен с резервом, SDK0.50 квалифицирован отдельным STDIO-клиентом. Новый default-false flag/full-only tool, отдельный текущий SDK file lease и явный schema2 provenance работают с исходным успешным SaveAs без его повтора/переписывания. Отдельные read-only/file/window/journal проверки подтвердили ту же модель, 25 окон, 110 защищённых и 25 сохранённых файлов; OPEN/SaveAs/close/geometry0. Обычный клиентSDK0.48 прежний. Целевые73.NET/21Native/11Python прошли. Полный локальный.NET935/936 остановился в одном случае на перезаписи тестовой настройки доMCP; лишние записи объединены,22 целевых случаев затем прошли. Исходный full-run не объявляется зелёным. Точные артефакты/публикация/CI — в локальной карте; следующий блок persistence/reopen, затем остальная К8–К11.
+
 23 октября: добавлен отдельный внутренний consumer current saved-result proof: строгая связь raw response/frozen report/первоначального successful SaveAs, собственные file/directory pins и отдельный текущий срок. 20 собственных parser scenarios/68 проверок и marker refusal прошли в staging; CAD-команд и SDK leases нет. Это подготовка downstream provenance, не подключённый MCP reconnect: Native queue, SDK admission/lease и переключение reopen consumers остаются следующим блоком. Установленный runtime и клиент прежние. Обе CI PR75 точной исходной ревизии успешны; новая публикация указана в локальной карте.
 
 22 октября: [пассивный Native core для reconnect сохранённого результата](docs/SAVED-RESULT-OBSERVATION.md) реализован в staging и прошёл раннее реальное чтение текущего saved SOLID/mm при истёкшем исходном verifier lease. Отдельный frozen report, два retained-context чтения и независимый read-only/file/journal audit подтвердили текущие наблюдения и неизменность исходных доказательств. Нет новых CAD-команд, повторного сохранения, закрытия, SDK lease или переоткрытия. 20 synthetic scenarios/78 проверок и CI wrapper прошли; исходные verifier/NativeJournal не менялись. MCP admission и downstream provenance — следующий блок; установленный Native/SDK клиента прежние. Обе CI PR74 точной последней ревизии успешны, повторять их не требуется. Новая публикация/CI — в локальной карте.
@@ -22,8 +24,8 @@
 
 | Компонент | Состояние |
 |---|---|
-| Native | 0.43.3-dev, releases/P2.6; guarded SOLID scale + explicit owned-open adoption/reconnect; прежние rotation scopes сохранены; установлен с резервом |
-| SDK | 0.49.3-dev staged и проверен через STDIO; .NET10/MCP2.2.0/Hosting10.0.12. Обычный чат пока0.48 |
+| Native | 0.44.0-dev, releases/P2.6; current saved-result restore/source variant + прежние scale/adoption/rotation scopes; установлен с резервом |
+| SDK | 0.50.0-dev staged и реально проверен через STDIO; .NET10/MCP2.2.0/Hosting10.0.12. Обычный чат пока0.48 |
 | Обычный Codex | SDK0.48 подтверждён после перезапуска; full35/read-only8. Новый SDK0.49.3 staged; настройка/перезапуск Codex ради него ещё не выполнялись |
 | Базовая квалификация P0 | Публичная ревизия e7387d99b6969f0079fa2fc74d4da2f689a2d37d, PR61; исполняемые файлы P0 не пересобирались |
 | Кандидат | P0-20261016.1, 51 файл локального комплекта; содержит manifest, запуск, инструкцию, диагностику и возврат настройки; CAD-файлы и полная пользовательская конфигурация не включены |

@@ -26,6 +26,17 @@ class CoreConfiguration(unittest.TestCase):
                 with self.subTest(key=key, value=value), self.assertRaises(ValueError):
                     general_core({**self.settings, key: value})
 
+    def test_saved_result_restoration_has_strict_boolean_dependencies(self):
+        full = json.loads((Path(__file__).parents[1] / 'config/general-saved-result-restore.json').read_text())
+        self.assertTrue(general_core(full))
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                general_core({**full, 'ownedSavedResultRestoreExperimental': value})
+        for key in ('ownedSavedReopenExperimental', 'ownedSavesExperimental', 'ownedSaveTargetsExperimental',
+                    'workingCopyOpenExperimental', 'entitySetsExperimental', 'workingCopiesExperimental', 'documentBindingsExperimental'):
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                general_core({**full, key: False})
+
     def test_owned_uniform_scale_flag_requires_boolean_and_owned_dependencies(self):
         full = {**self.settings, 'entitySetsExperimental': True, 'workingCopiesExperimental': True,
                 'documentBindingsExperimental': True, 'ownedUniformScalePlansExperimental': True}

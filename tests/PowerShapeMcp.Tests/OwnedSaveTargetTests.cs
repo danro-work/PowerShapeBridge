@@ -17,12 +17,16 @@ public sealed class OwnedSaveTargetTests
         public JsonObject Parameters { get; }
         public JsonObject Receipt { get; }
         public JsonObject Plan=>Receipt["target"]!.AsObject();
-        public TargetFixture(bool readOnly=false,bool enabled=true,bool saves=false,bool reopen=false)
+        public TargetFixture(bool readOnly=false,bool enabled=true,bool saves=false,bool reopen=false,bool restore=false)
         {
             foreach(var flag in new[]{"entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"})Data.Files.Config[flag]=true;
-            Data.Files.Config["ownedSaveTargetsExperimental"]=enabled;Data.Files.SaveConfig();
-            Data.Files.Config["ownedSavesExperimental"]=saves;Data.Files.SaveConfig();
-            if(reopen){Data.Files.Config["workingCopyOpenExperimental"]=true;Data.Files.Config["ownedSavedReopenExperimental"]=true;Data.Files.SaveConfig();}
+            Data.Files.Config["ownedSaveTargetsExperimental"]=enabled;
+            Data.Files.Config["ownedSavesExperimental"]=saves;
+            if(reopen){Data.Files.Config["workingCopyOpenExperimental"]=true;Data.Files.Config["ownedSavedReopenExperimental"]=true;}
+            if(restore)Data.Files.Config["ownedSavedResultRestoreExperimental"]=true;
+            // No session observes intermediate configuration. Publish once to
+            // avoid redundant replacement of the same isolated fixture file.
+            Data.Files.SaveConfig();
             // Fake replies fsync complete durable plans/journals. Allow a loaded
             // runner to finish those writes; dedicated DeadlineTests cover timing.
             Session=new(Data.Files.Options(readOnly,5),()=>Data.Time,()=>Data.Utc);
