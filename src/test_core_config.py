@@ -26,6 +26,15 @@ class CoreConfiguration(unittest.TestCase):
                 with self.subTest(key=key, value=value), self.assertRaises(ValueError):
                     general_core({**self.settings, key: value})
 
+    def test_saved_reopen_window_quota_is_bounded_and_requires_current_source(self):
+        full = json.loads((Path(__file__).parents[1] / 'config/general-saved-result-restore.json').read_text())
+        self.assertTrue(general_core({**full, 'savedReopenModelWindowLimit': 26}))
+        for value in (True, '26', None, 0, 33, 26.5):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                general_core({**full, 'savedReopenModelWindowLimit': value})
+        with self.assertRaises(ValueError):
+            general_core({**full, 'savedReopenModelWindowLimit': 26, 'ownedSavedResultRestoreExperimental': False})
+
     def test_saved_result_restoration_has_strict_boolean_dependencies(self):
         full = json.loads((Path(__file__).parents[1] / 'config/general-saved-result-restore.json').read_text())
         self.assertTrue(general_core(full))
