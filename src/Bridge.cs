@@ -16,6 +16,8 @@ namespace PowerShapeBridge
 {
     public sealed class Config
     {
+        public Config(){savedReopenModelWindowLimit=20;}
+        public int savedReopenModelWindowLimit { get; set; }
         public string expectedVersion { get; set; }
         public string expectedProject { get; set; }
         public string sourceStep { get; set; }
@@ -66,6 +68,7 @@ namespace PowerShapeBridge
         public string testProjectSha256 { get; set; }
         public void Validate()
         {
+            if(savedReopenModelWindowLimit<1||savedReopenModelWindowLimit>32||savedReopenModelWindowLimit>20&&(!IsGeneralCore||!ownedSavedResultRestoreExperimental))throw new ArgumentException("Expanded saved-reopen window quota requires current saved-result restore; range1..32.");
             if (expectedVersion != "23.2.2") throw new ArgumentException("Unsupported target version.");
             if (coreProfile != null && !IsGeneralCore) throw new ArgumentException("Unknown core profile.");
             if(entitySetsExperimental&&!IsGeneralCore)throw new ArgumentException("Entity sets require general core.");
@@ -109,7 +112,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.44.0-dev";
+        public const string ReleaseVersion = "0.44.1-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -119,6 +122,7 @@ namespace PowerShapeBridge
         internal static Config ParseConfig(string text)
         {
             var raw=Json.Deserialize<Dictionary<string,object>>(text);object enabled;
+            if(raw!=null&&raw.TryGetValue("savedReopenModelWindowLimit",out enabled)&&(!(enabled is int)||(int)enabled<1||(int)enabled>32))throw new ArgumentException("Saved-reopen window quota must be an integer1..32.");
             if(raw!=null&&raw.TryGetValue("ownedSavedResultRestoreExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Saved-result restoration flag must be JSON boolean.");
                 if((bool)enabled)foreach(string flag in new[]{"ownedSavedReopenExperimental","ownedSavesExperimental","ownedSaveTargetsExperimental","workingCopyOpenExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Saved-result restoration dependencies must be true JSON booleans.");}
@@ -280,6 +284,9 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--solid-scale-measurement-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{SolidScaleMembershipMeasurementTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--saved-reopen-window-policy-test") {
+                try{Console.WriteLine(Json.Serialize(new{state="passed_saved_reopen_window_policy",checks=SavedReopenWindowPolicy.SelfTest(),cadCommands=0}));return 0;}catch(Exception e){Console.WriteLine(Json.Serialize(new{state="rejected_saved_reopen_window_policy",error=e.ToString(),cadCommands=0}));return 3;}
             }
             if(args.Length==1&&args[0]=="--saved-result-restore-test") {
                 try{int checks=SavedResultRestoreTests.Run();Console.WriteLine(Json.Serialize(new{state="passed_saved_result_restore_wire_guards",checks=checks,cadCommands=0}));return 0;}

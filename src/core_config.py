@@ -36,6 +36,9 @@ def general_core(settings):
     saves = settings.get('ownedSavesExperimental', False)
     reopens = settings.get('ownedSavedReopenExperimental', False)
     restore = settings.get('ownedSavedResultRestoreExperimental', False)
+    window_limit = settings.get('savedReopenModelWindowLimit', 20)
+    if type(window_limit) is not int or not 1 <= window_limit <= 32 or window_limit > 20 and restore is not True:
+        raise ValueError('Expanded saved-reopen model quota requires current saved-result restoration; integer1..32')
     if type(restore) is not bool or restore and (profile != 'general-v1' or reopens is not True or saves is not True or save_targets is not True or opens is not True or experimental is not True or copies is not True or bindings is not True):
         raise ValueError('Saved-result restoration requires general guarded reopen and boolean dependencies')
     recovery = settings.get('checkpointRecoveryExperimental', False)

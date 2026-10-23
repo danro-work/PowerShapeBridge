@@ -4,7 +4,7 @@ namespace PowerShapeMcp;
 
 public sealed record HostOptions(string BridgeRoot, TimeSpan Timeout, bool ReadOnly)
 {
-    public const string Version = "0.50.0-dev";
+    public const string Version = "0.50.1-dev";
     public static HostOptions Parse(string[] args)
     {
         string? root = null;
@@ -85,6 +85,9 @@ public sealed record HostOptions(string BridgeRoot, TimeSpan Timeout, bool ReadO
             if (value.ValueKind == JsonValueKind.True && required.Any(dep => !config.TryGetProperty(dep, out var setting) || setting.ValueKind != JsonValueKind.True))
                 throw new InvalidDataException("Experimental feature dependencies are missing.");
         }
+        if(config.TryGetProperty("savedReopenModelWindowLimit",out var windowLimit)&&
+           (windowLimit.ValueKind!=JsonValueKind.Number||!windowLimit.TryGetInt32(out var reopenLimit)||reopenLimit is <1 or >32||reopenLimit>20&&(!config.TryGetProperty("ownedSavedResultRestoreExperimental",out var restore)||restore.ValueKind!=JsonValueKind.True)))
+            throw new InvalidDataException("Expanded saved-reopen model quota requires current saved-result restoration; integer1..32.");
         return config;
     }
 }

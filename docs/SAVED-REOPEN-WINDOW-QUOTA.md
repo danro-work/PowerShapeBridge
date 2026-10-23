@@ -1,0 +1,7 @@
+# Saved-result reopen window quota
+
+`savedReopenModelWindowLimit` is an optional integer from 1 through 32, default 20. This is a Bridge resource quota, not a documented Autodesk capacity limit. Normal working-copy opening is unchanged.
+
+Values above 20 require the full-only `ownedSavedResultRestoreExperimental` option. Only an explicit current saved-result source (schema 2) can use that expansion. Legacy saved-source preparations remain capped at 20. Expansion additionally requires the complete unique-model/native-window listing to match the current saved-source observation. The retained pre-OPEN guard independently checks that listing again. A count at the quota refuses before OPEN. Existing one-use claims, immutable source/checkpoint checks, journal, unknown-outcome fence, exactly-one-new-window observation and independent verifier remain required.
+
+The local qualification used 26 for one 25-to-26 saved-result reopen. Native execution, independent verifier/new binding, separate read-only observations, file/window/journal audit and the eight previously declared WORLD surface witnesses passed. All 25 prior windows remained; no SaveAs, scaling or close was repeated. The validation ceiling of 32 is not a qualification of PowerShape running 32 models. The current count already reaches the configured quota, so another reopen refuses. Remaining type/set/topology qualification belongs in PROJECT-STATE.md.
