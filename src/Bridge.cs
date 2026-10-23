@@ -285,6 +285,9 @@ namespace PowerShapeBridge
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{SolidScaleMembershipMeasurementTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
+            if(args.Length==1&&args[0]=="--owned-saved-copy-close-test") {
+                try{Console.WriteLine(Json.Serialize(new{state="passed_owned_saved_copy_close_guards",checks=OwnedSavedCopyCloseTests.Run(),cadCommands=0}));return 0;}catch(Exception e){Console.WriteLine(Json.Serialize(new{state="rejected_owned_saved_copy_close_guards",error=e.ToString(),cadCommands=0}));return 3;}
+            }
             if(args.Length==1&&args[0]=="--saved-reopen-window-policy-test") {
                 try{Console.WriteLine(Json.Serialize(new{state="passed_saved_reopen_window_policy",checks=SavedReopenWindowPolicy.SelfTest(),cadCommands=0}));return 0;}catch(Exception e){Console.WriteLine(Json.Serialize(new{state="rejected_saved_reopen_window_policy",error=e.ToString(),cadCommands=0}));return 3;}
             }
