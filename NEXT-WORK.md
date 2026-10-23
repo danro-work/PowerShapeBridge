@@ -1,4 +1,10 @@
-# Приоритет: saved-result ×0.5 persistence ПРОШЁЛ; не повторять OPEN/SaveAs/scale
+# Приоритет: Native disposable saved-copy close проверен; подключить MCP
+
+Читать новый верх work/P0-local-state-20261017.md и evidence/K9-owned-saved-copy-close-20261024/completed-block.json. Один close собственной ненужной копии выполнен; отдельный verifier разрешил original unknown без повтора команды. Текущие25окон/канонический saved result/241protected/26savedbytes подтверждены. Native close core только staging, не queued/catalogued/deployed; installedNative44.1/ordinarySDK48/stagedSDK50.1 прежние. execute-command.json/prepare.py НЕ ПОВТОРЯТЬ. Поправка сравнения хешей проверена целевыми28fixtures и реальным отдельным verifier; новый executor post-hash путь ещё не real-tested.
+
+Закончить публикацию/CI этого core-блока (точные сведения в карте), не повторять обе успешныеCI78/неизменённую.NET943 регрессию. Затем один законченный full-only MCP admission/one-use authority/defaultfalse flag с явным disposable profile, отказами/replay/unknown/late/cancellation proof и ранним одним новым real route test на ДРУГОЙ доказанно собственной ненужной копии. Не раскрывать общий close пользовательских/unsaved/multiview/middle-window документов. Точная source action grammar теперь исследована: повторные широкие поиски TLB/wrapper/UI help не нужны. Не заменять недостающую проверку пробными YES/NO либо настройкой диалогов. Сохранить acceptedP0, активный saved result, unsaved+45, fenced/unknownP2. Все оставшиеся строкиК8–К11 и личная приёмкаv1 сохраняются, P0 уже принят; человеческого действия сейчас нет.
+
+# Предыдущий блок: saved-result ×0.5 persistence ПРОШЁЛ
 
 Читать новый верх work/P0-local-state-20261017.md и evidence/K8-saved-reopen-window-policy-20261023/. Native0.44.1 установлен с резервом, stagedSDK0.50.1 выполнил один новый current-source restore, одну filesystem-only подготовку, один guarded saved OPEN и независимый verifier. Активна новая собственная Working-копия, всего26окон; старые25 сохранены. Отдельные readonly/file/window/journal/getter проверки прошли, восемь исходных WORLD точек в допуске0.01мм. live-once.py НЕ ПОВТОРЯТЬ. Новый лимит26 уже исчерпан; не повышать его автоматически для каждого OPEN. OrdinarySDK48 прежний, настройка Codex не менялась.
 
