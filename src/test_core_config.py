@@ -11,6 +11,18 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_saved_finalization_keeps_distinct_strict_boolean_profile(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-saved-finalization.json').read_text(encoding='utf-8-sig'))
+        self.assertIs(settings['ownedSavedFinalizationExperimental'], False)
+        self.assertIs(settings['ownedSavedResultCloseExperimental'], False)
+        general_core(settings)
+        settings['ownedSavedFinalizationExperimental'] = True
+        general_core(settings)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedSavedFinalizationExperimental': value})
+        for field in ('ownedSavedResultRestoreExperimental', 'ownedSavedReopenExperimental', 'workingCopiesExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError): general_core({**settings, field: False})
+
     def test_saved_result_close_strict_boolean_dependencies(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-saved-result-close.json').read_text(encoding='utf-8-sig'))
         general_core(settings)
