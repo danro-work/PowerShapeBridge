@@ -37,6 +37,7 @@ try {
 & (Join-Path $taskRoot 'verify-owned-saved-copy-close.ps1') -StageDirectory ($NativeStageDirectory+'-saved-copy-close') -EvidenceDirectory (Join-Path $taskEvidence 'saved-copy-close')
 & (Join-Path $taskRoot 'verify-owned-saved-result-close.ps1') -StageDirectory ($NativeStageDirectory+'-saved-result-close') -EvidenceDirectory (Join-Path $taskEvidence 'saved-result-close')
 & (Join-Path $taskRoot 'verify-owned-saved-finalization.ps1') -StageDirectory ($NativeStageDirectory+'-saved-finalization') -EvidenceDirectory (Join-Path $taskEvidence 'saved-finalization')
+& (Join-Path $taskRoot 'verify-returned-rotation.ps1') -StageDirectory ($NativeStageDirectory+'-returned-rotation') -EvidenceDirectory (Join-Path $taskEvidence 'returned-rotation')
 & (Join-Path $taskRoot 'verify-dmt-reader.ps1') -PythonPath $PythonPath -StageDirectory ($NativeStageDirectory+'-dmt-reader') -EvidenceDirectory (Join-Path $taskEvidence 'dmt-reader')
 & $PythonPath (Join-Path $taskRoot 'src\audit_sdk_transport_faults.py') --evidence $taskTransportEvidence --output (Join-Path $taskEvidence 'transport-fault-audit.json') --exercise-rejections
 if ($LASTEXITCODE -ne 0) { throw 'SDK transport fault evidence audit failed.' }
@@ -194,6 +195,7 @@ $taskFiles += @('src\SavedReopenWindowPolicy.cs','verify-saved-reopen-window-pol
 $taskFiles += @('src\OwnedSavedCopyClose.cs','src\OwnedSavedCopyCloseTests.cs','verify-owned-saved-copy-close.ps1')
 $taskFiles += @('src\OwnedSavedResultClose.cs','src\OwnedSavedResultCloseTests.cs','src\PowerShapeMcp.Host\SavedResultCloseTools.cs','tests\PowerShapeMcp.Tests\SavedResultCloseTests.cs','config\general-owned-saved-result-close.json','verify-owned-saved-result-close.ps1')
 $taskFiles += @('src\OwnedSavedFinalization.cs','src\SavedFinalizationSeal.cs','src\OwnedSavedFinalizationTests.cs','src\PowerShapeMcp.Host\SavedFinalizationTools.cs','tests\PowerShapeMcp.Tests\SavedFinalizationTests.cs','config\general-owned-saved-finalization.json','verify-owned-saved-finalization.ps1')
+$taskFiles += @('src\ReturnedRotationEvidence.cs','src\ReturnedRotationEvidenceTests.cs','src\ReturnedSolidRotationVerification.cs','src\PowerShapeMcp.Host\ReturnedRotationProof.cs','tests\PowerShapeMcp.Tests\ReturnedRotationProofTests.cs','verify-returned-rotation.ps1')
 $taskFiles += @('src\PowerShapeMcp.Host\SavedCopyCloseProof.cs','src\PowerShapeMcp.Host\SavedCopyCloseTools.cs','tests\PowerShapeMcp.Tests\SavedCopyCloseTests.cs','config\general-owned-saved-copy-close.json')
 $taskFiles += @('src\OwnedSolidQuarterTurn.cs','src\PowerShapeMcp.Host\SolidQuarterTurnTools.cs','src\PowerShapeMcp.Host\SolidQuarterTurnProof.cs','src\PowerShapeMcp.Host\SolidQuarterTurnStore.cs','tests\PowerShapeMcp.Tests\SolidQuarterTurnRoutesTests.cs','tools\CheckSolidQuarterTurnBoundaries.cs','verify-solid-quarter-turn.ps1','config\general-solid-quarter-turn.json')
 $taskFiles += @('src\PowerShapeMcp.Host\SolidRotationTools.cs','tests\PowerShapeMcp.Tests\SolidRotationRoutesTests.cs','config\general-solid-rotation.json')

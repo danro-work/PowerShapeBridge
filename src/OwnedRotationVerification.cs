@@ -42,6 +42,7 @@ namespace PowerShapeBridge {
    OwnedOperationPlans.Proofs fenceProofs=null;
    try {
     Validate(args);Require(EntitySets.Hex(verificationId,32),"Verification identity required.");
+    if(qualifyGeneral){var original=EntitySets.Receipt(root,(string)args["executionRequestId"],(string)args["executionReceiptSha256"]);if(Equals(original["state"],"owned_rotation_outcome_unknown"))return ReturnedSolidRotationVerification.Verify(root,verificationId,args,(SolidRotationContext.ReadContext)context);}
     using(var serial=new FileStream(Path.Combine(root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None))using(var proofs=new OwnedOperationPlans.Proofs()) {
      string id=(string)args["executionRequestId"];var receipt=proofs.Json(Artifact(root,"responses",id),(string)args["executionReceiptSha256"],16000000);
      Require(Equals(receipt["operationId"],id)&&Equals(receipt["state"],"owned_rotation_executed_unverified")&&Equals(receipt["returnCode"],1)&&Equals(receipt["geometryVerified"],false)&&Equals(receipt["geometryMutationAttempted"],true)&&Equals(receipt["contextChangeAttempted"],false)&&Equals(receipt["cadSaveAttempted"],false),"Complete unverified execution receipt required; not interrupted/partial batch.");

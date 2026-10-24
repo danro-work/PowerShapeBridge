@@ -120,7 +120,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.48.0-dev";
+        public const string ReleaseVersion = "0.49.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -308,6 +308,9 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--solid-scale-measurement-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{SolidScaleMembershipMeasurementTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--returned-rotation-test") {
+                try{Console.WriteLine(Json.Serialize(new{state="passed_returned_rotation_evidence",checks=ReturnedRotationEvidenceTests.Run(),cadCommands=0}));return 0;}catch(Exception e){Console.WriteLine(Json.Serialize(new{state="rejected_returned_rotation_evidence",error=e.ToString(),cadCommands=0}));return 3;}
             }
             if(args.Length==1&&args[0]=="--owned-saved-finalization-test") {
                 try{Console.WriteLine(Json.Serialize(new{state="passed_owned_saved_finalization_guards",checks=OwnedSavedFinalizationTests.Run(),cadCommands=0}));return 0;}catch(Exception e){Console.WriteLine(Json.Serialize(new{state="rejected_owned_saved_finalization_guards",error=e.ToString(),cadCommands=0}));return 3;}

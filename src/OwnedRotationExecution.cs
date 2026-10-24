@@ -13,6 +13,7 @@ namespace PowerShapeBridge {
    RotationSampleVerifier.Samples Measurements(int composite);
    int Rotate(int composite,int integerDegrees,double[] pointAndUnitDirection);
   }
+  internal static void RequirePostReadBudget(DateTime expiry,DateTime now){Require(expiry-now>=TimeSpan.FromSeconds(90),"Insufficient fresh lease budget for native rotation post-read; refresh before a new intent. No command submitted.");}
   static void Require(bool ok,string message){if(!ok)throw new InvalidOperationException(message);}
   static string Artifact(string root,string folder,string id){Require(EntitySets.Hex(id,32),"Invalid rotation identity.");string path=Path.Combine(root,folder,id+".json");OwnedCopies.NoReparse(path);return path;}
   static Dictionary<string,object> Clone(Dictionary<string,object> value){return Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(value));}
@@ -66,6 +67,7 @@ namespace PowerShapeBridge {
       var provenance=RotationMeasurementRecords.Provenance(packet,d);
       var captured=targets.Select(target=>{var samples=context.Measurements((int)target["compositeId"]);RotationSampleVerifier.Validate(samples);var key=(int[])target["entityKey"];Require(samples.Type==key[0]&&samples.NativeId==key[1]&&Near(samples.BoundsPaired,(double[])target["boundsBeforeWorldRawPaired"]),"Before-measurement target/bounds differ.");return samples;}).ToArray();
       d.Check(lease,context,result);
+      var native=context as SolidRotationContext.ExecutionContext;if(native!=null&&native.IsNativeProvider&&targets.Length==1&&d.Keys[0][0]==40)RequirePostReadBudget(d.Expires,DateTime.UtcNow);
       result["localArtifactsMayExist"]=true;
       for(int index=0;index<targets.Length;index++){string measurementSha=RotationMeasurementRecords.Freeze(root,id,index,"before",provenance,captured[index]);targets[index]["beforeMeasurementSha256"]=measurementSha;RotationMeasurementRecords.Read(root,id,index,"before",measurementSha,provenance,proofs);}
       var plan=new Dictionary<string,object>(parameters){{"schemaVersion",2},{"operationId",id},{"operation","rotate_owned_entities"},{"ownedRotationId",args["ownedRotationId"]},{"ownedRotationSha256",args["ownedRotationSha256"]},{"copyId",packet["copyId"]},{"ownershipSha256",packet["ownershipSha256"]},{"workingSha256",packet["workingSha256"]},{"inspectionRequestId",d.Binding["inspectionRequestId"]},{"inspectionSha256",d.Binding["inspectionSha256"]},{"windowContextSha256",packet["windowContextSha256"]},{"measurementProvenance",provenance},{"angleDegrees",angle},{"nativeAxis",axis},{"targets",targets},{"beforeWindows",windows},{"savedFileHashesBefore",saved},{"createdUtc",DateTime.UtcNow.ToString("o")},{"qualification","Internal executor; native sign/frame and independent geometry verification not qualified"}};
@@ -89,6 +91,7 @@ namespace PowerShapeBridge {
        Require(EntitySets.Canonical(RotationMeasurementRecords.Encode(beforeSamples))==EntitySets.Canonical(RotationMeasurementRecords.Encode(context.Measurements(composite))),"Native measurements changed before target rotation.");
        var measuredGuard=Stable(d,lease,context,current,new int[0][],saved);Require(EntitySets.ObservedDigest(measuredGuard)==EntitySets.ObservedDigest(snapshot)&&context.Composite(key[0],key[1])==composite&&Near(context.Bounds(composite),bounds),"Context changed while rereading measurements.");
        context.ConfirmDocument();Require(DateTime.UtcNow<d.Expires&&DocumentBindings.WindowDigest(context.Windows())==(string)d.Binding["windowContextSha256"],"Measurement read exhausted final rotation context/lease.");
+       if(native!=null&&native.IsNativeProvider&&targets.Length==1&&d.Keys[0][0]==40)RequirePostReadBudget(d.Expires,DateTime.UtcNow);
        calls++;result["geometryMutationAttempted"]=true;int code=context.Rotate(composite,angle,axis.ToArray());string returned=NativeJournal.Freeze(Path.Combine(commands,prefix+".returned.json"),new Dictionary<string,object>{{"operationId",id},{"planSha256",sha},{"index",index},{"startedSha256",started},{"returnCode",code},{"timestampUtc",DateTime.UtcNow.ToString("o")}});
        Require(code==1,"RotateItem returned non-success; batch stops without retry/inverse.");
        var after=Stable(d,lease,context,current,new[]{key},saved);Require(context.Composite(key[0],key[1])==composite,"Rotated target mapping changed; independent diagnosis required.");var afterBounds=context.Bounds(composite);Box(afterBounds);current=after;

@@ -34,6 +34,20 @@ internal static class SolidQuarterTurnProof
         return ScopeFor(parameters,general);
     }
     static void Need(bool ok){if(!ok)throw new ReferenceRejected("solid_quarter_turn_proof_differs");}
+    internal static bool SameNativeAxis(JsonNode? first,JsonNode? second)
+    {
+        if(first is not JsonArray a||second is not JsonArray b||a.Count!=6||b.Count!=6)return false;
+        try
+        {
+            // Framework and Python may spell one IEEE double differently (17 digits
+            // versus shortest round-trip). Require identical finite native doubles,
+            // not decimal JSON spelling; this is no geometric tolerance.
+            var x=System.Text.Json.JsonSerializer.SerializeToElement(a).EnumerateArray().Select(n=>n.GetDouble()).ToArray();
+            var y=System.Text.Json.JsonSerializer.SerializeToElement(b).EnumerateArray().Select(n=>n.GetDouble()).ToArray();
+            return x.All(double.IsFinite)&&y.All(double.IsFinite)&&x.SequenceEqual(y);
+        }
+        catch(Exception e)when(e is InvalidOperationException or FormatException){return false;}
+    }
     static string Text(JsonObject o,string key)=>ArtifactProof.String(o,key,"solid_quarter_turn_proof_invalid");
     internal static (JsonObject Value,string Sha) Raw(string root,string id,string? sha=null)
     {
@@ -56,14 +70,14 @@ internal static class SolidQuarterTurnProof
     }
     internal static JsonObject Execution(string root,string id,string sha,bool terminal=false,bool general=false)
     {
-        var (receipt,_)=Raw(root,id,sha);Need(receipt["state"]?.GetValue<string>()=="owned_rotation_executed_unverified"&&Text(receipt,"operationId")==id&&ArtifactProof.Boolean(receipt["geometryMutationAttempted"],true)&&ArtifactProof.Boolean(receipt["contextChangeAttempted"],false)&&ArtifactProof.Boolean(receipt["cadSaveAttempted"],false)&&ArtifactProof.Boolean(receipt["geometryVerified"],false)&&ArtifactProof.IntegerIs(receipt["returnCode"],1)&&ArtifactProof.IntegerIs(receipt["commandCallsAttempted"],1));
+        var (receipt,_)=Raw(root,id,sha);if(receipt["state"]?.GetValue<string>()=="owned_rotation_outcome_unknown")return ReturnedRotationProof.Execution(root,id,sha,general);Need(receipt["state"]?.GetValue<string>()=="owned_rotation_executed_unverified"&&Text(receipt,"operationId")==id&&ArtifactProof.Boolean(receipt["geometryMutationAttempted"],true)&&ArtifactProof.Boolean(receipt["contextChangeAttempted"],false)&&ArtifactProof.Boolean(receipt["cadSaveAttempted"],false)&&ArtifactProof.Boolean(receipt["geometryVerified"],false)&&ArtifactProof.IntegerIs(receipt["returnCode"],1)&&ArtifactProof.IntegerIs(receipt["commandCallsAttempted"],1));
         var plan=ArtifactProof.Verified(root,"rotationexecutions",id,Text(receipt,"planSha256"),16000000);
         Need(JsonNode.DeepEquals(plan,receipt["plan"])&&Text(plan,"operationId")==id&&Text(plan,"operation")=="rotate_owned_entities"&&ArtifactProof.IntegerIs(plan["schemaVersion"],2)&&plan["targets"] is JsonArray targets&&targets.Count==1&&receipt["qualificationScope"]?.GetValue<string>()==ExecutionScope(plan,general));
         var prepared=Raw(root,Text(plan,"ownedRotationId"),Text(receipt,"preparationReceiptSha256")).Value;
         Need(JsonNode.DeepEquals(prepared["ownedRotationSha256"],plan["ownedRotationSha256"])&&JsonNode.DeepEquals(prepared["solidWitnessBundleSha256"],receipt["solidWitnessBundleSha256"])&&JsonNode.DeepEquals(prepared["qualificationScope"],receipt["qualificationScope"]));
         var packet=ArtifactProof.Verified(root,"ownedrotations",Text(plan,"ownedRotationId"),Text(plan,"ownedRotationSha256"),65536);
         var originalPlan=ArtifactProof.Verified(root,"rotationplans",Text(packet,"rotationPlanId"),Text(packet,"rotationPlanSha256"),65536);
-        Need(JsonNode.DeepEquals(plan["nativeAxis"],originalPlan["nativeAxis"])&&JsonNode.DeepEquals(plan["angleDegrees"],originalPlan["parameters"]!["angleDegrees"]));
+        Need(SameNativeAxis(plan["nativeAxis"],originalPlan["nativeAxis"])&&JsonNode.DeepEquals(plan["angleDegrees"],originalPlan["parameters"]!["angleDegrees"]));
         var journal=ArtifactProof.Journal(root,id);Need(Text(journal,"state")== (terminal?"succeeded_verified":"executed_unverified")&&ArtifactProof.Boolean(journal["writerLockPresent"],false)&&Text(journal,"planSha256")==Text(receipt,"planSha256"));
         return receipt;
     }
@@ -77,6 +91,7 @@ internal static class SolidQuarterTurnProof
     }
     internal static void CheckedVerification(string root,JsonObject result,JsonObject args,bool general=false)
     {
+        if(Raw(root,Text(args,"executionRequestId"),Text(args,"executionReceiptSha256")).Value["state"]?.GetValue<string>()=="owned_rotation_outcome_unknown"){ReturnedRotationProof.Verification(root,result,args,general);return;}
         var id=Text(args,"executionRequestId");var original=Execution(root,id,Text(args,"executionReceiptSha256"),true,general);var plan=original["plan"]!.AsObject();
         Need(result["state"]?.GetValue<string>()==VerificationStateFor(Text(original,"qualificationScope"))&&JsonNode.DeepEquals(result["qualificationScope"],original["qualificationScope"])&&Text(result,"executionRequestId")==id&&Text(result,"recordedJournalState")=="succeeded_verified"&&ArtifactProof.Boolean(result["copyFenceReleased"],true)&&ArtifactProof.Boolean(result["nativeConventionQualified"],true)&&ArtifactProof.Boolean(result["samplePostconditionsPassed"],true));
         foreach(var key in new[]{"geometryMutationAttempted","contextChangeAttempted","cadSaveAttempted","retryAllowed"})Need(ArtifactProof.Boolean(result[key],false));
