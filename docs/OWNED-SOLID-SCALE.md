@@ -2,6 +2,8 @@
 
 ## Additional live qualification: enlargement
 
+The subsequent [current-access restoration and new SaveAs](OWNED-SOLID-SCALE-RESTORE.md) saved this already enlarged result without repeating OPEN or scale. The unsaved limitation below describes the original enlargement checkpoint; separate reopen persistence remains open.
+
 On 24 October 2026 the unchanged qualified Native 0.45 / staged SDK 0.51 route enlarged one SOLID by **1.5 around WORLD [-7, 11, 5] mm** in one new owned saved-reopen copy. One OPEN and its independent verifier preceded one complete thirteen-phase scale; the separate scale verifier completed only the matching journal/fence. Ordinary Codex remained SDK 0.48.
 
 A separate getter reader and independent arithmetic/file/window/journal audit confirmed the six paired bounds `[5, 102.5, -3.25, 71.75, 0.5, 45.5]` mm, eight transformed source witnesses within the unchanged 0.01 mm document tolerance (maximum distance about 0.000313 mm), COG, raw area ×2.25 and volume ×3.375, and the retained observed health/inventory/unit fields. These are sampled observations; unknown area units remain raw and full topology equivalence is not claimed. The original 25 windows and 25 previously saved files remained; the new copy made 26 windows. The extended audit checked 304 protected file pins and all thirteen phases/six journal events.

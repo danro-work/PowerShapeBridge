@@ -11,6 +11,14 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_scale_restore_flag_and_dependencies_are_strict(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-solid-scale-restore.json').read_text(encoding='utf-8-sig'))
+        general_core(settings)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedSolidScaleRestoreExperimental': value})
+        for dependency in ('ownedSolidScalesExperimental', 'ownedSavedReopenExperimental', 'workingCopiesExperimental', 'documentBindingsExperimental'):
+            with self.subTest(dependency=dependency), self.assertRaises(ValueError): general_core({**settings, dependency: False})
+
     def test_saved_copy_close_flag_is_strict_full_sdk_only(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-saved-copy-close.json').read_text(encoding='utf-8-sig'))
         general_core(settings)

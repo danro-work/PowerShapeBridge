@@ -38,7 +38,7 @@ namespace PowerShapeBridge {
    var active=after["activeWindow"] as Dictionary<string,object>;if(active==null||!Equals(active["selectedRaw"],1)||rows.Count(w=>Key(w)==Key(active)&&Equals(w["selectedRaw"],1))!=1)throw new InvalidOperationException("Remaining active window not established.");
   }
   static Dictionary<string,object> Receipt(OwnedOperationPlans.Proofs p,string root,Dictionary<string,object> args,string id,string hash){return p.Json(Path.Combine(root,"responses",(string)args[id]+".json"),(string)args[hash],16777216);}
-  static OwnedSavedReopenLease Source(OwnedOperationPlans.Proofs p,string root,Dictionary<string,object> args,out Dictionary<string,object> verified){
+  internal static OwnedSavedReopenLease Source(OwnedOperationPlans.Proofs p,string root,Dictionary<string,object> args,out Dictionary<string,object> verified){
    verified=Receipt(p,root,args,"reopenVerificationRequestId","reopenVerificationReceiptSha256");
    if(!Equals(verified["state"],"owned_saved_reopen_verified_observed")||!Equals(verified["recordedJournalState"],"succeeded_verified")||!Equals(verified["copyId"],args["copyId"])||!Equals(verified["ownershipSha256"],args["ownershipSha256"]))throw new IOException("Verified saved-reopen ownership required.");
    var original=p.Json(Path.Combine(root,"responses",(string)verified["reopenOperationId"]+".json"),(string)verified["reopenReceiptSha256"],16777216);

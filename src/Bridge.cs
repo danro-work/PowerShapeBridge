@@ -48,6 +48,7 @@ namespace PowerShapeBridge
         public bool ownedSavedReopenExperimental { get; set; }
         public bool ownedSavedResultRestoreExperimental { get; set; }
         public bool ownedSavedCopyCloseExperimental { get; set; }
+        public bool ownedSolidScaleRestoreExperimental { get; set; }
         public bool checkpointRecoveryExperimental { get; set; }
         public bool ownedRotationPlansExperimental { get; set; }
         public bool ownedSolidQuarterTurnsExperimental { get; set; }
@@ -84,6 +85,7 @@ namespace PowerShapeBridge
             if(ownedSavesExperimental&&(!IsGeneralCore||!ownedSaveTargetsExperimental))throw new ArgumentException("Owned SaveAs execution requires prepared owned targets.");
             if(ownedSavedReopenExperimental&&(!IsGeneralCore||!ownedSavesExperimental||!workingCopyOpenExperimental))throw new ArgumentException("Saved reopen requires owned SaveAs and owned copy open.");
             if(ownedSavedResultRestoreExperimental&&(!IsGeneralCore||!ownedSavedReopenExperimental||!entitySetsExperimental||!documentBindingsExperimental))throw new ArgumentException("Saved-result restoration requires guarded reopen, candidates and bindings.");
+            if(ownedSolidScaleRestoreExperimental&&(!IsGeneralCore||!ownedSolidScalesExperimental||!ownedSavedReopenExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Scale restoration requires general qualified scale, saved reopen, candidates, copies and bindings.");
             if(ownedSavedCopyCloseExperimental&&(!IsGeneralCore||!ownedSavedReopenExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Saved-copy close requires guarded saved reopen, candidates, copies and bindings.");
             if(checkpointRecoveryExperimental&&(!IsGeneralCore||!workingCopiesExperimental))throw new ArgumentException("Checkpoint recovery requires general owned working copies.");
             if(ownedSolidRotationsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!operationPlansExperimental))throw new ArgumentException("Solid rotations require general owned rotation and operation plans.");
@@ -114,7 +116,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.45.0-dev";
+        public const string ReleaseVersion = "0.46.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -124,6 +126,10 @@ namespace PowerShapeBridge
         internal static Config ParseConfig(string text)
         {
             var raw=Json.Deserialize<Dictionary<string,object>>(text);object enabled;
+            if(raw!=null&&raw.TryGetValue("ownedSolidScaleRestoreExperimental",out enabled)) {
+                if(!(enabled is bool))throw new ArgumentException("Scale restoration flag must be JSON boolean.");
+                if((bool)enabled)foreach(string flag in new[]{"ownedSolidScalesExperimental","ownedSavedReopenExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Scale restoration dependencies must be true JSON booleans.");}
+            }
             if(raw!=null&&raw.TryGetValue("ownedSavedCopyCloseExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Saved-copy close flag must be JSON boolean.");
                 if((bool)enabled)foreach(string flag in new[]{"ownedSavedReopenExperimental","ownedSavesExperimental","ownedSaveTargetsExperimental","workingCopyOpenExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Saved-copy close dependencies must be true JSON booleans.");}
