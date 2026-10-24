@@ -1,3 +1,13 @@
+# Приоритет: ×1.5 enlargement ПРОШЁЛ; сохранить и проверить persistence без повтора scale
+
+Читать новый верх work/P0-local-state-20261017.md, затем work/K8-solid-enlargement-20261024/NEXT-WORK.md и evidence/K8-solid-enlargement-20261024/independent-audit.json. Одна НОВАЯ saved-reopen копия открыта и проверена, один MCP scale1.5 WORLD[-7,11,5] выполнен, отдельно проверен Native/verifier/getter/math/file/window/readonly.26окон, все прежние25 сохранены; geometry UNSAVED. live-once.py/run-independent.py/audit.py/prepare.py НЕ ПОВТОРЯТЬ; не закрывать активную изменённую Working и не подавать второй scale/OPEN ради свежих leases. Native45/stagedSDK51/ordinarySDK48 прежние, production pins совпадают с PR80. ОбеCI80SUCCESS, прежнюю.NET961 регрессию/зелёныеCI не перечитывать без изменения/риска.
+
+Следующий малый блок: проверить штатный способ восстановления текущих copy/binding leases для ЭТОЙ уже изменённой собственной saved-reopen копии после окончания STDIO-сессии. Исторический OPEN/binding — provenance, не свежая authority; old clean saved-reopen verification не подменяет проверку post-scale состояния. Если нужен provider, ограничить его original successful saved OPEN + successful qualified scale verifier + current retained document/process/files/observations; без CAD-команд/повтора scale и без ремонта прошлых журналов. Затем один SaveAs в НОВЫЙ файл и отдельная проверка сохранения. Reopen требует отдельной квалификации disposition собственного renamed saved result при26окнах: нынешний close принимает лишь unchanged original-named saved-reopen Working. Не расширять его молча и не повышать квоту автоматически. Всё разрешено продолжением доК11; мышь отдельно.
+
+После persistence — остальные углы/оси/коэффициенты/типы/наборы/организацияК8, остающиесяК9, вся5classК10, выпуск/личная приёмкаК11. P0 принят, человеческого действия сейчас нет. Публикация этого live qualification/CI — в локальной карте.
+
+## Предыдущие блоки (исторические; новый верх приоритетен)
+
 # Приоритет: MCP saved-copy close проверен; продолжить оставшуюся К8–К11
 
 Сначала новый верх work/P0-local-state-20261017.md, затем work/K9-mcp-saved-copy-close-20261024/NEXT-WORK.md. Реальный маршрут Native45/stagedSDK51 завершён: одна НОВАЯ saved-reopen копия открыта, проверена, закрыта и независимо close-verified.25→26→25окон, canonical saved result активен,251protected/25previousSavedfiles/новые seed-working-checkpoint неизменны. SaveAs/geometry/mouse0. live-once.py/audit-block.py/prepare-package.py НЕ ПОВТОРЯТЬ; old core-only c924 unknown/history сохранены. Исправленный executor post-hash путь теперь real-tested. OrdinarySDK48/настройка Codex прежние. Квота26 не повышалась.

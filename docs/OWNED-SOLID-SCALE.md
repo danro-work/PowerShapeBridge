@@ -1,5 +1,17 @@
 # Owned SOLID scale — experimental route
 
+## Additional live qualification: enlargement
+
+On 24 October 2026 the unchanged qualified Native 0.45 / staged SDK 0.51 route enlarged one SOLID by **1.5 around WORLD [-7, 11, 5] mm** in one new owned saved-reopen copy. One OPEN and its independent verifier preceded one complete thirteen-phase scale; the separate scale verifier completed only the matching journal/fence. Ordinary Codex remained SDK 0.48.
+
+A separate getter reader and independent arithmetic/file/window/journal audit confirmed the six paired bounds `[5, 102.5, -3.25, 71.75, 0.5, 45.5]` mm, eight transformed source witnesses within the unchanged 0.01 mm document tolerance (maximum distance about 0.000313 mm), COG, raw area ×2.25 and volume ×3.375, and the retained observed health/inventory/unit fields. These are sampled observations; unknown area units remain raw and full topology equivalence is not claimed. The original 25 windows and 25 previously saved files remained; the new copy made 26 windows. The extended audit checked 304 protected file pins and all thirteen phases/six journal events.
+
+**This enlarged geometry is unsaved.** No SaveAs, close or mouse occurred. Persistence/reopen is a separate checkpoint: renew current connection authority for this already modified owned copy, save to a new target, qualify its explicit window disposition, then reopen without exceeding the agreed quota. Do not repeat the completed OPEN or scale to obtain fresh leases. The narrow clean saved-reopen close profile cannot close this modified copy or a renamed SaveAs result.
+
+All production source/binary/config pins matched the already qualified PR80 revision; its two Windows CI checks and prior full .NET 961/961 were successful. That unchanged full suite was not rerun for this live qualification. The separate reader was compiled from the prior strict getter reader with class/report text changes only; actual context, files, bounds and points were checked live. This result adds enlargement coverage, not acceptance of every scale factor/type/set or K10/K11.
+
+## Existing route contract
+
 Native0.43 / SDK0.49 provide three separate tools behind `ownedSolidScalesExperimental`, false by default. The flag requires general core, passive uniform-scale and operation-plan dependencies. Registration is explicit: `ToolCatalog.Create(session)` includes `..SolidScaleTools.Create(session)`; the class returns three `StrictTool` instances. No route is registered by the read-only server.
 
 | Tool | Required connection-local inputs | Result |
