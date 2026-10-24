@@ -44,7 +44,10 @@ namespace PowerShapeBridge {
    if(!c.IsGeneralCore||!c.ownedSolidQuarterTurnsExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned solid quarter turn disabled or invalid envelope.");
    OwnedSolidQuarterTurn.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;
   }
-  if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedWorkplaneActivation.Recipes.Contains(a["recipeId"] as string)) {
+  if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedSelection.Recipes.Contains(a["recipeId"] as string)) {
+    if(!c.IsGeneralCore||!c.ownedSelectionsExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned selection disabled or invalid envelope.");OwnedSelection.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;
+   }
+   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedWorkplaneActivation.Recipes.Contains(a["recipeId"] as string)) {
    if(!c.IsGeneralCore||!c.ownedWorkplaneActivationExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned activation disabled or invalid envelope.");
    OwnedWorkplaneActivation.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;
   }
@@ -109,7 +112,8 @@ namespace PowerShapeBridge {
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSolidScale.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSolidScale.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSolidQuarterTurn.RotationRecipes.Contains(readArgs["recipeId"] as string))return OwnedSolidQuarterTurn.RunRotation(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSolidQuarterTurn.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSolidQuarterTurn.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
- if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedWorkplaneActivation.Recipes.Contains(readArgs["recipeId"] as string))return OwnedWorkplaneActivation.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
+ if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSelection.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSelection.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
+   if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedWorkplaneActivation.Recipes.Contains(readArgs["recipeId"] as string))return OwnedWorkplaneActivation.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedWorkplaneOperations.Recipes.Contains(readArgs["recipeId"] as string))return OwnedWorkplaneOperations.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedLevelMoveOperations.Recipes.Contains(readArgs["recipeId"] as string))return OwnedLevelMoveOperations.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&new[]{"prepare_checkpoint_recovery","create_checkpoint_working_copy"}.Contains(readArgs["recipeId"] as string))return CheckpointRecovery.Run(id,(Dictionary<string,object>)readArgs["parameters"],Equals(readArgs["recipeId"],"create_checkpoint_working_copy"));

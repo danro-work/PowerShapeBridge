@@ -32,6 +32,7 @@ public sealed class BridgeSession : IDisposable
     internal OwnedLevelMoveStore LevelMoves { get; }
     internal OwnedWorkplaneStore Workplanes { get; }
     internal OwnedWorkplaneActivationStore WorkplaneActivations { get; }
+    internal OwnedSelectionStore Selections { get; }
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     public bool LevelReadingEnabled { get; }
@@ -63,6 +64,7 @@ public sealed class BridgeSession : IDisposable
         LevelMoves=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         Workplanes=new(options.BridgeRoot,Bindings,clock,utcClock);
         WorkplaneActivations=new(options.BridgeRoot,Bindings,Candidates,clock,utcClock);
+        Selections=new(options.BridgeRoot,Bindings,Candidates,utcClock);
         var config=Options.ReadConfiguration();
         LevelReadingEnabled=config.TryGetProperty("levelReadingExperimental",out var levelFlag)&&levelFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;
@@ -84,6 +86,7 @@ public sealed class BridgeSession : IDisposable
                 ("ownedLevelMovesExperimental",new[]{"prepare_owned_level_move"}),
                 ("ownedWorkplanesExperimental",new[]{"prepare_owned_workplane"}),
                 ("ownedWorkplaneActivationExperimental",new[]{"prepare_owned_workplane_activation"}),
+                ("ownedSelectionsExperimental",new[]{"prepare_owned_selection"}),
                 ("ownedRotationPlansExperimental",new[]{"prepare_owned_rotation"}),
                 ("ownedSolidRotationsExperimental",new[]{"prepare_owned_solid_rotation","execute_owned_solid_rotation","verify_owned_solid_rotation"}),
                 ("ownedSolidQuarterTurnsExperimental",new[]{"prepare_owned_solid_quarter_turn","execute_owned_solid_quarter_turn","verify_owned_solid_quarter_turn"}),
@@ -103,6 +106,7 @@ public sealed class BridgeSession : IDisposable
         if(!options.ReadOnly&&config.TryGetProperty("ownedLevelMovesExperimental",out var levelMoves)&&levelMoves.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_level_move","verify_owned_level_move","adopt_owned_level_move_execution"});
         if(!options.ReadOnly&&config.TryGetProperty("ownedWorkplanesExperimental",out var workplanes)&&workplanes.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_workplane","verify_owned_workplane","adopt_owned_workplane_execution"});
         if(!options.ReadOnly&&config.TryGetProperty("ownedWorkplaneActivationExperimental",out var activation)&&activation.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_workplane_activation","verify_owned_workplane_activation","adopt_owned_workplane_activation_execution"});
+        if(!options.ReadOnly&&config.TryGetProperty("ownedSelectionsExperimental",out var selection)&&selection.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_selection","verify_owned_selection"});
         if(!options.ReadOnly&&config.TryGetProperty("ownedSavedResultCloseExperimental",out var resultClose)&&resultClose.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_saved_result_close","verify_owned_saved_result_close"});
         if(!options.ReadOnly&&config.TryGetProperty("ownedSavedFinalizationExperimental",out var finalize)&&finalize.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_saved_finalization","verify_owned_saved_finalization"});
         if(!options.ReadOnly&&config.TryGetProperty("ownedSavedCopyCloseExperimental",out var close)&&close.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_saved_copy_close","verify_owned_saved_copy_close"});
@@ -133,6 +137,7 @@ public sealed class BridgeSession : IDisposable
         LevelMoves.ClearPrepared();
         Workplanes.ClearPrepared();
         WorkplaneActivations.ClearPrepared();
+        Selections.Clear();
         SaveTargets.Clear();
         Reopens.Clear();
         if(consumeOwned){Plans.Clear();Owned.Clear();}
@@ -183,5 +188,5 @@ public sealed class BridgeSession : IDisposable
         }
         return result;
     }
-    public void Dispose(){WorkplaneActivations.Clear();Workplanes.Clear();LevelMoves.Clear();DgkTargets.Clear();SolidScales.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
+    public void Dispose(){Selections.Clear();WorkplaneActivations.Clear();Workplanes.Clear();LevelMoves.Clear();DgkTargets.Clear();SolidScales.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
 }

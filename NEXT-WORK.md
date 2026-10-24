@@ -1,3 +1,13 @@
+# Приоритет: owned select/clear и регрессия ПРОШЛИ; публикация/точная CI
+
+Читать актуальный верх work/P0-local-state-20261017.md и work/K8-owned-selection-20261024/NEXT-WORK.md. Авторитетные доказательства evidence/K8-owned-selection-20261024/live/result.json + independent-audit.json. Один select и один clear со своими независимыми verifiers уже завершены. Повторять нельзя без нового риска. Модель/геометрия/файлы и остальные25окон сохранены; активная та же собственная Working,26окон,WORLD,пустое выделение. Скрипт live-once.py ТЕРМИНАЛЬНЫЙ.
+
+Native50 установлен с резервной копией и одним panelrestart; stagedSDK56 sdk-time-reviewed, ordinarySDK48 прежний. Три новых full-only tools/default-false flag; publicprofile выключен,localruntime включён. Native strict-null reader не ослаблялся; отдельное count-zero proof. ИсходныйOPEN verifier обновляет копию при непустом выделении без новогоOPEN; после успешного selectionverifier нужен новый copylease/binding. Поддержка пока только sole SOLID/mm/WORLD/safeASCII name,без multiple/subentities/других типов.
+
+ЦелевыеNative10/SDK10/Python17/catalog67full8readonly и реальный блок/независимый аудит завершены; полная.NET1021/1021 и Native10lifecycle/21strict-reading прошли без ошибок/skip. Теперь новый PR поверхPR86/точная CI черезCodeReview. Не повторять обе успешныеCI86/CI85 или старую1011регрессию. Первоначальные исправленные отказы тестового harness/CI-stage пути сохранены, CAD не повторялся. Чужие16STATUS не включать. Далее продолжить оставшуюся матрицу типов/наборовК8 и К9 согласно согласованному плану,пять классовК10,release/личнаяК11; не считать одинSOLID общимv1. P0 принят,действия пользователя сейчас не нужны.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: negative oblique persistence ПРОШЁЛ; следующая областьК8 — selection
 
 Читать актуальный верх work/P0-local-state-20261017.md и work/K8-negative-oblique-persistence-20261024/NEXT-WORK.md; completed-block.json + independent-persistence-audit.json. Одна НОВАЯ SaveAs/отдельный verifier/readonly seal/один qualified finalization/отдельный verifier/одна generic копия от seed/один OPEN/отдельный verifier уже завершены. Независимый getter/read-only/OS-file-window-journal аудит подтвердил8UV+8нормалей+COG+8инвариантов+габариты в прежнем профиле,максимальная разница0. Текущая активная новая собственная копия содержит сохранённый отрицательный−30° WORLD поворот ось[1,2,3],центр[2,−3,4]. Всего26окон,остальные25сохранены.421актуальных file pins неизменны; отдельно разрешённое изменение сериализации только у собственного закрытого writer,canonical seed/checkpoint/newworking сохранены. Никаких повторов transform/SaveAs/close/OPEN ради handles. Все live/getter scripts завершены — НЕ ПОВТОРЯТЬ.
