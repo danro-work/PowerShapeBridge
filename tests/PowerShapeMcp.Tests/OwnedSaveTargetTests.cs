@@ -17,19 +17,20 @@ public sealed class OwnedSaveTargetTests
         public JsonObject Parameters { get; }
         public JsonObject Receipt { get; }
         public JsonObject Plan=>Receipt["target"]!.AsObject();
-        public TargetFixture(bool readOnly=false,bool enabled=true,bool saves=false,bool reopen=false,bool restore=false)
+        public TargetFixture(bool readOnly=false,bool enabled=true,bool saves=false,bool reopen=false,bool restore=false,bool close=false)
         {
             foreach(var flag in new[]{"entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"})Data.Files.Config[flag]=true;
             Data.Files.Config["ownedSaveTargetsExperimental"]=enabled;
             Data.Files.Config["ownedSavesExperimental"]=saves;
             if(reopen){Data.Files.Config["workingCopyOpenExperimental"]=true;Data.Files.Config["ownedSavedReopenExperimental"]=true;}
             if(restore)Data.Files.Config["ownedSavedResultRestoreExperimental"]=true;
+            if(close)Data.Files.Config["ownedSavedCopyCloseExperimental"]=true;
             // No session observes intermediate configuration. Publish once to
             // avoid redundant replacement of the same isolated fixture file.
             Data.Files.SaveConfig();
             // Fake replies fsync complete durable plans/journals. Allow a loaded
             // runner to finish those writes; dedicated DeadlineTests cover timing.
-            Session=new(Data.Files.Options(readOnly,5),()=>Data.Time,()=>Data.Utc);
+            Session=new(Data.Files.Options(readOnly,close?10:5),()=>Data.Time,()=>Data.Utc);
             var copies=Session.Copies;var candidates=Session.Candidates;Bindings=Session.Bindings;Targets=Session.SaveTargets;
             var copyId=Guid.NewGuid().ToString("N");var work=FileArtifacts.FixedPath(Data.Root,"workingcopies",copyId,"Working_"+copyId+".psmodel");
             var checkpoint=FileArtifacts.FixedPath(Data.Root,"workingcopies",copyId,"checkpoint","Before.psmodel");

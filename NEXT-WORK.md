@@ -1,3 +1,13 @@
+# Приоритет: MCP saved-copy close проверен; продолжить оставшуюся К8–К11
+
+Сначала новый верх work/P0-local-state-20261017.md, затем work/K9-mcp-saved-copy-close-20261024/NEXT-WORK.md. Реальный маршрут Native45/stagedSDK51 завершён: одна НОВАЯ saved-reopen копия открыта, проверена, закрыта и независимо close-verified.25→26→25окон, canonical saved result активен,251protected/25previousSavedfiles/новые seed-working-checkpoint неизменны. SaveAs/geometry/mouse0. live-once.py/audit-block.py/prepare-package.py НЕ ПОВТОРЯТЬ; old core-only c924 unknown/history сохранены. Исправленный executor post-hash путь теперь real-tested. OrdinarySDK48/настройка Codex прежние. Квота26 не повышалась.
+
+Native42+marker/Python13 и полная.NET961/961 прошли. Исходный targeted fixture-only отказ сохранён; повторный failedcase+officialSDKroute2/2 прошли до полной регрессии. Read-only8 не содержит close; experimental full61. ОбеCI79SUCCESS, не перечитывать. Сначала закончить текущую публикацию/точную новуюCI, сведения в локальной карте. После результата CI перейти к следующему малому незавершённому сценарию К8 по матрице (оставшиеся углы/оси, коэффициенты, типы/наборы, организация); затем остающиеся операции К9, полная матрица пяти классовК10, выпуск/личная приёмкаК11. Не повторять принятый P0.
+
+Close ограничен clean verified saved-reopen Working с исходным именем, active-last/single-view, canonical saved source открыт, WORLD/empty. Для unsaved transformed Working или renamed SaveAs Result текущий профиль недостаточен: отдельная квалификация провайдера/явная принадлежность и ненужность, без автоматического расширения или повышения квоты. Не закрывать acceptedP0, unsaved+45, fenced/unknownP2. Новый CAD-сценарий требует свежего контекста/leases; мышь — отдельного согласия. Человеческого действия сейчас нет, К11 не завершён.
+
+## Предыдущая очередь работ (историческая; новый верх имеет приоритет)
+
 # Приоритет: Native disposable saved-copy close проверен; подключить MCP
 
 Читать новый верх work/P0-local-state-20261017.md и evidence/K9-owned-saved-copy-close-20261024/completed-block.json. Один close собственной ненужной копии выполнен; отдельный verifier разрешил original unknown без повтора команды. Текущие25окон/канонический saved result/241protected/26savedbytes подтверждены. Native close core только staging, не queued/catalogued/deployed; installedNative44.1/ordinarySDK48/stagedSDK50.1 прежние. execute-command.json/prepare.py НЕ ПОВТОРЯТЬ. Поправка сравнения хешей проверена целевыми28fixtures и реальным отдельным verifier; новый executor post-hash путь ещё не real-tested.

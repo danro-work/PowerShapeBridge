@@ -1,6 +1,6 @@
 # Disposable saved-copy close qualification
 
-This is a Native qualification core, deliberately absent from the file queue and MCP tool catalog. Installed runtime and ordinary SDK configuration are unchanged. A public owned-close tool, session admission and transport fault qualification remain to be implemented.
+This document records the earlier Native-only qualification. At that checkpoint the core was deliberately absent from the file queue and MCP tool catalog, and runtime/SDK configuration was unchanged. The subsequent [full MCP integration](OWNED-SAVED-COPY-CLOSE-MCP.md) adds strict full-only admission and records a separate new live route test; the historical results below are retained.
 
 The profile accepts only an explicitly disposable, independently verified saved-reopen Working copy: original owned filename, one model view, active last window, original successful OPEN/verification/claim/journal, immutable saved-source/seed/working/checkpoint provenance and fresh process/document/window observations. The canonical saved source must still be open in another window. Historical artifacts supply provenance; the new explicit disposable-copy decision and fresh retained-context guards are separate. This does not restore an old edit lease or authorize closing user documents.
 
@@ -10,4 +10,4 @@ One actual close removed exactly the newly qualified duplicate window; its canon
 
 Qualification distinguishes the command's actual close and subsequent independent verification from the revised executor's post-comparison path: the latter correction has targeted regression checks and was not re-executed against CAD. Twenty-eight isolated window/input/hash checks plus marker refusal cover this core. They are not the full public-tool cancellation/replay/recovery fault matrix.
 
-Window/native IDs remain temporary. No full topology, generic unsaved discard, middle/multiple-view window close, arbitrary model close, automatic recovery or SDK tool availability is claimed. Future MCP integration needs strict full-only configuration and admission, one-use authority, all refusal/unknown/late/cancellation cases and one new bounded real route test.
+Window/native IDs remain temporary. This original core-only result does not claim full topology, generic unsaved discard, middle/multiple-view window close, arbitrary model close, automatic recovery or SDK availability. See the subsequent MCP integration for current tool availability and scoped transport checks; broader fault qualification remains open.
