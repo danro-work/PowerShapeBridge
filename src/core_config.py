@@ -39,6 +39,9 @@ def general_core(settings):
     scale_restore = settings.get('ownedSolidScaleRestoreExperimental', False)
     if type(scale_restore) is not bool or scale_restore and (profile != 'general-v1' or settings.get('ownedSolidScalesExperimental') is not True or reopens is not True or experimental is not True or copies is not True or bindings is not True):
         raise ValueError('Scale restoration requires qualified scale, saved reopen and boolean dependencies')
+    result_close = settings.get('ownedSavedResultCloseExperimental', False)
+    if type(result_close) is not bool or result_close and (profile != 'general-v1' or restore is not True or saves is not True or experimental is not True or copies is not True or bindings is not True):
+        raise ValueError('Saved Result close requires current saved-result restoration and boolean dependencies')
     close = settings.get('ownedSavedCopyCloseExperimental', False)
     if type(close) is not bool or close and (profile != 'general-v1' or reopens is not True or saves is not True or save_targets is not True or opens is not True or experimental is not True or copies is not True or bindings is not True):
         raise ValueError('Saved-copy close requires guarded saved reopen and boolean dependencies')
