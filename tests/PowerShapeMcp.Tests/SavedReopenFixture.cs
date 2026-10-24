@@ -6,7 +6,7 @@ namespace PowerShapeMcp.Tests;
 // Complete synthetic hash-chain/receipt fixture, opaque files only; no native COM.
 internal sealed class SavedReopenFixture
 {
-    internal readonly OwnedReopenTests.Fixture Data=new();
+    internal readonly OwnedReopenTests.Fixture Data;
     internal BridgeSession Session=>Data.Target.Session;
     internal string Root=>Data.Saved.Root;
     internal JsonObject Prepared { get; }
@@ -20,8 +20,9 @@ internal sealed class SavedReopenFixture
         var hash=ArtifactProof.Freeze(Root,"responses/"+id+".pending",receipt);
         File.Move(FileArtifacts.FixedPath(Root,"responses",id+".pending"),FileArtifacts.FixedPath(Root,"responses",id+".json"));return hash;
     }
-    internal SavedReopenFixture()
+    internal SavedReopenFixture(bool close=false)
     {
+        Data=new(close:close);
         Prepared=Data.Prepared();Handle=Session.Reopens.Issue(Prepared,Session.SavedResults.Parameters(Data.Handle),Data.Handle)["ownedReopenHandle"]!.GetValue<string>();
     }
     private void Append(string state,JsonObject details)

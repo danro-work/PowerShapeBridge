@@ -189,6 +189,7 @@ $taskFiles += @('src\CurrentSavedResultSource.cs','src\CurrentSavedResultSourceT
 $taskFiles += @('src\SavedReopenSource.cs','src\SavedResultRestoreTests.cs','src\PowerShapeMcp.Host\SavedResultObservationProof.cs','src\PowerShapeMcp.Host\SavedResultRestoreTools.cs','tests\PowerShapeMcp.Tests\SavedResultRestoreTests.cs','config\general-saved-result-restore.json','verify-saved-result-restore.ps1')
 $taskFiles += @('src\SavedReopenWindowPolicy.cs','verify-saved-reopen-window-policy.ps1')
 $taskFiles += @('src\OwnedSavedCopyClose.cs','src\OwnedSavedCopyCloseTests.cs','verify-owned-saved-copy-close.ps1')
+$taskFiles += @('src\PowerShapeMcp.Host\SavedCopyCloseProof.cs','src\PowerShapeMcp.Host\SavedCopyCloseTools.cs','tests\PowerShapeMcp.Tests\SavedCopyCloseTests.cs','config\general-owned-saved-copy-close.json')
 $taskFiles += @('src\OwnedSolidQuarterTurn.cs','src\PowerShapeMcp.Host\SolidQuarterTurnTools.cs','src\PowerShapeMcp.Host\SolidQuarterTurnProof.cs','src\PowerShapeMcp.Host\SolidQuarterTurnStore.cs','tests\PowerShapeMcp.Tests\SolidQuarterTurnRoutesTests.cs','tools\CheckSolidQuarterTurnBoundaries.cs','verify-solid-quarter-turn.ps1','config\general-solid-quarter-turn.json')
 $taskFiles += @('src\PowerShapeMcp.Host\SolidRotationTools.cs','tests\PowerShapeMcp.Tests\SolidRotationRoutesTests.cs','config\general-solid-rotation.json')
 $taskFiles += @('src\SolidRotationContext.cs','src\SolidRotationContextTests.cs','tools\ReadGuardedRotationSnapshots.cs','verify-solid-rotation-context.ps1')

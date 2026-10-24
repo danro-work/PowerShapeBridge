@@ -22,7 +22,16 @@ namespace PowerShapeBridge {
    foreach(object bad in new object[]{false,"true",1,null}){var v=new Dictionary<string,object>(args);v["discardOwnedTestCopy"]=bad;rejects(()=>OwnedSavedCopyClose.Validate(v));}
    var extra=new Dictionary<string,object>(args){{"command","FILE CLOSE ALL"}};rejects(()=>OwnedSavedCopyClose.Validate(extra));var foreign=new Dictionary<string,object>(args);foreign["copyId"]="../other";rejects(()=>OwnedSavedCopyClose.Validate(foreign));
    need(OwnedSavedCopyClose.Command=="FILE CLOSE SELECTED YES");
-   var saved=new Dictionary<string,string>{{"Own.psmodel","abc"}};need(OwnedSavedCopyClose.SavedHashesEqual(saved,new Dictionary<string,string>(saved)));need(OwnedSavedCopyClose.SavedHashesEqual(new Dictionary<string,object>{{"Own.psmodel","abc"}},saved));need(!OwnedSavedCopyClose.SavedHashesEqual(saved,new Dictionary<string,string>{{"Own.psmodel","changed"}}));need(!OwnedSavedCopyClose.SavedHashesEqual(saved,new Dictionary<string,string>()));need(!OwnedSavedCopyClose.SavedHashesEqual(saved,new Dictionary<string,string>{{"Other.psmodel","abc"}}));return n;
+   var saved=new Dictionary<string,string>{{"Own.psmodel","abc"}};need(OwnedSavedCopyClose.SavedHashesEqual(saved,new Dictionary<string,string>(saved)));need(OwnedSavedCopyClose.SavedHashesEqual(new Dictionary<string,object>{{"Own.psmodel","abc"}},saved));need(!OwnedSavedCopyClose.SavedHashesEqual(saved,new Dictionary<string,string>{{"Own.psmodel","changed"}}));need(!OwnedSavedCopyClose.SavedHashesEqual(saved,new Dictionary<string,string>()));need(!OwnedSavedCopyClose.SavedHashesEqual(saved,new Dictionary<string,string>{{"Other.psmodel","abc"}}));
+   if(Program.ReadConfig().ownedSavedCopyCloseExperimental){
+    var config=Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(Program.Root,"bridge.config.json")));var missing=new Dictionary<string,object>(config);missing.Remove("ownedSavedCopyCloseExperimental");need(!Program.ParseConfig(Program.Json.Serialize(missing)).ownedSavedCopyCloseExperimental);need(Program.ParseConfig(Program.Json.Serialize(config)).ownedSavedCopyCloseExperimental);
+    foreach(object bad in new object[]{"true",1,null}){var c=new Dictionary<string,object>(config);c["ownedSavedCopyCloseExperimental"]=bad;rejects(()=>Program.ParseConfig(Program.Json.Serialize(c)));}
+    foreach(string dep in new[]{"ownedSavedReopenExperimental","workingCopiesExperimental","documentBindingsExperimental"}){var c=new Dictionary<string,object>(config);c[dep]=false;rejects(()=>Program.ParseConfig(Program.Json.Serialize(c)));}
+    var v=new Dictionary<string,object>(args);foreach(string k in new[]{"reopenVerificationRequestId","reopenVerificationReceiptSha256","ownershipSha256","discardOwnedTestCopy"})v.Remove(k);v["closeRequestId"]=new string('c',32);v["closeReceiptSha256"]=new string('d',64);OwnedSavedCopyClose.ValidateVerification(v);n++;
+    foreach(var item in new[]{new{Recipe=OwnedSavedCopyClose.Recipes[0],Args=args},new{Recipe=OwnedSavedCopyClose.Recipes[1],Args=v}}){string id=Guid.NewGuid().ToString("N");FileRequests.Parse(id,Program.Json.Serialize(new{requestId=id,operation="recipe.prepare",arguments=new{recipeId=item.Recipe,parameters=item.Args}}));n++;var fail=OwnedSavedCopyClose.Run(id,item.Recipe,item.Args);need(Equals(fail["powerShapeConnectionAttempted"],false)&&Equals(fail["contextChangeAttempted"],false));}
+    var malformed=new Dictionary<string,object>(v){{"command","FILE CLOSE ALL"}};rejects(()=>OwnedSavedCopyClose.ValidateVerification(malformed));
+   }
+   return n;
   }
  }
 }

@@ -4,7 +4,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 if((Test-Path -LiteralPath $StageDirectory) -or (Test-Path -LiteralPath $EvidenceDirectory)){throw 'Fresh isolated close stage and evidence required.'}
-& (Join-Path $PSScriptRoot 'build.ps1') -OutputDirectory $StageDirectory -ConfigurationPath (Join-Path $PSScriptRoot 'config\general-saved-result-restore.json')
+& (Join-Path $PSScriptRoot 'build.ps1') -OutputDirectory $StageDirectory -ConfigurationPath (Join-Path $PSScriptRoot 'config\general-owned-saved-copy-close.json')
 New-Item -ItemType Directory -Path $EvidenceDirectory | Out-Null
 $taskOutput=& (Join-Path $StageDirectory 'PSBridge.Worker.exe') --owned-saved-copy-close-test
 $taskExit=$LASTEXITCODE
@@ -17,5 +17,5 @@ $taskExit=$LASTEXITCODE
 $taskOutput | Set-Content -LiteralPath (Join-Path $EvidenceDirectory 'targeted.json') -Encoding utf8
 if($taskExit -ne 0){throw 'Saved copy close guards failed.'}
 $taskResult=$taskOutput | ConvertFrom-Json
-if($taskResult.state -ne 'passed_owned_saved_copy_close_guards' -or $taskResult.checks -ne 28 -or $taskResult.cadCommands -ne 0){throw 'Incomplete close checks.'}
-Write-Output 'PASS: 28 disposable saved-copy close/window/hash guards; no CAD.'
+if($taskResult.state -ne 'passed_owned_saved_copy_close_guards' -or $taskResult.checks -ne 42 -or $taskResult.cadCommands -ne 0){throw 'Incomplete close checks.'}
+Write-Output 'PASS: 42 disposable saved-copy close/window/hash/config/wire guards; no CAD.'

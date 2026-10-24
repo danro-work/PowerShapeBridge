@@ -5,11 +5,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace PowerShapeBridge {
- // Qualification core only: deliberately absent from queue/catalog. This closes
+ // Narrow saved-reopen profile, separately gated in the full queue/SDK. This closes
  // one explicitly disposable verified saved-reopen copy, with its saved source
  // still open. No general document-close or unsaved-user-document authority.
  internal static class OwnedSavedCopyClose {
   internal const string Command="FILE CLOSE SELECTED YES";
+  internal static readonly string[] Recipes={"execute_owned_saved_copy_close","verify_owned_saved_copy_close"};
   internal interface IContext:IDisposable {Dictionary<string,object> Windows();Dictionary<string,object> Observation();void ConfirmDocument();void Close();}
   internal sealed class ComContext:IContext {
    object app,document;
@@ -23,6 +24,9 @@ namespace PowerShapeBridge {
   internal static void Validate(Dictionary<string,object> args){
    string[] ids={"copyId","reopenVerificationRequestId","inspectionRequestId","listingRequestId"},hashes={"ownershipSha256","reopenVerificationReceiptSha256","inspectionSha256","listingSha256"};
    if(args.Count!=10||ids.Any(k=>!args.ContainsKey(k)||!EntitySets.Hex(args[k],32))||hashes.Any(k=>!args.ContainsKey(k)||!EntitySets.Hex(args[k],64))||!args.ContainsKey("discardOwnedTestCopy")||!Equals(args["discardOwnedTestCopy"],true)||!args.ContainsKey("expiresUtc"))throw new ArgumentException("Explicit disposable saved-copy close parameters required.");EntitySets.Expiry(args["expiresUtc"]);
+  }
+  internal static void ValidateVerification(Dictionary<string,object> args){
+   if(args.Count!=8||new[]{"copyId","closeRequestId","inspectionRequestId","listingRequestId"}.Any(k=>!args.ContainsKey(k)||!EntitySets.Hex(args[k],32))||new[]{"closeReceiptSha256","inspectionSha256","listingSha256"}.Any(k=>!args.ContainsKey(k)||!EntitySets.Hex(args[k],64))||!args.ContainsKey("expiresUtc"))throw new ArgumentException("Exact independent native close-verification parameters required.");EntitySets.Expiry(args["expiresUtc"]);
   }
   static string Key(Dictionary<string,object> w){var copy=new Dictionary<string,object>(w);copy.Remove("nativeWindowId");copy.Remove("selectedRaw");return EntitySets.Canonical(copy);}
   internal static bool SavedHashesEqual(object before,Dictionary<string,string> after){var expected=Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(before));return expected.Count==after.Count&&after.All(p=>expected.ContainsKey(p.Key)&&Equals(expected[p.Key],p.Value));}
@@ -58,7 +62,7 @@ namespace PowerShapeBridge {
       if(OwnedCopies.Digest(intent.Copy.Work)!=(string)intent.Plan["workingSha256"])throw new IOException("Disposable working bytes differ from saved result.");
       string folder=Path.GetDirectoryName(intent.Copy.WorkingPath),once=Path.Combine(folder,"close-once.json"),fence=Path.Combine(folder,"mutation-fence.json");if(File.Exists(once))throw new IOException("Earlier close claim; replay forbidden.");
       Action check=()=>{intent.Recheck();OwnedSaveTargets.NoFence(root,(string)args["copyId"]);if(DocumentBindings.WindowDigest(context.Windows())!=DocumentBindings.WindowDigest(listing))throw new InvalidOperationException("Close window context changed.");EntitySets.CheckObserved(expected,context.Observation(),new int[0][],expiry,DateTime.UtcNow);context.ConfirmDocument();};check();check();
-      var saved=WorkingCopyOpen.SavedHashes(listing);Directory.CreateDirectory(Path.Combine(root,"ownedcloseplans"));var plan=new Dictionary<string,object>(args){{"schemaVersion",1},{"operationId",id},{"operation","close_disposable_saved_reopen_copy"},{"before",listing},{"savedFileHashesBefore",saved},{"command",Command},{"fullTopologyEquivalent",false}};string sha=NativeJournal.Freeze(Path.Combine(root,"ownedcloseplans",id+".json"),plan);
+      var saved=WorkingCopyOpen.SavedHashes(listing);Directory.CreateDirectory(Path.Combine(root,"ownedcloseplans"));var plan=new Dictionary<string,object>(args){{"schemaVersion",1},{"operationId",id},{"operation","close_disposable_saved_reopen_copy"},{"before",listing},{"savedFileHashesBefore",saved},{"command",Command},{"fullTopologyEquivalent",false}};if(System.Text.Encoding.UTF8.GetByteCount(Program.Json.Serialize(plan))>65536)throw new InvalidOperationException("Close plan size limit.");string sha=NativeJournal.Freeze(Path.Combine(root,"ownedcloseplans",id+".json"),plan);
       result["copyId"]=args["copyId"];result["planSha256"]=sha;result["before"]=listing;journal=new NativeJournal(root,id,sha);journal.Append("prepared",new Dictionary<string,object>{{"copyId",args["copyId"]}});check();result["executionClaimSha256"]=NativeJournal.Freeze(once,new Dictionary<string,object>{{"operationId",id},{"planSha256",sha},{"automaticReplayForbidden",true}});result["executionFenceSha256"]=NativeJournal.Freeze(fence,new Dictionary<string,object>{{"operationId",id},{"planSha256",sha},{"reason","Owned saved-copy close awaiting independent verification"}});
       journal.Append("execution_claimed",new Dictionary<string,object>{{"copyId",args["copyId"]}});result["contextChangeAttempted"]=true;journal.Append("command_started",new Dictionary<string,object>{{"nativeRequestId",id}});context.Close();journal.Append("command_returned",new Dictionary<string,object>{{"nativeRequestId",id}});
       var after=context.Windows();result["after"]=after;CheckAfter(listing,after,target);intent.Recheck();var hashes=WorkingCopyOpen.SavedHashes(listing);if(!SavedHashesEqual(saved,hashes))throw new IOException("Saved file changed during close.");journal.Append("executed_unverified",new Dictionary<string,object>{{"closedModelId",target},{"noAutomaticReplay",true}});
@@ -70,7 +74,7 @@ namespace PowerShapeBridge {
   }
   internal static Dictionary<string,object> Verify(string root,string id,Dictionary<string,object> args,IContext context){
    // Separate fresh observations, no close command, no activation or save.
-   if(!(context is ComContext)||!EntitySets.Hex(id,32)||args.Count!=8||new[]{"copyId","closeRequestId","inspectionRequestId","listingRequestId"}.Any(k=>!args.ContainsKey(k)||!EntitySets.Hex(args[k],32))||new[]{"closeReceiptSha256","inspectionSha256","listingSha256"}.Any(k=>!args.ContainsKey(k)||!EntitySets.Hex(args[k],64))||!args.ContainsKey("expiresUtc"))throw new ArgumentException("Exact independent native close-verification parameters required.");
+   ValidateVerification(args);if(!(context is ComContext)||!EntitySets.Hex(id,32))throw new ArgumentException("Independent native close-verification context required.");
    using(var proofs=new OwnedOperationPlans.Proofs()){
     var original=Receipt(proofs,root,args,"closeRequestId","closeReceiptSha256");if(!new[]{"owned_saved_copy_closed_unverified","owned_saved_copy_close_outcome_unknown"}.Contains((string)original["state"])||!Equals(original["operationId"],args["closeRequestId"])||!Equals(original["nativeProviderQualified"],true)||!Equals(original["contextChangeAttempted"],true)||!Equals(original["cadSaveAttempted"],false)||!Equals(original["geometryMutationAttempted"],false))throw new IOException("Original attempted native close receipt required.");
     string operation=(string)args["closeRequestId"];var heldClaim=proofs.Json(Path.Combine(root,"workingcopies",(string)args["copyId"],"close-once.json"),(string)original["executionClaimSha256"]);string planSha=(string)heldClaim["planSha256"];if(!Equals(heldClaim["operationId"],operation)||original.ContainsKey("planSha256")&&!Equals(original["planSha256"],planSha))throw new IOException("Close claim/receipt plan differs.");
@@ -87,6 +91,20 @@ namespace PowerShapeBridge {
      NativeJournal.VerifiedJson(fence,(string)original["executionFenceSha256"],65536);File.Delete(fence);return new Dictionary<string,object>{{"state","owned_saved_copy_close_verified"},{"verificationId",id},{"operationId",operation},{"planSha256",planSha},{"copyId",plan["copyId"]},{"recordedJournalState",journal.State},{"savedFilesUnchanged",true},{"noCommandReplay",true},{"nativeProviderQualified",true},{"coreOnlyQualification",true},{"cadSaveAttempted",false},{"contextChangeAttempted",false},{"geometryMutationAttempted",false},{"timestampUtc",DateTime.UtcNow.ToString("o")}};
     }
    }
+  }
+  internal static Dictionary<string,object> Run(string id,string recipe,Dictionary<string,object> args){
+   bool verify=recipe==Recipes[1];bool connected=false;
+   try{
+    var config=Program.ReadConfig();if(!config.IsGeneralCore||!config.ownedSavedCopyCloseExperimental||!Recipes.Contains(recipe))throw new InvalidOperationException("Saved-copy close disabled.");if(verify)ValidateVerification(args);else Validate(args);
+    Directory.CreateDirectory(Path.Combine(Program.Root,"operations"));using(var guard=new FileStream(Path.Combine(Program.Root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None)){
+     // Reject provenance/absent-return faults before attaching to PowerShape.
+     using(var proofs=new OwnedOperationPlans.Proofs()){
+      if(verify){var raw=Receipt(proofs,Program.Root,args,"closeRequestId","closeReceiptSha256");var claim=proofs.Json(Path.Combine(Program.Root,"workingcopies",(string)args["copyId"],"close-once.json"),(string)raw["executionClaimSha256"]);var j=NativeJournal.ForVerification(Program.Root,(string)args["closeRequestId"],(string)claim["planSha256"]);if(!new[]{"executed_unverified","outcome_unknown"}.Contains(j.State)||!Equals(j.CommandReturnedDetails["nativeRequestId"],args["closeRequestId"]))throw new IOException("Returned pending close required.");}
+      else{Dictionary<string,object> original;using(var source=Source(proofs,Program.Root,args,out original)){source.Recheck();OwnedSaveTargets.NoFence(Program.Root,(string)args["copyId"]);}}
+     }
+     connected=true;using(var context=new ComContext(config)){var result=verify?Verify(Program.Root,id,args,context):Execute(Program.Root,id,args,context);result["coreOnlyQualification"]=false;result["queueQualifiedRoute"]=true;result["bridgeVersion"]=Program.ReleaseVersion;result["powerShapeConnectionAttempted"]=true;return result;}
+    }
+   }catch(Exception error){return new Dictionary<string,object>{{"state",verify?"owned_saved_copy_close_verification_rejected":"owned_saved_copy_close_rejected"},{"error",error.Message},{"operationId",id},{"cadSaveAttempted",false},{"geometryMutationAttempted",false},{"contextChangeAttempted",false},{"powerShapeConnectionAttempted",connected},{"retryAllowed",false},{"coreOnlyQualification",false},{"queueQualifiedRoute",true},{"timestampUtc",DateTime.UtcNow.ToString("o")}};}
   }
  }
 }
