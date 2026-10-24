@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <Version>0.52.0-dev</Version>
+    <Version>0.53.0-dev</Version>
   </PropertyGroup>
   <ItemGroup><InternalsVisibleTo Include="NativeFixtureCheck" /></ItemGroup>
   <ItemGroup>

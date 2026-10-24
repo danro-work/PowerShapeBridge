@@ -23,7 +23,7 @@ namespace PowerShapeBridge {
     string root=Program.Root;Directory.CreateDirectory(Path.Combine(root,"operations"));
     using(var guard=new FileStream(Path.Combine(root,"operations","executor.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None))
     using(var source=new OwnedSavedSource(root,new Dictionary<string,object>{{"verificationRequestId",args["verificationRequestId"]},{"verificationReceiptSha256",args["verificationReceiptSha256"]}},true)){
-     source.Recheck(); // File/journal dependencies before any COM attachment.
+     source.Recheck();OwnedSavedResultClose.NoPending(root,(string)source.Verified["targetId"]); // File/journal dependencies before any COM attachment.
      using(var context=new DocumentBindings.ComContext(config))return Observe(root,id,args,context);
     }
    }catch(Exception error){return new Dictionary<string,object>{{"state","current_saved_result_observation_rejected"},{"error",error.Message},{"executionAuthority",false},{"sdkLeaseIssued",false},{"cadSaveAttempted",false},{"contextChangeAttempted",false},{"geometryMutationAttempted",false},{"retryAllowed",false},{"localArtifactsMayExist",true},{"timestampUtc",DateTime.UtcNow.ToString("o")},{"bridgeVersion",Program.ReleaseVersion}};}
@@ -33,6 +33,7 @@ namespace PowerShapeBridge {
    string folder=Path.Combine(root,"savedresultobservations"),path=Path.Combine(folder,id+".json");OwnedCopies.NoReparse(path);Need(!File.Exists(path)&&!Directory.Exists(path),"Observation identity already exists; no overwrite.");
    var sourceArgs=new Dictionary<string,object>{{"verificationRequestId",args["verificationRequestId"]},{"verificationReceiptSha256",args["verificationReceiptSha256"]}};
    using(var source=new OwnedSavedSource(root,sourceArgs,true))using(var proofs=new OwnedOperationPlans.Proofs()){
+    OwnedSavedResultClose.NoPending(root,(string)source.Verified["targetId"]);
     var expected=proofs.Json(Path.Combine(root,"responses",(string)args["inspectionRequestId"]+".json"),(string)args["inspectionSha256"],16777216);
     var listing=proofs.Json(Path.Combine(root,"responses",(string)args["listingRequestId"]+".json"),(string)args["listingSha256"],16777216);
     DateTime expiry=EntitySets.Expiry(args["expiresUtc"]),now=DateTime.UtcNow,issued=EntitySets.Expiry(listing["timestampUtc"]);

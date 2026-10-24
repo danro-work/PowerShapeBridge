@@ -10,7 +10,7 @@ internal static class SavedCopyCloseProof
     private static JsonObject Read(string root,string id)=>JsonNode.Parse(FileArtifacts.ReadBytes(root,"responses/"+id+".json",16777216))!.AsObject();
     private static JsonObject Pinned(string root,JsonObject refs,string id,string sha)=>ArtifactProof.Verified(root,"responses",Text(refs,id),Text(refs,sha),16777216);
     private static DateTimeOffset Expiry(params JsonObject[] sources)=>sources.Select(o=>LeaseTime.Parse(Text(o,"expiresUtc"),Code)).Min();
-    private static JsonObject Fresh(BridgeSession s,JsonObject input,out JsonObject choice)
+    internal static JsonObject Fresh(BridgeSession s,JsonObject input,out JsonObject choice)
     {
         var observation=s.Candidates.DocumentParameters(Text(input,"candidateDocumentHandle"));choice=s.Documents.Consume(Text(input,"activeDocumentHandle"));
         var raw=Pinned(s.Options.BridgeRoot,observation,"inspectionRequestId","inspectionSha256");var listing=Pinned(s.Options.BridgeRoot,choice,"listingRequestId","listingSha256");
@@ -51,7 +51,7 @@ internal static class SavedCopyCloseProof
         if(receipt["planSha256"]is not null)Need(JsonNode.DeepEquals(receipt["planSha256"],claim["planSha256"]));return plan;
     }
     private static JsonObject WindowKey(JsonObject row){var copy=row.DeepClone().AsObject();copy.Remove("nativeWindowId");copy.Remove("selectedRaw");return copy;}
-    private static void WindowResult(JsonObject before,JsonObject after,int target)
+    internal static void WindowResult(JsonObject before,JsonObject after,int target)
     {
         foreach(var key in new[]{"processId","processStartedUtc","windowsSessionId"})Need(JsonNode.DeepEquals(before[key],after[key]));var old=before["windows"]!.AsArray().Select(v=>v!.AsObject()).ToArray();var rows=after["windows"]!.AsArray().Select(v=>v!.AsObject()).ToArray();
         Need(old.Count(w=>ArtifactProof.IntegerIs(w["modelId"],target))==1&&rows.Length==old.Length-1&&rows.Length>=1&&ArtifactProof.IntegerIs(before["windowCount"],old.Length)&&ArtifactProof.IntegerIs(after["windowCount"],rows.Length)&&!rows.Any(w=>ArtifactProof.IntegerIs(w["modelId"],target))&&rows.Select(w=>w["nativeWindowId"]!.ToJsonString()).Distinct().Count()==rows.Length&&rows.Count(w=>ArtifactProof.IntegerIs(w["selectedRaw"],1))==1);

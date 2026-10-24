@@ -11,6 +11,16 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_saved_result_close_strict_boolean_dependencies(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-saved-result-close.json').read_text(encoding='utf-8-sig'))
+        general_core(settings)
+        settings['ownedSavedResultCloseExperimental'] = True
+        general_core(settings)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedSavedResultCloseExperimental': value})
+        for field in ('ownedSavedResultRestoreExperimental', 'ownedSavesExperimental', 'workingCopiesExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError): general_core({**settings, field: False})
+
     def test_scale_restore_flag_and_dependencies_are_strict(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-solid-scale-restore.json').read_text(encoding='utf-8-sig'))
         general_core(settings)

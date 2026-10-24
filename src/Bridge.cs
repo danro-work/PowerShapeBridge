@@ -48,6 +48,7 @@ namespace PowerShapeBridge
         public bool ownedSavedReopenExperimental { get; set; }
         public bool ownedSavedResultRestoreExperimental { get; set; }
         public bool ownedSavedCopyCloseExperimental { get; set; }
+        public bool ownedSavedResultCloseExperimental { get; set; }
         public bool ownedSolidScaleRestoreExperimental { get; set; }
         public bool checkpointRecoveryExperimental { get; set; }
         public bool ownedRotationPlansExperimental { get; set; }
@@ -86,6 +87,7 @@ namespace PowerShapeBridge
             if(ownedSavedReopenExperimental&&(!IsGeneralCore||!ownedSavesExperimental||!workingCopyOpenExperimental))throw new ArgumentException("Saved reopen requires owned SaveAs and owned copy open.");
             if(ownedSavedResultRestoreExperimental&&(!IsGeneralCore||!ownedSavedReopenExperimental||!entitySetsExperimental||!documentBindingsExperimental))throw new ArgumentException("Saved-result restoration requires guarded reopen, candidates and bindings.");
             if(ownedSolidScaleRestoreExperimental&&(!IsGeneralCore||!ownedSolidScalesExperimental||!ownedSavedReopenExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Scale restoration requires general qualified scale, saved reopen, candidates, copies and bindings.");
+            if(ownedSavedResultCloseExperimental&&(!IsGeneralCore||!ownedSavedResultRestoreExperimental||!ownedSavesExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Saved Result close requires current saved-result restoration and general owned context.");
             if(ownedSavedCopyCloseExperimental&&(!IsGeneralCore||!ownedSavedReopenExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Saved-copy close requires guarded saved reopen, candidates, copies and bindings.");
             if(checkpointRecoveryExperimental&&(!IsGeneralCore||!workingCopiesExperimental))throw new ArgumentException("Checkpoint recovery requires general owned working copies.");
             if(ownedSolidRotationsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!operationPlansExperimental))throw new ArgumentException("Solid rotations require general owned rotation and operation plans.");
@@ -116,7 +118,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.46.0-dev";
+        public const string ReleaseVersion = "0.47.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -129,6 +131,10 @@ namespace PowerShapeBridge
             if(raw!=null&&raw.TryGetValue("ownedSolidScaleRestoreExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Scale restoration flag must be JSON boolean.");
                 if((bool)enabled)foreach(string flag in new[]{"ownedSolidScalesExperimental","ownedSavedReopenExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Scale restoration dependencies must be true JSON booleans.");}
+            }
+            if(raw!=null&&raw.TryGetValue("ownedSavedResultCloseExperimental",out enabled)) {
+                if(!(enabled is bool))throw new ArgumentException("Saved Result close flag must be JSON boolean.");
+                if((bool)enabled)foreach(string flag in new[]{"ownedSavedResultRestoreExperimental","ownedSavesExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Saved Result close dependencies must be true JSON booleans.");}
             }
             if(raw!=null&&raw.TryGetValue("ownedSavedCopyCloseExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Saved-copy close flag must be JSON boolean.");
@@ -296,6 +302,9 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--solid-scale-measurement-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{SolidScaleMembershipMeasurementTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--owned-saved-result-close-test") {
+                try{Console.WriteLine(Json.Serialize(new{state="passed_owned_saved_result_close_guards",checks=OwnedSavedResultCloseTests.Run(),cadCommands=0}));return 0;}catch(Exception e){Console.WriteLine(Json.Serialize(new{state="rejected_owned_saved_result_close_guards",error=e.ToString(),cadCommands=0}));return 3;}
             }
             if(args.Length==1&&args[0]=="--owned-saved-copy-close-test") {
                 try{Console.WriteLine(Json.Serialize(new{state="passed_owned_saved_copy_close_guards",checks=OwnedSavedCopyCloseTests.Run(),cadCommands=0}));return 0;}catch(Exception e){Console.WriteLine(Json.Serialize(new{state="rejected_owned_saved_copy_close_guards",error=e.ToString(),cadCommands=0}));return 3;}

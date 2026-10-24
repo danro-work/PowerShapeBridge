@@ -103,6 +103,7 @@ public sealed class BridgeSession : IDisposable
         if(!options.ReadOnly&&config.TryGetProperty("ownedLevelMovesExperimental",out var levelMoves)&&levelMoves.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_level_move","verify_owned_level_move","adopt_owned_level_move_execution"});
         if(!options.ReadOnly&&config.TryGetProperty("ownedWorkplanesExperimental",out var workplanes)&&workplanes.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_workplane","verify_owned_workplane","adopt_owned_workplane_execution"});
         if(!options.ReadOnly&&config.TryGetProperty("ownedWorkplaneActivationExperimental",out var activation)&&activation.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_workplane_activation","verify_owned_workplane_activation","adopt_owned_workplane_activation_execution"});
+        if(!options.ReadOnly&&config.TryGetProperty("ownedSavedResultCloseExperimental",out var resultClose)&&resultClose.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_saved_result_close","verify_owned_saved_result_close"});
         if(!options.ReadOnly&&config.TryGetProperty("ownedSavedCopyCloseExperimental",out var close)&&close.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(new[]{"execute_owned_saved_copy_close","verify_owned_saved_copy_close"});
     }
     public void AssertToolAllowed(string name)
