@@ -48,6 +48,7 @@ namespace PowerShapeBridge {
   }
   internal sealed class ExecutionContext : OwnedRotationExecution.IContext {
    readonly ReadContext reader;readonly IWriteContext writer;bool consumed;
+   internal bool IsNativeProvider {get{return reader.IsNativeProvider;}}
    internal ExecutionContext(IWriteContext context,Dictionary<string,object> expected,Dictionary<string,object> descriptor,string windowContextSha256){writer=context;reader=new ReadContext(context,expected,descriptor,windowContextSha256);}
    public Dictionary<string,object> Observation(){return reader.Observation();}
    public Dictionary<string,object> Windows(){return reader.Windows();}
