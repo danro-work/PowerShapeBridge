@@ -42,6 +42,9 @@ def general_core(settings):
     result_close = settings.get('ownedSavedResultCloseExperimental', False)
     if type(result_close) is not bool or result_close and (profile != 'general-v1' or restore is not True or saves is not True or experimental is not True or copies is not True or bindings is not True):
         raise ValueError('Saved Result close requires current saved-result restoration and boolean dependencies')
+    finalize = settings.get('ownedSavedFinalizationExperimental', False)
+    if type(finalize) is not bool or finalize and (profile != 'general-v1' or restore is not True or reopens is not True or saves is not True or experimental is not True or copies is not True or bindings is not True):
+        raise ValueError('Saved finalization requires sealed saved reopen and current saved-result restoration')
     close = settings.get('ownedSavedCopyCloseExperimental', False)
     if type(close) is not bool or close and (profile != 'general-v1' or reopens is not True or saves is not True or save_targets is not True or opens is not True or experimental is not True or copies is not True or bindings is not True):
         raise ValueError('Saved-copy close requires guarded saved reopen and boolean dependencies')

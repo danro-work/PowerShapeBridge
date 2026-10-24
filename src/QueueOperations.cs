@@ -17,6 +17,9 @@ namespace PowerShapeBridge {
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedSavedResultClose.Recipes.Contains(a["recipeId"] as string)) {
    if(!c.IsGeneralCore||!c.ownedSavedResultCloseExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Saved Result close disabled or invalid envelope.");OwnedSavedResultClose.Validate((Dictionary<string,object>)a["parameters"],Equals(a["recipeId"],OwnedSavedResultClose.Recipes[1]));return;
   }
+  if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedSavedFinalization.Recipes.Contains(a["recipeId"] as string)) {
+   if(!c.IsGeneralCore||!c.ownedSavedFinalizationExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Saved Result close disabled or invalid envelope.");OwnedSavedFinalization.Validate((Dictionary<string,object>)a["parameters"],Equals(a["recipeId"],OwnedSavedFinalization.Recipes[1]));return;
+  }
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedSavedCopyClose.Recipes.Contains(a["recipeId"] as string)) {
    if(!c.IsGeneralCore||!c.ownedSavedCopyCloseExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Saved-copy close disabled or invalid envelope.");
    if(Equals(a["recipeId"],OwnedSavedCopyClose.Recipes[0]))OwnedSavedCopyClose.Validate((Dictionary<string,object>)a["parameters"]);else OwnedSavedCopyClose.ValidateVerification((Dictionary<string,object>)a["parameters"]);return;
@@ -114,6 +117,7 @@ namespace PowerShapeBridge {
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"prepare_owned_saved_reopen"))return OwnedSavedReopen.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],OwnedScaleRestoration.Recipe))return OwnedScaleRestoration.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSavedResultClose.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSavedResultClose.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
+ if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSavedFinalization.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSavedFinalization.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSavedCopyClose.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSavedCopyClose.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"execute_owned_saved_reopen"))return OwnedSavedReopenExecution.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"verify_owned_saved_reopen"))return OwnedSavedReopenVerification.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
