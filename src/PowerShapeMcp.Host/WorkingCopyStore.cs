@@ -80,6 +80,13 @@ public sealed class WorkingCopyStore(Func<double>? clock=null,Func<DateTimeOffse
         double seconds=Math.Min(Math.Min(time.Remaining,300),(expiry-LeaseTime.PythonPrecision(utcNow())).TotalSeconds);
         if(seconds<=0)throw new ReferenceRejected("adoption_expired");return IssueLease(result,seconds);
     }
+    internal JsonObject IssueRestoredScale(JsonObject result)
+    {
+        const string code="scale_restore_copy_lease_invalid";
+        if(result["state"]?.GetValue<string>()!="owned_solid_scale_restored_observed"||result["restorationScope"]?.GetValue<string>()!=ScaleRestoreProof.Scope||!ArtifactProof.Boolean(result["originalJournalModified"],false)||!ArtifactProof.Boolean(result["geometrySaved"],false)||!ArtifactProof.Boolean(result["noCommandReplay"],true))throw new ReferenceRejected(code);
+        var time=LeaseTime.Remaining(ArtifactProof.String(result,"timestampUtc",code),utcNow(),code);var expiry=LeaseTime.Parse(ArtifactProof.String(result,"expiresUtc",code),code);
+        var seconds=Math.Min(time.Remaining,(expiry-LeaseTime.PythonPrecision(utcNow())).TotalSeconds);if(seconds<=0||seconds>300)throw new ReferenceRejected(code);return IssueLease(result,seconds);
+    }
     private JsonObject IssueLease(JsonObject result,double seconds)
     {
         Purge();if(copies.Count>=128)Clear();var handle=Guid.NewGuid().ToString("N");

@@ -79,6 +79,7 @@ public sealed class BridgeSession : IDisposable
                 ("uniformScalePlansExperimental",new[]{"prepare_uniform_scale_plan"}),
                 ("ownedUniformScalePlansExperimental",new[]{"prepare_owned_uniform_scale"}),
                 ("ownedSolidScalesExperimental",new[]{"prepare_owned_solid_scale","execute_owned_solid_scale","verify_owned_solid_scale"}),
+                ("ownedSolidScaleRestoreExperimental",new[]{"restore_owned_solid_scale"}),
                 ("ownedDgkTargetsExperimental",new[]{"prepare_owned_dgk_export"}),
                 ("ownedLevelMovesExperimental",new[]{"prepare_owned_level_move"}),
                 ("ownedWorkplanesExperimental",new[]{"prepare_owned_workplane"}),

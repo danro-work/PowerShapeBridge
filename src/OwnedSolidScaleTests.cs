@@ -39,7 +39,13 @@ namespace PowerShapeBridge {
    int before=ok.C.Calls;var replay=OwnedSolidScale.Execute(ok.Root,Guid.NewGuid().ToString("N"),ok.References,ok.C);check(Equals(replay["state"],"owned_solid_scale_rejected_before_change")&&Equals(replay["commandCallsAttempted"],0)&&ok.C.Calls==before);
    var bad=Clone(args);bad["executionReceiptSha256"]=new string('a',64);var rejected=OwnedSolidScale.Verify(ok.Root,Guid.NewGuid().ToString("N"),bad,ok.C);check(Equals(rejected["state"],"owned_solid_scale_verification_rejected")&&File.Exists(ok.Fence));
    var previous=System.Globalization.CultureInfo.CurrentCulture;try{System.Globalization.CultureInfo.CurrentCulture=System.Globalization.CultureInfo.GetCultureInfo("ru-RU");var p=new SolidUniformScaleProgram("1",0.5,new[]{2.5,3.5,4.5});check(p.Commands[2]=="NOKEEP"&&p.Commands[8]=="2.5 3.5 4.5"&&p.Commands[9]=="VALUE 0.5");p.Take(0);bool refused=false;try{p.Take(0);}catch(InvalidOperationException){refused=true;}check(refused);p.Abort();refused=false;try{p.Take(1);}catch(InvalidOperationException){refused=true;}check(refused);}finally{System.Globalization.CultureInfo.CurrentCulture=previous;}
-   Console.WriteLine("PASS: "+checks+" owned SOLID scale once/phase-stop/independent-fake-verifier checks; no CAD.");return checks;
+   var restoration=Clone(args);restoration["scaleVerificationRequestId"]=Guid.NewGuid().ToString("N");restoration["scaleVerificationReceiptSha256"]=new string('a',64);check(OwnedScaleRestoration.Common(restoration).Count==9);
+   foreach(string key in new[]{"scaleVerificationRequestId","scaleVerificationReceiptSha256"}){var invalid=Clone(restoration);invalid[key]="bad";bool refused=false;try{OwnedScaleRestoration.Common(invalid);}catch(InvalidDataException){refused=true;}check(refused);}
+   var extra=Clone(restoration);extra["permitReplay"]=true;bool extraRefused=false;try{OwnedScaleRestoration.Common(extra);}catch(InvalidDataException){extraRefused=true;}check(extraRefused);
+   var restoreRejected=OwnedSolidScale.Verify(ok.Root,Guid.NewGuid().ToString("N"),restoration,ok.C,true);check(Equals(restoreRejected["state"],"owned_solid_scale_restore_rejected")&&File.Exists(ok.Fence)&&ok.C.Calls==before);
+   var cfg=Program.ReadConfig();check(!cfg.ownedSolidScaleRestoreExperimental);var configRaw=Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(Program.Root,"bridge.config.json")));
+   foreach(object coerced in new object[]{"true",1,null}){configRaw["ownedSolidScaleRestoreExperimental"]=coerced;bool refused=false;try{Program.ParseConfig(Program.Json.Serialize(configRaw));}catch(ArgumentException){refused=true;}check(refused);}
+   Console.WriteLine("PASS: "+checks+" owned SOLID scale once/phase-stop/independent-fake-verifier/restoration refusal checks; no CAD.");return checks;
   }
  }
 }
