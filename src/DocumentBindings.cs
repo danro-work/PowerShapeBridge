@@ -17,7 +17,7 @@ namespace PowerShapeBridge {
    Dictionary<string,object> Observation();
    void ConfirmDocument();
   }
-  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,SolidRotationContext.IWriteContext,OwnedSolidScale.IExecutionContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext {
+  internal sealed class ComContext : OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,SolidRotationContext.IWriteContext,OwnedSolidScale.IExecutionContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext,OwnedSelection.IContext {
    object application,document;
    internal ComContext(Config config) {
     try {application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("No active model document.");document=ps.ActiveDocument;ConfirmDocument();}
@@ -26,6 +26,8 @@ namespace PowerShapeBridge {
    public Dictionary<string,object> Windows(){return DocumentSession.ReadStable(application);}
    public Dictionary<string,object> Observation(){return Probe.ReadInContext(application,document);}
    public object ModelItems(){ConfirmDocument();dynamic doc=document;return doc.GetModelItems();}
+   public int SelectionCount(){ConfirmDocument();dynamic ps=application;return Program.StrictInt(ps.Evaluate("SELECTION.NUMBER"));}
+   public void ChangeSelection(OwnedSelectionProgram program){ConfirmDocument();string command=program.Take();dynamic ps=application;ps.Exec(command);}
    public object SelectedItems(){ConfirmDocument();dynamic doc=document;return doc.GetSelectedItems();}
    public object WorkplaneIds(){ConfirmDocument();dynamic doc=document;return doc.GetWorkplanes((object)3,(object)"",(object)"");}
    public object WorkplaneInfo(int composite){if(composite<=0)throw new ArgumentException("Positive workplane composite required.");ConfirmDocument();dynamic doc=document;return doc.GetWorkplaneInfo(composite);}

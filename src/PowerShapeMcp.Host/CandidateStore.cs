@@ -71,6 +71,16 @@ public sealed class CandidateStore(Func<double>? clock=null,Func<DateTimeOffset>
         if(candidate.Key.Id>int.MaxValue)throw new ReferenceRejected("workplane_candidate_identity_out_of_range");
         return new(){["mode"]="existing",["nativeId"]=(int)candidate.Key.Id};
     }
+    internal JsonObject SelectionTarget(string handle,JsonObject binding)
+    {
+        Purge();
+        if(!candidates.TryGetValue(handle,out var candidate)||candidate.Key.Type!=40||candidate.Key.Id<1||candidate.Key.Id>int.MaxValue)
+            throw new ReferenceRejected("selection_candidate_unknown_or_wrong_type");
+        var source=DocumentParameters(candidate.Document);
+        foreach(var field in new[]{"inspectionRequestId","inspectionSha256"})
+            if(!JsonNode.DeepEquals(source[field],binding[field]))throw new ReferenceRejected("selection_candidate_wrong_binding");
+        return new(){["mode"]="select_single",["entityKey"]=new JsonArray(40,(int)candidate.Key.Id)};
+    }
     public JsonObject IssueSet(JsonObject result)
     {
         var id=ArtifactProof.String(result,"entitySetId","entity_set_receipt_invalid");

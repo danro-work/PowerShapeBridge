@@ -87,3 +87,6 @@ node_modules/
 credentials.json
 secrets.json
 /tooling-local.ps1
+
+/selectionplans/
+/selectionexecutions/

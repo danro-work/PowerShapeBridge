@@ -26,6 +26,9 @@ jobs:
       - name: Check workplane switch coordinate and no-replay boundaries
         shell: pwsh
         run: ./verify-workplane-switch.ps1
+      - name: Check owned selection lifecycle without CAD
+        shell: pwsh
+        run: ./verify-owned-selection.ps1
       - name: Preserve verification evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -34,4 +37,5 @@ jobs:
           path: |
             evidence/K1-baseline
             evidence/workplane-switch-ci
+            evidence/owned-selection-ci
           if-no-files-found: error
