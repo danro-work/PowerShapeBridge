@@ -1,3 +1,11 @@
+# Приоритет: SURFACE oblique persistence завершён; следующий блок К8 — uniform scale
+
+Сначала work/P0-local-state-20261017.md и work/K8-surface-oblique-persistence-20261025/NEXT-WORK.md. Один SaveAs/seal → одно qualified закрытие собственного writer → один generic OPEN с отдельными verifiers завершены. Все6UV-гридов/72точки/72нормали/visibility/layout точны на4этапах;583pins/6physicalidentity/остальные26окон сохранены,27→26→27. Обычный readonly подтвердил новуюкопию. Все live/audit scripts ТЕРМИНАЛЬНЫЕ — SaveAs/close/OPEN/RotateItem не повторять. Native55/staged61/ordinary48/config прежние; неизменённые тесты повторно не запускать. Публикация/точная CI в локальнойкарте; P0 принят, пользователя не ждём.
+
+Следующая малая область — один положительный равномерный масштаб SURFACE вокруг явного центра. Подготовленный порядок: work/K8-surface-oblique-persistence-20261025/NEXT-SURFACE-SCALE-SCOPE.md. Сначала проверить documented provider и reuse общего scale lifecycle: текущий SOLID использует13фиксированных Exec-фаз и SOLID-specific measurement, прямой ScaleItem здесь не подтверждён. Старые SOLID guards не ослаблять; для поверхности отдельный профиль всех6UV-гридов/area law/unavailable bounds и независимая проверка. Затем целевые проверки → ранний real owncopy → независимый аудит → нужная регрессия; persistence отдельно. Остальные типы/наборы К8, К9, пять классов К10,release/личнаяК11 впереди.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: SURFACE −30° вокруг заданной оси/центра проверен; сохранить результат
 
 Сначала work/P0-local-state-20261017.md и work/K8-surface-oblique-rotation-20261025/NEXT-WORK.md. Один SURFACE RotateItem−30°, direction[1,2,3], origin[2,−3,4], отдельный verifier и passive getter завершены. Независимый Python подтвердил 12 точек/12 нормалей; other5exact/559pins/27windows сохранены. Геометрия пока НЕ СОХРАНЕНА. Все live/audit scripts ТЕРМИНАЛЬНЫЕ — поворот не повторять. Native55/staged61/ordinary48/config прежние после одного разрешённого развёртывания. Полная регрессия/публикация/точная CI в локальной карте; обе CI94 SUCCESS, их не перечитывать.

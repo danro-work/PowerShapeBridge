@@ -47,8 +47,9 @@ claim and matching fence release passed independent audit. Ordinary read-only
 separately confirmed the same owned copy with six SURFACEs and empty WORLD.
 
 This geometry block performed no save, OPEN, close, selection, mouse interaction,
-inverse or command replay. Its result is currently unsaved; persistence requires
-a separate qualification without repeating the rotation. Sources and checkpoints
+inverse or command replay. Its result was unsaved at this geometry checkpoint. The subsequent separate
+[save/finalize/reopen qualification](SURFACE-OBLIQUE-ROTATION-PERSISTENCE.md)
+passed without repeating the rotation. Sources and checkpoints
 remain protected. This establishes sampled behavior for the stated real case,
 not full continuous geometry/topology or completion of K8-K11.
 
