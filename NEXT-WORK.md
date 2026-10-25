@@ -1,3 +1,11 @@
+# Приоритет: один SURFACE перенос проверен; сохранить его результат отдельным блоком
+
+Сначала верх work/P0-local-state-20261017.md и work/K8-surface-translation-20261025/NEXT-WORK.md. Один TranslateItem[+1,0,0]мм WORLD, отдельный verifier и дополнительный passive target getter завершены. 12точек цели с нулевой ошибкой, остальные5гридов/72нормали/свойства/479pins/27окон сохранены;6event journal/onceclaim/matching fence проверены. Live/audit scripts ТЕРМИНАЛЬНЫЕ, команды не повторять. Native53/staged59/ordinary48; собственная6SURFACE копия активна, WORLD/пусто. Геометрия пока НЕ СОХРАНЕНА. Защищённые source/working/checkpoint bytes прежние.
+
+Native8+oldSOLID34/SDK58/Python20/readiness70/9 доCAD и full.NET1047/1047 fail0skip0 +CIrunner8 послеCAD прошли. Публикация/точнаяCI в локальной карте; обеCI90SUCCESS/не перечитывать. Следующий bounded K8 — текущий Surface translation saved-result: свежий owned-copy доступ безOPEN → binding + текущие6гридов → один НОВЫЙ SaveAs/отдельный verifier → immutable seed/checkpoint → допустимая qualified finalization writer,если нужна,→один OPEN новой копии → независимое сравнение ВСЕХ6гридов/наблюдений. Квоту и старый strict-close не ослаблять; текущие27окон требуют отдельного выбора совместимого genericOPEN/ownedfinalization пути. Точный сценарий подготовить до мутаций. Никакого повторного сдвига/inverse/selection/mouse. Затем другиеК8типы/наборы/повороты/масштаб;К9;5классовК10;release/личнаяК11. P0 принят; пользователя сейчас не ждём.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: SURFACE select/clear проверены; публикация и следующая операция К8
 
 Читать верх work/P0-local-state-20261017.md и work/K8-surface-selection-20261025/NEXT-WORK.md. Реальный блок one select→independent verifier→one clear→independent verifier завершён; original receipts/journals/fences и 473pins проверены, все72point/normal witnesses шести поверхностей/27окон сохранены. Live scripts ТЕРМИНАЛЬНЫЕ. Native52/staged58/ordinary48; текущая копия содержит те же6SURFACE, WORLD, пустое выделение. Нового OPEN/SaveAs/геометрии/мыши не было.

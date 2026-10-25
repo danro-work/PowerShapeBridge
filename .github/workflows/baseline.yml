@@ -38,6 +38,9 @@ jobs:
       - name: Check separately gated owned SURFACE selection without CAD
         shell: pwsh
         run: ./verify-owned-surface-selection.ps1
+      - name: Check separately gated owned SURFACE translation without CAD
+        shell: pwsh
+        run: ./verify-owned-surface-translation.ps1
       - name: Preserve verification evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -50,4 +53,5 @@ jobs:
             evidence/surface-diagnostics-ci
             evidence/surface-sampling-ci
             evidence/owned-surface-selection-ci
+            evidence/owned-surface-translation-ci
           if-no-files-found: error

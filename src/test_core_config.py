@@ -11,6 +11,17 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_surface_translation_requires_strict_separate_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-translations.json').read_text())
+        self.assertIs(settings['ownedSurfaceTranslationsExperimental'], False)
+        general_core(settings)
+        settings.update(ownedSurfaceTranslationsExperimental=True, ownedTranslationsExperimental=True, operationPlansExperimental=True, ownedOperationPlansExperimental=True)
+        general_core(settings)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedSurfaceTranslationsExperimental': value})
+        for field in ('ownedTranslationsExperimental', 'surfaceSamplingExperimental', 'entitySetsExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError): general_core({**settings, field: False})
+
     def test_surface_sampling_is_strict_passive_default_false(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-sampling.json').read_text())
         self.assertIs(settings['surfaceSamplingExperimental'], False)
