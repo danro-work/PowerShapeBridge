@@ -71,15 +71,15 @@ public sealed class CandidateStore(Func<double>? clock=null,Func<DateTimeOffset>
         if(candidate.Key.Id>int.MaxValue)throw new ReferenceRejected("workplane_candidate_identity_out_of_range");
         return new(){["mode"]="existing",["nativeId"]=(int)candidate.Key.Id};
     }
-    internal JsonObject SelectionTarget(string handle,JsonObject binding)
+    internal JsonObject SelectionTarget(string handle,JsonObject binding,int nativeType=40)
     {
         Purge();
-        if(!candidates.TryGetValue(handle,out var candidate)||candidate.Key.Type!=40||candidate.Key.Id<1||candidate.Key.Id>int.MaxValue)
+        if(!candidates.TryGetValue(handle,out var candidate)||candidate.Key.Type!=nativeType||nativeType is not (40 or 21)||candidate.Key.Id<1||candidate.Key.Id>int.MaxValue)
             throw new ReferenceRejected("selection_candidate_unknown_or_wrong_type");
         var source=DocumentParameters(candidate.Document);
         foreach(var field in new[]{"inspectionRequestId","inspectionSha256"})
             if(!JsonNode.DeepEquals(source[field],binding[field]))throw new ReferenceRejected("selection_candidate_wrong_binding");
-        return new(){["mode"]="select_single",["entityKey"]=new JsonArray(40,(int)candidate.Key.Id)};
+        return new(){["mode"]="select_single",["entityKey"]=new JsonArray(nativeType,(int)candidate.Key.Id)};
     }
     internal JsonObject SurfaceReadParameters(string document,string handle)
     {

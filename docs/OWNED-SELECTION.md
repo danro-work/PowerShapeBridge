@@ -1,5 +1,9 @@
 # Owned selection: bounded K8 provider
 
+The subsequent separately gated SURFACE profile is documented in
+[OWNED-SURFACE-SELECTION.md](OWNED-SURFACE-SELECTION.md). The sole-SOLID provider
+and its schema 1/direct-bounds contract below remain supported.
+
 Native 0.50 / staged .NET host 0.56 add three full-server tools:
 `prepare_owned_selection`, `execute_owned_selection`, `verify_owned_selection`.
 `ownedSelectionsExperimental` defaults to false in the public profile. Read-only

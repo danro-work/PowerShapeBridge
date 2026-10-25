@@ -37,6 +37,7 @@ public sealed class BridgeSession : IDisposable
     public bool CandidatesEnabled { get; }
     public bool LevelReadingEnabled { get; }
     public bool SurfaceSamplingEnabled { get; }
+    public bool SurfaceSelectionsEnabled { get; }
     public bool RecoveryInspectionEnabled { get; }
     public bool RecoveryResolutionEnabled { get; }
     public OutcomeResolutionJournal Resolutions { get; }
@@ -65,8 +66,9 @@ public sealed class BridgeSession : IDisposable
         LevelMoves=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         Workplanes=new(options.BridgeRoot,Bindings,clock,utcClock);
         WorkplaneActivations=new(options.BridgeRoot,Bindings,Candidates,clock,utcClock);
-        Selections=new(options.BridgeRoot,Bindings,Candidates,utcClock);
+        Selections=new(options.BridgeRoot,Bindings,Candidates,utcClock,()=>SurfaceSelectionsEnabled);
         var config=Options.ReadConfiguration();
+        SurfaceSelectionsEnabled=!options.ReadOnly&&config.TryGetProperty("ownedSurfaceSelectionsExperimental",out var surfaceSelectionFlag)&&surfaceSelectionFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         SurfaceSamplingEnabled=config.TryGetProperty("surfaceSamplingExperimental",out var surfaceFlag)&&surfaceFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         LevelReadingEnabled=config.TryGetProperty("levelReadingExperimental",out var levelFlag)&&levelFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         CandidatesEnabled=config.TryGetProperty("entitySetsExperimental",out var flag)&&flag.ValueKind==System.Text.Json.JsonValueKind.True;

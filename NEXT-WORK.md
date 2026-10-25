@@ -1,3 +1,11 @@
+# Приоритет: SURFACE select/clear проверены; публикация и следующая операция К8
+
+Читать верх work/P0-local-state-20261017.md и work/K8-surface-selection-20261025/NEXT-WORK.md. Реальный блок one select→independent verifier→one clear→independent verifier завершён; original receipts/journals/fences и 473pins проверены, все72point/normal witnesses шести поверхностей/27окон сохранены. Live scripts ТЕРМИНАЛЬНЫЕ. Native52/staged58/ordinary48; текущая копия содержит те же6SURFACE, WORLD, пустое выделение. Нового OPEN/SaveAs/геометрии/мыши не было.
+
+Native9+oldSOLID10/SDK31/Python19/readiness68/9 и после реального блока полный.NET1042/1042 без ошибок/skip, CI-runner9/strictNative21 прошли. Опубликовать отдельный PR поверх PR89, attached, точная CI только Code Review; обе успешные CI89 не перечитывать. Чужие16STATUS исключить. Следующая небольшая областьК8 — реальное преобразование одного SURFACE с явным параметрическим witness-профилем и independent before/after; sampled envelope не выдавать за недоступный nativebox и не ослаблять старый SOLID/Surface box-adapter. Поддержку типов/наборов/центров расширять отдельно. Затем оставшиесяК9/пять классовК10/release и личнаяК11; P0 принят, действий пользователя сейчас нет.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: пассивный SURFACE reader проверен в PowerShape; публикация и точная CI
 
 Читать актуальный верх work/P0-local-state-20261017.md и work/K8-surface-grid-20261025/NEXT-WORK.md. Новый inspect_surface_samples прошёл через staged readonly SDK0.57 / Native0.51.2:12точек/нормалей/visibility по явному UV[1,2] с2×3делениями. COM-layout и точность исходных double проверены; независимый аудит файлов/окон/контекста прошёл. Все live/diagnostic scripts завершены, не повторять. Runtime установлен с резервами, ordinarySDK48 прежний. Ни геометрия, ни выделение, ни CAD-файлы не менялись.
