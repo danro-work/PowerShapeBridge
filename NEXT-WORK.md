@@ -1,3 +1,11 @@
+# Приоритет: SURFACE WORLDZ+90 проверен; persistence отдельным блоком
+
+Сначала work/P0-local-state-20261017.md и work/K8-surface-rotation-20261025/NEXT-WORK.md. Один RotateItem+90WORLDZ throughorigin → отдельный verifier → passivegetter завершены. Независимый Python[-y,x,z] доказал12positions+12normals error0,other5exact/visibility/layout/наблюдения/515pins/27windows сохранены. Операция UNSAVED. Все live/audit scripts ТЕРМИНАЛЬНЫЕ, ни поворот/SaveAs/OPEN/close/selection/mouse/inverse не повторять. Native54/staged60/ordinary48; текущая6SURFACE копия/emptyWORLD. Публикация/точнаяCI в локальной карте; обеCI92SUCCESS/не перечитывать. ПередCAD Native9+oldSurface8/Solid34/SDK63/Frameworkproof6/Python21/readiness72/9; после full.NET1052/1052 fail0skip0 +CIrunner9/SDK6. Не повторять неизменённые проверки.
+
+Следующий малый блок — сохранить уже повернутый результат существующим own workflow: freshowner/context +all6grids → одинNEW SaveAs/verifier → immutable seed/checkpoint/independentOSaudit → qualified ownedwriterfinalization/verifier → одинgenericOPEN новой копии/verifier → all6grid audit. Никакого новогоRotateItem/деплоя/измененияквоты; точный сценарий подготовить от новых receipts/текущих515pins,а старые persistence scripts не запускать. Далее оставшаясяК8матрица типов/наборов/центров/масштаба;К9;5classК10;release-userК11. P0 принят, пользователя не ждём.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: SURFACE move persistence пройден; следующая малая операция К8
 
 Сначала work/P0-local-state-20261017.md и work/K8-surface-persistence-20261025/NEXT-WORK.md. Один SaveAs/seal → один owned saved-Result finalization → один genericOPEN новой копии с отдельными verifiers и независимыми all6UVgrid/file/window audits завершены. Все72точки/72нормали/visibility/layout сохранены;503pins с одним явно учтённым sameidentity writer-finalization и остальные26окон сохранены,27→26→27. Native53/staged59/ordinary48/config прежние; весь код/полная.NET1047 и обеCI91GREEN без повтора. Новая копия6SURFACE/emptyWORLD активна. Все live/audit scripts ТЕРМИНАЛЬНЫЕ; не повторять SaveAs/close/OPEN/translation.

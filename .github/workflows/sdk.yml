@@ -36,6 +36,9 @@ jobs:
         run: |
           $taskInspector = Join-Path (npm prefix --global) 'mcp-inspector.cmd'
           ./verify-sdk.ps1 -DotnetPath (Get-Command dotnet.exe).Source -PythonPath (Get-Command python.exe).Source -InspectorPath $taskInspector
+      - name: Verify actual Framework surface rotation receipts in SDK
+        shell: pwsh
+        run: ./verify-owned-surface-rotation.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\surface-rotation')
       - name: Preserve SDK verification evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

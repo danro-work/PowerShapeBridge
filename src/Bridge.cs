@@ -66,6 +66,7 @@ namespace PowerShapeBridge
         public bool surfaceSamplingExperimental { get; set; }
         public bool ownedSurfaceSelectionsExperimental { get; set; }
         public bool ownedSurfaceTranslationsExperimental { get; set; }
+        public bool ownedSurfaceRotationsExperimental { get; set; }
         public bool IsGeneralCore { get { return coreProfile == "general-v1"; } }
         public bool CoreTransportEnabled { get { return IsGeneralCore || (mcpMutationsPanel && recipeOperationsPanel); } }
         public string qualificationOperationId { get; set; }
@@ -105,6 +106,7 @@ namespace PowerShapeBridge
             if(levelReadingExperimental&&!IsGeneralCore)throw new ArgumentException("Passive level reading requires general core.");
             if(ownedLevelMovesExperimental&&(!IsGeneralCore||!levelReadingExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned level moves require general sets/copies/bindings/level reads.");
             if(ownedWorkplanesExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned workplanes require general sets/copies/bindings.");
+            if(ownedSurfaceRotationsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface rotation requires owned rotation plans and surface sampling.");
             if(ownedSurfaceTranslationsExperimental&&(!IsGeneralCore||!ownedTranslationsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface translation requires owned translation and surface sampling.");
             if(ownedSurfaceSelectionsExperimental&&(!IsGeneralCore||!ownedSelectionsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface selection requires owned selection and surface sampling.");
             if(surfaceSamplingExperimental&&(!IsGeneralCore||!entitySetsExperimental))throw new ArgumentException("Surface sampling requires general passive candidates.");
@@ -128,7 +130,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.53.0-dev";
+        public const string ReleaseVersion = "0.54.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -169,6 +171,7 @@ namespace PowerShapeBridge
                     object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Owned SOLID scale dependencies must be true JSON booleans.");
                 }
             }
+            if(raw!=null&&raw.TryGetValue("ownedSurfaceRotationsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface rotation flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedRotationPlansExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface rotation dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedSurfaceTranslationsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface translation flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedTranslationsExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface translation dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedSurfaceSelectionsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface selection flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedSelectionsExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface selection dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("surfaceSamplingExperimental",out enabled)) {
@@ -253,6 +256,9 @@ namespace PowerShapeBridge
             }
             if(args.Length==1&&args[0]=="--owned-translation-test") {
                 try{if(!File.Exists(Path.Combine(Root,".surface-translation-fixture")))throw new InvalidOperationException("Isolated translation fixture marker required.");Console.WriteLine("PASS: "+OwnedTranslationTests.Run()+" existing SOLID translation controls; no CAD.");return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--surface-rotation-test") {
+                try{OwnedSurfaceRotationTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
             if(args.Length==1&&args[0]=="--surface-translation-test") {
                 try{OwnedSurfaceTranslationTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
