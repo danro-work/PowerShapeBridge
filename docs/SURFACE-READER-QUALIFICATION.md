@@ -1,5 +1,9 @@
 # Six-surface source: real reader observations
 
+This records the earlier Native 0.50 investigation. The subsequent independent
+passive MCP reader is described in [SURFACE-SAMPLING.md](SURFACE-SAMPLING.md).
+Its success does not qualify the old box-dependent transform adapter below.
+
 On 25 October 2026 (Moscow), the existing staged SDK 0.56 / Native 0.50
 created one owned saved-byte copy of a closed historical test result, opened it
 once and independently verified that OPEN. The new copy contains six planar

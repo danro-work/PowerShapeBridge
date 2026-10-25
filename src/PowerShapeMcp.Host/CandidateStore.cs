@@ -81,6 +81,13 @@ public sealed class CandidateStore(Func<double>? clock=null,Func<DateTimeOffset>
             if(!JsonNode.DeepEquals(source[field],binding[field]))throw new ReferenceRejected("selection_candidate_wrong_binding");
         return new(){["mode"]="select_single",["entityKey"]=new JsonArray(40,(int)candidate.Key.Id)};
     }
+    internal JsonObject SurfaceReadParameters(string document,string handle)
+    {
+        var source=DocumentParameters(document);
+        if(!candidates.TryGetValue(handle,out var candidate)||candidate.Document!=document||candidate.Key.Type!=21||candidate.Key.Id<1||candidate.Key.Id>int.MaxValue)
+            throw new ReferenceRejected("surface_candidate_unknown_wrong_document_or_type");
+        source["entityKey"]=new JsonArray(21,(int)candidate.Key.Id);return source;
+    }
     public JsonObject IssueSet(JsonObject result)
     {
         var id=ArtifactProof.String(result,"entitySetId","entity_set_receipt_invalid");

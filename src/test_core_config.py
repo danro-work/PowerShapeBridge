@@ -11,6 +11,16 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_surface_sampling_is_strict_passive_default_false(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-sampling.json').read_text())
+        self.assertIs(settings['surfaceSamplingExperimental'], False)
+        general_core(settings)
+        settings['surfaceSamplingExperimental'] = True
+        general_core(settings)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'surfaceSamplingExperimental': value})
+        with self.assertRaises(ValueError): general_core({**settings, 'entitySetsExperimental': False})
+
     def test_owned_selection_full_only_flag_is_strict_and_default_false(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-selection.json').read_text())
         self.assertIs(settings['ownedSelectionsExperimental'], False)
