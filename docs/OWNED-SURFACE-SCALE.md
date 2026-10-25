@@ -44,7 +44,8 @@ Python affine/normal audit passed:12target points, maximum component error
 journal,13linked phase returns, once claim and matching fence release were audited.
 The ordinary read-only client separately confirmed the same six-surface owned copy
 and emptyWORLD. SaveAs/OPEN/close/mouse/inverse were absent from this geometry block.
-Persistence is a separate checkpoint; the scale recipe is never repeated for it.
+The subsequent [save/finalize/reopen qualification](SURFACE-SCALE-PERSISTENCE.md)
+passed without repeating the scale recipe.
 
 Before CAD:42Native controls,29priorSOLID controls,82targetedSDK tests,
 12actualFramework/SDK proof cases,22Python config tests and catalogs75full/9readonly.
