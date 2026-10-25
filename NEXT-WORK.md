@@ -1,3 +1,9 @@
+# Приоритет: SURFACE scale и persistence завершены
+
+Сначала work/P0-local-state-20261017.md и work/K8-surface-scale-persistence-20261025/NEXT-WORK.md. Один масштаб×1.25/центр[2,−3,4], SaveAs/seal/ownedfinalization/genericOPEN с отдельными verifiers завершены. Все6UVгридов/72точки72нормали на4этапах точны;655pins/6physicalidentity/остальные26окон сохранены,27→26→27. Все live/audit scripts TERMINAL: не повторять scale/SaveAs/close/OPEN. Native56/staged62/ordinary48/config прежние, неизменённую регрессию не повторять. Публикация/точнаяCI в карте; P0 принят, действий пользователя нет. Следом оставшаясяК8матрица типов/наборов,К9,пятьклассовК10,release/личнаяК11.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: SURFACE scale прошёл; persistence выполняется
 
 Сначала work/P0-local-state-20261017.md и work/K8-surface-scale-persistence-20261025/NEXT-WORK.md. Один13фазный масштаб×1.25/центр[2,−3,4] завершён и независимо проверен. Не повторять масштаб или terminal live scripts. Новый SaveAs/seal → независимый аудит → одно ownedwriterfinalization/verifier → один genericOPEN/verifier со всеми6UVгридами в работе; перед продолжением сверять submissions/results/журнал. Native56/staged62/ordinary48. Регрессия:1056/1057 плюс исходные два варианта проблемного теста2/2 с прежним кодом/бюджетом; originalfailure сохранён. Публикация/CI и точные IDs в карте. К8–К11 открыты, P0 принят, пользователя не ждём.
