@@ -1,3 +1,11 @@
+# Приоритет: SURFACE move persistence пройден; следующая малая операция К8
+
+Сначала work/P0-local-state-20261017.md и work/K8-surface-persistence-20261025/NEXT-WORK.md. Один SaveAs/seal → один owned saved-Result finalization → один genericOPEN новой копии с отдельными verifiers и независимыми all6UVgrid/file/window audits завершены. Все72точки/72нормали/visibility/layout сохранены;503pins с одним явно учтённым sameidentity writer-finalization и остальные26окон сохранены,27→26→27. Native53/staged59/ordinary48/config прежние; весь код/полная.NET1047 и обеCI91GREEN без повтора. Новая копия6SURFACE/emptyWORLD активна. Все live/audit scripts ТЕРМИНАЛЬНЫЕ; не повторять SaveAs/close/OPEN/translation.
+
+Опубликовать только5документов текущего состояния/сценария отдельным draftPR поверхPR91,attach,точнаяCIчерезCodeReview; чужие16STATUS исключить. Затем следующая областьК8 — один SURFACE WORLD integer rotation с explicit-grid witness-профилем: цель/центр/ось/угол, positions+normals преобразованы,other5exact,fullownedlifecycle/verifier; старый bbox-dependentSurfaceadapter и SOLID-ограничения не ослаблять. Сначала изучить reuse существующего rotation lifecycle и подготовить узкий код/целевые проверки, затем ранний realowncopyCAD и независимый аудит. Поддержка типов/наборов/масштаба и центров остаётся открыта; далееК9/5classК10/release-userК11. P0 принят, действий пользователя сейчас нет.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: один SURFACE перенос проверен; сохранить его результат отдельным блоком
 
 Сначала верх work/P0-local-state-20261017.md и work/K8-surface-translation-20261025/NEXT-WORK.md. Один TranslateItem[+1,0,0]мм WORLD, отдельный verifier и дополнительный passive target getter завершены. 12точек цели с нулевой ошибкой, остальные5гридов/72нормали/свойства/479pins/27окон сохранены;6event journal/onceclaim/matching fence проверены. Live/audit scripts ТЕРМИНАЛЬНЫЕ, команды не повторять. Native53/staged59/ordinary48; собственная6SURFACE копия активна, WORLD/пусто. Геометрия пока НЕ СОХРАНЕНА. Защищённые source/working/checkpoint bytes прежние.

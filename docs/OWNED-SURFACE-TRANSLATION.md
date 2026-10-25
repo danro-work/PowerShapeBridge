@@ -55,7 +55,9 @@ the other five grids, all72 normals/visibility/layout witnesses, non-positional
 properties,27windows and479 protected post-deployment file pins were preserved.
 The six-event journal and one-use claim passed independent audit. Two protected
 runtime/config pins were replaced only by the authorized deployment manifest.
-The geometry remains unsaved. Ordinary read-only confirmed the active own copy,
+A subsequent [saved-result block](SURFACE-TRANSLATION-PERSISTENCE.md) preserved
+all six grids through SaveAs, sealed bytes, owned-writer finalization and one new
+generic OPEN with separate verification. Ordinary read-only confirmed the active own copy,
 empty selection and WORLD separately. Full regression/publication status is kept
 in the current project state. Legacy base observation-read counters exclude the
 additional reads inside the surface witness capture; they are not total COM counts.
