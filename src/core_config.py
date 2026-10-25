@@ -19,6 +19,9 @@ def general_core(settings):
     bindings = settings.get('documentBindingsExperimental', False)
     level_moves = settings.get('ownedLevelMovesExperimental', False)
     workplanes = settings.get('ownedWorkplanesExperimental', False)
+    curve_layout = settings.get('curveLayoutExperimental', False)
+    if type(curve_layout) is not bool or curve_layout and (profile != 'general-v1' or settings.get('entitySetsExperimental') is not True):
+        raise ValueError('Curve layout requires general passive candidates')
     surface_samples = settings.get('surfaceSamplingExperimental', False)
     surface_scale = settings.get('ownedSurfaceScalesExperimental', False)
     if type(surface_scale) is not bool or surface_scale and (profile != 'general-v1' or surface_samples is not True or any(settings.get(k) is not True for k in ('ownedUniformScalePlansExperimental', 'uniformScalePlansExperimental', 'operationPlansExperimental'))):

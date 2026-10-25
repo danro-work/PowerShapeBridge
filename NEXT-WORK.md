@@ -1,3 +1,11 @@
+# Приоритет: COMPCURVE raw-layout проверен; следующий шаг — typed witnesses и перенос
+
+Сначала work/P0-local-state-20261017.md и work/K8-curve-layout-20261026/NEXT-WORK.md. Один NEW owncopy OPEN/verifier, readonly native-layout1–4 и независимый квадратный oracle завершены. XYZ[4,3]/magnitude[4]/lower1; старый flat/3*N adapter не считать рабочим. Отказ0–3 сохранён; исправленный error-path возвращаеткод3. Исходник/678pins/остальные27окон сохранены,теперь28окон; текущие695pins и точные IDs/SHA в карте. Native57.1/staged63/ordinary48, полная.NET1063/1063 пройдена. Все live/audit scripts TERMINAL: OPEN/геометрию/неизменённые чтения/тесты не повторять. ОбеCI97/98SUCCESS; публикация/новаяCI в карте.
+
+Далее versioned typed curve witnesses: реальные2DXYZ, N magnitudes, tangent/freeflags/counts/index/units, независимое сохранение SOLID. Затем один owned TranslateItem через общий claim/fence/execute/verifier и отдельное сохранение/переоткрытие. Нельзя молча ослабить старый RotationMeasurements.Curve или выдумать bounds. P0 принят; действий пользователя нет. Остальные типы/наборыК8,К9,пятьклассовК10,release/личнаяК11 открыты.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: SURFACE scale и persistence завершены
 
 Сначала work/P0-local-state-20261017.md и work/K8-surface-scale-persistence-20261025/NEXT-WORK.md. Один масштаб×1.25/центр[2,−3,4], SaveAs/seal/ownedfinalization/genericOPEN с отдельными verifiers завершены. Все6UVгридов/72точки72нормали на4этапах точны;655pins/6physicalidentity/остальные26окон сохранены,27→26→27. Все live/audit scripts TERMINAL: не повторять scale/SaveAs/close/OPEN. Native56/staged62/ordinary48/config прежние, неизменённую регрессию не повторять. Публикация/точнаяCI в карте; P0 принят, действий пользователя нет. Следом оставшаясяК8матрица типов/наборов,К9,пятьклассовК10,release/личнаяК11.
