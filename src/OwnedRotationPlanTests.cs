@@ -9,9 +9,10 @@ namespace PowerShapeBridge {
   static void Require(bool ok,string message){if(!ok)throw new InvalidOperationException(message);}
   static Dictionary<string,string> Hashes(string root){return Directory.GetFiles(root,"*",SearchOption.AllDirectories).ToDictionary(path=>path,path=>Program.Hash(path));}
   internal sealed class Fixture {
-   internal readonly OwnedOperationPlanTests.Fixture Base=new OwnedOperationPlanTests.Fixture(true,true);
+   internal readonly OwnedOperationPlanTests.Fixture Base;
    internal readonly string PlanId=Guid.NewGuid().ToString("N");internal readonly Dictionary<string,object> Plan,Args;
-   internal Fixture(bool mixed=false) {
+   internal Fixture(bool mixed=false,bool surface=false) {
+    Base=new OwnedOperationPlanTests.Fixture(true,true,surface);
     var entry=(Dictionary<string,object>)((IList)Base.Plan["entitySets"])[0];
     if(mixed) {
      var set=Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(Base.Root,"entitysets",Base.SetId+".json")));set["entityKeys"]=new[]{new[]{40,5},new[]{21,8},new[]{59,10}};

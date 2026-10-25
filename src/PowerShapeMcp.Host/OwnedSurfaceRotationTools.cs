@@ -1,0 +1,58 @@
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using ModelContextProtocol.Protocol;
+using ModelContextProtocol.Server;
+using PowerShapeGeometry;
+namespace PowerShapeMcp;
+
+[McpServerToolType]
+public sealed class OwnedSurfaceRotationTools(BridgeSession session)
+{
+    [McpServerTool(Name="execute_owned_surface_rotation",ReadOnly=false,Destructive=true,Idempotent=false,OpenWorld=false)]
+    [Description("Experimental one explicit owned SURFACE +90 integer degrees about WORLD Z through origin, among1..8SURFACEs in mm/idle/empty selection. Requires existing prepare_rotation_plan and prepare_owned_rotation, plus an explicit known UV grid for all surfaces. One direct RotateItem; consumes CAD leases before submission, remains fenced until separate verification. Target sampled positions AND normals rotate; other surfaces/visibility/layout/properties/files/windows preserved. Native bounds unavailable; not full topology. No selection/save/OPEN/close/inverse/replay. Separate default-off flag; full only.")]
+    public Task<CallToolResult> Execute([Description("Fresh ownedRotationHandle from prepare_owned_rotation in this connection, single SURFACE target, angle90/origin[0,0,0]/direction[0,0,1] WORLD.")]string ownedRotationHandle,[Description("Exact known tStart,tEnd,tDivisions,uStart,uEnd,uDivisions for every surface, divisions1..4. No automatic UV-domain inference.")]JsonElement surfaceGrid,CancellationToken cancellationToken)=>Run(false,new(){["ownedRotationHandle"]=ownedRotationHandle,["surfaceGrid"]=JsonNode.Parse(surfaceGrid.GetRawText())},cancellationToken);
+    [McpServerTool(Name="verify_owned_surface_rotation",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false)]
+    [Description("Independently verify original SURFACE WORLD Z90 rotation using its raw receipt/journal and fresh candidates/listing/native samples. Checks target positions/normals and preserved other-surface witnesses/ownership/files/context. May complete journal/release only matching fence. No CAD command, selection, save, inverse or replay. Full only.")]
+    public Task<CallToolResult> Verify([Description("Original Native execution request ID.")]string executionRequestId,[Description("Original immutable raw execution SHA256, lowercase64hex.")]string executionReceiptSha256,[Description("Fresh post-return candidate document.")]string candidateDocumentHandle,[Description("Fresh one-use active listing choice.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Run(true,new(){["executionRequestId"]=executionRequestId,["executionReceiptSha256"]=executionReceiptSha256,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
+    async Task<CallToolResult> Run(bool verify,JsonObject input,CancellationToken ct)
+    {
+        string name=verify?"verify_owned_surface_rotation":"execute_owned_surface_rotation";session.AssertToolAllowed(name);bool gate=false,submitted=false;string? id=null;var timer=Stopwatch.StartNew();
+        CallToolResult Fail(string state,string? code=null){var d=new JsonObject{["state"]=state,["geometryMutationAttempted"]=submitted&&!verify,["contextChangeAttempted"]=false,["cadSaveAttempted"]=false,["retryAllowed"]=false,["localArtifactsMayExist"]=submitted};if(id is not null)d["bridgeRequestId"]=id;if(code is not null)d["errorCode"]=code;return DiagnosticTools.Result(d,true);}
+        try{
+            gate=await session.ReferenceGate.WaitAsync(session.Options.Timeout,ct);if(!gate)return Fail("queue_timeout_before_submission");ct.ThrowIfCancellationRequested();if(File.Exists(FileArtifacts.FixedPath(session.Options.BridgeRoot,"maintenance.json")))return Fail("maintenance_before_submission");JsonObject args;
+            if(verify){_=OwnedSurfaceRotationProof.Execution(session.Options.BridgeRoot,input["executionRequestId"]!.GetValue<string>(),input["executionReceiptSha256"]!.GetValue<string>());args=OwnedExecutionProof.VerificationParameters(input,session.Candidates,session.Documents,true);}
+            else{var grid=input["surfaceGrid"]!.AsObject();ExecutionTools.ValidateSurfaceGrid(grid);args=session.OwnedRotations.ValidationParameters(input["ownedRotationHandle"]!.GetValue<string>());args["surfaceGrid"]=grid.DeepClone();session.RevokeCadLeases(true);}
+            ct.ThrowIfCancellationRequested();var remaining=session.Options.Timeout-timer.Elapsed;if(remaining<=TimeSpan.Zero)return Fail("queue_timeout_before_submission");submitted=true;var reply=await session.Ipc.SubmitAsync("recipe.prepare",new(){["recipeId"]=name,["parameters"]=args},ct,remaining);id=reply["bridgeRequestId"]?.GetValue<string>();if(ct.IsCancellationRequested||timer.Elapsed>=session.Options.Timeout)return Fail("owned_surface_rotation_outcome_unknown");
+            if(reply["state"]?.GetValue<string>()!=(verify?"owned_surface_rotation_verified_observed":"owned_surface_rotation_executed_unverified"))return DiagnosticTools.Result(reply,true);
+            if(verify)OwnedSurfaceRotationProof.Verified(session.Options.BridgeRoot,reply,args);
+            else{var raw=OwnedSelectionProof.Raw(session.Options.BridgeRoot,id!);var plan=OwnedSurfaceRotationProof.Execution(session.Options.BridgeRoot,id!,raw.Sha);foreach(var k in args.Select(a=>a.Key))if(!JsonNode.DeepEquals(plan[k],args[k]))throw new ReferenceRejected("surface_rotation_execution_dependency_differs");reply["executionReceiptSha256"]=raw.Sha;reply["intentConsumed"]=true;}
+            return DiagnosticTools.Result(reply);
+        }catch(OperationCanceledException)when(ct.IsCancellationRequested){return Fail(submitted?"owned_surface_rotation_outcome_unknown":"cancelled_before_submission");}
+        catch(Exception e)when(e is ReferenceRejected or IOException or InvalidOperationException or JsonException or KeyNotFoundException or NullReferenceException or FormatException or UnauthorizedAccessException){return Fail(submitted?"owned_surface_rotation_outcome_unknown":"owned_surface_rotation_rejected_before_submission",e is ReferenceRejected x?x.Code:"surface_rotation_proof_unavailable");}
+        finally{if(gate)session.ReferenceGate.Release();}
+    }
+    public static McpServerTool[] Create(BridgeSession s){if(!s.ExecutionEnabled("execute_owned_surface_rotation"))return[];var t=new OwnedSurfaceRotationTools(s);var execute=SolidQuarterTurnTools.Schema("ownedRotationHandle");execute["properties"]!["surfaceGrid"]=SurfaceReadTools.GridSchema(4);execute["required"]!.AsArray().Add("surfaceGrid");return[new StrictTool(McpServerTool.Create(t.Execute),s,execute,x=>ExecutionTools.ValidateSurfaceGrid(x["surfaceGrid"]!.AsObject())),new StrictTool(McpServerTool.Create(t.Verify),s,SolidQuarterTurnTools.Schema("executionRequestId","executionReceiptSha256","candidateDocumentHandle","activeDocumentHandle"))];}
+}
+
+internal static class OwnedSurfaceRotationProof
+{
+    static void Need(bool v){if(!v)throw new ReferenceRejected("surface_rotation_proof_invalid");}
+    static string Text(JsonObject v,string k)=>ArtifactProof.String(v,k,"surface_rotation_proof_invalid");
+    internal static JsonObject Execution(string root,string id,string sha){
+        var raw=OwnedSelectionProof.Raw(root,id,sha).Value;Need(Text(raw,"operationId")==id&&raw["state"]?.GetValue<string>()is "owned_surface_rotation_executed_unverified" or "owned_surface_rotation_outcome_unknown"&&ArtifactProof.Boolean(raw["geometryMutationAttempted"],true)&&ArtifactProof.Boolean(raw["contextChangeAttempted"],false)&&ArtifactProof.Boolean(raw["cadSaveAttempted"],false)&&ArtifactProof.IntegerIs(raw["returnCode"],1));
+        var p=ArtifactProof.Verified(root,"ownedexecutions",id,Text(raw,"planSha256"),65536);Need(JsonNode.DeepEquals(p,raw["plan"])&&ArtifactProof.IntegerIs(p["schemaVersion"],3)&&Text(p,"operationId")==id&&Text(p,"operation")=="rotate_owned_surface"&&Text(p,"measurementProfile")=="owned_surface_grid_world_z90_v1"&&ArtifactProof.Boolean(p["executionEnabled"],true)&&p["boundsBeforeWorldRaw"]is null&&!p.ContainsKey("vectorRaw"));
+        Need(ArtifactProof.IntegerIs(p["angleDegrees"],90)&&JsonNode.DeepEquals(p["nativeAxis"],new JsonArray(0,0,0,0,0,1)));ExecutionTools.ValidateSurfaceGrid(p["surfaceGrid"]!.AsObject());
+        var packet=ArtifactProof.Verified(root,"ownedrotations",Text(p,"ownedRotationId"),Text(p,"ownedRotationSha256"),65536);foreach(var k in new[]{"copyId","ownershipSha256","workingSha256","windowContextSha256","bindingId","bindingSha256","rotationPlanId","rotationPlanSha256"})Need(JsonNode.DeepEquals(packet[k],p[k]));Need(ArtifactProof.Boolean(packet["executionEnabled"],false));
+        var rotation=ArtifactProof.Verified(root,"rotationplans",Text(p,"rotationPlanId"),Text(p,"rotationPlanSha256"),65536);Need(Text(rotation,"operation")=="rotate_entities"&&JsonNode.DeepEquals(rotation["entityKeys"],new JsonArray(new JsonArray(21,SurfaceReadTools.Integer(p["nativeId"])))));var def=RotationDefinition.Read(rotation["parameters"]!.AsObject());Need(def is not null&&SurfaceReadTools.Number(rotation["parameters"]!["angleDegrees"])==90&&JsonNode.DeepEquals(rotation["nativeAxis"],p["nativeAxis"]));
+        var source=ArtifactProof.Verified(root,"responses",Text(p,"inspectionRequestId"),Text(p,"inspectionSha256"),16000000);Capture(p["captureBefore"]!.AsObject(),p,source);return p;
+    }
+    static void Capture(JsonObject c,JsonObject p,JsonObject source){var parameters=new JsonObject{["mode"]="select_surface_single",["entityKey"]=new JsonArray(21,SurfaceReadTools.Integer(p["nativeId"])),["grid"]=p["surfaceGrid"]!.DeepClone()};OwnedSurfaceSelectionProof.Capture(c,parameters,source,0);Need(JsonNode.DeepEquals(c["compositeId"],p["compositeId"]));}
+    internal static void Verified(string root,JsonObject reply,JsonObject args){
+        OwnedExecutionProof.CheckedTranslationVerification(reply,args);var p=Execution(root,Text(args,"executionRequestId"),Text(args,"executionReceiptSha256"));var source=ArtifactProof.Verified(root,"responses",Text(p,"inspectionRequestId"),Text(p,"inspectionSha256"),16000000);var before=p["captureBefore"]!.AsObject();var after=reply["surfaceCaptureAfter"]!.AsObject();Capture(after,p,source);var normalized=after.DeepClone().AsObject();var axis=new double[]{0,0,0,0,0,1};
+        var old=before["witnesses"]!.AsArray();var current=normalized["witnesses"]!.AsArray();for(int row=0;row<old.Count;row++)if(JsonNode.DeepEquals(old[row]!["entityKey"],before["entityKey"])){
+            foreach(var field in new[]{"positionsWorldRaw","normalsWorldRaw"}){var x=old[row]!["samples"]![field]!.AsArray();var y=current[row]!["samples"]![field]!.AsArray();Need(x.Count==y.Count);for(int i=0;i<x.Count;i++){var transformed=RotationSampleVerifier.Transform(x[i]!.AsArray().Select(SurfaceReadTools.Number).ToArray(),90,axis,field=="normalsWorldRaw");for(int j=0;j<3;j++)Need(Math.Abs(transformed[j]-SurfaceReadTools.Number(y[i]![j]))<=2e-6);}current[row]!["samples"]![field]=x.DeepClone();}
+        }Need(JsonNode.DeepEquals(before,normalized));
+    }
+}
