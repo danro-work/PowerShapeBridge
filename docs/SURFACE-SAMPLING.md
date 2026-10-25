@@ -76,3 +76,10 @@ then the real MCP block and independent audit. The subsequent full .NET suite pa
 CI is recorded in the local publication state. Native tests run in an
 isolated fake context through `verify-surface-sampling.ps1`; CI never contacts CAD.
 K8, K10 and K11 remain open.
+
+The first CI run exposed equal coarse Windows clock ticks in the existing owned
+selection fixture. Its synthetic verification reads now use a logical timestamp
+strictly after the recorded successful callback return, with an explicit tie
+control. Unknown-return cases retain their rejection path. Production chronology
+guards, receipts and CAD behavior are unchanged; the 10 lifecycle cases passed
+after this test-only fix.

@@ -25,11 +25,17 @@ namespace PowerShapeBridge {
    var old=Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(f.Root,"documentbindings",f.BindingId+".json")));string id=Guid.NewGuid().ToString("N");var r=DocumentBindings.Prepare(f.Root,id,new Dictionary<string,object>{{"copyId",old["copyId"]},{"ownershipSha256",old["ownershipSha256"]},{"inspectionRequestId",inspect},{"inspectionSha256",sha},{"expiresUtc",DateTime.UtcNow.AddSeconds(180).ToString("o")}},snapshot,c,new Dictionary<string,object>());return new Dictionary<string,object>{{"bindingId",id},{"bindingSha256",r["bindingSha256"]}};
   }
   static Dictionary<string,object> Verification(OwnedOperationPlanTests.Fixture f,Context c,string execution,string sha){
-   string inspect=Guid.NewGuid().ToString("N"),listing=Guid.NewGuid().ToString("N");var o=c.Observation();o["timestampUtc"]=DateTime.UtcNow.ToString("o");o["bridgeRequestId"]=inspect;var w=c.Windows();w["state"]="documents_listed_verified";w["timestampUtc"]=DateTime.UtcNow.ToString("o");string a=NativeJournal.Freeze(Path.Combine(f.Root,"responses",inspect+".json"),o),b=NativeJournal.Freeze(Path.Combine(f.Root,"responses",listing+".json"),w);
+   var receipt=Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(f.Root,"responses",execution+".json")));var returned=Equals(receipt["state"],"owned_selection_executed_unverified")?NativeJournal.ForVerification(f.Root,execution,(string)receipt["planSha256"]).CommandReturnedUtc:DateTime.MinValue;
+   // Fake reads have a logical clock: coarse Windows ticks can equal the return.
+   // Keep the production strict-after guard; do not sleep or edit real receipts.
+   DateTime stamp=AfterReturn(DateTime.UtcNow,returned);
+   string inspect=Guid.NewGuid().ToString("N"),listing=Guid.NewGuid().ToString("N");var o=c.Observation();o["timestampUtc"]=stamp.ToString("o");o["bridgeRequestId"]=inspect;var w=c.Windows();w["state"]="documents_listed_verified";w["timestampUtc"]=stamp.AddTicks(1).ToString("o");string a=NativeJournal.Freeze(Path.Combine(f.Root,"responses",inspect+".json"),o),b=NativeJournal.Freeze(Path.Combine(f.Root,"responses",listing+".json"),w);
    return new Dictionary<string,object>{{"executionRequestId",execution},{"executionReceiptSha256",sha},{"inspectionRequestId",inspect},{"inspectionSha256",a},{"listingRequestId",listing},{"listingSha256",b},{"windowNumber",1},{"modelId",9},{"expiresUtc",DateTime.UtcNow.AddSeconds(150).ToString("o")}};
   }
+  static DateTime AfterReturn(DateTime now,DateTime returned){return now>returned?now:returned.AddTicks(1);}
   internal static int Run(){
    Require(File.Exists(Path.Combine(Program.Root,".owned-selection-fixture")),"Own isolated selection marker required, no CAD.");int passed=0;
+   var tied=new DateTime(2026,1,1,0,0,0,DateTimeKind.Utc);Require(AfterReturn(tied,tied)>tied&&AfterReturn(tied.AddTicks(2),tied)==tied.AddTicks(2),"Synthetic observation clock does not strictly follow return.");
    foreach(string fault in new[]{"control","throw_after_change","geometry_drift","null_positive"}){
     var f=new OwnedOperationPlanTests.Fixture(true,true);var c=new Context{Snapshot=Clone(f.Snapshot),Listing=Clone(f.Listing)};c.Snapshot["entities"]=new[]{EntitySets.Inventory(c.Snapshot)[0]};c.Snapshot["entityCount"]=1;
     for(int phase=0;phase<(fault=="control"?2:1);phase++){
