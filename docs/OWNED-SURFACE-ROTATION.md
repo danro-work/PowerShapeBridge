@@ -54,7 +54,9 @@ protected runtime/config pins changed through the authorized deployment manifest
 The original six-event journal, one-shot rotation claim and matching fence release
 passed independent audit; ordinary read-only confirmed the same own copy, six
 SURFACEs and emptyWORLD separately. No selection/save/OPEN/close/mouse/inverse.
-The rotated geometry is still UNSAVED; persistence is a subsequent qualification.
+The rotation was unsaved at this geometry checkpoint. A subsequent separate
+[save/finalize/reopen qualification](SURFACE-ROTATION-PERSISTENCE.md) passed;
+this geometry operation was not repeated.
 
 Before real CAD: Native9rotation +8priorSURFACE translation +34SOLID translation
 controls,63targeted SDK tests,6actual Framework/SDK proof controls,21Python config

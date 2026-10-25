@@ -1,3 +1,11 @@
+# Приоритет: SURFACE Z90 persistence завершён; оставшаяся матрица К8
+
+Сначала work/P0-local-state-20261017.md и work/K8-surface-rotation-persistence-20261025/NEXT-WORK.md. Уже выполненный поворот сохранился: один SaveAs/seal → одно закрытие собственного writer → один generic OPEN с отдельными verifiers; все 6 UV-гридов/72 точки/72 нормали/видимость/layout точно совпали на четырёх этапах. Независимый аудит 539 pins/шести физических файлов/остальных 26 окон прошёл; 27→26→27 окон. Обычный readonly подтвердил новую собственную копию. Все live/audit scripts ТЕРМИНАЛЬНЫЕ: SaveAs/close/OPEN/RotateItem не повторять. Native54/staged60/ordinary48/config прежние, полной .NET1052 и двум SUCCESS CI93 повтор не нужен.
+
+Опубликовать только пять документов этого блока отдельным draft PR поверх PR93 и прикрепить; точная CI через Code Review. Чужие 16 STATUS исключить. Затем следующая ограниченная область К8 — оставшиеся SURFACE повороты вокруг произвольной мировой оси и центра либо масштаб; сначала выбрать следующий необходимый профиль по матрице и проверить reuse общего lifecycle, затем целевые проверки → ранний собственный CAD → независимое чтение → необходимая регрессия. Общие типы/наборы, К9, пять классов К10, release/личная К11 впереди. P0 принят; действий пользователя сейчас нет.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: SURFACE WORLDZ+90 проверен; persistence отдельным блоком
 
 Сначала work/P0-local-state-20261017.md и work/K8-surface-rotation-20261025/NEXT-WORK.md. Один RotateItem+90WORLDZ throughorigin → отдельный verifier → passivegetter завершены. Независимый Python[-y,x,z] доказал12positions+12normals error0,other5exact/visibility/layout/наблюдения/515pins/27windows сохранены. Операция UNSAVED. Все live/audit scripts ТЕРМИНАЛЬНЫЕ, ни поворот/SaveAs/OPEN/close/selection/mouse/inverse не повторять. Native54/staged60/ordinary48; текущая6SURFACE копия/emptyWORLD. Публикация/точнаяCI в локальной карте; обеCI92SUCCESS/не перечитывать. ПередCAD Native9+oldSurface8/Solid34/SDK63/Frameworkproof6/Python21/readiness72/9; после full.NET1052/1052 fail0skip0 +CIrunner9/SDK6. Не повторять неизменённые проверки.
