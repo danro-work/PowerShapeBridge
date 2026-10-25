@@ -35,6 +35,10 @@ namespace PowerShapeBridge {
    if(!c.IsGeneralCore||!c.ownedOpenAdoptionExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned OPEN adoption disabled or invalid envelope.");
    OwnedOpenAdoption.Validate((Dictionary<string,object>)a["parameters"],Equals(a["recipeId"],OwnedOpenAdoption.RefreshRecipe));return;
   }
+  if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedSurfaceScaleMeasurements.Recipes.Contains(a["recipeId"] as string)){
+   if(!c.IsGeneralCore||!c.ownedSurfaceScalesExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Surface scale disabled or invalid envelope.");
+   OwnedSolidScale.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"],true);return;
+  }
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&OwnedSolidScale.Recipes.Contains(a["recipeId"] as string)) {
    if(!c.IsGeneralCore||!c.ownedSolidScalesExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Owned SOLID scale disabled or invalid envelope.");
    OwnedSolidScale.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;
@@ -114,6 +118,7 @@ namespace PowerShapeBridge {
  var request=FileRequests.Parse(id,File.ReadAllText(Path.Combine(Program.Root,"requests",id+".json.processing"),Encoding.UTF8));
  var readArgs=(Dictionary<string,object>)request["arguments"];
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],SavedResultObservation.Recipe))return SavedResultObservation.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
+ if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSurfaceScaleMeasurements.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSolidScale.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"],true);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSolidScale.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSolidScale.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSolidQuarterTurn.RotationRecipes.Contains(readArgs["recipeId"] as string))return OwnedSolidQuarterTurn.RunRotation(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSolidQuarterTurn.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSolidQuarterTurn.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);

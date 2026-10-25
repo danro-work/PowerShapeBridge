@@ -11,6 +11,17 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_surface_scale_requires_strict_separate_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-scale.json').read_text())
+        self.assertIs(settings['ownedSurfaceScalesExperimental'], False)
+        general_core(settings)
+        settings['ownedSurfaceScalesExperimental'] = True
+        general_core(settings)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedSurfaceScalesExperimental': value})
+        for field in ('ownedUniformScalePlansExperimental', 'uniformScalePlansExperimental', 'surfaceSamplingExperimental', 'operationPlansExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError): general_core({**settings, field: False})
+
     def test_surface_rotation_requires_strict_separate_gate(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-rotations.json').read_text())
         self.assertIs(settings['ownedSurfaceRotationsExperimental'], False)

@@ -28,6 +28,7 @@ public sealed class BridgeSession : IDisposable
     internal UniformScalePlanStore ScalePlans { get; }
     internal OwnedUniformScaleStore OwnedScales { get; }
     internal SolidScaleStore SolidScales { get; }
+    internal SolidScaleStore SurfaceScales { get; }
     internal OwnedDgkTargetStore DgkTargets { get; }
     internal OwnedLevelMoveStore LevelMoves { get; }
     internal OwnedWorkplaneStore Workplanes { get; }
@@ -61,7 +62,7 @@ public sealed class BridgeSession : IDisposable
         SolidQuarterTurns=new(options.BridgeRoot,OwnedRotations,utcClock);SolidRotations=new(options.BridgeRoot,OwnedRotations,utcClock,true);
         ScalePlans=new(options.BridgeRoot,Candidates,clock,utcClock);
         OwnedScales=new(options.BridgeRoot,ScalePlans,Bindings,clock,utcClock);
-        SolidScales=new(options.BridgeRoot,OwnedScales);
+        SolidScales=new(options.BridgeRoot,OwnedScales);SurfaceScales=new(options.BridgeRoot,OwnedScales,true);
         DgkTargets=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         LevelMoves=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         Workplanes=new(options.BridgeRoot,Bindings,clock,utcClock);
@@ -84,6 +85,7 @@ public sealed class BridgeSession : IDisposable
                 ("rotationPlansExperimental",new[]{"prepare_rotation_plan"}),
                 ("uniformScalePlansExperimental",new[]{"prepare_uniform_scale_plan"}),
                 ("ownedUniformScalePlansExperimental",new[]{"prepare_owned_uniform_scale"}),
+                ("ownedSurfaceScalesExperimental",new[]{"prepare_owned_surface_scale","execute_owned_surface_scale","verify_owned_surface_scale"}),
                 ("ownedSolidScalesExperimental",new[]{"prepare_owned_solid_scale","execute_owned_solid_scale","verify_owned_solid_scale"}),
                 ("ownedSolidScaleRestoreExperimental",new[]{"restore_owned_solid_scale"}),
                 ("ownedDgkTargetsExperimental",new[]{"prepare_owned_dgk_export"}),
@@ -137,7 +139,7 @@ public sealed class BridgeSession : IDisposable
         OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();
         ScalePlans.Clear();
         OwnedScales.Clear();
-        SolidScales.Clear();
+        SolidScales.Clear();SurfaceScales.Clear();
         DgkTargets.Clear();
         LevelMoves.ClearPrepared();
         Workplanes.ClearPrepared();
@@ -193,5 +195,5 @@ public sealed class BridgeSession : IDisposable
         }
         return result;
     }
-    public void Dispose(){Selections.Clear();WorkplaneActivations.Clear();Workplanes.Clear();LevelMoves.Clear();DgkTargets.Clear();SolidScales.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
+    public void Dispose(){Selections.Clear();WorkplaneActivations.Clear();Workplanes.Clear();LevelMoves.Clear();DgkTargets.Clear();SolidScales.Clear();SurfaceScales.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
 }
