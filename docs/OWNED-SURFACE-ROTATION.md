@@ -1,5 +1,9 @@
 # Owned SURFACE WORLD Z90 rotation (experimental)
 
+The original Z90 profile below remains supported. The subsequent
+[integer WORLD rotation extension](SURFACE-INTEGER-ROTATION.md) adds a distinct
+profile and separate negative-oblique real qualification.
+
 Native0.54/stagedSDK0.60 add two full-only tools behind the separate default-false
 `ownedSurfaceRotationsExperimental` flag. It requires owned rotation preparation
 and passive surface sampling dependencies. The Python compatibility facade does

@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using PowerShapeMcp;
 
-if(args.Length==3&&args[0]=="--surface-rotation")return SurfaceRotationCheck.Run(args[1],args[2]);
+if(args.Length==3&&args[0]=="--surface-rotation"){try{return SurfaceRotationCheck.Run(args[1],args[2]);}catch(Exception error){Console.Error.WriteLine(error);return 1;}}
 if(args.Length==3&&args[0]=="--checkpoint-recovered-open")return CheckpointOpenCheck.Run(args[1],args[2]);
 if(args.Length==3&&args[0]=="--owned-rotation-packets")return OwnedRotationCheck.Run(args[1],args[2]);
 if(args.Length==3&&args[0]=="--owned-dgk-targets")return DgkTargetCheck.Run(args[1],args[2]);

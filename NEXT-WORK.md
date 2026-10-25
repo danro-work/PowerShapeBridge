@@ -1,3 +1,11 @@
+# Приоритет: SURFACE −30° вокруг заданной оси/центра проверен; сохранить результат
+
+Сначала work/P0-local-state-20261017.md и work/K8-surface-oblique-rotation-20261025/NEXT-WORK.md. Один SURFACE RotateItem−30°, direction[1,2,3], origin[2,−3,4], отдельный verifier и passive getter завершены. Независимый Python подтвердил 12 точек/12 нормалей; other5exact/559pins/27windows сохранены. Геометрия пока НЕ СОХРАНЕНА. Все live/audit scripts ТЕРМИНАЛЬНЫЕ — поворот не повторять. Native55/staged61/ordinary48/config прежние после одного разрешённого развёртывания. Полная регрессия/публикация/точная CI в локальной карте; обе CI94 SUCCESS, их не перечитывать.
+
+Следующий малый блок — существующий own workflow без нового RotateItem: свежий owned context/все6гридов → один новый SaveAs/verifier → immutable seed/checkpoint/независимый OS audit → одно qualified закрытие собственного writer/verifier → один generic OPEN новой копии/verifier → независимое сравнение всех6гридов/файлов/окон. Подготовить новый сценарий из последних original receipts/current pins, старые live scripts не запускать. Квоту и historicalunknown/fences не менять. После persistence — оставшиеся масштаб/типы/наборы К8, К9, пять классов К10, release/личная К11. P0 принят; действий пользователя сейчас нет.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: SURFACE Z90 persistence завершён; оставшаяся матрица К8
 
 Сначала work/P0-local-state-20261017.md и work/K8-surface-rotation-persistence-20261025/NEXT-WORK.md. Уже выполненный поворот сохранился: один SaveAs/seal → одно закрытие собственного writer → один generic OPEN с отдельными verifiers; все 6 UV-гридов/72 точки/72 нормали/видимость/layout точно совпали на четырёх этапах. Независимый аудит 539 pins/шести физических файлов/остальных 26 окон прошёл; 27→26→27 окон. Обычный readonly подтвердил новую собственную копию. Все live/audit scripts ТЕРМИНАЛЬНЫЕ: SaveAs/close/OPEN/RotateItem не повторять. Native54/staged60/ordinary48/config прежние, полной .NET1052 и двум SUCCESS CI93 повтор не нужен.
