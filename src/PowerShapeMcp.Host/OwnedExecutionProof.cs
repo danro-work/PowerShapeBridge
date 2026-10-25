@@ -42,14 +42,21 @@ public static class OwnedExecutionProof
         JsonObject plan;try{plan=ArtifactProof.Verified(root,"copyopenplans",id,sha,65536);}catch(ReferenceRejected){throw new ReferenceRejected("owned_open_plan_sha_differs");}
         if(!JsonNode.DeepEquals(plan,result["plan"])||parameters.Any(p=>!JsonNode.DeepEquals(plan[p.Key],p.Value))||plan["operation"]?.GetValue<string>()!="open_working_copy"||!ArtifactProof.Boolean(plan["geometryExecutionEnabled"],false)||plan["operationId"]?.GetValue<string>()!=id)throw new ReferenceRejected("owned_open_plan_identity_differs");
     }
-    public static void TranslationReceipt(string root,JsonObject result,JsonObject parameters)
+    public static void TranslationReceipt(string root,JsonObject result,JsonObject parameters,bool surface=false)
     {
         var code="owned_translation_execution_receipt_invalid";var id=Text(result,"operationId",code);var sha=Text(result,"planSha256",code);
         if(result["state"]?.GetValue<string>()!="owned_translation_executed_unverified"||!FileArtifacts.Token(id)||!FileArtifacts.Token(sha,64)||result["bridgeRequestId"]?.GetValue<string>()!=id||
            !ArtifactProof.Boolean(result["geometryMutationAttempted"],true)||!ArtifactProof.Boolean(result["contextChangeAttempted"],false)||!ArtifactProof.Boolean(result["cadSaveAttempted"],false)||
            !ArtifactProof.IntegerIs(result["returnCode"],1)||!ArtifactProof.Boolean(result["copyFenced"],true)||result["recordedJournalState"]?.GetValue<string>()!="executed_unverified")throw new ReferenceRejected(code);
         JsonObject plan;try{plan=ArtifactProof.Verified(root,"ownedexecutions",id,sha,65536);}catch(ReferenceRejected){throw new ReferenceRejected("owned_translation_plan_sha_differs");}
-        if(!JsonNode.DeepEquals(plan,result["plan"])||!ArtifactProof.Boolean(plan["executionEnabled"],true)||plan["operationId"]?.GetValue<string>()!=id||plan["operation"]?.GetValue<string>()!="translate_owned_solid"||parameters.Any(p=>!JsonNode.DeepEquals(plan[p.Key],p.Value)))throw new ReferenceRejected("owned_translation_execution_plan_differs");
+        if(!JsonNode.DeepEquals(plan,result["plan"])||!ArtifactProof.Boolean(plan["executionEnabled"],true)||plan["operationId"]?.GetValue<string>()!=id||plan["operation"]?.GetValue<string>()!=(surface?"translate_owned_surface":"translate_owned_solid")||surface&&!ArtifactProof.IntegerIs(plan["schemaVersion"],2)||parameters.Any(p=>!JsonNode.DeepEquals(plan[p.Key],p.Value)))throw new ReferenceRejected("owned_translation_execution_plan_differs");
+        if(surface){
+            if(plan["measurementProfile"]?.GetValue<string>()!="owned_surface_grid_translation_v1"||plan["boundsBeforeWorldRaw"]is not null)throw new ReferenceRejected(code);
+            ExecutionTools.ValidateSurfaceGrid(plan["surfaceGrid"]!.AsObject());var source=ArtifactProof.Verified(root,"responses",Text(plan,"inspectionRequestId",code),Text(plan,"inspectionSha256",code),16000000);
+            var p=new JsonObject{["mode"]="select_surface_single",["entityKey"]=new JsonArray(21,SurfaceReadTools.Integer(plan["nativeId"])),["grid"]=plan["surfaceGrid"]!.DeepClone()};
+            var capture=plan["captureBefore"]!.AsObject();OwnedSurfaceSelectionProof.Capture(capture,p,source,0);if(!JsonNode.DeepEquals(capture["compositeId"],plan["compositeId"]))throw new ReferenceRejected(code);
+            var vector=plan["vectorRaw"]!.AsArray();if(vector.Count!=3||vector.All(v=>SurfaceReadTools.Number(v)==0)||vector.Any(v=>Math.Abs(SurfaceReadTools.Number(v))>1000000))throw new ReferenceRejected(code);
+        }
     }
     public static void CheckedTranslationVerification(JsonObject result,JsonObject parameters)
     {

@@ -102,7 +102,7 @@ public sealed class BridgeSession : IDisposable
                 ("ownedSaveTargetsExperimental",new[]{"prepare_owned_save_as"}),
                 ("ownedSavedReopenExperimental",new[]{"prepare_owned_saved_reopen"})})
                 if(config.TryGetProperty(flagName,out var enabled)&&enabled.ValueKind==System.Text.Json.JsonValueKind.True)prepared.UnionWith(names);
-            foreach(var (flagName,names) in new[]{("workingCopyOpenExperimental",new[]{"open_working_copy","verify_working_copy_open"}),("ownedTranslationsExperimental",new[]{"execute_owned_translation","verify_owned_translation"}),("ownedSavesExperimental",new[]{"execute_owned_save_as","verify_owned_save_as"}),("ownedSavedReopenExperimental",new[]{"execute_owned_saved_reopen","verify_owned_saved_reopen"})})
+            foreach(var (flagName,names) in new[]{("workingCopyOpenExperimental",new[]{"open_working_copy","verify_working_copy_open"}),("ownedSurfaceTranslationsExperimental",new[]{"execute_owned_surface_translation","verify_owned_surface_translation"}),("ownedTranslationsExperimental",new[]{"execute_owned_translation","verify_owned_translation"}),("ownedSavesExperimental",new[]{"execute_owned_save_as","verify_owned_save_as"}),("ownedSavedReopenExperimental",new[]{"execute_owned_saved_reopen","verify_owned_saved_reopen"})})
                 if(config.TryGetProperty(flagName,out var enabled)&&enabled.ValueKind==System.Text.Json.JsonValueKind.True)execution.UnionWith(names);
         }
         if(!options.ReadOnly&&config.TryGetProperty("checkpointRecoveryExperimental",out var recoveryCopy)&&recoveryCopy.ValueKind==System.Text.Json.JsonValueKind.True)

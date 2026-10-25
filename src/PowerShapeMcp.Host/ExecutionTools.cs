@@ -25,9 +25,17 @@ public sealed class ExecutionTools(BridgeSession session)
     [McpServerTool(Name="verify_owned_translation",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false),Description("Verify the original translation receipt and authoritative journal using fresh native observations. May append its journal and an enabled immutable outcome-resolution record. The native verifier releases only its matching fence on verified success; no command replay or CAD mutation. Unavailable in read-only server.")]
     public Task<CallToolResult> VerifyOwnedTranslation([Description("Original execution request ID.")]string executionRequestId,[Description("Original native execution receipt SHA256.")]string executionReceiptSha256,[Description("Fresh candidate document observation.")]string candidateDocumentHandle,[Description("Fresh one-use active listing choice.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Run("verify_owned_translation",new(){["executionRequestId"]=executionRequestId,["executionReceiptSha256"]=executionReceiptSha256,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
 
+    [McpServerTool(Name="execute_owned_surface_translation",ReadOnly=false,Destructive=true,Idempotent=false,OpenWorld=false)]
+    [Description("Execute one prepared explicit SURFACE translation in an owned mm/WORLD copy among1..8SURFACEs, with an explicit known UV grid. Reuses the coupled owned translate_entities plan/vector and one direct native TranslateItem call. Target sampled positions must shift; normals/visibility/layout/non-positional properties/other surface samples/files/windows stay unchanged. Native bounds unavailable; not full topology. Consumes all CAD leases before submission; fenced until separate verification. No selection/save/inverse/replay. Full only; separate experimental flag.")]
+    public Task<CallToolResult> ExecuteOwnedSurfaceTranslation([Description("Prepared coupled owned-operation handle in this connection, one SURFACE target, nonzero WORLD vector in document raw mm.")]string ownedOperationHandle,[Description("Exact known tStart,tEnd,tDivisions,uStart,uEnd,uDivisions for every retained surface. Increasing ranges; integer divisions1..4. Domain is not inferred.")]System.Text.Json.JsonElement surfaceGrid,CancellationToken cancellationToken)=>Run("execute_owned_surface_translation",new(){["ownedOperationHandle"]=ownedOperationHandle,["surfaceGrid"]=JsonNode.Parse(surfaceGrid.GetRawText())},cancellationToken);
+
+    [McpServerTool(Name="verify_owned_surface_translation",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false)]
+    [Description("Independently verify an original SURFACE translation using authoritative journal/return, immutable before-grid and fresh candidate/listing plus fresh native grid measurements. Complete journal and release only matching fence after observed success. No CAD command, inverse, save, replay or full topology claim. Full only.")]
+    public Task<CallToolResult> VerifyOwnedSurfaceTranslation([Description("Original native execution request ID.")]string executionRequestId,[Description("Original raw execution SHA256,64 lowercase hex.")]string executionReceiptSha256,[Description("Fresh post-return candidate document.")]string candidateDocumentHandle,[Description("Fresh one-use active listing choice.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Run("verify_owned_surface_translation",new(){["executionRequestId"]=executionRequestId,["executionReceiptSha256"]=executionReceiptSha256,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
+
     private async Task<CallToolResult> Run(string name,JsonObject args,CancellationToken cancellationToken)
     {
-        session.AssertToolAllowed(name);var timer=Stopwatch.StartNew();var acquired=false;var submitted=false;string? request=null;
+        session.AssertToolAllowed(name);bool surface=name.Contains("surface_translation",StringComparison.Ordinal);bool translate=name is "execute_owned_translation" or "execute_owned_surface_translation";var timer=Stopwatch.StartNew();var acquired=false;var submitted=false;string? request=null;
         try
         {
             if(!await session.ReferenceGate.WaitAsync(session.Options.Timeout,cancellationToken))return DiagnosticTools.Result(Stopped("queue_timeout_before_submission"),true);
@@ -38,10 +46,11 @@ public sealed class ExecutionTools(BridgeSession session)
             {
                 "activate_document"=>session.Documents.Consume(Text(args,"documentHandle")),
                 "open_working_copy"=>OwnedExecutionProof.OpenParameters(args,session.Candidates,session.Copies,session.Documents),
+                "execute_owned_surface_translation"=>SurfaceParameters(session,args),
                 "execute_owned_translation"=>session.Owned.ValidationParameters(Text(args,"ownedOperationHandle")),
-                _=>OwnedExecutionProof.VerificationParameters(args,session.Candidates,session.Documents,name=="verify_owned_translation")
+                _=>OwnedExecutionProof.VerificationParameters(args,session.Candidates,session.Documents,name is "verify_owned_translation" or "verify_owned_surface_translation")
             };
-            if(name is "activate_document" or "open_working_copy" or "execute_owned_translation")session.RevokeCadLeases(name=="execute_owned_translation");
+            if(translate||name is "activate_document" or "open_working_copy")session.RevokeCadLeases(translate);
             submitted=true;
             var data=await session.Ipc.SubmitAsync("recipe.prepare",new(){["recipeId"]=name,["parameters"]=parameters},cancellationToken,session.Options.Timeout-timer.Elapsed);
             request=data["bridgeRequestId"]?.GetValue<string>();var state=data["state"]?.GetValue<string>();
@@ -53,7 +62,8 @@ public sealed class ExecutionTools(BridgeSession session)
                 switch(name)
                 {
                     case "open_working_copy":OwnedExecutionProof.OpenReceipt(session.Options.BridgeRoot,data,parameters);break;
-                    case "execute_owned_translation":OwnedExecutionProof.TranslationReceipt(session.Options.BridgeRoot,data,parameters);break;
+                    case "execute_owned_surface_translation":case "execute_owned_translation":OwnedExecutionProof.TranslationReceipt(session.Options.BridgeRoot,data,parameters,surface);break;
+                    case "verify_owned_surface_translation":OwnedExecutionProof.CheckedTranslationVerification(data,parameters);break;
                     case "verify_owned_translation":OwnedExecutionProof.CheckedTranslationVerification(data,parameters);data=session.RecordResolution(name,data,parameters,cancellationToken);break;
                     case "verify_working_copy_open":
                         if(!JsonNode.DeepEquals(data["openOperationId"],args["openRequestId"])||!JsonNode.DeepEquals(data["openReceiptSha256"],args["openReceiptSha256"])||!JsonNode.DeepEquals(data["expiresUtc"],parameters["expiresUtc"]))throw new ReferenceRejected("verified_open_native_identity_differs");
@@ -79,7 +89,7 @@ public sealed class ExecutionTools(BridgeSession session)
             {
                 "activate_document"=>submitted?"document_activation_outcome_unknown":"document_choice_rejected",
                 "open_working_copy"=>submitted?"working_copy_open_outcome_unknown":"working_copy_open_rejected",
-                "execute_owned_translation"=>submitted?"owned_translation_outcome_unknown":"owned_translation_rejected_before_change",
+                "execute_owned_translation" or "execute_owned_surface_translation"=>submitted?"owned_translation_outcome_unknown":"owned_translation_rejected_before_change",
                 "verify_working_copy_open"=>"owned_open_verification_rejected",
                 _=>"owned_translation_verification_rejected"
             };
@@ -94,19 +104,25 @@ public sealed class ExecutionTools(BridgeSession session)
     {
         var data=source?.DeepClone().AsObject()??new JsonObject();data["state"]=state;
         if(request is not null)data["bridgeRequestId"]=request;
-        data["geometryMutationAttempted"]=name=="execute_owned_translation";data["contextChangeAttempted"]=name is "open_working_copy" or "activate_document";
+        data["geometryMutationAttempted"]=name is "execute_owned_translation" or "execute_owned_surface_translation";data["contextChangeAttempted"]=name is "open_working_copy" or "activate_document";
         data["cadSaveAttempted"]=false;data["retryAllowed"]=false;data["localArtifactsMayExist"]=true;
         if(name=="activate_document")data["documentHandleConsumed"]=true;
         if(name.StartsWith("verify_",StringComparison.Ordinal))data["qualification"]="Journal append may be unknown; no CAD command was issued.";
         return data;
     }
+    private static JsonObject SurfaceParameters(BridgeSession session,JsonObject input)
+    {
+        var grid=input["surfaceGrid"]!.AsObject();ValidateSurfaceGrid(grid);var p=session.Owned.ValidationParameters(Text(input,"ownedOperationHandle"));p["surfaceGrid"]=grid.DeepClone();return p;
+    }
+    internal static void ValidateSurfaceGrid(JsonObject grid){SurfaceReadTools.Grid(grid);if(SurfaceReadTools.Integer(grid["tDivisions"])>4||SurfaceReadTools.Integer(grid["uDivisions"])>4)throw new ReferenceRejected("surface_translation_grid_invalid");}
     private static bool BeforeSubmission(string? state)=>state is "cancelled_before_submission" or "queue_timeout_before_submission" or "maintenance_before_submission" or "failed_before_submission";
     private static string Text(JsonObject args,string name)=>args[name]!.GetValue<string>();
-    private static readonly Dictionary<string,string> Success=new(){["activate_document"]="document_active_verified",["open_working_copy"]="working_copy_opened_observed",["verify_working_copy_open"]="owned_open_verified_observed",["execute_owned_translation"]="owned_translation_executed_unverified",["verify_owned_translation"]="owned_translation_verified_observed"};
+    private static readonly Dictionary<string,string> Success=new(){["activate_document"]="document_active_verified",["open_working_copy"]="working_copy_opened_observed",["verify_working_copy_open"]="owned_open_verified_observed",["execute_owned_surface_translation"]="owned_translation_executed_unverified",["verify_owned_surface_translation"]="owned_translation_verified_observed",["execute_owned_translation"]="owned_translation_executed_unverified",["verify_owned_translation"]="owned_translation_verified_observed"};
     public static McpServerTool[] Create(BridgeSession session)
     {
         var methods=new ExecutionTools(session);using var stream=typeof(ExecutionTools).Assembly.GetManifestResourceStream("execution-tools.json")!;
         var schemas=JsonNode.Parse(stream)!.AsArray().Select(t=>t!.AsObject()).ToDictionary(t=>t["name"]!.GetValue<string>());
+        var surfaceExecute=schemas["execute_owned_translation"].DeepClone().AsObject();surfaceExecute["inputSchema"]!["properties"]!["surfaceGrid"]=SurfaceReadTools.GridSchema(4);surfaceExecute["inputSchema"]!["required"]!.AsArray().Add("surfaceGrid");schemas["execute_owned_surface_translation"]=surfaceExecute;schemas["verify_owned_surface_translation"]=schemas["verify_owned_translation"].DeepClone().AsObject();
         var result=new List<McpServerTool>();
         foreach(var method in typeof(ExecutionTools).GetMethods(BindingFlags.Instance|BindingFlags.Public).Where(m=>m.GetCustomAttribute<McpServerToolAttribute>() is not null))
         {
@@ -114,7 +130,7 @@ public sealed class ExecutionTools(BridgeSession session)
             var schema=schemas[name]["inputSchema"]!.DeepClone().AsObject();
             foreach(var parameter in method.GetParameters())
                 if(schema["properties"]?[parameter.Name!] is JsonObject property&&parameter.GetCustomAttribute<DescriptionAttribute>() is { } description)property["description"]=description.Description;
-            result.Add(new StrictTool(McpServerTool.Create(method,methods),session,schema));
+            result.Add(new StrictTool(McpServerTool.Create(method,methods),session,schema,name=="execute_owned_surface_translation"?x=>ValidateSurfaceGrid(x["surfaceGrid"]!.AsObject()):null));
         }
         return result.ToArray();
     }
