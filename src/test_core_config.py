@@ -21,6 +21,17 @@ class CoreConfiguration(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'surfaceSamplingExperimental': value})
         with self.assertRaises(ValueError): general_core({**settings, 'entitySetsExperimental': False})
 
+    def test_surface_selection_profile_requires_strict_separate_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-selection.json').read_text())
+        self.assertIs(settings['ownedSurfaceSelectionsExperimental'], False)
+        general_core(settings)
+        settings.update(ownedSurfaceSelectionsExperimental=True, ownedSelectionsExperimental=True)
+        general_core(settings)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedSurfaceSelectionsExperimental': value})
+        for field in ('ownedSelectionsExperimental', 'surfaceSamplingExperimental', 'entitySetsExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError): general_core({**settings, field: False})
+
     def test_owned_selection_full_only_flag_is_strict_and_default_false(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-selection.json').read_text())
         self.assertIs(settings['ownedSelectionsExperimental'], False)

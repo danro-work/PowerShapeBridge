@@ -20,6 +20,9 @@ def general_core(settings):
     level_moves = settings.get('ownedLevelMovesExperimental', False)
     workplanes = settings.get('ownedWorkplanesExperimental', False)
     surface_samples = settings.get('surfaceSamplingExperimental', False)
+    surface_selection = settings.get('ownedSurfaceSelectionsExperimental', False)
+    if type(surface_selection) is not bool or surface_selection and (profile != 'general-v1' or surface_samples is not True or settings.get('ownedSelectionsExperimental') is not True):
+        raise ValueError('Surface selection requires strict owned selection and sample flags')
     if type(surface_samples) is not bool or surface_samples and (profile != 'general-v1' or experimental is not True):
         raise ValueError('Surface sampling requires general passive candidates and boolean flag')
     selections = settings.get('ownedSelectionsExperimental', False)

@@ -63,10 +63,14 @@ public sealed class SurfaceReadTools(BridgeSession session)
         var expiry=LeaseTime.Parse(args["expiresUtc"]!.GetValue<string>(),"surface_read_expired");var stamp=LeaseTime.Parse(reply["timestampUtc"]!.GetValue<string>(),"surface_read_time_invalid");Need(stamp<=DateTimeOffset.UtcNow.AddSeconds(5)&&stamp<expiry&&DateTimeOffset.UtcNow<expiry);foreach(var s in new[]{before,after})Need(LeaseTime.Parse(s["timestampUtc"]!.GetValue<string>(),"surface_read_time_invalid")<=stamp);
         var result=reply.DeepClone().AsObject();result["state"]="surface_samples_inspected_read_only";result["nativeReceiptSha256"]=original.Sha;result["cadMutationAttempted"]=false;return result;
     }
+    internal static JsonObject GridSchema(int maxDivisions=32)
+    {
+        var fields=new JsonObject();foreach(var k in new[]{"tStart","tEnd","uStart","uEnd"})fields[k]=new JsonObject{["type"]="number",["minimum"]=-1000000,["maximum"]=1000000};foreach(var k in new[]{"tDivisions","uDivisions"})fields[k]=new JsonObject{["type"]="integer",["minimum"]=1,["maximum"]=maxDivisions};return new JsonObject{["type"]="object",["properties"]=fields,["required"]=new JsonArray("tStart","tEnd","tDivisions","uStart","uEnd","uDivisions"),["additionalProperties"]=false};
+    }
     public static McpServerTool[] Create(BridgeSession session)
     {
         if(!session.SurfaceSamplingEnabled)return[];var p=new JsonObject();foreach(var k in new[]{"candidateDocumentHandle","candidateEntityHandle"})p[k]=StrictTool.Token(k,"Fresh same-connection passive candidate.")["properties"]![k]!.DeepClone();
-        var fields=new JsonObject();foreach(var k in new[]{"tStart","tEnd","uStart","uEnd"})fields[k]=new JsonObject{["type"]="number",["minimum"]=-1000000,["maximum"]=1000000};foreach(var k in new[]{"tDivisions","uDivisions"})fields[k]=new JsonObject{["type"]="integer",["minimum"]=1,["maximum"]=32};p["grid"]=new JsonObject{["type"]="object",["properties"]=fields,["required"]=new JsonArray("tStart","tEnd","tDivisions","uStart","uEnd","uDivisions"),["additionalProperties"]=false};
+        p["grid"]=GridSchema();
         return[new StrictTool(McpServerTool.Create(new SurfaceReadTools(session).Inspect),session,new JsonObject{["type"]="object",["properties"]=p,["required"]=new JsonArray("candidateDocumentHandle","candidateEntityHandle","grid"),["additionalProperties"]=false},x=>Grid(x["grid"]!.AsObject()))];
     }
 }

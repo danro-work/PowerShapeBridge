@@ -30,5 +30,10 @@ namespace PowerShapeBridge {
    }catch(Exception error){result["error"]=error.Message;}
    result["timestampUtc"]=DateTime.UtcNow.ToString("o");return result;
   }
+  // Inventory-only proof for explicit count-zero callers; never calls SelectedItems.
+  internal static Dictionary<string,object>[] Inventory(Dictionary<string,object> expected,IContext c){
+   var ids=Ids(c.ModelItems());var first=ids.Length==0?new Dictionary<int,Dictionary<string,object>>():Metadata(ids,c.ItemData(ids));var inventory=EntitySets.Inventory(expected);Require(first.Count==inventory.Length,"Direct inventory count differs.");foreach(var e in inventory){var matches=first.Values.Where(v=>Equals(v["nativeTypeCode"],e["nativeTypeCode"])&&Equals(v["nativeId"],e["nativeId"])&&Equals(v["name"],e["name"])&&Equals(v["levelNumber"],e["levelNumber"])).ToArray();Require(matches.Length==1,"Direct inventory metadata differs.");}
+   var next=Ids(c.ModelItems());var second=next.Length==0?new Dictionary<int,Dictionary<string,object>>():Metadata(next,c.ItemData(next));Require(ids.OrderBy(v=>v).SequenceEqual(next.OrderBy(v=>v))&&EntitySets.Canonical(first.OrderBy(v=>v.Key).Select(v=>v.Value))==EntitySets.Canonical(second.OrderBy(v=>v.Key).Select(v=>v.Value)),"Direct inventory changed between getters.");return first.OrderBy(v=>v.Key).Select(v=>v.Value).ToArray();
+  }
  }
 }
