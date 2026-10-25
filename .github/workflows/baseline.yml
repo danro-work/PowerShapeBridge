@@ -47,6 +47,9 @@ jobs:
       - name: Check separately gated owned SURFACE uniform scale without CAD
         shell: pwsh
         run: ./verify-owned-surface-scale.ps1
+      - name: Check passive COMPCURVE layout and native errors without CAD
+        shell: pwsh
+        run: ./verify-curve-layout.ps1
       - name: Preserve verification evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -62,4 +65,5 @@ jobs:
             evidence/owned-surface-translation-ci
             evidence/owned-surface-rotation-ci
             evidence/owned-surface-scale-ci
+            evidence/curve-layout-ci
           if-no-files-found: error
