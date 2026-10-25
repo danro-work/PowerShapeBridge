@@ -19,6 +19,9 @@ def general_core(settings):
     bindings = settings.get('documentBindingsExperimental', False)
     level_moves = settings.get('ownedLevelMovesExperimental', False)
     workplanes = settings.get('ownedWorkplanesExperimental', False)
+    surface_samples = settings.get('surfaceSamplingExperimental', False)
+    if type(surface_samples) is not bool or surface_samples and (profile != 'general-v1' or experimental is not True):
+        raise ValueError('Surface sampling requires general passive candidates and boolean flag')
     selections = settings.get('ownedSelectionsExperimental', False)
     if type(selections) is not bool or selections and (profile != 'general-v1' or experimental is not True or copies is not True or bindings is not True):
         raise ValueError('Owned selection requires general copies/candidates/bindings and boolean flag')

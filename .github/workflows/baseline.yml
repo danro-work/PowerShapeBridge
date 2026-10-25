@@ -32,6 +32,9 @@ jobs:
       - name: Compile passive surface diagnostics without execution
         shell: pwsh
         run: ./verify-surface-diagnostics.ps1
+      - name: Check passive surface COM shape and precision without CAD
+        shell: pwsh
+        run: ./verify-surface-sampling.ps1
       - name: Preserve verification evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -42,4 +45,5 @@ jobs:
             evidence/workplane-switch-ci
             evidence/owned-selection-ci
             evidence/surface-diagnostics-ci
+            evidence/surface-sampling-ci
           if-no-files-found: error

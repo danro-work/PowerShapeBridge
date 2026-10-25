@@ -63,6 +63,7 @@ namespace PowerShapeBridge
         public bool ownedWorkplanesExperimental { get; set; }
         public bool ownedWorkplaneActivationExperimental { get; set; }
         public bool ownedSelectionsExperimental { get; set; }
+        public bool surfaceSamplingExperimental { get; set; }
         public bool IsGeneralCore { get { return coreProfile == "general-v1"; } }
         public bool CoreTransportEnabled { get { return IsGeneralCore || (mcpMutationsPanel && recipeOperationsPanel); } }
         public string qualificationOperationId { get; set; }
@@ -102,6 +103,7 @@ namespace PowerShapeBridge
             if(levelReadingExperimental&&!IsGeneralCore)throw new ArgumentException("Passive level reading requires general core.");
             if(ownedLevelMovesExperimental&&(!IsGeneralCore||!levelReadingExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned level moves require general sets/copies/bindings/level reads.");
             if(ownedWorkplanesExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned workplanes require general sets/copies/bindings.");
+            if(surfaceSamplingExperimental&&(!IsGeneralCore||!entitySetsExperimental))throw new ArgumentException("Surface sampling requires general passive candidates.");
             if(ownedSelectionsExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned selections require general copies/candidates/bindings.");
             if(ownedWorkplaneActivationExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned workplane activation requires general sets/copies/bindings.");
             if (IsGeneralCore) {
@@ -122,7 +124,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.50.0-dev";
+        public const string ReleaseVersion = "0.51.2-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -162,6 +164,10 @@ namespace PowerShapeBridge
                 if((bool)enabled)foreach(string flag in new[]{"ownedUniformScalePlansExperimental","uniformScalePlansExperimental","operationPlansExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {
                     object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Owned SOLID scale dependencies must be true JSON booleans.");
                 }
+            }
+            if(raw!=null&&raw.TryGetValue("surfaceSamplingExperimental",out enabled)) {
+                if(!(enabled is bool))throw new ArgumentException("Surface sampling flag must be boolean.");
+                object value;if((bool)enabled&&(!raw.TryGetValue("entitySetsExperimental",out value)||!(value is bool)||!(bool)value))throw new ArgumentException("Surface sampling requires passive candidates.");
             }
             if(raw!=null&&raw.TryGetValue("ownedSelectionsExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Owned selections flag must be JSON boolean.");
@@ -232,6 +238,9 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--native-selection-reading-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);
                 try{NativeSelectionReadingTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
+            }
+            if(args.Length==1&&args[0]=="--surface-sampling-test") {
+                try{NativeSurfaceSamplingTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.ToString());return 3;}
             }
             if(args.Length==1&&args[0]=="--owned-selection-test") {
                 try{OwnedSelectionTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}

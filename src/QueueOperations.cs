@@ -11,6 +11,9 @@ namespace PowerShapeBridge {
   Config c=Program.ReadConfig();
   if(r.Count!=3||!Equals(r["requestId"],id)||!r.ContainsKey("arguments"))throw new ArgumentException("Invalid envelope.");
   var a=r["arguments"] as Dictionary<string,object>;if(a==null)throw new ArgumentException("Invalid arguments.");string op=(string)r["operation"];
+  if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&Equals(a["recipeId"],NativeSurfaceSampling.Recipe)) {
+   if(!c.IsGeneralCore||!c.surfaceSamplingExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Passive surface sampling disabled or invalid envelope.");NativeSurfaceSampling.Validate((Dictionary<string,object>)a["parameters"]);return;
+  }
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&Equals(a["recipeId"],OwnedScaleRestoration.Recipe)) {
    if(!c.IsGeneralCore||!c.ownedSolidScaleRestoreExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Scale restoration disabled or invalid envelope.");OwnedScaleRestoration.Common((Dictionary<string,object>)a["parameters"]);return;
   }
@@ -119,6 +122,7 @@ namespace PowerShapeBridge {
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&new[]{"prepare_checkpoint_recovery","create_checkpoint_working_copy"}.Contains(readArgs["recipeId"] as string))return CheckpointRecovery.Run(id,(Dictionary<string,object>)readArgs["parameters"],Equals(readArgs["recipeId"],"create_checkpoint_working_copy"));
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"prepare_owned_save_as"))return OwnedSaveTargets.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"prepare_owned_saved_reopen"))return OwnedSavedReopen.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
+ if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],NativeSurfaceSampling.Recipe))return NativeSurfaceSampling.Run((Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],OwnedScaleRestoration.Recipe))return OwnedScaleRestoration.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSavedResultClose.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSavedResultClose.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&OwnedSavedFinalization.Recipes.Contains(readArgs["recipeId"] as string))return OwnedSavedFinalization.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);

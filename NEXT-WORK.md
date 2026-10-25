@@ -1,3 +1,11 @@
+# Приоритет: пассивный SURFACE reader проверен в PowerShape; публикация и точная CI
+
+Читать актуальный верх work/P0-local-state-20261017.md и work/K8-surface-grid-20261025/NEXT-WORK.md. Новый inspect_surface_samples прошёл через staged readonly SDK0.57 / Native0.51.2:12точек/нормалей/visibility по явному UV[1,2] с2×3делениями. COM-layout и точность исходных double проверены; независимый аудит файлов/окон/контекста прошёл. Все live/diagnostic scripts завершены, не повторять. Runtime установлен с резервами, ordinarySDK48 прежний. Ни геометрия, ни выделение, ни CAD-файлы не менялись.
+
+Полная .NET1033/1033 без ошибок/skip и Native14/21/28 прошли после реального блока. Дальше опубликовать отдельный draftPR поверх PR88, проверить точную голову CI через Code Review. После этого следующий блок К8 — отдельная квалификация SURFACE selection/transform без требований успешного nativebox в passive sample result. Сначала небольшой конкретный сценарий на собственной копии и независимая геометрическая проверка; sampled envelope не выдавать за fullbounds. Старый Surface transform adapter/исторические−2/−3/unknown не переписывать. Приоритеты К9, матрица пяти классов К10 и release/личная приёмка К11 сохраняются. P0 принят; действий пользователя сейчас не требуется.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: SURFACE source/пассивные наблюдения проверены; исправить контракт grid-reader
 
 Читать верх work/P0-local-state-20261017.md и work/K8-surface-source-20261025/NEXT-WORK.md. One new own generic copy/oneOPEN/independentverifier завершены; активна новая Working с6SURFACE,27окон,все прежние26сохранены. OPEN/live/getter scripts терминальные, не повторять. Independent-audit.json + completed-block.json подтверждают96sampledточек/96нормалей/raw-area/файлы/окна/journal. Геометрия/выделение/сохранения/close/mouse не менялись.
