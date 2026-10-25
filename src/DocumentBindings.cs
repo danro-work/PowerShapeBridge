@@ -17,7 +17,7 @@ namespace PowerShapeBridge {
    Dictionary<string,object> Observation();
    void ConfirmDocument();
   }
-  internal sealed class ComContext : OwnedSurfaceRotation.IWriter,OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,SolidRotationContext.IWriteContext,OwnedSolidScale.IExecutionContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext,OwnedSelection.IContext,NativeSurfaceSampling.IContext {
+  internal sealed class ComContext : OwnedSurfaceScaleMeasurements.IPhaseGuard, OwnedSurfaceRotation.IWriter,OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,SolidRotationContext.IWriteContext,OwnedSolidScale.IExecutionContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext,OwnedSelection.IContext,NativeSurfaceSampling.IContext {
    object application,document;
    internal ComContext(Config config) {
     try {application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("No active model document.");document=ps.ActiveDocument;ConfirmDocument();}
@@ -46,10 +46,12 @@ namespace PowerShapeBridge {
    public int Translate(int composite,double[] vector){ConfirmDocument();dynamic doc=document;return Program.StrictInt(doc.TranslateItem(composite,vector[0],vector[1],vector[2]));}
    // Called only through the internal guarded rotation adapter; no public queue route yet.
    public int Rotate(int composite,int angle,double[] axis){if(composite<=0||axis==null||axis.Length!=6||axis.Any(v=>double.IsNaN(v)||double.IsInfinity(v))||Math.Abs(axis.Skip(3).Sum(v=>v*v)-1)>1e-12||angle%360==0||Math.Abs((long)angle)>1000000)throw new ArgumentException("Explicit finite normalized rotation required.");ConfirmDocument();dynamic doc=document;return Program.StrictInt(doc.RotateItem(composite,angle,axis.Cast<object>().ToArray()));}
-   public void ScalePhaseGuard(Dictionary<string,object> expected,string solidName,int phase,int windowCount){
+   public void ScalePhaseGuard(Dictionary<string,object> expected,string solidName,int phase,int windowCount){ScalePhaseGuardCore(expected,solidName,phase,windowCount,"SOLID");}
+   public void SurfaceScalePhaseGuard(Dictionary<string,object> expected,string name,int phase,int windowCount){ScalePhaseGuardCore(expected,name,phase,windowCount,"SURFACE");}
+   void ScalePhaseGuardCore(Dictionary<string,object> expected,string solidName,int phase,int windowCount,string expectedType){
     if(phase<0||phase>=13||windowCount<1)throw new ArgumentException("Fixed scale phase/window required.");ConfirmDocument();dynamic ps=application;var model=expected["model"] as Dictionary<string,object>;if(model==null)throw new InvalidDataException("Pinned scale model required.");int id=Program.StrictInt(model["id"]);
     if(Program.StrictInt(ps.Evaluate("WINDOW.NUMBER"))!=windowCount||Convert.ToString(ps.Evaluate("MODEL.SELECTED"),CultureInfo.InvariantCulture)!=(string)model["name"]||!string.Equals(Path.GetFullPath(Convert.ToString(ps.Evaluate("MODEL[ID "+id.ToString(CultureInfo.InvariantCulture)+"].PATH"),CultureInfo.InvariantCulture)),Path.GetFullPath((string)model["path"]),StringComparison.OrdinalIgnoreCase)||ActiveWorkplane()!=0||Program.StrictInt(ps.Evaluate("SELECTION.NUMBER"))!=(phase==0?0:1))throw new InvalidOperationException("Pinned scale document/WORLD/selection changed.");
-    if(phase>0&&(!string.Equals(Convert.ToString(ps.Evaluate("SELECTION.TYPE[0]"),CultureInfo.InvariantCulture),"SOLID",StringComparison.OrdinalIgnoreCase)||Convert.ToString(ps.Evaluate("SELECTION.NAME[0]"),CultureInfo.InvariantCulture)!=solidName))throw new InvalidOperationException("Pinned selected scale target changed.");ConfirmDocument();
+    if(phase>0&&(!string.Equals(Convert.ToString(ps.Evaluate("SELECTION.TYPE[0]"),CultureInfo.InvariantCulture),expectedType,StringComparison.OrdinalIgnoreCase)||Convert.ToString(ps.Evaluate("SELECTION.NAME[0]"),CultureInfo.InvariantCulture)!=solidName))throw new InvalidOperationException("Pinned selected scale target changed.");ConfirmDocument();
     string modelName=(string)model["name"];if(modelName.Any(ch=>!char.IsLetterOrDigit(ch)&&ch!='_')||Program.StrictInt(ps.Evaluate("MODEL['"+modelName+"'].ID"))!=id)throw new InvalidOperationException("Pinned owned scale model ID changed.");
    }
    // Internal typed frozen program; never a public raw-command queue route.

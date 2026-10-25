@@ -20,6 +20,9 @@ def general_core(settings):
     level_moves = settings.get('ownedLevelMovesExperimental', False)
     workplanes = settings.get('ownedWorkplanesExperimental', False)
     surface_samples = settings.get('surfaceSamplingExperimental', False)
+    surface_scale = settings.get('ownedSurfaceScalesExperimental', False)
+    if type(surface_scale) is not bool or surface_scale and (profile != 'general-v1' or surface_samples is not True or any(settings.get(k) is not True for k in ('ownedUniformScalePlansExperimental', 'uniformScalePlansExperimental', 'operationPlansExperimental'))):
+        raise ValueError('Surface scaling requires owned scale plans and passive surface sampling')
     surface_rotation = settings.get('ownedSurfaceRotationsExperimental', False)
     if type(surface_rotation) is not bool or surface_rotation and (profile != 'general-v1' or surface_samples is not True or settings.get('ownedRotationPlansExperimental') is not True):
         raise ValueError('Surface rotation requires owned rotation plans and sample flags')
