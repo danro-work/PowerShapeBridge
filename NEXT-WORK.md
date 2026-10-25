@@ -1,3 +1,13 @@
+# Приоритет: SURFACE source/пассивные наблюдения проверены; исправить контракт grid-reader
+
+Читать верх work/P0-local-state-20261017.md и work/K8-surface-source-20261025/NEXT-WORK.md. One new own generic copy/oneOPEN/independentverifier завершены; активна новая Working с6SURFACE,27окон,все прежние26сохранены. OPEN/live/getter scripts терминальные, не повторять. Independent-audit.json + completed-block.json подтверждают96sampledточек/96нормалей/raw-area/файлы/окна/journal. Геометрия/выделение/сохранения/close/mouse не менялись.
+
+Реальные gaps: box(false)−2,stored/FromWP0 — успешныхnativebounds нет. UV[0,1]→−3; explicitUV[1,2] наNLATS/NLONS2→success0; приdivisions3×3 пришло16positions/normals/visibility,не9. Existing RotationMeasurements.Surface по-прежнему закрыто отказывает,не ослаблять его до фикса/квалификации. Четыре угла/ sampled envelope не выдавать за fullnativebox. Локальная Autodesk2023OLE help/официальный wrapper изучены; wrapperbbox используетselection и непригоден дляreadonly. Приоритет — один небольшой новый passive division-count профиль(например2×2 на одной явной поверхности), затем decoder/read-only result с provenance,visibility и bounds unavailable; не повторять старые−2/−3 профили без изменения. Новая generalSurface selection/transform требует своей квалификации,не считатьготовойпоgetters. Документ docs/SURFACE-READER-QUALIFICATION.md.
+
+Runtime/config/Native50/stagedSDK56/ordinary48 прежние,deploy0. Локальная.NET1021 и обеCI87SUCCESS актуальны без повтора. Теперь публикация только3standalone diagnostics/docs/state; privateCAD/rawfiles/чужие16STATUS исключить. K8/K9/matrix5classK10/release-userK11 остаются; P0 принят,действия пользователя не требуются.
+
+## Предыдущий блок (исторический)
+
 # Приоритет: owned select/clear и регрессия ПРОШЛИ; публикация/точная CI
 
 Читать актуальный верх work/P0-local-state-20261017.md и work/K8-owned-selection-20261024/NEXT-WORK.md. Авторитетные доказательства evidence/K8-owned-selection-20261024/live/result.json + independent-audit.json. Один select и один clear со своими независимыми verifiers уже завершены. Повторять нельзя без нового риска. Модель/геометрия/файлы и остальные25окон сохранены; активная та же собственная Working,26окон,WORLD,пустое выделение. Скрипт live-once.py ТЕРМИНАЛЬНЫЙ.
