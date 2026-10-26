@@ -1,4 +1,105 @@
-﻿# CURRENT: SET PACKAGE READY; EARLY CAD STOPPED BY TWO POWERSHAPE PROCESSES
+﻿# CURRENT: NATIVE66 INSTALLED; BOTH INSTANCES PRESERVED; SUCCESSFUL-OPEN ACCESS RESTORE NEXT
+
+User keeps both PowerShape instances and explicitly asked to ignore the new one.
+NO pending user question. Do not ask to close either again. P0 personally accepted;
+K8/K9/five-class K10/release/personal K11 remain OPEN. No mouse authorized.
+
+Native0.66.0-dev INSTALLED with backup work/general-deployment-backup-20261026-184225
+and one idle panel restart. StagedSDK0.72, ordinarySDK0.48 unchanged. Deployment
+evidence state deployed_panel_verified. No repeat deployment needed. Explicit
+main process pin PID17304/start2026-10-08T08:38:27.4633424Z/session1/executable
+is checked against COM app.pid, readonly MainWindowHWND Windows owner and live OS
+identity; no fallback. Process34372 untouched, still required by user.
+
+Installed ordinary readonly inspection7f4a8c5575004cf88cf0170703add9ac and
+listing898aaf4d5aa541c9a52e7fa775747d9c PASSED with BOTH processes present:
+main28windows, owncurve b2fa1380699f4087abcb02c1da54221a/model280013123 active,
+emptyWORLD. Desired old own six-SURFACE copy8fb7cc6d628d4e7a8a762002638cf145 /
+model280012835 is open inactive at27. These are historical observations, not
+future handles; do not repeat unchanged read checks or use expired handles.
+ZERO new CAD activation/geometry/save/open/close in this attachment block.
+
+Postdeployment audit:1042oldpins, ONLY2authorized pinned runtime changes via
+manifest before/after SHA and18backup/runtime pairs, foreign16 intact. Nextpins
+evidence/powershape-process-pin-20261026/protected-for-next-block.json (1115).
+17Native/10SDK/31Python and STDIO90full/11readonly/noqueue passed. CI fixture
+runner marker refusal+17checks passed. Full.NET1130:1129passed/1File.Replace
+UnauthorizedAccess in restricted token,0skip; exact unchanged test passed1/1
+outside that token. Both original failed TRX and separate success preserved.
+No working-code workaround or repeated successful suite. All processes terminal.
+
+NEXT read work/powershape-process-pin-20261026/NEXT-OWNED-ACCESS-CONTRACT.md.
+Old six-SURFACE generic OPENb20256af7bac460eb9746139bcac6d85 was successful with27
+windows; current28. Existing verify_working_copy_open correctly requires its
+original whole inventory. Interrupted-OPEN adoption also requires its original
+inventory and a timeout/three-event journal, so DOES NOT APPLY. Do not submit
+either old verifier, replay OPEN, close unrelated windows, raise quota, weaken
+original guards or fabricate SDK leases. No CAD command attempted/unknown here.
+
+Implement separate qualified current-access observer for an original successful
+clean owned OPEN, with unchanged history/source/checkpoint/saved bytes, fresh
+main-only current context/window/file checks and no fences. Targeted tests then
+fresh existing-owncopy activation/all-six samples/reference audit and observer.
+Then one new two-SURFACE WORLD[1,0,0] intent via existing ordered set executor,
+separate Native/SDK/Python target+four-nontarget+step-chain/window/file audit.
+Unknown stops/fences, no repeat/inverse. Persistence is separate later.
+
+Pin source branch codex/powershape-process-pin from PR107/dda9336; publication
+status in currentevidence/publication-*.json when present. PR107 BOTHCI SUCCESS
+baseline121641103653/run40342632253 andSDK121641104223/run40342632196; no repoll.
+PR106 BOTHCI SUCCESS too. Foreign16 must remain excluded from commits.
+Preserved old notes below may say runtime64, questionpending or notdeployed;
+those are historical and superseded by this head. No repeated completed CAD.
+
+# CURRENT: USER KEEPS BOTH INSTANCES; EXPLICIT MAIN PROCESS PIN QUALIFIED READ-ONLY
+
+User answered both instances are needed, then said "не обращай внимания на новый
+экземпляр". This SUPERSEDES the pending close-instance question below. NO user
+question/permission pending; do not ask to close either instance again or treat
+the preserved old preflight-stop report as current authorization policy.
+
+Current branch codex/powershape-process-pin, based on PR107/dda9336. PR107 draft
+attached, both exact-head CI SUCCESS: baseline121641103653/run40342632253 and
+SDK121641104223/run40342632196. Do not repoll. Its source remains the ordered set
+candidate, not live accepted. PR106 also bothSUCCESS; no repeat of completed CAD.
+
+Current pin source Native66/SDK72/Python66 is UNCOMMITTED, not deployed. Installed
+Native64/ordinarySDK48 unchanged. A named expected process pin contains exact
+PID17304, creationUtc2026-10-08T08:38:27.4633424Z, session1 and canonical executable.
+It rechecks COM app.pid + documented readonly MainWindowHWND + Windows HWND owner,
+OS creation/session/executable, with NO fallback or process-by-order selection.
+Default no-pin behavior still rejects multiple processes. The existing document,
+ownership/binding/claim/fence/journal guards remain. No commands to the new34372.
+
+Independent COM/OS probe succeeded; then Native66 --pinned-session-read succeeded
+on real main17304 with BOTH processes present:28documents, current owncurve
+b2fa1380699f4087abcb02c1da54221a/model280013123, emptyWORLD. Historical six-surface
+owncopy8fb7cc6d628d4e7a8a762002638cf145/model280012835 found at window27 (NOT a future
+handle; fresh listing/binding required). ZERO activation/geometry/save/open/close.
+Readiness17Native/10SDK/31Python and actual STDIO90full/11readonly/noqueue passed;
+clean Native66/SDK72 bytes pinned in currentevidence/qualified-package.json.
+1042prior protected pins and foreign16 unchanged before deployment.
+
+NEXT: reviewed deploy-general.ps1, one idle backed-up Native66 panel deployment
+from currentwork/native and new deployment plan/evidence. Revalidate package hashes
+and known idle panel/queue; never restart an incomplete deployment or duplicatepanel.
+Then fresh ordinary/staged read/list in pinned MAIN only, independent confirmation
+both processes stay present, fresh owned-surface activation/ownership verification,
+one early ordered two-SURFACE translation and separate native/SDK/Python all-six
+UV/affine/non-target/file/window/step-chain audit. Save/reopen is separate later.
+Update oldruntime pins only via exact authorized deployment manifest; preserve
+all oldfailedscale/clear/persistence evidence. Fullnewregression/CI after real block.
+Do not count PR107's1120-era code tests as qualification of new pin source.
+
+Process pin work scripts: wire-pin-once.py STOPPED after writing only Bridge.cs;
+wire-pin-tail.py completed remaining source. Never rerun them. WindowsPowerShell
+unsigned diagnostic was blocked BEFORE COM; no execution-policy change made.
+Independent compiled readonly AttachmentProbe succeeded; its old14:52 snapshot is
+history, while Native66 passive read is newer. No mutation unknown exists.
+All test/build/readiness/readonly processes terminal; no active exec handles.
+K8/K9/fiveclassK10/release/personalK11 OPEN, P0accepted. No mouse authorized.
+
+# CURRENT: SET PACKAGE READY; EARLY CAD STOPPED BY TWO POWERSHAPE PROCESSES
 
 Current work/K8-surface-set-translation-20261026/CURRENT.md and WIP.md.
 Native65/SDK71 clean package ready: Native10, actualFrameworkSDK16, necessarylegacy

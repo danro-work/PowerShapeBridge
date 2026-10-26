@@ -18,8 +18,9 @@ namespace PowerShapeBridge {
    void ConfirmDocument();
   }
   internal sealed class ComContext : OwnedCurveScaleMeasurements.IPhaseGuard, OwnedCurveTranslation.IContext, NativeCurveLayout.IContext, OwnedSurfaceScaleMeasurements.IPhaseGuard, OwnedSurfaceRotation.IWriter,OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,SolidRotationContext.IWriteContext,OwnedSolidScale.IExecutionContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext,OwnedSelection.IContext,NativeSurfaceSampling.IContext {
-   object application,document;
+   object application,document;readonly Dictionary<string,object> processPin;
    internal ComContext(Config config) {
+    processPin=config.powerShapeProcessPin==null?null:Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(config.powerShapeProcessPin));
     try {application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("No active model document.");document=ps.ActiveDocument;ConfirmDocument();}
     catch {Dispose();throw;}
    }
@@ -67,6 +68,7 @@ namespace PowerShapeBridge {
    public object FacePoint(string face,double t,double u,bool normal){face=SolidFaceMeasurements.FaceName(face);SolidFaceMeasurements.Vector(new[]{t,u,0});ConfirmDocument();dynamic ps=application;return ps.Evaluate("SURFACE['"+face+"'].EVALUATE("+t.ToString("R",CultureInfo.InvariantCulture)+";"+u.ToString("R",CultureInfo.InvariantCulture)+")."+(normal?"NORMAL":"POSITION"));}
    public void SaveAs(string path){ConfirmDocument();WorkingCopyOpen.CommandPath(path);dynamic ps=application;ps.Exec("FILE SAVEASPATH "+path);}
    public void ConfirmDocument() {
+    PowerShapeProcessPin.Check(application,processPin);
     dynamic ps=application;if(Convert.ToBoolean(ps.Busy())||!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("Active COM document unavailable/busy.");
     object current=null;IntPtr retained=IntPtr.Zero,active=IntPtr.Zero;
     try {current=ps.ActiveDocument;retained=Marshal.GetIUnknownForObject(document);active=Marshal.GetIUnknownForObject(current);if(retained!=active)throw new InvalidOperationException("Active COM document changed.");}

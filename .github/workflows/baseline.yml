@@ -26,6 +26,9 @@ jobs:
       - name: Check workplane switch coordinate and no-replay boundaries
         shell: pwsh
         run: ./verify-workplane-switch.ps1
+      - name: Check explicit process identity pin without COM or CAD
+        shell: pwsh
+        run: ./verify-process-pin.ps1
       - name: Check owned selection lifecycle without CAD
         shell: pwsh
         run: ./verify-owned-selection.ps1
@@ -85,6 +88,7 @@ jobs:
             evidence/owned-surface-selection-ci
             evidence/owned-surface-translation-ci
             evidence/surface-set-translation-ci
+            evidence/process-pin-ci
             evidence/owned-surface-rotation-ci
             evidence/owned-surface-scale-ci
             evidence/curve-layout-ci

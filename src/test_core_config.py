@@ -11,6 +11,15 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_explicit_process_pin_rejects_partial_or_coerced_identity(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-core.json').read_text())
+        pin = dict(processId=101, processStartedUtc='2026-10-08T08:38:27.4633424Z', windowsSessionId=1, executablePath=r'C:\Program Files\Autodesk\PowerShape 2023\sys\exec64\powershape.exe')
+        general_core({**settings, 'powerShapeProcessPin': pin})
+        general_core({**settings, 'powerShapeProcessPin': None})
+        bad = [True, {**pin, 'processId': True}, {**pin, 'windowsSessionId': '1'}, {**pin, 'fallback': True}, {k:v for k,v in pin.items() if k != 'processStartedUtc'}, {**pin, 'processStartedUtc': '2026-10-08T08:38:27'}, {**pin, 'executablePath': 'powershape.exe'}]
+        for value in bad:
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'powerShapeProcessPin': value})
+
     def test_curve_scale_stop_recovery_has_strict_separate_gate(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-scale-stop-recovery.json').read_text())
         self.assertIs(settings['curveScaleStopRecoveryExperimental'], False)
