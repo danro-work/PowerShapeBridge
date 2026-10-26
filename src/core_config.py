@@ -1,4 +1,4 @@
-"""General core configuration policy; legacy fixture profile remains opt-in."""
+﻿"""General core configuration policy; legacy fixture profile remains opt-in."""
 FIXTURE_FLAGS = ('translationTestPanel', 'checkpointTestPanel',
                  'parameterizedTranslationPanel', 'diskVerificationPanel',
                  'mcpMutationsPanel', 'recipeOperationsPanel', 'captureViewport')
@@ -32,6 +32,15 @@ def general_core(settings):
     if type(curve_layout) is not bool or curve_layout and (profile != 'general-v1' or settings.get('entitySetsExperimental') is not True):
         raise ValueError('Curve layout requires general passive candidates')
     surface_samples = settings.get('surfaceSamplingExperimental', False)
+    recovery = settings.get('curveScaleStopRecoveryExperimental', False)
+    if type(recovery) is not bool or recovery and any(settings.get(k) is not True for k in ('curveScaleStopInspectionExperimental', 'ownedSelectionsExperimental')):
+        raise ValueError('Curve scale stop recovery requires stop inspection and owned selection')
+    stop = settings.get('curveScaleStopInspectionExperimental', False)
+    if type(stop) is not bool or stop and settings.get('ownedCurveScalesExperimental') is not True:
+        raise ValueError('Curve scale stop inspection needs strict curve scale gate')
+    curve_scale = settings.get('ownedCurveScalesExperimental', False)
+    if type(curve_scale) is not bool or curve_scale and (profile != 'general-v1' or any(settings.get(k) is not True for k in ('ownedUniformScalePlansExperimental', 'uniformScalePlansExperimental', 'operationPlansExperimental', 'curveWitnessesExperimental'))):
+        raise ValueError('Curve scaling requires owned scale plans and passive curve/SOLID witnesses')
     surface_scale = settings.get('ownedSurfaceScalesExperimental', False)
     if type(surface_scale) is not bool or surface_scale and (profile != 'general-v1' or surface_samples is not True or any(settings.get(k) is not True for k in ('ownedUniformScalePlansExperimental', 'uniformScalePlansExperimental', 'operationPlansExperimental'))):
         raise ValueError('Surface scaling requires owned scale plans and passive surface sampling')

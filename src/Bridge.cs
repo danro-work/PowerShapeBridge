@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -55,6 +55,9 @@ namespace PowerShapeBridge
         public bool ownedRotationPlansExperimental { get; set; }
         public bool ownedSolidQuarterTurnsExperimental { get; set; }
         public bool ownedSolidRotationsExperimental { get; set; }
+        public bool ownedCurveScalesExperimental { get; set; }
+        public bool curveScaleStopInspectionExperimental { get; set; }
+        public bool curveScaleStopRecoveryExperimental { get; set; }
         public bool ownedSurfaceScalesExperimental { get; set; }
         public bool ownedSolidScalesExperimental { get; set; }
         public bool ownedUniformScalePlansExperimental { get; set; }
@@ -111,6 +114,9 @@ namespace PowerShapeBridge
             if(levelReadingExperimental&&!IsGeneralCore)throw new ArgumentException("Passive level reading requires general core.");
             if(ownedLevelMovesExperimental&&(!IsGeneralCore||!levelReadingExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned level moves require general sets/copies/bindings/level reads.");
             if(ownedWorkplanesExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned workplanes require general sets/copies/bindings.");
+            if(curveScaleStopRecoveryExperimental&&(!IsGeneralCore||!curveScaleStopInspectionExperimental||!ownedSelectionsExperimental))throw new ArgumentException("Curve scale stop recovery needs stop inspection and owned selection.");
+            if(curveScaleStopInspectionExperimental&&(!IsGeneralCore||!ownedCurveScalesExperimental))throw new ArgumentException("Curve scale stop inspection requires curve scaling.");
+            if(ownedCurveScalesExperimental&&(!IsGeneralCore||!ownedUniformScalePlansExperimental||!operationPlansExperimental||!curveWitnessesExperimental))throw new ArgumentException("Curve scaling requires owned scale plans and curve witnesses.");
             if(ownedSurfaceScalesExperimental&&(!IsGeneralCore||!ownedUniformScalePlansExperimental||!operationPlansExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface scales require owned scale plans and surface sampling.");
             if(ownedSurfaceRotationsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface rotation requires owned rotation plans and surface sampling.");
             if(ownedSurfaceTranslationsExperimental&&(!IsGeneralCore||!ownedTranslationsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface translation requires owned translation and surface sampling.");
@@ -140,7 +146,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.61.0-dev";
+        public const string ReleaseVersion = "0.64.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -181,6 +187,9 @@ namespace PowerShapeBridge
                     object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Owned SOLID scale dependencies must be true JSON booleans.");
                 }
             }
+            if(raw!=null&&raw.TryGetValue("curveScaleStopRecoveryExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Recovery flag must be Boolean.");if((bool)enabled)foreach(string k in new[]{"curveScaleStopInspectionExperimental","ownedSelectionsExperimental"}){object v;if(!raw.TryGetValue(k,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Recovery dependencies missing.");}}
+            if(raw!=null&&raw.TryGetValue("curveScaleStopInspectionExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Curve scale stop inspection flag must be Boolean.");if((bool)enabled){object v;if(!raw.TryGetValue("ownedCurveScalesExperimental",out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Curve scale stop inspection dependency required.");}}
+            if(raw!=null&&raw.TryGetValue("ownedCurveScalesExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Curve scale flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedUniformScalePlansExperimental","uniformScalePlansExperimental","operationPlansExperimental","curveWitnessesExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Curve scale dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedSurfaceScalesExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface scale flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedUniformScalePlansExperimental","uniformScalePlansExperimental","operationPlansExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface scale dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedSurfaceRotationsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface rotation flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedRotationPlansExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface rotation dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedSurfaceTranslationsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface translation flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedTranslationsExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface translation dependencies required.");}}
@@ -398,6 +407,9 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--curve-rotation-test"){try{OwnedCurveRotationTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.ToString());return 3;}}
             if(args.Length==1&&args[0]=="--curve-translation-test"){try{OwnedCurveTranslationTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.ToString());return 3;}}
             if(args.Length==1&&args[0]=="--curve-layout-test"){try{NativeCurveLayoutTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.Message);return 3;}}
+            if(args.Length==1&&args[0]=="--curve-scale-stop-recovery-test"){try{CurveScaleStopRecoveryTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
+            if(args.Length==1&&args[0]=="--curve-scale-stop-test"){try{CurveScaleStopInspectionTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
+            if(args.Length==1&&args[0]=="--curve-scale-test"){try{OwnedCurveScaleTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--surface-scale-test") { try{OwnedSurfaceScaleTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error);return 3;} }
             if(args.Length==1&&args[0]=="--owned-solid-scale-test") {
                 Console.OutputEncoding=new UTF8Encoding(false);

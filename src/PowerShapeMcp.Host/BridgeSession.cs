@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 
@@ -28,6 +28,7 @@ public sealed class BridgeSession : IDisposable
     internal UniformScalePlanStore ScalePlans { get; }
     internal OwnedUniformScaleStore OwnedScales { get; }
     internal SolidScaleStore SolidScales { get; }
+    internal SolidScaleStore CurveScales { get; }
     internal SolidScaleStore SurfaceScales { get; }
     internal OwnedDgkTargetStore DgkTargets { get; }
     internal OwnedLevelMoveStore LevelMoves { get; }
@@ -64,7 +65,7 @@ public sealed class BridgeSession : IDisposable
         SolidQuarterTurns=new(options.BridgeRoot,OwnedRotations,utcClock);SolidRotations=new(options.BridgeRoot,OwnedRotations,utcClock,true);
         ScalePlans=new(options.BridgeRoot,Candidates,clock,utcClock);
         OwnedScales=new(options.BridgeRoot,ScalePlans,Bindings,clock,utcClock);
-        SolidScales=new(options.BridgeRoot,OwnedScales);SurfaceScales=new(options.BridgeRoot,OwnedScales,true);
+        SolidScales=new(options.BridgeRoot,OwnedScales);SurfaceScales=new(options.BridgeRoot,OwnedScales,true);CurveScales=new(options.BridgeRoot,OwnedScales,false,true);
         DgkTargets=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         LevelMoves=new(options.BridgeRoot,Candidates,Bindings,clock,utcClock);
         Workplanes=new(options.BridgeRoot,Bindings,clock,utcClock);
@@ -89,6 +90,9 @@ public sealed class BridgeSession : IDisposable
                 ("rotationPlansExperimental",new[]{"prepare_rotation_plan"}),
                 ("uniformScalePlansExperimental",new[]{"prepare_uniform_scale_plan"}),
                 ("ownedUniformScalePlansExperimental",new[]{"prepare_owned_uniform_scale"}),
+                ("curveScaleStopRecoveryExperimental",new[]{"prepare_owned_curve_scale_stop_recovery","execute_owned_curve_scale_stop_recovery","verify_owned_curve_scale_stop_recovery"}),
+                ("curveScaleStopInspectionExperimental",new[]{"inspect_owned_curve_scale_selection_stop"}),
+                ("ownedCurveScalesExperimental",new[]{"prepare_owned_curve_scale","execute_owned_curve_scale","verify_owned_curve_scale"}),
                 ("ownedSurfaceScalesExperimental",new[]{"prepare_owned_surface_scale","execute_owned_surface_scale","verify_owned_surface_scale"}),
                 ("ownedSolidScalesExperimental",new[]{"prepare_owned_solid_scale","execute_owned_solid_scale","verify_owned_solid_scale"}),
                 ("ownedSolidScaleRestoreExperimental",new[]{"restore_owned_solid_scale"}),
@@ -145,7 +149,7 @@ public sealed class BridgeSession : IDisposable
         OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();
         ScalePlans.Clear();
         OwnedScales.Clear();
-        SolidScales.Clear();SurfaceScales.Clear();
+        SolidScales.Clear();SurfaceScales.Clear();CurveScales.Clear();CurveScaleStopRecoveries?.Clear();
         DgkTargets.Clear();
         LevelMoves.ClearPrepared();
         Workplanes.ClearPrepared();
@@ -201,5 +205,6 @@ public sealed class BridgeSession : IDisposable
         }
         return result;
     }
-    public void Dispose(){Selections.Clear();WorkplaneActivations.Clear();Workplanes.Clear();LevelMoves.Clear();DgkTargets.Clear();SolidScales.Clear();SurfaceScales.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
+    internal CurveScaleStopRecoveryStore? CurveScaleStopRecoveries { get; set; }
+    public void Dispose(){CurveScaleStopRecoveries?.Clear();Selections.Clear();WorkplaneActivations.Clear();Workplanes.Clear();LevelMoves.Clear();DgkTargets.Clear();SolidScales.Clear();SurfaceScales.Clear();CurveScales.Clear();CurveScaleStopRecoveries?.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
 }

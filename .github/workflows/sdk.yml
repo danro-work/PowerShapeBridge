@@ -51,6 +51,15 @@ jobs:
       - name: Verify actual Framework COMPCURVE rotation receipts in SDK
         shell: pwsh
         run: ./verify-curve-rotation.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\curve-rotation')
+      - name: Verify actual Framework COMPCURVE scale receipts in SDK
+        shell: pwsh
+        run: ./verify-owned-curve-scale.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\curve-scale')
+      - name: Verify actual Framework COMPCURVE selection-stop receipts in SDK
+        shell: pwsh
+        run: ./verify-curve-scale-stop.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\curve-scale-stop')
+      - name: Verify actual Framework COMPCURVE clear-recovery receipts in SDK
+        shell: pwsh
+        run: ./verify-curve-scale-stop-recovery.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\curve-scale-stop-recovery')
       - name: Preserve SDK verification evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

@@ -1,3 +1,107 @@
+﻿# CURRENT: CLEAR-ONLY RECOVERY COMPLETE; NEW SCALE INTENT NEXT
+
+Native0.64/stagedSDK0.70.1/ordinarySDK0.48. Current owncopy
+75b1886a5f7740898ee8501c4b410179/model280013059, SOLID5+curve2,
+emptyWORLD/28windows. ONE clear2c6a0b104b114ec28836213468084507 returned;
+separate verifiera6b4aeb0229c4ee9ab5b885a66210cee, normal passive reader
+28010301c9444ee1a0484ee81255fcbb and independent Python audit passed.
+Full ORIGINAL fourcontrols/eightdirections/eightmagnitudes/16flags/SOLID
+samples/normals/COG/bounds/rawmetrics EXACT. Original scale5d716bb798b64a90b2122d2869d1690c
+failure/claim/four-event unknown journal unchanged. Original fence archived,
+separate resolution recorded; recovery secondary then original fences released.
+No scale/SaveAs/OPEN/close/mouse. Do NOT rerun any previous live/clear scripts.
+
+Initial SDK70 rejected Native-preparation3df8899b749c4ced88198cdb6226b11b before
+clear due Z/+00:00 expiry encoding; original packet remains unclaimed. SDK70.1
+exact UTC tick comparison (no lease extension) passed actual original Native bytes
+and8targeted tests; NEW preparationc937206158524276a1caad09fc6bddf7 used for clear.
+Native64 runtime unchanged for this SDK fix, backup work/general-deployment-backup-20261026-101727.
+Ordinaryreadonlydb0505185aa0420ebe0c16202c9d0832 confirmed samecopy/emptyWORLD.
+
+Full.NET1106/1106 fail0skip0 completed after real recovery; no need rerun without
+new code/risk. Native5/FrameworkSDK9/gateSDK10/expirySDK8/Python29/readiness88/11
+passed. Source uncommitted on PR105 branch@39b0ab1; foreign16STATUS exact.
+OldPR105CI bothSUCCESS are historical; do not repoll. New publication still pending.
+Use new SDK output folders; previous69.1 and current70.1 packages are protected.
+
+NEXT: original requested curve scale factor1.25 aroundWORLD[2,-3,4], NEW intent,
+fresh current ownership/binding/curve source, same owncopy, no newOPEN for leases.
+Reuse fixed13phase NOKEEP lifecycle, separate verifier, normal passive reader,
+independent affine/direction/magnitude/flag/range/length/area/SOLID/file/window/
+journal/phase audit. Original failed intent must remain consumed. Current runtime
+already contains correct Composite Curve guard; no deploy needed. Full1106 and
+applicable targeted checks stay valid without unchanged reruns. Scale persistence
+separate only after scale success. No mouse/quota increase/blind close. K8-K11open.
+
+Exact current evidence/pins/reference: evidence/K8-curve-scale-stop-recovery-20261026/
+completed-block.json, protected-for-next-block-v2.json, current-reference-capture.json.
+Original successful OPEN is e1e21251d0ff4fbdbf76d58af6ca43ea; exactSHA in prior
+principal-persistence completed-block.json. Fresh ownership verification is required;
+historical handles are never current authority. P0accepted; no user action pending.
+
+# CURRENT: PASSIVE PHASE0 STOP DIAGNOSIS COMPLETE; EXPLICIT CLEAR RECOVERY NEXT
+
+Native0.63.2/stagedSDK0.69.1/ordinarySDK0.48. Current owncopy
+75b1886a5f7740898ee8501c4b410179/model280013059, SOLID5+curve2,
+curve selected inWORLD/28windows. Original scale5d716bb798b64a90b2122d2869d1690c
+remains outcome_unknown with original claim/fence/four events unchanged.
+Only phase0SELECT returned; no EDIT SCALE/APPLY/cleanup/scale replay.
+Guard mapping COMPCURVE -> actual "Composite Curve" is fixed and installed.
+
+Installed Autodesk2023 IPshapeModelDoc.htm/GetCompCurvePointData explicitly
+disallows nonempty selection. First selected-control observer failed;0.63.1
+exposed nested getter refusal. Both failed raw receipts preserved. Do NOT
+try another selected control getter or weaken empty-only public readers.
+
+NEW passive pending-controls observer8d2e8ea39a1f4e96919aac515941eb6e succeeded
+through SDK and independent Python audit: direct selected composite/type/name/
+level positively verified twice; only phase0 and14originalproofs/863pins/28windows
+unchanged. Ordinaryreadonlyac4200d17b7d4d15996b350d3af2ebb0 confirmed samecopy/
+selection. Current full controls NOT read: fullControlProofAvailable=false,
+mutationAuthorityGranted=false, no original outcome resolution/fence release.
+Profile owned_curve_scale_phase0_stop_pending_controls_v1. No CAD commands.
+
+Targeted4Native/9FrameworkSDK/16SDK/28Python, readiness85full11readonly,
+legacyempty10 passed. PostCAD4+9 and legacycurveScale37+14 passed with mock
+selected getter denial matching Autodesk. Fullnew.NET not run while scale still
+unqualified; previous1088 is historical. Source changed only through current
+scale/observer work; foreign16STATUS exact. Current source UNCOMMITTED on
+codex/k8-curve-principal-rotation@39b0ab1; PR105 historicalCI bothSUCCESS,
+do not repoll. No newPR/merge/close. Current observer SDK folder now69.1:
+publish future SDK to a NEW folder, preserve current package pinned for evidence.
+
+Next follow work/K8-curve-scale-stop-20261026/NEXT-RECOVERY-SCOPE.md:
+separately prepare ONE narrowly bound clear-selection recovery, fresh selected
+identity/ownership/proofs; one clear callback with ownclaim/journal while original
+fence stays. Then fresh emptyWORLD and complete ORIGINAL curve/SOLID controls
+through normal reader, independent verifier/audit. Only then matching fence may
+release with separate immutable resolution; original failed scale/history/claim
+never rewritten. No blind clear/inverse/replay/lease extension/OPENforleases/quota
+increase/mouse. New scale afterwards requires a NEW intent, never oldlive rerun.
+P0 accepted, K8-K11 open, no pending user action or permission.
+
+Exact current evidence: evidence/K8-curve-scale-stop-20261026/block-result.json;
+new immutable pins in protected-for-next-block.json; original fence separate in
+original-fence-requires-qualified-recovery.json (never delete manually).
+All existing live/audit scripts TERMINAL; no repeated unchanged tests/CAD.
+
+# CURRENT: curve scale stopped after phase0 selection; do not replay or clear
+
+Сначала work/P0-local-state-20261017.md и work/K8-curve-scale-20261026/WIP.md.
+Один execute5d716bb798b64a90b2122d2869d1690c: только SELECT phase0 returned,
+phase1 EDIT SCALE/APPLY не подавались. Native62/staged68/ordinary48.
+Guard ожидал COMPCURVE, реальное имя типа выделения "Composite Curve".
+Исходный outcome_unknown/claim/fence сохранены. Owncopy75b1886a5f7740898ee8501c4b410179,
+model280013059, curve2 выделена вWORLD,28окон. Не повторять live-once.py,
+масштаб/SELECT/cleanup/inverse; не удалять fence вручную. Passive control-reader
+отказал из-за требования пустого выделения, полного poststop control-proof нет.
+Исходники0.62.1 исправляют только mapping native descriptor, ещё не установлены.
+Далее: целевая проверка guard, отдельный evidence-bound recovery этой остановки,
+свежий контекст и независимые доказательства перед новой CAD-операцией.
+Текущий scale source uncommitted; PR105@39b0ab1 CI обеSUCCESS исторические,
+не перепроверять. Новую полную регрессию не запускать вместо рабочего CAD.
+P0 принят; К8–К11 открыты, новых разрешений пользователя сейчас не требуется.
+
 # Приоритет: поворот Y−90 сохранён и проверен после открытия новой копии
 
 Сначала work/P0-local-state-20261017.md. Один NEW SaveAs/проверка → защищённые
