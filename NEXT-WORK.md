@@ -20,7 +20,8 @@ Ordinaryreadonlydb0505185aa0420ebe0c16202c9d0832 confirmed samecopy/emptyWORLD.
 
 Full.NET1106/1106 fail0skip0 completed after real recovery; no need rerun without
 new code/risk. Native5/FrameworkSDK9/gateSDK10/expirySDK8/Python29/readiness88/11
-passed. Source uncommitted on PR105 branch@39b0ab1; foreign16STATUS exact.
+passed. Source saved in local curve-scale-recovery checkpoint; foreign16STATUS exact.
+Exact current branch/head and next scale scenario are in the local state map.
 OldPR105CI bothSUCCESS are historical; do not repoll. New publication still pending.
 Use new SDK output folders; previous69.1 and current70.1 packages are protected.
 
