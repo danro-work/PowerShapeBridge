@@ -11,6 +11,16 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_curve_rotation_has_strict_separate_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-rotations.json').read_text())
+        self.assertIs(settings['ownedCurveRotationsExperimental'], False)
+        settings.update(ownedCurveRotationsExperimental=True, rotationPlansExperimental=True, ownedRotationPlansExperimental=True, documentBindingsExperimental=True)
+        general_core(settings)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedCurveRotationsExperimental': value})
+        for field in ('ownedRotationPlansExperimental', 'curveWitnessesExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError): general_core({**settings, field: False})
+
     def test_combined_curve_witnesses_require_passive_gate(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-witnesses.json').read_text())
         self.assertIs(settings['curveWitnessesExperimental'], False)
