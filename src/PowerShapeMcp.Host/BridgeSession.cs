@@ -37,6 +37,7 @@ public sealed class BridgeSession : IDisposable
     public SemaphoreSlim ReferenceGate { get; }=new(1,1);
     public bool CandidatesEnabled { get; }
     public bool LevelReadingEnabled { get; }
+    public bool CurveWitnessesEnabled { get; }
     public bool CurveLayoutEnabled { get; }
     public bool SurfaceSamplingEnabled { get; }
     public bool SurfaceSelectionsEnabled { get; }
@@ -71,6 +72,7 @@ public sealed class BridgeSession : IDisposable
         Selections=new(options.BridgeRoot,Bindings,Candidates,utcClock,()=>SurfaceSelectionsEnabled);
         var config=Options.ReadConfiguration();
         SurfaceSelectionsEnabled=!options.ReadOnly&&config.TryGetProperty("ownedSurfaceSelectionsExperimental",out var surfaceSelectionFlag)&&surfaceSelectionFlag.ValueKind==System.Text.Json.JsonValueKind.True;
+        CurveWitnessesEnabled=config.TryGetProperty("curveWitnessesExperimental",out var witnessFlag)&&witnessFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         CurveLayoutEnabled=config.TryGetProperty("curveLayoutExperimental",out var curveFlag)&&curveFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         SurfaceSamplingEnabled=config.TryGetProperty("surfaceSamplingExperimental",out var surfaceFlag)&&surfaceFlag.ValueKind==System.Text.Json.JsonValueKind.True;
         LevelReadingEnabled=config.TryGetProperty("levelReadingExperimental",out var levelFlag)&&levelFlag.ValueKind==System.Text.Json.JsonValueKind.True;
@@ -125,6 +127,7 @@ public sealed class BridgeSession : IDisposable
             name=="inspect_model_levels"&&LevelReadingEnabled||
             name=="inspect_surface_samples"&&SurfaceSamplingEnabled||
             name=="inspect_curve_sample_layout"&&CurveLayoutEnabled||
+            name=="inspect_curve_translation_witnesses"&&CurveWitnessesEnabled||
             name=="inspect_entity_candidates"&&CandidatesEnabled||name=="inspect_operation_recovery"&&RecoveryInspectionEnabled||prepared.Contains(name)||execution.Contains(name))return;
         throw new McpProtocolException("Tool is unavailable in this server/mode.",McpErrorCode.InvalidParams);
     }

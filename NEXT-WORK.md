@@ -1,3 +1,23 @@
+# Приоритет: пассивный curve/SOLID reader прошёл; сохранение уже перенесённого результата
+
+Сначала work/P0-local-state-20261017.md и work/K8-curve-translation-20261026/NEXT-PERSISTENCE-SCOPE.md.
+Native59/stagedSDK65/ordinary48. Новый inspect_curve_translation_witnesses прошёл
+через настоящий readonlyMCP: оба typedcapture точно совпали с уже проверенным
+переносом. Независимые4точки квадрата/8точекSOLID/sourceSHA/708pins/28окон сохранены.
+Native7/SDK19/FrameworkSDK5/Python25/readiness79full11readonly и postCADCI7+5 прошли;
+full.NET1076/1076 без ошибок/skip. Повторять эти неизменённые проверки не нужно.
+Объём protectedpins уточнён в evidence/K8-curve-witnesses-20261026/protected-for-next-block.json (711pins).
+Текущая собственная копия содержит1SOLID+1COMPCURVE со сдвигомWORLD[1,2,3],
+геометрия пока НЕСОХРАНЕНА. Read/live/translation scripts терминальные.
+
+Следующий отдельный малый блок: freshowncontext+новыйcombinedreader → одинNEW
+SaveAs/verifier → immutablepreclose seal/OSaudit → qualifiedownwriterfinalization/
+verifier → одинgenericOPEN копии изканоническогоseed/verifier → combinedreader
+и независимый файловый/журнальный/геометрический аудит. Окон28→27→28; quota26
+saved-reopen не менять, genericOPEN отдельно. Никакого нового переноса/selection/
+mouse/inverse/повтора unknown. Публикацияreader поверхPR100 и точнаяCI — в локальной
+карте. P0 принят, пользователя не ждём; К8–К11 открыты.
+
 # CURRENT: CURVE TRANSLATION, AUDIT AND NECESSARY REGRESSION COMPLETE
 
 Read work/K8-curve-translation-20261026/WIP.md and currentevidence/completed-live-block.json.

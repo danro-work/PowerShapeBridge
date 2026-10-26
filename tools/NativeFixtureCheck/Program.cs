@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using PowerShapeMcp;
 
+if(args.Length==3&&args[0]=="--curve-witness"){try{return CurveWitnessCheck.Run(args[1],args[2]);}catch(Exception error){Console.Error.WriteLine(error);return 1;}}
 if(args.Length==3&&args[0]=="--curve-translation"){try{return CurveTranslationCheck.Run(args[1],args[2]);}catch(Exception error){Console.Error.WriteLine(error);return 1;}}
 if(args.Length==3&&args[0]=="--surface-scale"){try{return SurfaceScaleCheck.Run(args[1],args[2]);}catch(Exception error){Console.Error.WriteLine(error);return 1;}}
 if(args.Length==3&&args[0]=="--surface-rotation"){try{return SurfaceRotationCheck.Run(args[1],args[2]);}catch(Exception error){Console.Error.WriteLine(error);return 1;}}

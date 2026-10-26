@@ -65,6 +65,7 @@ namespace PowerShapeBridge
         public bool ownedWorkplaneActivationExperimental { get; set; }
         public bool ownedSelectionsExperimental { get; set; }
         public bool ownedCurveTranslationsExperimental { get; set; }
+        public bool curveWitnessesExperimental { get; set; }
         public bool curveLayoutExperimental { get; set; }
         public bool surfaceSamplingExperimental { get; set; }
         public bool ownedSurfaceSelectionsExperimental { get; set; }
@@ -114,6 +115,7 @@ namespace PowerShapeBridge
             if(ownedSurfaceTranslationsExperimental&&(!IsGeneralCore||!ownedTranslationsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface translation requires owned translation and surface sampling.");
             if(ownedSurfaceSelectionsExperimental&&(!IsGeneralCore||!ownedSelectionsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface selection requires owned selection and surface sampling.");
             if(ownedCurveTranslationsExperimental&&(!IsGeneralCore||!ownedTranslationsExperimental||!curveLayoutExperimental))throw new ArgumentException("Curve translations require owned translations and passive curve layout.");
+            if(curveWitnessesExperimental&&(!IsGeneralCore||!curveLayoutExperimental))throw new ArgumentException("Combined curve witnesses require passive layout.");
             if(curveLayoutExperimental&&(!IsGeneralCore||!entitySetsExperimental))throw new ArgumentException("Curve layout requires passive general candidates.");
             if(surfaceSamplingExperimental&&(!IsGeneralCore||!entitySetsExperimental))throw new ArgumentException("Surface sampling requires general passive candidates.");
             if(ownedSelectionsExperimental&&(!IsGeneralCore||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned selections require general copies/candidates/bindings.");
@@ -136,7 +138,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.58.0-dev";
+        public const string ReleaseVersion = "0.59.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -182,6 +184,7 @@ namespace PowerShapeBridge
             if(raw!=null&&raw.TryGetValue("ownedSurfaceTranslationsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface translation flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedTranslationsExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface translation dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedSurfaceSelectionsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface selection flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedSelectionsExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface selection dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedCurveTranslationsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Curve translation flag must be boolean.");if((bool)enabled)foreach(string dep in new[]{"ownedTranslationsExperimental","curveLayoutExperimental"}){object v;if(!raw.TryGetValue(dep,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Curve translation dependencies required.");}}
+            if(raw!=null&&raw.TryGetValue("curveWitnessesExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Curve witness flag must be Boolean.");object dependency;if((bool)enabled&&(!raw.TryGetValue("curveLayoutExperimental",out dependency)||!(dependency is bool)||!(bool)dependency))throw new ArgumentException("Curve witness dependency required.");}
             if(raw!=null&&raw.TryGetValue("curveLayoutExperimental",out enabled)) {if(!(enabled is bool))throw new ArgumentException("Curve layout flag must be boolean.");object dependency;if((bool)enabled&&(!raw.TryGetValue("entitySetsExperimental",out dependency)||!(dependency is bool)||!(bool)dependency))throw new ArgumentException("Curve layout requires passive candidates.");}
             if(raw!=null&&raw.TryGetValue("surfaceSamplingExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Surface sampling flag must be boolean.");
@@ -388,6 +391,7 @@ namespace PowerShapeBridge
                 if(!File.Exists(Path.Combine(Root,".owned-open-adoption-fixture"))){Console.Error.WriteLine("Own synthetic adoption fixture marker required; no CAD access.");return 3;}
                 try{Console.WriteLine(Json.Serialize(new{state="passed_owned_open_adoption_fake_guards",checks=OwnedOpenAdoptionTests.SelfTest(),cadCommands=0}));return 0;}catch(Exception error){Console.Error.WriteLine(error.ToString());return 3;}
             }
+            if(args.Length==1&&args[0]=="--curve-witness-test"){try{NativeCurveWitnessTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.ToString());return 3;}}
             if(args.Length==1&&args[0]=="--curve-translation-test"){try{OwnedCurveTranslationTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.ToString());return 3;}}
             if(args.Length==1&&args[0]=="--curve-layout-test"){try{NativeCurveLayoutTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.Message);return 3;}}
             if(args.Length==1&&args[0]=="--surface-scale-test") { try{OwnedSurfaceScaleTests.Run();return 0;}catch(Exception error){Console.Error.WriteLine(error);return 3;} }

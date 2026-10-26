@@ -22,6 +22,9 @@ def general_core(settings):
     curve_move = settings.get('ownedCurveTranslationsExperimental', False)
     if type(curve_move) is not bool or curve_move and (profile != 'general-v1' or settings.get('ownedTranslationsExperimental') is not True or settings.get('curveLayoutExperimental') is not True):
         raise ValueError('Curve translation requires owned translations and curve layout')
+    witnesses = settings.get('curveWitnessesExperimental', False)
+    if type(witnesses) is not bool or witnesses and (profile != 'general-v1' or settings.get('curveLayoutExperimental') is not True):
+        raise ValueError('Combined curve witnesses require passive curve layout')
     curve_layout = settings.get('curveLayoutExperimental', False)
     if type(curve_layout) is not bool or curve_layout and (profile != 'general-v1' or settings.get('entitySetsExperimental') is not True):
         raise ValueError('Curve layout requires general passive candidates')
