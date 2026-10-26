@@ -1,3 +1,24 @@
+# Приоритет: перенос COMPCURVE сохранён и проверен после открытия новой копии
+
+Сначала work/P0-local-state-20261017.md. ОдинNEW SaveAs/verifier → readonlyseed/
+checkpoint/OSaudit → qualifiedownwriterfinalization/verifier → одинgenericOPEN/
+verifier → combinedcurve/SOLIDreader на4этапах завершены. Все4контрольные точки,
+касательные/величины/флаги кривой и8pinnedXYZ/нормалей/COG/bounds/rawmetricsSOLID
+точно совпали;724pins/6физическихidentity/остальные27окон сохранены28→27→28.
+ТолькоownwriterA изменил сериализацию770048→737280байт, прежняяidentity;
+canonicalseed/checkpoint/новаякопия сохранили770048. Всеlive/audit scripts терминальные,
+SaveAs/close/OPEN/перенос не повторять. Native59/staged65/ordinary48/config прежние.
+Full.NET1076/1076 ицелевыеNative7/FrameworkSDK5/SDK19/Python25 применимы безповтора.
+Ordinaryreadonly отдельно подтвердил новую1SOLID+1COMPCURVEкопию/emptyWORLD/28окон.
+Точная публикация/CI и новыеpins — в локальнойкарте. Геометрическаяпроверкаsampled,
+не полная топология. P0принят, действийпользователя сейчаснет.
+
+Далее следующий bounded К8 — один поворот COMPCURVE WORLDZ+90 с полнымиконтролями
+иunchangedSOLIDсвидетелями. Сначала reviewreuse sharedownedrotation/claim/fence/
+executor иqualifiedcapture, затемцелевыеchecks → раннийownCAD → независимыйaudit
+→ необходимаярегрессия; persistenceотдельно. Не ослаблять старыйflat3*Ncurveadapter.
+Типы/наборы/остальныеповороты/масштабК8,К9,5классовК10,release/личнаяК11впереди.
+
 # Приоритет: пассивный curve/SOLID reader прошёл; сохранение уже перенесённого результата
 
 Сначала work/P0-local-state-20261017.md и work/K8-curve-translation-20261026/NEXT-PERSISTENCE-SCOPE.md.
