@@ -42,6 +42,9 @@ jobs:
       - name: Verify actual Framework surface scale receipts in SDK
         shell: pwsh
         run: ./verify-owned-surface-scale.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\surface-scale')
+      - name: Verify actual Framework curve translation receipts in SDK
+        shell: pwsh
+        run: ./verify-curve-translation.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\curve-translation')
       - name: Preserve SDK verification evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

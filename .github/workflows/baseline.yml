@@ -50,6 +50,9 @@ jobs:
       - name: Check passive COMPCURVE layout and native errors without CAD
         shell: pwsh
         run: ./verify-curve-layout.ps1
+      - name: Check one COMPCURVE translation lifecycle without CAD
+        shell: pwsh
+        run: ./verify-curve-translation.ps1
       - name: Preserve verification evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -66,4 +69,5 @@ jobs:
             evidence/owned-surface-rotation-ci
             evidence/owned-surface-scale-ci
             evidence/curve-layout-ci
+            evidence/curve-translation-ci
           if-no-files-found: error

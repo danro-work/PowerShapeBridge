@@ -19,6 +19,9 @@ def general_core(settings):
     bindings = settings.get('documentBindingsExperimental', False)
     level_moves = settings.get('ownedLevelMovesExperimental', False)
     workplanes = settings.get('ownedWorkplanesExperimental', False)
+    curve_move = settings.get('ownedCurveTranslationsExperimental', False)
+    if type(curve_move) is not bool or curve_move and (profile != 'general-v1' or settings.get('ownedTranslationsExperimental') is not True or settings.get('curveLayoutExperimental') is not True):
+        raise ValueError('Curve translation requires owned translations and curve layout')
     curve_layout = settings.get('curveLayoutExperimental', False)
     if type(curve_layout) is not bool or curve_layout and (profile != 'general-v1' or settings.get('entitySetsExperimental') is not True):
         raise ValueError('Curve layout requires general passive candidates')

@@ -17,7 +17,7 @@ namespace PowerShapeBridge {
    Dictionary<string,object> Observation();
    void ConfirmDocument();
   }
-  internal sealed class ComContext : NativeCurveLayout.IContext, OwnedSurfaceScaleMeasurements.IPhaseGuard, OwnedSurfaceRotation.IWriter,OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,SolidRotationContext.IWriteContext,OwnedSolidScale.IExecutionContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext,OwnedSelection.IContext,NativeSurfaceSampling.IContext {
+  internal sealed class ComContext : OwnedCurveTranslation.IContext, NativeCurveLayout.IContext, OwnedSurfaceScaleMeasurements.IPhaseGuard, OwnedSurfaceRotation.IWriter,OwnedTranslation.IContext,OwnedSaveAs.IContext,RotationMeasurements.IContext,SolidRotationContext.IWriteContext,OwnedSolidScale.IExecutionContext,NativeSelectionReading.IContext,NativeLevelReading.IContext,OwnedLevelMoveExecution.IContext,OwnedWorkplanePlans.IContext,OwnedWorkplaneActivation.IContext,OwnedSelection.IContext,NativeSurfaceSampling.IContext {
    object application,document;
    internal ComContext(Config config) {
     try {application=DocumentSession.Attach(config);dynamic ps=application;if(!Convert.ToBoolean(ps.IsDocumentActive()))throw new InvalidOperationException("No active model document.");document=ps.ActiveDocument;ConfirmDocument();}
@@ -58,6 +58,7 @@ namespace PowerShapeBridge {
    public void ScalePhase(SolidUniformScaleProgram program,int phase){ConfirmDocument();string command=program.Take(phase);dynamic ps=application;ps.Exec(command);}
    public object SetItemsLevel(int composite,int level){if(level<0||level>997)throw new ArgumentException("Level outside qualified candidate range.");ConfirmDocument();dynamic doc=document;return doc.SetItemsLevel(composite,level);}
    public object SurfacePoints(string name,double tStart,double tEnd,int tCount,double uStart,double uEnd,int uCount){ConfirmDocument();dynamic doc=document;return doc.GetSurfacePoints(name,1,tStart,tEnd,tCount,uStart,uEnd,uCount);}
+   public int CurvePointCount(int nativeId){if(nativeId<=0)throw new ArgumentException("Positive curve nativeID required.");ConfirmDocument();dynamic ps=application;return Program.StrictInt(ps.Evaluate("COMPCURVE[ID "+nativeId.ToString(CultureInfo.InvariantCulture)+"].POINT.NUMBER"));}
    public object CurvePoints(string name,int start,int end){ConfirmDocument();dynamic doc=document;return doc.GetCompCurvePointData(name,start,end,1);}
    public object ClosestSolidFace(int nativeId,double[] point){if(nativeId<0)throw new ArgumentException("Explicit SOLID ID required.");string xyz=SolidFaceMeasurements.Coordinates(point);ConfirmDocument();dynamic ps=application;return ps.Evaluate("SOLID[ID "+nativeId.ToString(CultureInfo.InvariantCulture)+"].CLOSEST_FACE("+xyz+")");}
    public object FaceNear(string face,double[] point){face=SolidFaceMeasurements.FaceName(face);string xyz=SolidFaceMeasurements.Coordinates(point);ConfirmDocument();dynamic ps=application;return ps.Evaluate("SURFACE['"+face+"'].NEAR("+xyz+")");}
