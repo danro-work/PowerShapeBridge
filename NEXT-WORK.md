@@ -1,3 +1,62 @@
+# CURRENT: CURVE TRANSLATION, AUDIT AND NECESSARY REGRESSION COMPLETE
+
+Read work/K8-curve-translation-20261026/WIP.md and currentevidence/completed-live-block.json.
+Real one-shot translation/verifier/passive read and independentaudit COMPLETE.
+DO NOT replay any live script or translation. Current ownedcopy e204ef4b90b1490a8294d265bb312ecc
+has oneSOLID native5 plus COMPCURVE native2 shiftedWORLD[1,2,3]; UNSAVED.
+Native58/stagedSDK64/ordinary48. 708 nextprotectedpins. All28windows unchanged.
+Full.NET1070/1071 passed; singleAdvisoryReport.File.Replace sandboxUnauthorizedAccess
+passed scoped elevated1/1 with samecode/budget. OriginalTRX andregression-summary.json
+retained; no otherfailures/skips, whole suite notrerun. PostCADCIrunner9+SDKproof11passed.
+No furtherunchanged tests/CADneeded. PR99bothCI SUCCESS, doNOTreread.
+
+Now publish only selectedcurrentcode/docs in draftPRover99, attach, exactheadCI
+throughCodeReview. Foreign16STATUS mustremainuntouched. Then separatepersistence
+with independentcurve+SOLIDwitnesses; firstreviewpassiveproviderreuse andaddonly
+neededpassiveboundprofile. No translationrepeat, OPENjustforleases, quota increase,
+blindclose, historicalunknownrepair ormouse. P0accepted; nohumaninputpending.
+K8-K11 remainopen.
+
+# CURRENT: ONE CURVE TRANSLATION REAL BLOCK AND AUDIT COMPLETE; REGRESSION/PUBLICATION PENDING
+
+P0 accepted; no user input pending. work/K8-curve-translation-20261026 is current.
+Evidence: evidence/K8-curve-translation-20261026/completed-live-block.json and independent-audit.json.
+Exactly one TranslateItem WORLD[1,2,3]mm:52aef9122d9447469074245f4f412c79,
+SHA bd744cb14bba481ec7a58732af4cbb3406111d4ac218f1cc76d73b2f32236b44.
+Separate verifiera7e91373bb8840d48b80a7522ed7ba07 successful, matching fence gone;
+passive getter1d0148ae764c41adb6061c19d720cd52. All fourpositions error0, eight
+tangent directions/magnitudes and16freeflags preserved; eightpinnedSOLIDpoints/
+normals/COG/bounds/rawmetrics unchanged. 695pins and28windows preserved. Ordinary
+SDK48 readonlybad18d00a42b47d6a7003289a54ad7c1/listinge2be193002f34552a6d2c66ab4b0d18e confirmed.
+
+Current copye204ef4b90b1490a8294d265bb312ecc, model280012867,
+Working_e204ef4b90b1490a8294d265bb312ecc. SOLID type40/native5/name1,
+curve type59/native2/name2. Read context freshly; historical handles notauthority.
+Native58 deployed with backupwork/general-deployment-backup-20261026-011057,
+stagedSDK64 work/K8-curve-translation-20261026/sdk; ordinary48/config unchanged.
+First scriptlive-once stopped aftertwo reads due mistaken declaredSOLIDid1;
+originalsaved; correctedidentity script submittedONLYtranslation. Both TERMINAL.
+Do not rerun scripts/translate/OPEN/unchangedchecks. Newgeometry UNSAVED.
+NoSaveAs/OPEN/close/selection/mouse/inverse. Protected nextpins in currentevidence.
+Historicalunknowns preserved. SharedOwnedTranslation lifecycle/schema4,
+default-offfull-onlyflag2tools; catalog78full10readonly. Oldcurveadapterunchanged.
+
+TargetedNative9/markerrefusal3,oldSOLID32/oldSurface8,SDK19,FrameworkSDK11,
+Python24 andreadiness passed. Fresh postCADCIrunner9+11passed. Full.NET running,
+initialAdvisoryReportTests.File.Replace failedsandboxUnauthorizedAccess;
+retainoriginalTRX, aftercompletion rerunONLYthatfailedcase elevated ifonlyfailure.
+All code changes uncommitted oncodex/k8-curve-layout@f8dac820a167428d39854a7510ca4512f5c09c35.
+PR99 BOTH CI SUCCESS, currentevidence priorfolder/ci-terminal.json; doNOTrepoll.
+
+Next finishregression, publish selectedcode/docs only oncodex/k8-curve-translation
+overPR99 andattach; exactheadCIthroughCodeReview. Preserveforeign16STATUS.
+Then separate persistence for ALREADYmovedcurve with unchangedSOLIDwitnesses;
+no newtranslation orOPENjustforleases. Need a passive pinnedSOLID/curve witness
+acrossSaveAs/reopen, existing rawcurvegetter doesnot byitself proveSOLIDsamples.
+Firstreview existingpassive provider reuse; boundednewreadprofileifneeded.
+GenericOPEN differssavedreopenquota26; doNOTraisequota/blindlyclosegenericcopy.
+K8/K9/fiveclassK10/release/reconnect/rollback/personalK11 remainOPEN.
+
 # Приоритет: COMPCURVE raw-layout проверен; следующий шаг — typed witnesses и перенос
 
 Сначала work/P0-local-state-20261017.md и work/K8-curve-layout-20261026/NEXT-WORK.md. Один NEW owncopy OPEN/verifier, readonly native-layout1–4 и независимый квадратный oracle завершены. XYZ[4,3]/magnitude[4]/lower1; старый flat/3*N adapter не считать рабочим. Отказ0–3 сохранён; исправленный error-path возвращаеткод3. Исходник/678pins/остальные27окон сохранены,теперь28окон; текущие695pins и точные IDs/SHA в карте. Native57.1/staged63/ordinary48, полная.NET1063/1063 пройдена. Все live/audit scripts TERMINAL: OPEN/геометрию/неизменённые чтения/тесты не повторять. ОбеCI97/98SUCCESS; публикация/новаяCI в карте.

@@ -56,4 +56,7 @@ this actual layout: it assumes flat arrays,3*N magnitudes and available bounds.
 No old verifier was silently weakened. Next, implement an explicitly versioned
 typed curve witness profile from the observed layout, then one owned translation
 and separate persistence using the existing ownership/claim/fence/verifier cycle.
-Mixed sets, remaining K8 operations, K9, five-classK10 and release/userK11 remain open.
+The separately gated [owned COMPCURVE translation](OWNED-CURVE-TRANSLATION.md)
+subsequently qualified one complete1..N control profile with an unchanged SOLID
+control. This passive diagnostic alone still supplies no edit authority. Mixed
+sets, remaining K8 operations, K9, five-classK10 and release/userK11 remain open.

@@ -11,6 +11,16 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_curve_translation_requires_strict_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-translations.json').read_text())
+        self.assertIs(settings['ownedCurveTranslationsExperimental'], False)
+        settings.update(ownedCurveTranslationsExperimental=True, curveLayoutExperimental=True, ownedTranslationsExperimental=True, ownedOperationPlansExperimental=True, operationPlansExperimental=True)
+        general_core(settings)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedCurveTranslationsExperimental': value})
+        for field in ('ownedTranslationsExperimental', 'curveLayoutExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError): general_core({**settings, field: False})
+
     def test_curve_layout_requires_strict_passive_gate(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-layout.json').read_text())
         self.assertIs(settings['curveLayoutExperimental'], False)
