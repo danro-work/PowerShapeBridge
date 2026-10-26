@@ -4,7 +4,7 @@ namespace PowerShapeMcp;
 
 public sealed record HostOptions(string BridgeRoot, TimeSpan Timeout, bool ReadOnly)
 {
-    public const string Version = "0.71.0-dev";
+    public const string Version = "0.72.0-dev";
     public static HostOptions Parse(string[] args)
     {
         string? root = null;
@@ -37,6 +37,7 @@ public sealed record HostOptions(string BridgeRoot, TimeSpan Timeout, bool ReadO
         if (config.GetProperty("coreProfile").GetString() != "general-v1" ||
             config.GetProperty("expectedVersion").GetString() != "23.2.2")
             throw new InvalidDataException("Only general-v1 / PowerShape 23.2.2 is supported.");
+        PowerShapeProcessPinOptions.Validate(config);
         foreach (var field in new[] { "translationTestPanel", "checkpointTestPanel", "parameterizedTranslationPanel", "diskVerificationPanel", "mcpMutationsPanel", "recipeOperationsPanel", "captureViewport" })
             if (config.TryGetProperty(field, out var value) && value.ValueKind is not (JsonValueKind.Null or JsonValueKind.False))
                 throw new InvalidDataException("General core forbids fixture flags and captures.");

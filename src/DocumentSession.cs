@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -14,7 +14,7 @@ namespace PowerShapeBridge {
    try {
     dynamic ps=application;int pid=Program.StrictInt(ps.Evaluate("app.pid"));
     var candidates=Process.GetProcessesByName("powershape").Where(p=>p.SessionId==Process.GetCurrentProcess().SessionId).ToArray();
-    if(candidates.Length!=1||candidates[0].Id!=pid)throw new InvalidOperationException("PowerShape instance absent or ambiguous.");
+    if(config.powerShapeProcessPin==null){if(candidates.Length!=1||candidates[0].Id!=pid)throw new InvalidOperationException("PowerShape instance absent or ambiguous.");}else{if(!candidates.Any(p=>p.Id==pid))throw new InvalidOperationException("Pinned PowerShape absent from this session.");PowerShapeProcessPin.Check(application,config.powerShapeProcessPin);}
     if(Convert.ToBoolean(ps.Busy()))throw new InvalidOperationException("PowerShape busy.");
     string version=string.Join(".",new[]{Program.StrictInt(ps.Evaluate("VERSION.MAJOR")),Program.StrictInt(ps.Evaluate("VERSION.MINOR")),Program.StrictInt(ps.Evaluate("VERSION.REVISION"))});
     if(version!=config.expectedVersion)throw new InvalidOperationException("Unexpected PowerShape version.");
@@ -22,6 +22,7 @@ namespace PowerShapeBridge {
    }catch {if(Marshal.IsComObject(application))Marshal.ReleaseComObject(application);throw;}
   }
   static Dictionary<string,object> ReadOnce(object application) {
+   PowerShapeProcessPin.Check(application,Program.ReadConfig().powerShapeProcessPin);
    dynamic ps=application;int pid=Program.StrictInt(ps.Evaluate("app.pid"));
    var result=new Dictionary<string,object>{{"processId",pid}};
    using(var process=Process.GetProcessById(pid)){result["processStartedUtc"]=process.StartTime.ToUniversalTime().ToString("o");result["windowsSessionId"]=process.SessionId;}

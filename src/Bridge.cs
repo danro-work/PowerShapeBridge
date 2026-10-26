@@ -75,6 +75,7 @@ namespace PowerShapeBridge
         public bool ownedSurfaceSelectionsExperimental { get; set; }
         public bool ownedSurfaceTranslationsExperimental { get; set; }
         public bool ownedSurfaceSetTranslationsExperimental { get; set; }
+        public Dictionary<string,object> powerShapeProcessPin { get; set; }
         public bool ownedSurfaceRotationsExperimental { get; set; }
         public bool IsGeneralCore { get { return coreProfile == "general-v1"; } }
         public bool CoreTransportEnabled { get { return IsGeneralCore || (mcpMutationsPanel && recipeOperationsPanel); } }
@@ -120,6 +121,7 @@ namespace PowerShapeBridge
             if(ownedCurveScalesExperimental&&(!IsGeneralCore||!ownedUniformScalePlansExperimental||!operationPlansExperimental||!curveWitnessesExperimental))throw new ArgumentException("Curve scaling requires owned scale plans and curve witnesses.");
             if(ownedSurfaceScalesExperimental&&(!IsGeneralCore||!ownedUniformScalePlansExperimental||!operationPlansExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface scales require owned scale plans and surface sampling.");
             if(ownedSurfaceRotationsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface rotation requires owned rotation plans and surface sampling.");
+            PowerShapeProcessPin.ValidateConfiguration(powerShapeProcessPin,IsGeneralCore);
             if(ownedSurfaceSetTranslationsExperimental&&(!IsGeneralCore||!ownedSurfaceTranslationsExperimental||!ownedTranslationsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface set translation requires singleton translation and passive surface dependencies.");
             if(ownedSurfaceTranslationsExperimental&&(!IsGeneralCore||!ownedTranslationsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface translation requires owned translation and surface sampling.");
             if(ownedSurfaceSelectionsExperimental&&(!IsGeneralCore||!ownedSelectionsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface selection requires owned selection and surface sampling.");
@@ -148,7 +150,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.65.0-dev";
+        public const string ReleaseVersion = "0.66.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -410,6 +412,8 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--curve-rotation-test"){try{OwnedCurveRotationTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.ToString());return 3;}}
             if(args.Length==1&&args[0]=="--curve-translation-test"){try{OwnedCurveTranslationTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.ToString());return 3;}}
             if(args.Length==1&&args[0]=="--curve-layout-test"){try{NativeCurveLayoutTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.Message);return 3;}}
+            if(args.Length==1&&args[0]=="--process-pin-test"){try{PowerShapeProcessPinTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
+            if(args.Length==1&&args[0]=="--pinned-session-read"){object pinned=null;try{Config c=ReadConfig();if(!c.IsGeneralCore||c.powerShapeProcessPin==null)throw new InvalidOperationException("Explicit process pin required for this passive diagnostic.");pinned=DocumentSession.Attach(c);var listing=DocumentSession.ReadStable(pinned);var observation=Probe.ReadInContext(pinned,null);if(!Equals(observation["state"],"succeeded_verified"))throw new InvalidOperationException(Json.Serialize(observation));Console.WriteLine(Json.Serialize(new{state="pinned_session_and_active_model_read_only",processPin=c.powerShapeProcessPin,listing,observation,cadCommands=0,contextChanges=0}));return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}finally{if(pinned!=null&&Marshal.IsComObject(pinned))Marshal.ReleaseComObject(pinned);}}
             if(args.Length==1&&args[0]=="--surface-set-translation-test"){try{OwnedSurfaceSetTranslationTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--curve-scale-stop-recovery-test"){try{CurveScaleStopRecoveryTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--curve-scale-stop-test"){try{CurveScaleStopInspectionTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
@@ -624,6 +628,7 @@ namespace PowerShapeBridge
                 Stage("attach");
                 app = borrowedApplication ?? Marshal.GetActiveObject("PowerShape.Application");
                 dynamic ps = app;
+                PowerShapeProcessPin.Check(application: app,pin: config.powerShapeProcessPin);
                 int pid = Program.StrictInt(ps.Evaluate("app.pid"));
                 r["processId"] = pid;
                 using (var process = Process.GetProcessById(pid))

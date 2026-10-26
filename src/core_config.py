@@ -1,4 +1,8 @@
 ﻿"""General core configuration policy; legacy fixture profile remains opt-in."""
+import datetime
+import ntpath
+import re
+
 FIXTURE_FLAGS = ('translationTestPanel', 'checkpointTestPanel',
                  'parameterizedTranslationPanel', 'diskVerificationPanel',
                  'mcpMutationsPanel', 'recipeOperationsPanel', 'captureViewport')
@@ -10,6 +14,18 @@ FIXTURE_FIELDS = ('expectedProject', 'sourceStep', 'protectedProject',
 
 def general_core(settings):
     profile = settings.get('coreProfile')
+    pin = settings.get('powerShapeProcessPin')
+    if pin is not None:
+        if profile != 'general-v1' or type(pin) is not dict or set(pin) != {'processId', 'processStartedUtc', 'windowsSessionId', 'executablePath'}:
+            raise ValueError('Exact general PowerShape process pin required')
+        if type(pin['processId']) is not int or not 0 < pin['processId'] <= 2147483647 or type(pin['windowsSessionId']) is not int or not 0 <= pin['windowsSessionId'] <= 2147483647:
+            raise ValueError('Strict PID/session integers required')
+        stamp, path = pin['processStartedUtc'], pin['executablePath']
+        if type(stamp) is not str or not re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,7})?(?:Z|\+00:00)', stamp):
+            raise ValueError('Explicit UTC process creation time required')
+        datetime.datetime.fromisoformat(stamp.replace('Z', '+00:00'))
+        if type(path) is not str or len(path) > 1024 or not re.match(r'^[A-Za-z]:\\', path) or ntpath.normpath(path).casefold() != path.casefold() or ntpath.basename(path).casefold() != 'powershape.exe' or '\0' in path:
+            raise ValueError('Canonical absolute PowerShape executable path required')
     levels = settings.get('levelReadingExperimental', False)
     if type(levels) is not bool or levels and profile != 'general-v1':
         raise ValueError('Passive level reading requires general core and a boolean flag')
