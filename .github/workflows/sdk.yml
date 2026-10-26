@@ -45,6 +45,9 @@ jobs:
       - name: Verify actual Framework curve translation receipts in SDK
         shell: pwsh
         run: ./verify-curve-translation.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\curve-translation')
+      - name: Verify actual Framework passive curve and SOLID witnesses in SDK
+        shell: pwsh
+        run: ./verify-curve-witness.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\curve-witnesses')
       - name: Preserve SDK verification evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

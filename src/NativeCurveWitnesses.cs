@@ -1,0 +1,18 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+namespace PowerShapeBridge {
+ // Passive reuse of the qualified controls and SOLID provider; never invokes a writer.
+ internal static class NativeCurveWitnesses {
+  internal const string Recipe="inspect_curve_translation_witnesses",Profile="compcurve_and_solid_passive_witnesses_v1";
+  static void Need(bool v,string s){if(!v)throw new InvalidDataException(s);}
+  internal static void Validate(Dictionary<string,object> a){NativeCurveLayout.Validate(a);var r=(Dictionary<string,object>)a["range"];Need(Equals(r["startIndex"],1)&&(int)r["endIndex"]>=2&&(int)r["endIndex"]<=32,"Explicit complete1..N curve controls required.");}
+  internal static Dictionary<string,object> Read(Dictionary<string,object> expected,int[] key,Dictionary<string,object> range,DateTime expiry,OwnedTranslation.IContext c){
+   var r=new Dictionary<string,object>{{"state","curve_witnesses_read_rejected"},{"profile",Profile},{"geometryMutationAttempted",false},{"contextChangeAttempted",false},{"cadSaveAttempted",false},{"captureAttempted",false},{"geometryQualified",false},{"indexBaseInferred",false},{"topologyCertified",false},{"retryAllowed",false}};
+   try{Need(key.Length==2&&key[0]==59&&key[1]>0,"One explicit COMPCURVE required.");c.ConfirmDocument();var windows=c.Windows();var before=c.Observation();EntitySets.CheckObserved(expected,before,new[]{key},expiry,DateTime.UtcNow);var first=OwnedCurveTranslation.Capture(expected,expiry,c,key[1],range);var second=OwnedCurveTranslation.Capture(expected,expiry,c,key[1],range,first);Need(OwnedSurfaceSelection.Same(first,second),"Combined curve/SOLID witnesses changed during passive read.");var after=c.Observation();EntitySets.CheckObserved(expected,after,new[]{key},expiry,DateTime.UtcNow);var final=c.Windows();c.ConfirmDocument();Need(DocumentBindings.WindowDigest(windows)==DocumentBindings.WindowDigest(final)&&DateTime.UtcNow<expiry,"Read windows/lifetime changed.");r["state"]="curve_witnesses_read_observed";r["entityKey"]=key;r["entity"]=EntitySets.Inventory(expected).Single(e=>Equals(e["nativeTypeCode"],59)&&Equals(e["nativeId"],key[1]));r["range"]=range;r["nativeLayout"]=second["layout"];r["curveWitnesses"]=first;r["recheckedWitnesses"]=second;r["sameContextCapturePasses"]=2;r["curveControlsQualified"]=true;r["before"]=before;r["after"]=after;r["windowsBefore"]=windows;r["windowsAfter"]=final;r["boundsWorldRawPaired"]=null;r["coordinateFrame"]="world";r["lengthUnits"]="document_raw";r["lengthUnitsRaw"]=expected["lengthUnitsRaw"];r["lengthUnitFactorRaw"]=expected["lengthUnitFactorRaw"];r["qualification"]="Complete explicit1..N curve control arrays and eight pinned SOLID face samples/normals/COG/native bounds/raw invariants, repeated in one held context. Sampled observations only, not continuous geometry or topology. No edit authority, file-byte proof, selection, activation, save or image.";
+   }catch(Exception e){r["error"]=e.Message;}r["timestampUtc"]=DateTime.UtcNow.ToString("o");return r;
+  }
+  internal static Dictionary<string,object> Run(Dictionary<string,object> a){Validate(a);var cfg=Program.ReadConfig();Need(cfg.IsGeneralCore&&cfg.curveWitnessesExperimental,"Combined curve witnesses disabled.");using(var proofs=new OwnedOperationPlans.Proofs()){var expected=proofs.Json(Path.Combine(Program.Root,"responses",(string)a["inspectionRequestId"]+".json"),(string)a["inspectionSha256"],16000000);using(var c=new DocumentBindings.ComContext(cfg)){var r=Read(expected,EntitySets.Keys(new[]{a["entityKey"]})[0],(Dictionary<string,object>)a["range"],EntitySets.Expiry(a["expiresUtc"]),c);r["arguments"]=a;r["nativeProviderQualified"]=true;r["bridgeVersion"]=Program.ReleaseVersion;return r;}}}
+ }
+}

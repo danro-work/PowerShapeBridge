@@ -11,6 +11,14 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_combined_curve_witnesses_require_passive_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-witnesses.json').read_text())
+        self.assertIs(settings['curveWitnessesExperimental'], False)
+        general_core({**settings, 'curveWitnessesExperimental': True})
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'curveWitnessesExperimental': value})
+        with self.assertRaises(ValueError): general_core({**settings, 'curveWitnessesExperimental': True, 'curveLayoutExperimental': False})
+
     def test_curve_translation_requires_strict_gate(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-translations.json').read_text())
         self.assertIs(settings['ownedCurveTranslationsExperimental'], False)
