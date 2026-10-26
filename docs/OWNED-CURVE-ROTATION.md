@@ -1,4 +1,36 @@
-# Owned COMPCURVE WORLD Z+90 rotation
+# Owned COMPCURVE principal-axis rotations
+
+Native0.61/stagedSDK0.67 extend the same full-only tools/default-false flag with
+`owned_compcurve_controls_world_principal_v2`, schema6/operation
+`rotate_owned_compcurve_principal`. Only signed90/180 degrees around unit principal
+X/Y/Z, including negative axis directions, and explicit WORLD pivot coordinates
+bounded to±1e6 are admitted. Original Z+90/origin intent keeps schema5/v1 and its
+strict definition. No new public tools, flags, queue route or safety executor.
+
+Positions rotate around the pivot; both tangent directions rotate about zero.
+Existing shared RotationSampleVerifier.Transform/ExactBounds/Envelope predicates
+are reused. Signed permutations have exact extrema mapping; observed curve
+minXYZ/maxXYZ are explicitly converted to paired bounds for Envelope. No general
+curve bound is invented from controls, and arbitrary/oblique/fractional angles
+remain unsupported for this strategy. Full curve controls and unchanged pinned
+SOLID witnesses retain the prior layout/magnitude/Boolean/property policy.
+SDK verifies the frozen source plan's angle, origin, unit direction, profile,
+schema, operation and native axis in addition to the original lifecycle proofs.
+
+Real CAD qualification now includes old Z90 and one Y−90 aroundWORLD[2,−3,4].
+Exactly one RotateItem, separate verifier/passive reader and independent Python
+point[6-z,y,2+x]/direction[-dz,dy,dx] oracle passed. Max errors3.56e-15mm/6.13e-17;
+curve rangesmin[-16.2,-9,-10],max[-16.2,11,10]. Magnitudes/16flags, neighboring
+SOLID samples/COG/bounds/rawmetrics,807pins and28windows preserved. Ordinary
+readonly confirmed. Geometry is UNSAVED at this checkpoint; no new SaveAs/OPEN/
+close/selection/mouse. Runtime backup/onepanelrestart; ordinarySDK48 unchanged.
+X/half/negativeaxis cases are fixture-verified, not additional live qualification.
+Full.NET1088/1088 fail0skip0; Native15/actualFrameworkSDK23/targetedSDK25/readiness
+81full11readonly passed, with post-CAD runner15+23. Initial readiness caught an
+advertised-version mismatch beforeCAD; source constant corrected and new fixture
+passed. Control/sample proof does not certify full topology. K8–K11 remain open.
+
+## Original Z90 profile and qualification
 
 Native 0.60 / staged SDK 0.66 add `execute_owned_curve_rotation` and
 `verify_owned_curve_rotation`. The two tools exist only on the full server,
