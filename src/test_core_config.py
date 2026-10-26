@@ -11,6 +11,16 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_owned_open_access_restore_requires_explicit_boolean_and_guards(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-open-access-restore.json').read_text())
+        self.assertIs(settings['ownedOpenAccessRestoreExperimental'], False)
+        enabled = {**settings, 'ownedOpenAccessRestoreExperimental': True,
+                   **{k: True for k in ('workingCopyOpenExperimental', 'workingCopiesExperimental', 'entitySetsExperimental', 'documentBindingsExperimental')}}
+        general_core(enabled)
+        for k in ('workingCopyOpenExperimental', 'workingCopiesExperimental', 'entitySetsExperimental', 'documentBindingsExperimental'):
+            with self.subTest(dependency=k), self.assertRaises(ValueError): general_core({**enabled, k: False})
+        with self.assertRaises(ValueError): general_core({**enabled, 'ownedOpenAccessRestoreExperimental': 'true'})
+
     def test_explicit_process_pin_rejects_partial_or_coerced_identity(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-core.json').read_text())
         pin = dict(processId=101, processStartedUtc='2026-10-08T08:38:27.4633424Z', windowsSessionId=1, executablePath=r'C:\Program Files\Autodesk\PowerShape 2023\sys\exec64\powershape.exe')

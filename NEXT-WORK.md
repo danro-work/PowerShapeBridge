@@ -1,4 +1,96 @@
-﻿# CURRENT: NATIVE66 INSTALLED; BOTH INSTANCES PRESERVED; SUCCESSFUL-OPEN ACCESS RESTORE NEXT
+﻿# CURRENT: OWNED OPEN ACCESS QUALIFIED; STRICT V1 SET PARTIAL STOP DIAGNOSED
+
+Source branch codex/owned-open-access-restore from2c934ef, uncommitted until
+current publication-*.json says otherwise. Installed Native67.1 / stagedSDK73 /
+ordinarySDK48. Both PowerShape instances kept; main17304 exactpin remains. No
+user question. P0accepted; K8/K9/fiveclassK10/release/personalK11 remain OPEN.
+
+Real observer9f12cadbb99f4fb68765b4766d2c6c10 + independent bindingcheck
+7b61aeb200714c71af1d49978deea5df succeeded for existing own6SURFACE copy
+8fb7cc6d628d4e7a8a762002638cf145/model280012835 after27->28windows history.
+Original OPENb20256af7bac460eb9746139bcac6d85 NOT repeated. Exactly one prior
+activationb42a158f13c1414b88c155358bd16162; no repeated activation after fix.
+The first observerf2aa8ef0b0f647f8b98a9b2b15453e94 rejected before any binding
+because oldraw lacks inlinebridgeRequestId. Native67.1 validates exactpath/SHA,
+allows absentinlineID and rejects conflictingone; actual Native sparsehistory
+checked before deployment. Original rejection retained. No unknown observer.
+
+Setd01e345e81fe4c60b31f944646e24470 STOPPED outcome_unknown after first target
+surface1/[21,2] callback authoritatively returned1. Second2/[21,5] neverstarted.
+Step0phase returned/completed0; mainjournal prepared/claimed/started/unknown.
+Separate readonly all6 + independent local math/byte audit proved only surface1
+X+1, maxpositionerror8.881784197001252e-16mm; TWO targetnormalcomponents differ
+atmost2.220446049250313e-16raw. Five others positions/normals exact; all layouts/
+shapes/visibility exact. Oldv1 equality correctly rejects those bytes. No set
+success, verifier, retry, inverse, save/open/close/mouse. Geometry UNSAVED.
+Original claim/fence/journal retained; do not manually release or finishstep2.
+Ordinaryreadonly independently confirmed ownactive6SURFACE/emptyWORLD/28windows.
+
+Full.NET1142/1142 fail0skip0 passed outside restrictedfiletoken after realblock.
+Nativeobserver18 +actualFrameworkSDKhistory3; gateSDK12/Python32/catalog91/11
+and noqueue passed. New regression from actualstop: strictv1Native11 andSDK18
+pass, including tiny targetnormal drift refusal before second callback. No
+productionnormalguard was relaxed. No repeat fullsuite or old successful CAD.
+All test/read/build/deployment processes TERMINAL. Originalfailures preserved.
+
+Exact current evidence: evidence/owned-open-access-restore-20261027/
+completed-observer-block.json, independent-stop-audit.json, live-v2/,
+set-stop-readonly/, ordinary-readonly-after-stop.json. 1278protectedpins +9stop
+artifacts unchanged. Installed backupwork/general-deployment-backup-20261026-211400.
+The earlier preclose EnumWindows failure had no close/copy;18pairs/originalpanel
+verified, ownmaintenance removed and reviewed escalation finished installation.
+Do not rerun deployments or either live script. Sourcepublication follows.
+
+NEXT read work/owned-open-access-restore-20261027/NEXT-SET-NUMERICAL-NORMALS-CONTRACT.md:
+bounded passive partial-stop observation -> separate qualified one-use current
+state disposition/lease with archived matching fence and immutable oldunknown/
+claim -> explicitly versioned numerical-normal profile for NEW intents only ->
+NEW surfaces2then3 WORLD[0,1,0] experiment, independently checked. Oldsurface1X+1
+is an exact pinned nontarget baseline. No automaticoldretry, noquotaevasion or
+extra activation/open/close. If disposition cannot be proven, keep quarantine.
+PR108 BOTHCI SUCCESS baseline121780742405/SDK121780743274; no repoll.
+
+# CURRENT: OWNED ACCESS RESTORED; FIRST SET CALLBACK STOPPED, FENCE RETAINED
+
+Read work/owned-open-access-restore-20261027/CURRENT.md first. This supersedes old
+pin66 and pending-restore notes below. Branch codex/owned-open-access-restore,
+uncommitted Native67.1/stagedSDK73/Python67.1; installed67.1/ordinary48. Backup
+work/general-deployment-backup-20261026-211400. PR108 BOTHCI SUCCESS; no repoll.
+
+Main17304 current own six-SURFACE copy8fb7cc6d628d4e7a8a762002638cf145/model280012835
+ACTIVE after exactly one owned activation b42a158f13c1414b88c155358bd16162,28windows,
+emptyWORLD. New PowerShape34372 preserved, no commands sent there. No mouse.
+Original successful genericOPEN b20256af7bac460eb9746139bcac6d85 NOT replayed.
+
+First observer f2aa8ef0b0f647f8b98a9b2b15453e94 rejected before binding/report due
+old Native response omitting bridgeRequestId (IPC adds it). Sparse raw format
+fix67.1 tested18Native+actualNativehistory and3FrameworkSDKhistory; oldfailure
+preserved. New observer9f12cadbb99f4fb68765b4766d2c6c10 SUCCEEDED with independent
+SDKraw/history proof and binding check7b61aeb200714c71af1d49978deea5df. No OPEN,
+activation/selection/save/geometry in observer. Before all6grids matched retained
+saved reference exactly. GateSDK12/Python32/catalog91full11readonly/noqueue pass.
+
+NEW ordered-set execution d01e345e81fe4c60b31f944646e24470 STOPPED outcome_unknown.
+Its first target surface1/[21,2] TranslateItem AUTHORITATIVELY returned1 in step0,
+then full witness postcondition rejected normals/layout/flags/other surface or
+identity equality. Second target surface2/[21,5] NEVER STARTED. Step proof phase
+returned,completed0,only0000.started/returned; mainjournal outcome_unknown.
+Original claim/fence/journal MUST stay; no set verifier to infer full success,
+retry, inverse, automatic WORLD, save/open/close or manual fence removal.
+No result.json in live-v2; failed script terminal, never rerun either live script.
+
+Separate read-only diagnostic script inspect-set-stop-readonly.py now reads all6
+public grids and compares first-target-only affine effect, exact nontargets and
+normals/layout/flags, original artifacts and1278protectedpins. See evidence/
+owned-open-access-restore-20261027/set-stop-readonly/result.json when terminal.
+The diagnostic does NOT resolve the original set or remove a fence. Finish its
+independent audit and source fault diagnosis before designing separate recovery.
+Do not declare ordered set qualified. Geometry remains UNSAVED and fenced.
+
+No user question/action required now. Authorized autonomous diagnostics/code
+continue; K8-K11 OPEN, P0accepted. Do not close unknown docs or either process.
+
+# CURRENT: NATIVE66 INSTALLED; BOTH INSTANCES PRESERVED; SUCCESSFUL-OPEN ACCESS RESTORE NEXT
 
 User keeps both PowerShape instances and explicitly asked to ignore the new one.
 NO pending user question. Do not ask to close either again. P0 personally accepted;

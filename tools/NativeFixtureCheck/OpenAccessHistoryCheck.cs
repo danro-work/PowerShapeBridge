@@ -1,0 +1,6 @@
+using System.Text.Json.Nodes;
+using PowerShapeMcp;
+internal static class OpenAccessHistoryCheck
+{
+    internal static int Run(string input,string output){var report=JsonNode.Parse(File.ReadAllText(input))!.AsObject();var f=report["historyFixture"]!.AsObject();string root=f["root"]!.GetValue<string>();var args=f["args"]!.AsObject();string id=args["verificationRequestId"]!.GetValue<string>(),sha=args["verificationReceiptSha256"]!.GetValue<string>();var h=OwnedOpenAccessRestoreProof.History(root,id,sha);if(h.JournalHashes.Count!=6)throw new InvalidDataException("Six native historical event bytes required.");int cases=1;foreach(var bad in new[]{new string('0',64),new string('a',63)}){bool refused=false;try{OwnedOpenAccessRestoreProof.History(root,id,bad);}catch(ReferenceRejected){refused=true;}if(!refused)throw new InvalidDataException("Changed original hash accepted.");cases++;}Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(output))!);File.WriteAllText(output,new JsonObject{["state"]="passed",["cases"]=cases,["actualFrameworkHistoryBytes"]=true,["cadConnectionAttempted"]=false}.ToJsonString(new(){WriteIndented=true}));Console.WriteLine($"PASS: {cases} actual Framework successful OPEN history/SHA checks in SDK; no CAD.");return 0;}
+}

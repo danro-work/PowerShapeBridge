@@ -85,6 +85,7 @@ public sealed class BridgeSession : IDisposable
         {
             execution.Add("activate_document");
             foreach(var (flagName,names) in new[]{
+                ("ownedOpenAccessRestoreExperimental",new[]{"restore_verified_owned_open"}),
                 ("ownedOpenAdoptionExperimental",new[]{"adopt_owned_open_document","restore_owned_open_adoption"}),
                 ("ownedSavedResultRestoreExperimental",new[]{"restore_owned_saved_result"}),
                 ("rotationPlansExperimental",new[]{"prepare_rotation_plan"}),
