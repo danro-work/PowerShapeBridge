@@ -1,0 +1,22 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+namespace PowerShapeBridge {
+ internal static class OwnedCurveRotation {
+  internal const string Profile="owned_compcurve_controls_world_z90_v1";
+  internal const string Qualification="One explicit owned COMPCURVE WORLD Z+90 around origin, complete1..N controls plus unchanged neighboring SOLID face witnesses. Actual control positions and tangents rotate; magnitudes/freeflags/layout/other properties/files/windows preserved. Sampled/control observations only, not full topology. No selection/save/inverse/replay.";
+  static void Need(bool v,string s){if(!v)throw new InvalidDataException(s);}
+  static Dictionary<string,object> Clone(object v){return Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(v));}
+  static double[] V(object v){return((IEnumerable)v).Cast<object>().Select(OwnedSurfaceTranslation.Number).ToArray();}
+  internal static Dictionary<string,object> Validate(Dictionary<string,object> a){Need(a!=null&&a.Count==3&&a.ContainsKey("curveRange"),"Exact curve rotation arguments required.");var range=a["curveRange"]as Dictionary<string,object>;NativeCurveLayout.Range(range);Need(Equals(range["startIndex"],1)&&(int)range["endIndex"]>=2&&(int)range["endIndex"]<=32,"Explicit complete1..N range required.");var b=a.Where(p=>p.Key!="curveRange").ToDictionary(p=>p.Key,p=>p.Value);OwnedRotationExecution.Validate(b);return b;}
+  internal static double[] Axis(Dictionary<string,object> p){var axis=V(p["nativeAxis"]);Need(OwnedSurfaceTranslation.Number(p["angleDegrees"])==90&&axis.SequenceEqual(new[]{0.0,0,0,0,0,1})&&Equals(p["measurementProfile"],Profile),"Only declared WORLD Z+90 through origin qualified.");return axis;}
+  internal static int Target(OwnedTransformSource d){Need(Equals(d.Plan["operation"],"rotate_entities")&&d.Keys.Length==1&&d.Keys[0][0]==59,"One explicit COMPCURVE rotate_entities target required.");var p=(Dictionary<string,object>)d.Plan["parameters"];var axis=OwnedRotationPlans.Axis(p);Axis(new Dictionary<string,object>{{"angleDegrees",p["angleDegrees"]},{"nativeAxis",axis},{"measurementProfile",Profile}});return d.Keys[0][1];}
+  internal static void Post(Dictionary<string,object> before,Dictionary<string,object> after,Dictionary<string,object> original,Dictionary<string,object> current){
+   OwnedCurveTranslation.Layout(original);OwnedCurveTranslation.Layout(current);var normalized=Clone(current);var x=((IEnumerable)((Dictionary<string,object>)original["layout"])["fields"]).Cast<Dictionary<string,object>>().ToArray();var y=((IEnumerable)((Dictionary<string,object>)normalized["layout"])["fields"]).Cast<Dictionary<string,object>>().ToArray();foreach(int field in new[]{0,1,5}){var a=V(x[field]["values"]);var b=V(y[field]["values"]);Need(a.Length==b.Length&&a.Length%3==0,"Curve rotation array shape changed.");for(int i=0;i<a.Length;i+=3)Need(Math.Abs(b[i]+a[i+1])<=1e-6&&Math.Abs(b[i+1]-a[i])<=1e-6&&Math.Abs(b[i+2]-a[i+2])<=1e-6,"Control position or tangent differs from WORLD Z+90.");y[field]["values"]=x[field]["values"];}Need(OwnedSurfaceSelection.Same(original,normalized),"Curve magnitudes/freeflags/count/identity/layout or SOLID witnesses changed.");
+   int id=Program.StrictInt(((IEnumerable)original["entityKey"]).Cast<object>().Last());var observed=Clone(after);var old=(Dictionary<string,object>)EntitySets.Inventory(before).Single(e=>Equals(e["nativeTypeCode"],59)&&Equals(e["nativeId"],id))["geometry"];var next=(Dictionary<string,object>)EntitySets.Inventory(observed).Single(e=>Equals(e["nativeTypeCode"],59)&&Equals(e["nativeId"],id))["geometry"];var min=V(old["min_rangeRaw"]);var max=V(old["max_rangeRaw"]);Need(min.Length==3&&max.Length==3,"Observed ranges required.");Need(OwnedTranslation.Near(V(next["min_rangeRaw"]),new[]{-max[1],min[0],min[2]})&&OwnedTranslation.Near(V(next["max_rangeRaw"]),new[]{-min[1],max[0],max[2]}),"Native world range does not match principal quarter-turn.");next["min_rangeRaw"]=old["min_rangeRaw"];next["max_rangeRaw"]=old["max_rangeRaw"];Need(EntitySets.ObservedDigest(before)==EntitySets.ObservedDigest(observed),"Other curve/SOLID/context/units/properties changed.");
+  }
+  internal static Dictionary<string,object> Finish(Dictionary<string,object> r,bool rotation,bool curve){if(rotation&&curve){r["state"]=((string)r["state"]).Replace("owned_translation_","owned_curve_rotation_");r["qualification"]=Qualification;return r;}return OwnedSurfaceRotation.Finish(r,rotation);}
+ }
+}

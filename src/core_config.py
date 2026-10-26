@@ -19,6 +19,9 @@ def general_core(settings):
     bindings = settings.get('documentBindingsExperimental', False)
     level_moves = settings.get('ownedLevelMovesExperimental', False)
     workplanes = settings.get('ownedWorkplanesExperimental', False)
+    curve_rotation = settings.get('ownedCurveRotationsExperimental', False)
+    if type(curve_rotation) is not bool or curve_rotation and (profile != 'general-v1' or settings.get('ownedRotationPlansExperimental') is not True or settings.get('curveWitnessesExperimental') is not True):
+        raise ValueError('Curve rotations require owned rotation plans and combined passive witnesses')
     curve_move = settings.get('ownedCurveTranslationsExperimental', False)
     if type(curve_move) is not bool or curve_move and (profile != 'general-v1' or settings.get('ownedTranslationsExperimental') is not True or settings.get('curveLayoutExperimental') is not True):
         raise ValueError('Curve translation requires owned translations and curve layout')

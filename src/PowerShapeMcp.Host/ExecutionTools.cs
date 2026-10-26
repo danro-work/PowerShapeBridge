@@ -35,7 +35,7 @@ public sealed class ExecutionTools(BridgeSession session)
 
     internal async Task<CallToolResult> Run(string name,JsonObject args,CancellationToken cancellationToken)
     {
-        session.AssertToolAllowed(name);bool curve=name.Contains("curve_translation",StringComparison.Ordinal);bool surface=name.Contains("surface_translation",StringComparison.Ordinal);bool translate=name is "execute_owned_translation" or "execute_owned_surface_translation" or "execute_owned_curve_translation";var timer=Stopwatch.StartNew();var acquired=false;var submitted=false;string? request=null;
+        session.AssertToolAllowed(name);bool curveRotation=name.Contains("curve_rotation",StringComparison.Ordinal);bool curve=curveRotation||name.Contains("curve_translation",StringComparison.Ordinal);bool surface=name.Contains("surface_translation",StringComparison.Ordinal);bool translate=name is "execute_owned_translation" or "execute_owned_surface_translation" or "execute_owned_curve_translation" or "execute_owned_curve_rotation";var timer=Stopwatch.StartNew();var acquired=false;var submitted=false;string? request=null;
         try
         {
             if(!await session.ReferenceGate.WaitAsync(session.Options.Timeout,cancellationToken))return DiagnosticTools.Result(Stopped("queue_timeout_before_submission"),true);
@@ -48,10 +48,11 @@ public sealed class ExecutionTools(BridgeSession session)
                 "open_working_copy"=>OwnedExecutionProof.OpenParameters(args,session.Candidates,session.Copies,session.Documents),
                 "execute_owned_surface_translation"=>SurfaceParameters(session,args),
                 "execute_owned_curve_translation"=>CurveParameters(session,args),
+                "execute_owned_curve_rotation"=>CurveRotationParameters(session,args),
                 "execute_owned_translation"=>session.Owned.ValidationParameters(Text(args,"ownedOperationHandle")),
-                _=>OwnedExecutionProof.VerificationParameters(args,session.Candidates,session.Documents,name is "verify_owned_translation" or "verify_owned_surface_translation" or "verify_owned_curve_translation")
+                _=>OwnedExecutionProof.VerificationParameters(args,session.Candidates,session.Documents,name is "verify_owned_translation" or "verify_owned_surface_translation" or "verify_owned_curve_translation" or "verify_owned_curve_rotation")
             };
-            if(curve&&!translate)CurveTranslationProof.Execution(session.Options.BridgeRoot,Text(args,"executionRequestId"),Text(args,"executionReceiptSha256"));
+            if(curve&&!translate)CurveTranslationProof.Execution(session.Options.BridgeRoot,Text(args,"executionRequestId"),Text(args,"executionReceiptSha256"),false,curveRotation);
             if(translate||name is "activate_document" or "open_working_copy")session.RevokeCadLeases(translate);
             submitted=true;
             var data=await session.Ipc.SubmitAsync("recipe.prepare",new(){["recipeId"]=name,["parameters"]=parameters},cancellationToken,session.Options.Timeout-timer.Elapsed);
@@ -63,6 +64,8 @@ public sealed class ExecutionTools(BridgeSession session)
             {
                 switch(name)
                 {
+                    case "execute_owned_curve_rotation":CurveTranslationProof.Receipt(session.Options.BridgeRoot,data,parameters,true);break;
+                    case "verify_owned_curve_rotation":CurveTranslationProof.Verified(session.Options.BridgeRoot,data,parameters,true);break;
                     case "execute_owned_curve_translation":CurveTranslationProof.Receipt(session.Options.BridgeRoot,data,parameters);break;
                     case "verify_owned_curve_translation":CurveTranslationProof.Verified(session.Options.BridgeRoot,data,parameters);break;
                     case "open_working_copy":OwnedExecutionProof.OpenReceipt(session.Options.BridgeRoot,data,parameters);break;
@@ -93,8 +96,10 @@ public sealed class ExecutionTools(BridgeSession session)
             {
                 "activate_document"=>submitted?"document_activation_outcome_unknown":"document_choice_rejected",
                 "open_working_copy"=>submitted?"working_copy_open_outcome_unknown":"working_copy_open_rejected",
+                "execute_owned_curve_rotation"=>submitted?"owned_curve_rotation_outcome_unknown":"owned_curve_rotation_rejected_before_change",
                 "execute_owned_translation" or "execute_owned_surface_translation" or "execute_owned_curve_translation"=>submitted?"owned_translation_outcome_unknown":"owned_translation_rejected_before_change",
                 "verify_working_copy_open"=>"owned_open_verification_rejected",
+                "verify_owned_curve_rotation"=>"owned_curve_rotation_verification_rejected",
                 _=>"owned_translation_verification_rejected"
             };
             var data=submitted?Unknown(name,state,request):Stopped(state);
@@ -108,12 +113,13 @@ public sealed class ExecutionTools(BridgeSession session)
     {
         var data=source?.DeepClone().AsObject()??new JsonObject();data["state"]=state;
         if(request is not null)data["bridgeRequestId"]=request;
-        data["geometryMutationAttempted"]=name is "execute_owned_translation" or "execute_owned_surface_translation" or "execute_owned_curve_translation";data["contextChangeAttempted"]=name is "open_working_copy" or "activate_document";
+        data["geometryMutationAttempted"]=name is "execute_owned_translation" or "execute_owned_surface_translation" or "execute_owned_curve_translation" or "execute_owned_curve_rotation";data["contextChangeAttempted"]=name is "open_working_copy" or "activate_document";
         data["cadSaveAttempted"]=false;data["retryAllowed"]=false;data["localArtifactsMayExist"]=true;
         if(name=="activate_document")data["documentHandleConsumed"]=true;
         if(name.StartsWith("verify_",StringComparison.Ordinal))data["qualification"]="Journal append may be unknown; no CAD command was issued.";
         return data;
     }
+    private static JsonObject CurveRotationParameters(BridgeSession s,JsonObject a){var r=a["curveRange"]!.AsObject();CurveTranslationProof.Range(r);var p=s.OwnedRotations.ValidationParameters(Text(a,"ownedRotationHandle"));p["curveRange"]=r.DeepClone();return p;}
     private static JsonObject CurveParameters(BridgeSession s,JsonObject a){var r=a["curveRange"]!.AsObject();CurveTranslationProof.Range(r);var p=s.Owned.ValidationParameters(Text(a,"ownedOperationHandle"));p["curveRange"]=r.DeepClone();return p;}
     private static JsonObject SurfaceParameters(BridgeSession session,JsonObject input)
     {
@@ -122,7 +128,7 @@ public sealed class ExecutionTools(BridgeSession session)
     internal static void ValidateSurfaceGrid(JsonObject grid){SurfaceReadTools.Grid(grid);if(SurfaceReadTools.Integer(grid["tDivisions"])>4||SurfaceReadTools.Integer(grid["uDivisions"])>4)throw new ReferenceRejected("surface_translation_grid_invalid");}
     private static bool BeforeSubmission(string? state)=>state is "cancelled_before_submission" or "queue_timeout_before_submission" or "maintenance_before_submission" or "failed_before_submission";
     private static string Text(JsonObject args,string name)=>args[name]!.GetValue<string>();
-    private static readonly Dictionary<string,string> Success=new(){["execute_owned_curve_translation"]="owned_translation_executed_unverified",["verify_owned_curve_translation"]="owned_translation_verified_observed",["activate_document"]="document_active_verified",["open_working_copy"]="working_copy_opened_observed",["verify_working_copy_open"]="owned_open_verified_observed",["execute_owned_surface_translation"]="owned_translation_executed_unverified",["verify_owned_surface_translation"]="owned_translation_verified_observed",["execute_owned_translation"]="owned_translation_executed_unverified",["verify_owned_translation"]="owned_translation_verified_observed"};
+    private static readonly Dictionary<string,string> Success=new(){["execute_owned_curve_rotation"]="owned_curve_rotation_executed_unverified",["verify_owned_curve_rotation"]="owned_curve_rotation_verified_observed",["execute_owned_curve_translation"]="owned_translation_executed_unverified",["verify_owned_curve_translation"]="owned_translation_verified_observed",["activate_document"]="document_active_verified",["open_working_copy"]="working_copy_opened_observed",["verify_working_copy_open"]="owned_open_verified_observed",["execute_owned_surface_translation"]="owned_translation_executed_unverified",["verify_owned_surface_translation"]="owned_translation_verified_observed",["execute_owned_translation"]="owned_translation_executed_unverified",["verify_owned_translation"]="owned_translation_verified_observed"};
     public static McpServerTool[] Create(BridgeSession session)
     {
         var methods=new ExecutionTools(session);using var stream=typeof(ExecutionTools).Assembly.GetManifestResourceStream("execution-tools.json")!;
