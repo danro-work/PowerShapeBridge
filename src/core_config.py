@@ -14,6 +14,9 @@ FIXTURE_FIELDS = ('expectedProject', 'sourceStep', 'protectedProject',
 
 def general_core(settings):
     profile = settings.get('coreProfile')
+    access = settings.get('ownedOpenAccessRestoreExperimental', False)
+    if type(access) is not bool or access and (profile != 'general-v1' or any(settings.get(k) is not True for k in ('workingCopyOpenExperimental', 'workingCopiesExperimental', 'entitySetsExperimental', 'documentBindingsExperimental'))):
+        raise ValueError('Owned OPEN current-access restore requires strict guarded dependencies')
     pin = settings.get('powerShapeProcessPin')
     if pin is not None:
         if profile != 'general-v1' or type(pin) is not dict or set(pin) != {'processId', 'processStartedUtc', 'windowsSessionId', 'executablePath'}:
