@@ -15,5 +15,6 @@
   "ownedSelectionsExperimental": false,
   "surfaceSamplingExperimental": true,
   "ownedSurfaceSelectionsExperimental": false,
-  "ownedSurfaceTranslationsExperimental": false
+  "ownedSurfaceTranslationsExperimental": false,
+  "ownedSurfaceSetTranslationsExperimental": false
 }

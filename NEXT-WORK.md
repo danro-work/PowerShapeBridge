@@ -1,4 +1,70 @@
-﻿# CURRENT: PR106 PUBLISHED; FIXTURE CLOCK ORDERING FIX VALIDATED
+﻿# CURRENT: SET PACKAGE READY; EARLY CAD STOPPED BY TWO POWERSHAPE PROCESSES
+
+Current work/K8-surface-set-translation-20261026/CURRENT.md and WIP.md.
+Native65/SDK71 clean package ready: Native10, actualFrameworkSDK16, necessarylegacy
+Native80, SDK26/27 plus sole corrected readonly expectation1/1, Python30 passed.
+Actual STDIO90full/11readonly/schema/mode/unknown-handle noqueue and8Native strict
+config cases passed; qualified-package.json pins clean native-ready +sdk-v1 bytes.
+No newfull regression yet; PR106 historical1106 does NOT cover this new source.
+
+Predeployment own active model inspection52838f8375974f1791d920031b95c234 succeeded
+for b2fa1380699f4087abcb02c1da54221a/model280013123 emptyWORLD. Listing
+4f85f2879287411eada9ea896553c01d REJECTED: PowerShape instance absent or ambiguous.
+Fresh OS read established TWO powershape.exe in session1: main17304 (startedOct8)
+and34372 (startedOct26 17:03:40MSK); one idle Bridgepanel27284/Native64. IDs are
+observations only, not future authority. Second instance ownership/data UNKNOWN.
+No deployment/activation/geometry/save/open/close/mouse occurred. Do not kill or
+close unknown process, weaken one-instance guard, or retry CAD while ambiguous.
+
+One async USER QUESTION is pending: close additional PowerShape normally after
+preserving needed work and report, or say both are still needed. Elapsed time,
+generic heartbeat and CI success are NOT a reply. Continue independent source/
+draft/CI work while waiting; if user reports closing, reread current process/list/
+model before idle backed-up deployment and concrete own two-surface scenario.
+If both are needed, preserve this environment blocker; no forced close.
+
+Sourcebranch codex/k8-surface-set-translation from33f0e8a; no PR107 yet. Preserve
+foreign16 and1042pins. InstalledNative64/ordinarySDK48 unchanged; Native65/SDK71 are
+staged only. All test scripts/processes terminal. Never replay old curve scale/
+clear/save/open. Both PR106 CI SUCCESS at33f0e8a, do not repoll. Exact evidence in
+currentevidence/preflight-stop.json/readiness.json/qualified-package.json.
+K8/K9/fiveclassK10/release/personalK11 OPEN; P0accepted. Need no mouse permission
+for read-only process checks; ask separately before any mouse use.
+
+# CURRENT: SURFACE SET SOURCE READY FOR CLEAN PACKAGE / EARLY OWN-CAD
+
+Read work/K8-surface-set-translation-20261026/WIP.md; current internal-readiness-summary.json.
+Branch codex/k8-surface-set-translation, uncommitted Native65/SDK71/Python65 source.
+Installed Native64 / ordinarySDK48 unchanged; NO set CAD/deploy yet. Native10,
+actual Framework-to-SDK16 and legacyNative80 passed. SDK original26/27 plus
+corrected sole readonly exception-expectation1/1 passed; Pythonconfig30 passed.
+No new full regression yet; old1106 covers PR106, not this new source. Initial
+version mismatch build and readonly expectation failure preserved, not hidden.
+1042prior protectedpins and foreign16 unchanged. All test processes TERMINAL;
+do not rerun unchanged successful tests. WIP old RUNNING85505 text is historical:
+it completed10Native/16FrameworkSDK successfully. SDK corrected test also terminal.
+
+PR106 @33f0e8a9df8c18e38b4e71265a6cf63cd0f4adb7 attached; baseline121613522263 and
+SDK121613746909 bothSUCCESS. Do not repoll. No PR107 yet.
+New tools use existing ExecutionTools.Create/ToolCatalog, defaultfalse separate
+flag, explicit original orderedset/coupledpacket/TTL, shared Native executor and
+per-step started/returned/observed chain; no alternate owned executor. SDK checks
+raw Native bytes, full chain, partial-step refusal, alltarget/non-target UV fields.
+These are internal checks, NOT live qualification or v1 acceptance.
+
+NEXT: clean Native65 build at currentwork/native-ready from runtime.config.json;
+SDK71 package sdk-v1 compiled0warnings/0errors; actual STDIO full/readonly catalog,
+unknownhandle/mode refusals/noqueue, Native component strict config gates, freeze
+package/version/byte manifest and concrete live scenario. Then idle/backed-up
+deployment (reviewed deploy-general.ps1), separate fresh CAD reads, one supported
+activation of historically owned six-surface copy only after fresh identity/ownership,
+one ordered two-SURFACE translation, separate verifier and independent all-six
+UV/affine/non-target/file/window/step-chain audit. No user mouse/source mutation,
+quota increase, OPEN forleases or replayunknown. Fullregression after real block;
+SaveAs/reopen separate afterward. K8/K9/fiveclassK10/release/personalK11 remainOPEN.
+P0accepted, no human input pending. Preserve currentcurve result and all old scripts.
+
+# CURRENT: PR106 PUBLISHED; FIXTURE CLOCK ORDERING FIX VALIDATED
 
 PR106 https://github.com/danro-work/PowerShapeBridge/pull/106 is draft and attached,
 base codex/k8-curve-principal-rotation. Public source194e5013f468d52649c1100773a2a2952f2c2864

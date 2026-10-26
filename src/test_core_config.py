@@ -107,6 +107,17 @@ class CoreConfiguration(unittest.TestCase):
         for field in ('ownedTranslationsExperimental', 'surfaceSamplingExperimental', 'entitySetsExperimental'):
             with self.subTest(field=field), self.assertRaises(ValueError): general_core({**settings, field: False})
 
+    def test_surface_set_translation_requires_strict_gate_and_dependencies(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-set-translations.json').read_text())
+        self.assertIs(settings['ownedSurfaceSetTranslationsExperimental'], False)
+        general_core(settings)
+        settings.update(ownedSurfaceSetTranslationsExperimental=True, ownedSurfaceTranslationsExperimental=True, ownedTranslationsExperimental=True, operationPlansExperimental=True, ownedOperationPlansExperimental=True)
+        general_core(settings)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedSurfaceSetTranslationsExperimental': value})
+        for field in ('ownedSurfaceTranslationsExperimental', 'ownedTranslationsExperimental', 'surfaceSamplingExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError): general_core({**settings, field: False})
+
     def test_surface_sampling_is_strict_passive_default_false(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-sampling.json').read_text())
         self.assertIs(settings['surfaceSamplingExperimental'], False)

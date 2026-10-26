@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using PowerShapeMcp;
 
+if(args.Length==3&&args[0]=="--surface-set-translation"){try{return SurfaceSetTranslationCheck.Run(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
 if(args.Length==3&&args[0]=="--curve-scale-stop-recovery-preparation"){try{return CurveScaleStopRecoveryCheck.Preparation(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
 if(args.Length==3&&args[0]=="--curve-scale-stop-recovery"){try{return CurveScaleStopRecoveryCheck.Run(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
 if(args.Length==3&&args[0]=="--curve-scale-stop"){try{return CurveScaleStopCheck.Run(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
