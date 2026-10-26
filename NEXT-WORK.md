@@ -1,4 +1,30 @@
-﻿# CURRENT: CURVE SCALE SAVED AND REOPENED; INDEPENDENT AUDITS COMPLETE
+﻿# CURRENT: PR106 PUBLISHED; FIXTURE CLOCK ORDERING FIX VALIDATED
+
+PR106 https://github.com/danro-work/PowerShapeBridge/pull/106 is draft and attached,
+base codex/k8-curve-principal-rotation. Public source194e5013f468d52649c1100773a2a2952f2c2864
+contains completed curve scale/persistence. Its baseline121609825635/run40333795869
+FAILED in the synthetic stop-inspection control: post-stop freshness rejected.
+Initial SDK121609826100/run40333796089 was pending at last read. Preserve originalfailure;
+do not retry CAD or deploy. Superseded chatattachment105 was replaced by106 at the100
+metadata limit; GitHub PR105 was NOT changed, dependencyURL/base/oldCI remain retained.
+
+Test-only fix: fresh fake timestamps are at least one100ns tick after the last
+recorded receipt/event even on coarse Windows clocks. Production comparison and
+lease expiry are unchanged. Two explicit same-stop-tick negative cases reject;
+control accepts. Native6/actualFrameworkSDK9, recoveryNative5/actualFrameworkSDK9
+passed in new staging; independent timestamp/error audit passed. Exact original
+failing CI timestamps were not logged, so same-tick originalcause is inferred.
+InstalledNative64/stagedSDK70.1/ordinary48/config and savedCAD bytes unchanged.
+No deploy/CAD/extraOPEN/localfull1106 rerun. New CI after push must be read for its
+EXACT head through Codex app diagnostics. Do not cite old194 baseline as passing.
+
+Current owned curve result b2fa1380699f4087abcb02c1da54221a/model280013123,
+emptyWORLD/28windows. Persistence complete,1042nextpins; originalOPEN70d605be1cf84ab9bd84d2bf682482ca
+SHA in completed-block.json. All prior live/audit scripts TERMINAL. Source branch
+codex/k8-curve-scale-recovery; next type/set scope in current work/NEXT-K8-SETS-SCOPE.md.
+K8-K11 open; P0accepted, no human input pending. Foreign16 remain protected.
+
+# CURRENT: CURVE SCALE SAVED AND REOPENED; INDEPENDENT AUDITS COMPLETE
 
 Read current evidence/K8-curve-scale-persistence-20261026/completed-block.json.
 All scale, clear-recovery, SaveAs, finalization, OPEN and audit scripts are TERMINAL;
