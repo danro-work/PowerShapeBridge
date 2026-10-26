@@ -74,6 +74,7 @@ namespace PowerShapeBridge
         public bool surfaceSamplingExperimental { get; set; }
         public bool ownedSurfaceSelectionsExperimental { get; set; }
         public bool ownedSurfaceTranslationsExperimental { get; set; }
+        public bool ownedSurfaceSetTranslationsExperimental { get; set; }
         public bool ownedSurfaceRotationsExperimental { get; set; }
         public bool IsGeneralCore { get { return coreProfile == "general-v1"; } }
         public bool CoreTransportEnabled { get { return IsGeneralCore || (mcpMutationsPanel && recipeOperationsPanel); } }
@@ -119,6 +120,7 @@ namespace PowerShapeBridge
             if(ownedCurveScalesExperimental&&(!IsGeneralCore||!ownedUniformScalePlansExperimental||!operationPlansExperimental||!curveWitnessesExperimental))throw new ArgumentException("Curve scaling requires owned scale plans and curve witnesses.");
             if(ownedSurfaceScalesExperimental&&(!IsGeneralCore||!ownedUniformScalePlansExperimental||!operationPlansExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface scales require owned scale plans and surface sampling.");
             if(ownedSurfaceRotationsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface rotation requires owned rotation plans and surface sampling.");
+            if(ownedSurfaceSetTranslationsExperimental&&(!IsGeneralCore||!ownedSurfaceTranslationsExperimental||!ownedTranslationsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface set translation requires singleton translation and passive surface dependencies.");
             if(ownedSurfaceTranslationsExperimental&&(!IsGeneralCore||!ownedTranslationsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface translation requires owned translation and surface sampling.");
             if(ownedSurfaceSelectionsExperimental&&(!IsGeneralCore||!ownedSelectionsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Surface selection requires owned selection and surface sampling.");
             if(ownedCurveRotationsExperimental&&(!IsGeneralCore||!ownedRotationPlansExperimental||!curveWitnessesExperimental))throw new ArgumentException("Curve rotations require owned rotation plans and passive combined witnesses.");
@@ -146,7 +148,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.64.0-dev";
+        public const string ReleaseVersion = "0.65.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -192,6 +194,7 @@ namespace PowerShapeBridge
             if(raw!=null&&raw.TryGetValue("ownedCurveScalesExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Curve scale flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedUniformScalePlansExperimental","uniformScalePlansExperimental","operationPlansExperimental","curveWitnessesExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Curve scale dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedSurfaceScalesExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface scale flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedUniformScalePlansExperimental","uniformScalePlansExperimental","operationPlansExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface scale dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedSurfaceRotationsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface rotation flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedRotationPlansExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface rotation dependencies required.");}}
+            if(raw!=null&&raw.TryGetValue("ownedSurfaceSetTranslationsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface set flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedSurfaceTranslationsExperimental","ownedTranslationsExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface set dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedSurfaceTranslationsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface translation flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedTranslationsExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface translation dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedSurfaceSelectionsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Surface selection flag must be boolean.");if((bool)enabled)foreach(string dependency in new[]{"ownedSelectionsExperimental","surfaceSamplingExperimental"}){object v;if(!raw.TryGetValue(dependency,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Surface selection dependencies required.");}}
             if(raw!=null&&raw.TryGetValue("ownedCurveRotationsExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Curve rotation flag must be Boolean.");if((bool)enabled)foreach(string dep in new[]{"ownedRotationPlansExperimental","curveWitnessesExperimental"}){object value;if(!raw.TryGetValue(dep,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Curve rotation dependency required.");}}
@@ -407,6 +410,7 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--curve-rotation-test"){try{OwnedCurveRotationTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.ToString());return 3;}}
             if(args.Length==1&&args[0]=="--curve-translation-test"){try{OwnedCurveTranslationTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.ToString());return 3;}}
             if(args.Length==1&&args[0]=="--curve-layout-test"){try{NativeCurveLayoutTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e.Message);return 3;}}
+            if(args.Length==1&&args[0]=="--surface-set-translation-test"){try{OwnedSurfaceSetTranslationTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--curve-scale-stop-recovery-test"){try{CurveScaleStopRecoveryTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--curve-scale-stop-test"){try{CurveScaleStopInspectionTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--curve-scale-test"){try{OwnedCurveScaleTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}

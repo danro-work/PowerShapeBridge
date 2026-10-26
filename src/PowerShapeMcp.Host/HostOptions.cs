@@ -4,7 +4,7 @@ namespace PowerShapeMcp;
 
 public sealed record HostOptions(string BridgeRoot, TimeSpan Timeout, bool ReadOnly)
 {
-    public const string Version = "0.70.1-dev";
+    public const string Version = "0.71.0-dev";
     public static HostOptions Parse(string[] args)
     {
         string? root = null;
@@ -57,6 +57,7 @@ public sealed record HostOptions(string BridgeRoot, TimeSpan Timeout, bool ReadO
             ["ownedSurfaceRotationsExperimental"] = ["ownedRotationPlansExperimental","surfaceSamplingExperimental"],
             ["ownedCurveRotationsExperimental"] = ["ownedRotationPlansExperimental","curveWitnessesExperimental"],
             ["ownedCurveTranslationsExperimental"] = ["ownedTranslationsExperimental","curveLayoutExperimental"],
+            ["ownedSurfaceSetTranslationsExperimental"] = ["ownedSurfaceTranslationsExperimental","ownedTranslationsExperimental","surfaceSamplingExperimental"],
             ["ownedSurfaceTranslationsExperimental"] = ["ownedTranslationsExperimental","surfaceSamplingExperimental"],
             ["ownedSurfaceSelectionsExperimental"] = ["ownedSelectionsExperimental","surfaceSamplingExperimental"],
             ["ownedLevelMovesExperimental"] = ["levelReadingExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"],

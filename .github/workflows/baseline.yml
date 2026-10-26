@@ -41,6 +41,9 @@ jobs:
       - name: Check separately gated owned SURFACE translation without CAD
         shell: pwsh
         run: ./verify-owned-surface-translation.ps1
+      - name: Check ordered owned SURFACE set translation and partial failure without CAD
+        shell: pwsh
+        run: ./verify-surface-set-translation.ps1
       - name: Check separately gated owned SURFACE rotation without CAD
         shell: pwsh
         run: ./verify-owned-surface-rotation.ps1
@@ -81,6 +84,7 @@ jobs:
             evidence/surface-sampling-ci
             evidence/owned-surface-selection-ci
             evidence/owned-surface-translation-ci
+            evidence/surface-set-translation-ci
             evidence/owned-surface-rotation-ci
             evidence/owned-surface-scale-ci
             evidence/curve-layout-ci

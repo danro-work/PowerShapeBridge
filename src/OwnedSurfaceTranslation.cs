@@ -20,13 +20,17 @@ namespace PowerShapeBridge {
    return OwnedSurfaceSelection.Capture(o,expiry,selection,new Dictionary<string,object>{{"mode","select_surface_single"},{"entityKey",new[]{21,native}},{"grid",grid}});
   }
   internal static void Post(Dictionary<string,object> before,Dictionary<string,object> after,Dictionary<string,object> original,Dictionary<string,object> current,double[] delta){
+   PostTargets(before,after,original,current,delta,EntitySets.Keys(new[]{original["entityKey"]}));
+  }
+  internal static void PostTargets(Dictionary<string,object> before,Dictionary<string,object> after,Dictionary<string,object> original,Dictionary<string,object> current,double[] delta,int[][] targets){
    // SURFACE observation has non-positional properties (including raw area).
    // Reject any change rather than normalizing away unsupported new properties.
    Need(EntitySets.ObservedDigest(before)==EntitySets.ObservedDigest(after),"Surface translation changed observed non-positional properties/context.");
-   var normalized=Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(current));var key=original["entityKey"];
-   var oldRows=((IEnumerable)original["witnesses"]).Cast<Dictionary<string,object>>().ToArray();var newRows=((IEnumerable)normalized["witnesses"]).Cast<Dictionary<string,object>>().ToArray();Need(oldRows.Length==newRows.Length&&oldRows.Count(row=>OwnedSurfaceSelection.Same(row["entityKey"],key))==1,"Surface inventory/unique target witness count differs.");
+   var normalized=Program.Json.Deserialize<Dictionary<string,object>>(Program.Json.Serialize(current));
+   Need(targets!=null&&targets.Length>=1&&targets.Length<=8&&targets.All(k=>k!=null&&k.Length==2&&k[0]==21&&k[1]>0)&&targets.Select(k=>k[1]).Distinct().Count()==targets.Length,"Explicit distinct surface postcondition targets required.");
+   var oldRows=((IEnumerable)original["witnesses"]).Cast<Dictionary<string,object>>().ToArray();var newRows=((IEnumerable)normalized["witnesses"]).Cast<Dictionary<string,object>>().ToArray();Need(oldRows.Length==newRows.Length&&targets.All(k=>oldRows.Count(row=>OwnedSurfaceSelection.Same(row["entityKey"],k))==1),"Surface inventory/unique target witness count differs.");
    for(int row=0;row<oldRows.Length;row++){
-    if(!OwnedSurfaceSelection.Same(oldRows[row]["entityKey"],key))continue;
+    if(!targets.Any(k=>OwnedSurfaceSelection.Same(oldRows[row]["entityKey"],k)))continue;
     Need(OwnedSurfaceSelection.Same(oldRows[row]["entityKey"],newRows[row]["entityKey"]),"Surface target order differs.");var a=(Dictionary<string,object>)oldRows[row]["samples"];var b=(Dictionary<string,object>)newRows[row]["samples"];var oldPoints=((IEnumerable)a["positionsWorldRaw"]).Cast<object>().Select(Vector).ToArray();var newPoints=((IEnumerable)b["positionsWorldRaw"]).Cast<object>().Select(Vector).ToArray();Need(oldPoints.Length==newPoints.Length&&oldPoints.Length>=4,"Surface point witness shape differs.");
     for(int i=0;i<oldPoints.Length;i++)for(int axis=0;axis<3;axis++)Need(Math.Abs(newPoints[i][axis]-(oldPoints[i][axis]+delta[axis]))<=0.000001,"Surface position does not match declared WORLD translation.");b["positionsWorldRaw"]=a["positionsWorldRaw"];
    }

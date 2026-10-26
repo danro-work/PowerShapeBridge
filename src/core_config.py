@@ -47,6 +47,9 @@ def general_core(settings):
     surface_rotation = settings.get('ownedSurfaceRotationsExperimental', False)
     if type(surface_rotation) is not bool or surface_rotation and (profile != 'general-v1' or surface_samples is not True or settings.get('ownedRotationPlansExperimental') is not True):
         raise ValueError('Surface rotation requires owned rotation plans and sample flags')
+    surface_set_translation = settings.get('ownedSurfaceSetTranslationsExperimental', False)
+    if type(surface_set_translation) is not bool or surface_set_translation and (profile != 'general-v1' or settings.get('ownedSurfaceTranslationsExperimental') is not True or surface_samples is not True or settings.get('ownedTranslationsExperimental') is not True):
+        raise ValueError('Surface set translation requires strict singleton translation and sampling dependencies')
     surface_translation = settings.get('ownedSurfaceTranslationsExperimental', False)
     if type(surface_translation) is not bool or surface_translation and (profile != 'general-v1' or surface_samples is not True or settings.get('ownedTranslationsExperimental') is not True):
         raise ValueError('Surface translation requires strict owned translation and sample flags')
