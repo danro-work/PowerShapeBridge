@@ -1,3 +1,199 @@
+﻿# CURRENT: PR106 PUBLISHED; FIXTURE CLOCK ORDERING FIX VALIDATED
+
+PR106 https://github.com/danro-work/PowerShapeBridge/pull/106 is draft and attached,
+base codex/k8-curve-principal-rotation. Public source194e5013f468d52649c1100773a2a2952f2c2864
+contains completed curve scale/persistence. Its baseline121609825635/run40333795869
+FAILED in the synthetic stop-inspection control: post-stop freshness rejected.
+Initial SDK121609826100/run40333796089 was pending at last read. Preserve originalfailure;
+do not retry CAD or deploy. Superseded chatattachment105 was replaced by106 at the100
+metadata limit; GitHub PR105 was NOT changed, dependencyURL/base/oldCI remain retained.
+
+Test-only fix: fresh fake timestamps are at least one100ns tick after the last
+recorded receipt/event even on coarse Windows clocks. Production comparison and
+lease expiry are unchanged. Two explicit same-stop-tick negative cases reject;
+control accepts. Native6/actualFrameworkSDK9, recoveryNative5/actualFrameworkSDK9
+passed in new staging; independent timestamp/error audit passed. Exact original
+failing CI timestamps were not logged, so same-tick originalcause is inferred.
+InstalledNative64/stagedSDK70.1/ordinary48/config and savedCAD bytes unchanged.
+No deploy/CAD/extraOPEN/localfull1106 rerun. New CI after push must be read for its
+EXACT head through Codex app diagnostics. Do not cite old194 baseline as passing.
+
+Current owned curve result b2fa1380699f4087abcb02c1da54221a/model280013123,
+emptyWORLD/28windows. Persistence complete,1042nextpins; originalOPEN70d605be1cf84ab9bd84d2bf682482ca
+SHA in completed-block.json. All prior live/audit scripts TERMINAL. Source branch
+codex/k8-curve-scale-recovery; next type/set scope in current work/NEXT-K8-SETS-SCOPE.md.
+K8-K11 open; P0accepted, no human input pending. Foreign16 remain protected.
+
+# CURRENT: CURVE SCALE SAVED AND REOPENED; INDEPENDENT AUDITS COMPLETE
+
+Read current evidence/K8-curve-scale-persistence-20261026/completed-block.json.
+All scale, clear-recovery, SaveAs, finalization, OPEN and audit scripts are TERMINAL;
+never replay them or unchanged checks. One new SaveAs 6826ef3baec04baf8ec8c014698a5d42,
+SHA 6a85af04d97976f7c05ecf71e58f03344d6b5a3cebedc694a19cfc8129d4fce4, verifier e9e0011924ff4078a6f760287ab26c5c;
+seal a0aed80daef34c1ba6fef72ff3425ada; qualified finalization 58598096c3354975920517aadb2de335,
+verifier e7bebdfc7ddc4026968e7f442205fdaa; NEW generic OPEN 70d605be1cf84ab9bd84d2bf682482ca,
+SHA 43639656c92f241e5f70ec303e378a45e19bef10061481eeb83f0afcd5c7a75e, verifier 4e6ee32f9a444e1aaf3d240d17c1303b.
+
+Factor1.25 around WORLD[2,-3,4] preserved on four stages: all4 curve controls,
+8 tangent directions/magnitudes/16flags, original SOLID8pinned points/normals/
+COG/bounds/rawmetrics exact. Independent oracle[-20.75,1.25*originalX+2,
+-1.25*originalY-1], 1011pins/sixOSidentities/journals/claims/fences
+and other27windows passed;28->27->28. Only knownwriter serialization
+884736->864256bytes changed at sameidentity.
+Canonicalseed/checkpoint/newcopy retained 884736bytes.
+Raw oldSaveAs hash stays historical. Oldfailedscale/clear history unchanged.
+Nextpins 1042 in current protected-for-next-block.json; only knownwriter updated.
+
+Current owncopy b2fa1380699f4087abcb02c1da54221a, model280013123, Working_b2fa1380699f4087abcb02c1da54221a;
+SOLIDnative5/name1 +COMPCURVEnative2/name2, emptyWORLD/28windows.
+OriginalOPEN above is ownershiphistory, not a currenthandle. Fresh observations,
+ownership verification and binding required before next CAD. Ordinaryreadonly
+09b2bb3db52d4688af3b0148cdaf36e4 and listing9ec9ef4cdfd54ee88329794c1f77d074 confirmed.
+Native64/stagedSDK70.1 at D:\ChatGPT\PowerShapeBridge\PS_Bridge\work\K8-curve-scale-stop-recovery-20261026\sdk-expiry-fix\PowerShapeMcp.Host.dll, ordinarySDK48/config unchanged.
+No deploy/newtransform/selection/mouse in persistence. Full.NET1106/1106 fail0skip0
+and applicable targeted tests remain valid; no unchanged local rerun. Foreign16 exact.
+
+Publication pending on codex/k8-curve-scale-recovery, base codex/k8-curve-principal-rotation
+(PR105, bothCI alreadySUCCESS, do not repoll). Commit selected docs/state only;
+source checkpoint09278ed and docs6fd3ff2 already local. Push/draft/attach and
+exactheadCI through Codex app diagnostics; never commit CAD/work/evidence/runtime.
+If attachments full, preserve dependency URLs and unlink only superseded chatmetadata,
+not GitHub PR state. No merge/close required.
+
+Next work/K8-curve-scale-persistence-20261026/NEXT-K8-SETS-SCOPE.md: reconcile remaining
+K8 type/set matrix and review shared retained-context typed set lifecycle before
+one smallest owned two-target translation with unchanged control. Establish provider,
+partialfailure/unknown rules and targeted readiness before CAD. No newOPEN forleases,
+quota increase, unknownreplay, sourceedit ormouse. Do not omit POINT/open/trimmed/
+nonWORLDXY/fiveclass requirements. K8/K9/K10/K11 open; P0accepted, no userinputpending.
+Controls/samples do not prove full topology. Final v1 personal acceptance remains later.
+
+# CURRENT: NEW CURVE SCALE VERIFIED; SEPARATE PERSISTENCE PREPARED
+
+One NEW scale9886cf5f1c734e9cb83c27cb60dcf5f1/verifier88b3abb18f484e169719d0e920d11024
+and passive8eb38d784a094f0689cd6f58311af246 passed. Factor1.25 aroundWORLD[2,-3,4],
+fourpoints error1.78e-15mm, directions0error/magnitudesx1.25/16flags and original
+pinnedSOLID exact. Length80->100/areaRaw400->625; ranges[-20.75,-10.5,-13.5]–
+[-20.75,14.5,11.5]. 932pins/28windows unchanged,13phase/6journal/newclaim/fence audit
+passed. Ordinaryreadonly4ed5778cb994410eb46314809b1ef3d5 confirmed samecopy/emptyWORLD.
+Current owncopy75b1886a5f7740898ee8501c4b410179/model280013059, SOLID5+curve2.
+Geometry UNSAVED. No deployment/code/tests rerun; Native64/SDK70.1/ordinary48 and
+passed1106/1106 +applicable targeted checks stay valid. Oldfailedscale/clear history
+unchanged. All old live/audit scripts TERMINAL; never repeat scale or clear.
+
+Next NEW folder work/K8-curve-scale-persistence-20261026: save-and-seal-once.py
+then independent seal/OSaudit; prepare-finalization; one qualified ownwriter close/
+verifier, one genericOPEN/verifier and independent persistence/OS/control/SOLID audit.
+28->27->28, no newgeometry/deploy/selection/mouse/quota increase. Stage scripts are
+prepared, NOT yet run. Current998pins in freshscale/protected-for-next-block.json.
+P0accepted; K8-K11open; no userinputpending. Gitbranch codex/k8-curve-scale-recovery,
+HEAD6fd3ff230f1bf97fef587e724889c82ec6a1d44b, local only. Foreign16 unchanged.
+
+# CURRENT: CLEAR-ONLY RECOVERY COMPLETE; NEW SCALE INTENT NEXT
+
+Native0.64/stagedSDK0.70.1/ordinarySDK0.48. Current owncopy
+75b1886a5f7740898ee8501c4b410179/model280013059, SOLID5+curve2,
+emptyWORLD/28windows. ONE clear2c6a0b104b114ec28836213468084507 returned;
+separate verifiera6b4aeb0229c4ee9ab5b885a66210cee, normal passive reader
+28010301c9444ee1a0484ee81255fcbb and independent Python audit passed.
+Full ORIGINAL fourcontrols/eightdirections/eightmagnitudes/16flags/SOLID
+samples/normals/COG/bounds/rawmetrics EXACT. Original scale5d716bb798b64a90b2122d2869d1690c
+failure/claim/four-event unknown journal unchanged. Original fence archived,
+separate resolution recorded; recovery secondary then original fences released.
+No scale/SaveAs/OPEN/close/mouse. Do NOT rerun any previous live/clear scripts.
+
+Initial SDK70 rejected Native-preparation3df8899b749c4ced88198cdb6226b11b before
+clear due Z/+00:00 expiry encoding; original packet remains unclaimed. SDK70.1
+exact UTC tick comparison (no lease extension) passed actual original Native bytes
+and8targeted tests; NEW preparationc937206158524276a1caad09fc6bddf7 used for clear.
+Native64 runtime unchanged for this SDK fix, backup work/general-deployment-backup-20261026-101727.
+Ordinaryreadonlydb0505185aa0420ebe0c16202c9d0832 confirmed samecopy/emptyWORLD.
+
+Full.NET1106/1106 fail0skip0 completed after real recovery; no need rerun without
+new code/risk. Native5/FrameworkSDK9/gateSDK10/expirySDK8/Python29/readiness88/11
+passed. Source saved in local curve-scale-recovery checkpoint; foreign16STATUS exact.
+Exact current branch/head and next scale scenario are in the local state map.
+OldPR105CI bothSUCCESS are historical; do not repoll. New publication still pending.
+Use new SDK output folders; previous69.1 and current70.1 packages are protected.
+
+NEXT: original requested curve scale factor1.25 aroundWORLD[2,-3,4], NEW intent,
+fresh current ownership/binding/curve source, same owncopy, no newOPEN for leases.
+Reuse fixed13phase NOKEEP lifecycle, separate verifier, normal passive reader,
+independent affine/direction/magnitude/flag/range/length/area/SOLID/file/window/
+journal/phase audit. Original failed intent must remain consumed. Current runtime
+already contains correct Composite Curve guard; no deploy needed. Full1106 and
+applicable targeted checks stay valid without unchanged reruns. Scale persistence
+separate only after scale success. No mouse/quota increase/blind close. K8-K11open.
+
+Exact current evidence/pins/reference: evidence/K8-curve-scale-stop-recovery-20261026/
+completed-block.json, protected-for-next-block-v2.json, current-reference-capture.json.
+Original successful OPEN is e1e21251d0ff4fbdbf76d58af6ca43ea; exactSHA in prior
+principal-persistence completed-block.json. Fresh ownership verification is required;
+historical handles are never current authority. P0accepted; no user action pending.
+
+# CURRENT: PASSIVE PHASE0 STOP DIAGNOSIS COMPLETE; EXPLICIT CLEAR RECOVERY NEXT
+
+Native0.63.2/stagedSDK0.69.1/ordinarySDK0.48. Current owncopy
+75b1886a5f7740898ee8501c4b410179/model280013059, SOLID5+curve2,
+curve selected inWORLD/28windows. Original scale5d716bb798b64a90b2122d2869d1690c
+remains outcome_unknown with original claim/fence/four events unchanged.
+Only phase0SELECT returned; no EDIT SCALE/APPLY/cleanup/scale replay.
+Guard mapping COMPCURVE -> actual "Composite Curve" is fixed and installed.
+
+Installed Autodesk2023 IPshapeModelDoc.htm/GetCompCurvePointData explicitly
+disallows nonempty selection. First selected-control observer failed;0.63.1
+exposed nested getter refusal. Both failed raw receipts preserved. Do NOT
+try another selected control getter or weaken empty-only public readers.
+
+NEW passive pending-controls observer8d2e8ea39a1f4e96919aac515941eb6e succeeded
+through SDK and independent Python audit: direct selected composite/type/name/
+level positively verified twice; only phase0 and14originalproofs/863pins/28windows
+unchanged. Ordinaryreadonlyac4200d17b7d4d15996b350d3af2ebb0 confirmed samecopy/
+selection. Current full controls NOT read: fullControlProofAvailable=false,
+mutationAuthorityGranted=false, no original outcome resolution/fence release.
+Profile owned_curve_scale_phase0_stop_pending_controls_v1. No CAD commands.
+
+Targeted4Native/9FrameworkSDK/16SDK/28Python, readiness85full11readonly,
+legacyempty10 passed. PostCAD4+9 and legacycurveScale37+14 passed with mock
+selected getter denial matching Autodesk. Fullnew.NET not run while scale still
+unqualified; previous1088 is historical. Source changed only through current
+scale/observer work; foreign16STATUS exact. Current source UNCOMMITTED on
+codex/k8-curve-principal-rotation@39b0ab1; PR105 historicalCI bothSUCCESS,
+do not repoll. No newPR/merge/close. Current observer SDK folder now69.1:
+publish future SDK to a NEW folder, preserve current package pinned for evidence.
+
+Next follow work/K8-curve-scale-stop-20261026/NEXT-RECOVERY-SCOPE.md:
+separately prepare ONE narrowly bound clear-selection recovery, fresh selected
+identity/ownership/proofs; one clear callback with ownclaim/journal while original
+fence stays. Then fresh emptyWORLD and complete ORIGINAL curve/SOLID controls
+through normal reader, independent verifier/audit. Only then matching fence may
+release with separate immutable resolution; original failed scale/history/claim
+never rewritten. No blind clear/inverse/replay/lease extension/OPENforleases/quota
+increase/mouse. New scale afterwards requires a NEW intent, never oldlive rerun.
+P0 accepted, K8-K11 open, no pending user action or permission.
+
+Exact current evidence: evidence/K8-curve-scale-stop-20261026/block-result.json;
+new immutable pins in protected-for-next-block.json; original fence separate in
+original-fence-requires-qualified-recovery.json (never delete manually).
+All existing live/audit scripts TERMINAL; no repeated unchanged tests/CAD.
+
+# CURRENT: curve scale stopped after phase0 selection; do not replay or clear
+
+Сначала work/P0-local-state-20261017.md и work/K8-curve-scale-20261026/WIP.md.
+Один execute5d716bb798b64a90b2122d2869d1690c: только SELECT phase0 returned,
+phase1 EDIT SCALE/APPLY не подавались. Native62/staged68/ordinary48.
+Guard ожидал COMPCURVE, реальное имя типа выделения "Composite Curve".
+Исходный outcome_unknown/claim/fence сохранены. Owncopy75b1886a5f7740898ee8501c4b410179,
+model280013059, curve2 выделена вWORLD,28окон. Не повторять live-once.py,
+масштаб/SELECT/cleanup/inverse; не удалять fence вручную. Passive control-reader
+отказал из-за требования пустого выделения, полного poststop control-proof нет.
+Исходники0.62.1 исправляют только mapping native descriptor, ещё не установлены.
+Далее: целевая проверка guard, отдельный evidence-bound recovery этой остановки,
+свежий контекст и независимые доказательства перед новой CAD-операцией.
+Текущий scale source uncommitted; PR105@39b0ab1 CI обеSUCCESS исторические,
+не перепроверять. Новую полную регрессию не запускать вместо рабочего CAD.
+P0 принят; К8–К11 открыты, новых разрешений пользователя сейчас не требуется.
+
 # Приоритет: поворот Y−90 сохранён и проверен после открытия новой копии
 
 Сначала work/P0-local-state-20261017.md. Один NEW SaveAs/проверка → защищённые

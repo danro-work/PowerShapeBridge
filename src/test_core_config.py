@@ -11,6 +11,33 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_curve_scale_stop_recovery_has_strict_separate_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-scale-stop-recovery.json').read_text())
+        self.assertIs(settings['curveScaleStopRecoveryExperimental'], False)
+        enabled = {**settings, 'ownedCurveScalesExperimental': True, 'curveScaleStopInspectionExperimental': True, 'curveScaleStopRecoveryExperimental': True}
+        general_core(enabled)
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**enabled, 'curveScaleStopRecoveryExperimental': value})
+        for field in ('curveScaleStopInspectionExperimental', 'ownedSelectionsExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError): general_core({**enabled, field: False})
+
+    def test_curve_scale_stop_inspection_is_strict_and_separate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-scale-stop.json').read_text())
+        self.assertIs(settings['curveScaleStopInspectionExperimental'], False)
+        general_core({**settings, 'ownedCurveScalesExperimental': True, 'curveScaleStopInspectionExperimental': True})
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedCurveScalesExperimental': True, 'curveScaleStopInspectionExperimental': value})
+        with self.assertRaises(ValueError): general_core({**settings, 'curveScaleStopInspectionExperimental': True})
+
+    def test_curve_scale_requires_strict_separate_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-scales.json').read_text())
+        self.assertIs(settings['ownedCurveScalesExperimental'], False)
+        general_core({**settings, 'ownedCurveScalesExperimental': True})
+        for value in ('true', 1, None):
+            with self.subTest(value=value), self.assertRaises(ValueError): general_core({**settings, 'ownedCurveScalesExperimental': value})
+        for field in ('ownedUniformScalePlansExperimental', 'uniformScalePlansExperimental', 'operationPlansExperimental', 'curveWitnessesExperimental'):
+            with self.subTest(field=field), self.assertRaises(ValueError): general_core({**settings, 'ownedCurveScalesExperimental': True, field: False})
+
     def test_curve_rotation_has_strict_separate_gate(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-curve-rotations.json').read_text())
         self.assertIs(settings['ownedCurveRotationsExperimental'], False)
