@@ -65,4 +65,6 @@ byte proof passed before CAD; catalog88full/11readonly refused unknown handles
 before queue submission. Full regression/post-CAD results and exact artifact
 identities are in current project state. This qualification covers the exact
 returned phase0 stop, not broader interrupted scale/recovery cases required by
-K7/K10. The scale itself is still unqualified and requires a NEW scale intent.
+K7/K10. A subsequent [new scale intent](OWNED-CURVE-SCALE.md) passed its own
+execution, independent verifier and control/SOLID audit. That separate success
+does not change the original failed request or broaden this recovery contract.

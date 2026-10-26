@@ -1,4 +1,69 @@
-﻿# CURRENT: CLEAR-ONLY RECOVERY COMPLETE; NEW SCALE INTENT NEXT
+﻿# CURRENT: CURVE SCALE SAVED AND REOPENED; INDEPENDENT AUDITS COMPLETE
+
+Read current evidence/K8-curve-scale-persistence-20261026/completed-block.json.
+All scale, clear-recovery, SaveAs, finalization, OPEN and audit scripts are TERMINAL;
+never replay them or unchanged checks. One new SaveAs 6826ef3baec04baf8ec8c014698a5d42,
+SHA 6a85af04d97976f7c05ecf71e58f03344d6b5a3cebedc694a19cfc8129d4fce4, verifier e9e0011924ff4078a6f760287ab26c5c;
+seal a0aed80daef34c1ba6fef72ff3425ada; qualified finalization 58598096c3354975920517aadb2de335,
+verifier e7bebdfc7ddc4026968e7f442205fdaa; NEW generic OPEN 70d605be1cf84ab9bd84d2bf682482ca,
+SHA 43639656c92f241e5f70ec303e378a45e19bef10061481eeb83f0afcd5c7a75e, verifier 4e6ee32f9a444e1aaf3d240d17c1303b.
+
+Factor1.25 around WORLD[2,-3,4] preserved on four stages: all4 curve controls,
+8 tangent directions/magnitudes/16flags, original SOLID8pinned points/normals/
+COG/bounds/rawmetrics exact. Independent oracle[-20.75,1.25*originalX+2,
+-1.25*originalY-1], 1011pins/sixOSidentities/journals/claims/fences
+and other27windows passed;28->27->28. Only knownwriter serialization
+884736->864256bytes changed at sameidentity.
+Canonicalseed/checkpoint/newcopy retained 884736bytes.
+Raw oldSaveAs hash stays historical. Oldfailedscale/clear history unchanged.
+Nextpins 1042 in current protected-for-next-block.json; only knownwriter updated.
+
+Current owncopy b2fa1380699f4087abcb02c1da54221a, model280013123, Working_b2fa1380699f4087abcb02c1da54221a;
+SOLIDnative5/name1 +COMPCURVEnative2/name2, emptyWORLD/28windows.
+OriginalOPEN above is ownershiphistory, not a currenthandle. Fresh observations,
+ownership verification and binding required before next CAD. Ordinaryreadonly
+09b2bb3db52d4688af3b0148cdaf36e4 and listing9ec9ef4cdfd54ee88329794c1f77d074 confirmed.
+Native64/stagedSDK70.1 at D:\ChatGPT\PowerShapeBridge\PS_Bridge\work\K8-curve-scale-stop-recovery-20261026\sdk-expiry-fix\PowerShapeMcp.Host.dll, ordinarySDK48/config unchanged.
+No deploy/newtransform/selection/mouse in persistence. Full.NET1106/1106 fail0skip0
+and applicable targeted tests remain valid; no unchanged local rerun. Foreign16 exact.
+
+Publication pending on codex/k8-curve-scale-recovery, base codex/k8-curve-principal-rotation
+(PR105, bothCI alreadySUCCESS, do not repoll). Commit selected docs/state only;
+source checkpoint09278ed and docs6fd3ff2 already local. Push/draft/attach and
+exactheadCI through Codex app diagnostics; never commit CAD/work/evidence/runtime.
+If attachments full, preserve dependency URLs and unlink only superseded chatmetadata,
+not GitHub PR state. No merge/close required.
+
+Next work/K8-curve-scale-persistence-20261026/NEXT-K8-SETS-SCOPE.md: reconcile remaining
+K8 type/set matrix and review shared retained-context typed set lifecycle before
+one smallest owned two-target translation with unchanged control. Establish provider,
+partialfailure/unknown rules and targeted readiness before CAD. No newOPEN forleases,
+quota increase, unknownreplay, sourceedit ormouse. Do not omit POINT/open/trimmed/
+nonWORLDXY/fiveclass requirements. K8/K9/K10/K11 open; P0accepted, no userinputpending.
+Controls/samples do not prove full topology. Final v1 personal acceptance remains later.
+
+# CURRENT: NEW CURVE SCALE VERIFIED; SEPARATE PERSISTENCE PREPARED
+
+One NEW scale9886cf5f1c734e9cb83c27cb60dcf5f1/verifier88b3abb18f484e169719d0e920d11024
+and passive8eb38d784a094f0689cd6f58311af246 passed. Factor1.25 aroundWORLD[2,-3,4],
+fourpoints error1.78e-15mm, directions0error/magnitudesx1.25/16flags and original
+pinnedSOLID exact. Length80->100/areaRaw400->625; ranges[-20.75,-10.5,-13.5]–
+[-20.75,14.5,11.5]. 932pins/28windows unchanged,13phase/6journal/newclaim/fence audit
+passed. Ordinaryreadonly4ed5778cb994410eb46314809b1ef3d5 confirmed samecopy/emptyWORLD.
+Current owncopy75b1886a5f7740898ee8501c4b410179/model280013059, SOLID5+curve2.
+Geometry UNSAVED. No deployment/code/tests rerun; Native64/SDK70.1/ordinary48 and
+passed1106/1106 +applicable targeted checks stay valid. Oldfailedscale/clear history
+unchanged. All old live/audit scripts TERMINAL; never repeat scale or clear.
+
+Next NEW folder work/K8-curve-scale-persistence-20261026: save-and-seal-once.py
+then independent seal/OSaudit; prepare-finalization; one qualified ownwriter close/
+verifier, one genericOPEN/verifier and independent persistence/OS/control/SOLID audit.
+28->27->28, no newgeometry/deploy/selection/mouse/quota increase. Stage scripts are
+prepared, NOT yet run. Current998pins in freshscale/protected-for-next-block.json.
+P0accepted; K8-K11open; no userinputpending. Gitbranch codex/k8-curve-scale-recovery,
+HEAD6fd3ff230f1bf97fef587e724889c82ec6a1d44b, local only. Foreign16 unchanged.
+
+# CURRENT: CLEAR-ONLY RECOVERY COMPLETE; NEW SCALE INTENT NEXT
 
 Native0.64/stagedSDK0.70.1/ordinarySDK0.48. Current owncopy
 75b1886a5f7740898ee8501c4b410179/model280013059, SOLID5+curve2,
