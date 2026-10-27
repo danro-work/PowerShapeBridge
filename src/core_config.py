@@ -72,6 +72,9 @@ def general_core(settings):
     surface_rotation = settings.get('ownedSurfaceRotationsExperimental', False)
     if type(surface_rotation) is not bool or surface_rotation and (profile != 'general-v1' or surface_samples is not True or settings.get('ownedRotationPlansExperimental') is not True):
         raise ValueError('Surface rotation requires owned rotation plans and sample flags')
+    numerical = settings.get('ownedSurfaceSetNumericalExperimental', False)
+    if type(numerical) is not bool or numerical and (profile != 'general-v1' or settings.get('ownedSurfaceSetTranslationsExperimental') is not True):
+        raise ValueError('Numerical set requires strict set dependencies')
     surface_set_translation = settings.get('ownedSurfaceSetTranslationsExperimental', False)
     if type(surface_set_translation) is not bool or surface_set_translation and (profile != 'general-v1' or settings.get('ownedSurfaceTranslationsExperimental') is not True or surface_samples is not True or settings.get('ownedTranslationsExperimental') is not True):
         raise ValueError('Surface set translation requires strict singleton translation and sampling dependencies')
