@@ -1,4 +1,90 @@
-﻿# CURRENT: OWNED OPEN ACCESS QUALIFIED; STRICT V1 SET PARTIAL STOP DIAGNOSED
+﻿# CURRENT: PARTIAL-STOP OBSERVER QUALIFIED,1151/1151; DISPOSITION STILL NEXT
+
+Native68 installed (backupwork/general-deployment-backup-20261026-234418), staged
+SDK74.1/ordinary48. Branch codex/surface-set-partial-stop from633ee40; publication
+status in E/publication-*.json when present. PR109 BOTHCI SUCCESS; no repoll.
+E=evidence/surface-set-partial-stop-20261027. No user question, no mouse, P0accepted.
+
+Real observation08ef0dcdd00e4442ac262e47a30ef556 passed Native+SDK:144point
+samples in2retainedpasses,5exactnontargets, all layouts/flags exact,17original
+artifacts unchanged. Independent public getter8b597f8a2c954f768832aec745a8f0f1
+matched firsttarget arrays exactly. Independent Python byte/math audit1498pins/
+28windows passed; ordinaryreadonly confirmed mainown6SURFACE/emptyWORLD/Native68.
+No geometry/selection/activation/save/open/close, no authority or fence release.
+
+Originalsetd01e345e81fe4c60b31f944646e24470 remains UNKNOWN and fenced, first
+surface1 X+1, second2neverstarted. Owncopy8fb7cc6d628d4e7a8a762002638cf145 /
+model280012835 stays ACTIVE with28windows/emptyWORLD, UNSAVED. Both PowerShape
+instances preserved; main17304 exactpin. Never oldretry/inverse/step2continuation,
+manualfenceremoval, quota bypass or extra windows. New observer does NOT resolve
+oldoutcome and issues no copy/binding/edit handle. Disposition remains separate.
+
+First Native c72c024f982e4e2489ea4c3d837cd064 also qualified but SDK74 rejected
+max-error summary equality: Framework reported normal1.11e-16, SDK/Python2.22e-16.
+SDK74.1 keeps actual geometry checks unchanged and compares summary max scalars
+within8machineeps (position scaled), exact counts/policy. Original c72raw was
+revalidated OFFLINE; only a new passive live request after codefix, not CADretry.
+Native68 NOT redeployed for SDKfix. Old failedlive/fixtures preserved.
+
+Full.NET1151/1151 fail0skip0 passed AFTER realblock. Targeted13Native/11FrameworkSDK/
+9SDK/33Python, actual17history Native+SDK, STDIO92full/11readonly/91disabled/noqueue
+passed. First Nativefixture pathlong fixedshortstage; wrongclaimlookup corrected
+to original operationplans/opPlanId.execution-once.json. A premature --no-build
+checker produced stale8case output; only framework-sdk-v3-proofs.json11 is current.
+One live-v2 launch before readiness script finished found nofile and did nothing;
+readiness then terminal, actual live-v2 executed ONCE. Never rerun those scripts.
+All exec handles21413/95907/70464/28269 and others TERMINAL; no pending CAD action.
+
+NEXT read work/surface-set-partial-stop-20261027/NEXT-DISPOSITION-CONTRACT.md.
+Separate prepare/one-usearchive/independentverify must preserve oldunknown,
+claim/journal and exact fence bytes, recheck fresh all6context/files before a new
+CURRENT lease. Current Origin requires activefence: archived-history loading must
+be explicitly bound to qualified disposition, never a silent fallback. Only
+after that, NEW numerical-normal execution profile and NEW surfaces2then3
+WORLD[0,1,0] intent, with surface1X+1 exactnontarget. Persistence later. K8-K11OPEN.
+
+# CURRENT: PASSIVE PARTIAL-STOP OBSERVER REAL-QUALIFIED; FENCE/UNKNOWN RETAINED
+
+Read work/surface-set-partial-stop-20261027/CURRENT.md. Native68 installed with
+backupwork/general-deployment-backup-20261026-234418; stagedSDK74.1/ordinary48.
+Branch codex/surface-set-partial-stop from633ee40, uncommitted. PR109 bothCI
+SUCCESS, do not repoll. Both PowerShape instances preserved; main17304 exactpin.
+
+New live-v2 observation08ef0dcdd00e4442ac262e47a30ef556 SUCCEEDED through SDK74.1.
+Native read all6surfaces twice; independent public targetgetter
+8b597f8a2c954f768832aec745a8f0f1 matched exact arrays/layout/flags. Local independent
+audit passed144samples/5exactnontargets/17originalartifacts/1498pins/28windows.
+First-only X+1 error8.88e-16mm; Native normal-summary1.11e-16 vsSDK/Python2.22e-16.
+SDK74.1 validates geometry unchanged, diagnostic summary within8machineeps.
+No new geometry/activation/selection/save/open/close/mouse, no fence release,
+no edit/copy/binding lease and originalOutcomeResolved=false.
+
+Oldsetd01e345e81fe4c60b31f944646e24470 remains UNKNOWN/fenced, firstsurface1X+1,
+second2neverstarted; owncopy8fb7cc6d628d4e7a8a762002638cf145/model280012835 active,
+28windows emptyWORLD, UNSAVED. Do not retry/inverse/continue oldset or removefence.
+Separate qualified one-use disposition still required before any new geometry.
+
+First Native c72c024f982e4e2489ea4c3d837cd064 also succeeded; SDK74 rejected only
+max-error summary equality. Its immutable raw was revalidated OFFLINE by74.1,
+no Native replay; known codechange then new passive live-v2 qualified. Old
+live-once terminal failed, never rerun. Native68 NOT redeployed forSDK-onlyfix.
+
+Targeted13Native/11FrameworkSDK/9SDK/33Python/readiness92full11readonly91disabled
+noqueue passed. Originalactual17history checked Native+SDK. Firstfixtures longpath
+and wrongclaimpath failures preserved; fixed staging/lookup only. All original
+geometry/executor guards untouched. Full.NET currently running exec21413; WAIT
+same handle to terminal before claiming full pass. No other active exec handles.
+
+Evidence E=evidence/surface-set-partial-stop-20261027: live-v2/result.json,
+independent-live-audit.json, qualified-package-v2.json, original-live-proof-
+revalidated.json. Current protected-before-live-v2.json1498 includes activefence.
+Future matching-archive transition must be separately authorized/qualified and
+explicitly update only that fence mapping, never silently relax oldpins.
+No user action pending, P0accepted, K8-K11OPEN. Next bounded disposition contract
+follows original work/owned-open-access-restore-20261027/NEXT-SET-NUMERICAL-NORMALS-
+CONTRACT.md steps2-4; step1 now complete. No quota bypass or extra window.
+
+# CURRENT: OWNED OPEN ACCESS QUALIFIED; STRICT V1 SET PARTIAL STOP DIAGNOSED
 
 Source branch codex/owned-open-access-restore from2c934ef, uncommitted until
 current publication-*.json says otherwise. Installed Native67.1 / stagedSDK73 /
