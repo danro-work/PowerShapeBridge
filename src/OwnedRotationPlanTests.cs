@@ -11,8 +11,8 @@ namespace PowerShapeBridge {
   internal sealed class Fixture {
    internal readonly OwnedOperationPlanTests.Fixture Base;
    internal readonly string PlanId=Guid.NewGuid().ToString("N");internal readonly Dictionary<string,object> Plan,Args;
-   internal Fixture(bool mixed=false,bool surface=false,bool curve=false) {
-    Base=new OwnedOperationPlanTests.Fixture(true,true,surface,curve);
+   internal Fixture(bool mixed=false,bool surface=false,bool curve=false,bool surfaceSet=false) {
+    Base=new OwnedOperationPlanTests.Fixture(true,true,surface,curve,surfaceSet);
     var entry=(Dictionary<string,object>)((IList)Base.Plan["entitySets"])[0];
     if(mixed) {
      var set=Program.Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(Path.Combine(Base.Root,"entitysets",Base.SetId+".json")));set["entityKeys"]=new[]{new[]{40,5},new[]{21,8},new[]{59,10}};
