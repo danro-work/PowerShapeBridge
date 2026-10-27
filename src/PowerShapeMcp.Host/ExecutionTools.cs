@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Nodes;
@@ -41,9 +41,14 @@ public sealed class ExecutionTools(BridgeSession session)
     [Description("Independently verify the original SURFACE set execution: exact immutable target order, every authoritative step return/hash chain, fresh full target/non-target UV witnesses and matching main journal/fence. Partial or lost returns cannot become success from geometry alone. No CAD command, save, inverse or replay. Full only.")]
     public Task<CallToolResult> VerifyOwnedSurfaceSetTranslation([Description("Original native set execution request ID.")]string executionRequestId,[Description("Original raw set execution SHA256,64 lowercase hex.")]string executionReceiptSha256,[Description("Fresh post-return candidate document observation.")]string candidateDocumentHandle,[Description("Fresh one-use active document listing choice.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Run("verify_owned_surface_set_translation",new(){["executionRequestId"]=executionRequestId,["executionReceiptSha256"]=executionReceiptSha256,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
 
+    [McpServerTool(Name="execute_owned_surface_set_translation_numerical",ReadOnly=false,Destructive=true,Idempotent=false,OpenWorld=false),Description("NEW schema8 ordered SURFACE set translation in WORLD/mm. Frozen target-only normal component tolerance1e-12 raw and unit length tolerance1e-9; target sampled positions within1e-6mm. Non-target samples/normals/layouts/visibility exact. One-use NEW intent only; no old schema7 retry/continuation/inverse. Sequential callbacks stop immediately on unknown; fenced until separate verification. No selection/save; full-only default-off gate.")]
+    public Task<CallToolResult> ExecuteOwnedSurfaceSetNumerical([Description("Unconsumed NEW coupled owned-operation handle with2..8 explicit ordered SURFACEs.")]string ownedOperationHandle,[Description("Exact known UV grid for all surfaces; divisions1..4, no domain inference.")]System.Text.Json.JsonElement surfaceGrid,CancellationToken cancellationToken)=>Run("execute_owned_surface_set_translation_numerical",new(){["ownedOperationHandle"]=ownedOperationHandle,["surfaceGrid"]=JsonNode.Parse(surfaceGrid.GetRawText())},cancellationToken);
+    [McpServerTool(Name="verify_owned_surface_set_translation_numerical",ReadOnly=false,Destructive=false,Idempotent=false,OpenWorld=false),Description("Verify only the NEW schema8 numerical-normal SURFACE set: frozen policy, exact target order, complete authoritative per-step returns/hash chain, fresh all-surface witnesses/files/windows and matching fence. Reject schema7/partial/lost-return proofs. No CAD command, save, retry or full topology claim; full only.")]
+    public Task<CallToolResult> VerifyOwnedSurfaceSetNumerical([Description("Original NEW schema8 execution request ID.")]string executionRequestId,[Description("Exact immutable new receipt SHA256.")]string executionReceiptSha256,[Description("Fresh post-return candidate.")]string candidateDocumentHandle,[Description("Fresh one-use active listing choice.")]string activeDocumentHandle,CancellationToken cancellationToken)=>Run("verify_owned_surface_set_translation_numerical",new(){["executionRequestId"]=executionRequestId,["executionReceiptSha256"]=executionReceiptSha256,["candidateDocumentHandle"]=candidateDocumentHandle,["activeDocumentHandle"]=activeDocumentHandle},cancellationToken);
+
     internal async Task<CallToolResult> Run(string name,JsonObject args,CancellationToken cancellationToken)
     {
-        session.AssertToolAllowed(name);bool curveRotation=name.Contains("curve_rotation",StringComparison.Ordinal);bool curve=curveRotation||name.Contains("curve_translation",StringComparison.Ordinal);bool surfaceSet=name.Contains("surface_set_translation",StringComparison.Ordinal);bool surface=surfaceSet||name.Contains("surface_translation",StringComparison.Ordinal);bool translate=name is "execute_owned_surface_set_translation" or "execute_owned_translation" or "execute_owned_surface_translation" or "execute_owned_curve_translation" or "execute_owned_curve_rotation";var timer=Stopwatch.StartNew();var acquired=false;var submitted=false;string? request=null;
+        session.AssertToolAllowed(name);bool curveRotation=name.Contains("curve_rotation",StringComparison.Ordinal);bool curve=curveRotation||name.Contains("curve_translation",StringComparison.Ordinal);bool numerical=name.EndsWith("_numerical",StringComparison.Ordinal);bool surfaceSet=name.Contains("surface_set_translation",StringComparison.Ordinal);bool surface=surfaceSet||name.Contains("surface_translation",StringComparison.Ordinal);bool translate=name is "execute_owned_surface_set_translation_numerical" or "execute_owned_surface_set_translation" or "execute_owned_translation" or "execute_owned_surface_translation" or "execute_owned_curve_translation" or "execute_owned_curve_rotation";var timer=Stopwatch.StartNew();var acquired=false;var submitted=false;string? request=null;
         try
         {
             if(!await session.ReferenceGate.WaitAsync(session.Options.Timeout,cancellationToken))return DiagnosticTools.Result(Stopped("queue_timeout_before_submission"),true);
@@ -54,14 +59,14 @@ public sealed class ExecutionTools(BridgeSession session)
             {
                 "activate_document"=>session.Documents.Consume(Text(args,"documentHandle")),
                 "open_working_copy"=>OwnedExecutionProof.OpenParameters(args,session.Candidates,session.Copies,session.Documents),
-                "execute_owned_surface_set_translation"=>SurfaceSetParameters(session,args),
+                "execute_owned_surface_set_translation_numerical" or "execute_owned_surface_set_translation"=>SurfaceSetParameters(session,args),
                 "execute_owned_surface_translation"=>SurfaceParameters(session,args),
                 "execute_owned_curve_translation"=>CurveParameters(session,args),
                 "execute_owned_curve_rotation"=>CurveRotationParameters(session,args),
                 "execute_owned_translation"=>session.Owned.ValidationParameters(Text(args,"ownedOperationHandle")),
-                _=>OwnedExecutionProof.VerificationParameters(args,session.Candidates,session.Documents,name is "verify_owned_surface_set_translation" or "verify_owned_translation" or "verify_owned_surface_translation" or "verify_owned_curve_translation" or "verify_owned_curve_rotation")
+                _=>OwnedExecutionProof.VerificationParameters(args,session.Candidates,session.Documents,name is "verify_owned_surface_set_translation_numerical" or "verify_owned_surface_set_translation" or "verify_owned_translation" or "verify_owned_surface_translation" or "verify_owned_curve_translation" or "verify_owned_curve_rotation")
             };
-            if(surfaceSet&&!translate)SurfaceSetTranslationProof.Execution(session.Options.BridgeRoot,Text(args,"executionRequestId"),Text(args,"executionReceiptSha256"));
+            if(surfaceSet&&!translate)SurfaceSetTranslationProof.Execution(session.Options.BridgeRoot,Text(args,"executionRequestId"),Text(args,"executionReceiptSha256"),false,numerical);
             if(curve&&!translate)CurveTranslationProof.Execution(session.Options.BridgeRoot,Text(args,"executionRequestId"),Text(args,"executionReceiptSha256"),false,curveRotation);
             if(translate||name is "activate_document" or "open_working_copy")session.RevokeCadLeases(translate);
             submitted=true;
@@ -74,8 +79,8 @@ public sealed class ExecutionTools(BridgeSession session)
             {
                 switch(name)
                 {
-                    case "execute_owned_surface_set_translation":SurfaceSetTranslationProof.Receipt(session.Options.BridgeRoot,data,parameters);break;
-                    case "verify_owned_surface_set_translation":SurfaceSetTranslationProof.Verified(session.Options.BridgeRoot,data,parameters);break;
+                    case "execute_owned_surface_set_translation_numerical":case "execute_owned_surface_set_translation":SurfaceSetTranslationProof.Receipt(session.Options.BridgeRoot,data,parameters,numerical);break;
+                    case "verify_owned_surface_set_translation_numerical":case "verify_owned_surface_set_translation":SurfaceSetTranslationProof.Verified(session.Options.BridgeRoot,data,parameters,numerical);break;
                     case "execute_owned_curve_rotation":CurveTranslationProof.Receipt(session.Options.BridgeRoot,data,parameters,true);break;
                     case "verify_owned_curve_rotation":CurveTranslationProof.Verified(session.Options.BridgeRoot,data,parameters,true);break;
                     case "execute_owned_curve_translation":CurveTranslationProof.Receipt(session.Options.BridgeRoot,data,parameters);break;
@@ -127,7 +132,7 @@ public sealed class ExecutionTools(BridgeSession session)
     {
         var data=source?.DeepClone().AsObject()??new JsonObject();data["state"]=state;
         if(request is not null)data["bridgeRequestId"]=request;
-        data["geometryMutationAttempted"]=name is "execute_owned_surface_set_translation" or "execute_owned_translation" or "execute_owned_surface_translation" or "execute_owned_curve_translation" or "execute_owned_curve_rotation";data["contextChangeAttempted"]=name is "open_working_copy" or "activate_document";
+        data["geometryMutationAttempted"]=name is "execute_owned_surface_set_translation_numerical" or "execute_owned_surface_set_translation" or "execute_owned_translation" or "execute_owned_surface_translation" or "execute_owned_curve_translation" or "execute_owned_curve_rotation";data["contextChangeAttempted"]=name is "open_working_copy" or "activate_document";
         data["cadSaveAttempted"]=false;data["retryAllowed"]=false;data["localArtifactsMayExist"]=true;
         if(name=="activate_document")data["documentHandleConsumed"]=true;
         if(name.StartsWith("verify_",StringComparison.Ordinal))data["qualification"]="Journal append may be unknown; no CAD command was issued.";
@@ -143,13 +148,14 @@ public sealed class ExecutionTools(BridgeSession session)
     internal static void ValidateSurfaceGrid(JsonObject grid){SurfaceReadTools.Grid(grid);if(SurfaceReadTools.Integer(grid["tDivisions"])>4||SurfaceReadTools.Integer(grid["uDivisions"])>4)throw new ReferenceRejected("surface_translation_grid_invalid");}
     private static bool BeforeSubmission(string? state)=>state is "cancelled_before_submission" or "queue_timeout_before_submission" or "maintenance_before_submission" or "failed_before_submission";
     private static string Text(JsonObject args,string name)=>args[name]!.GetValue<string>();
-    private static readonly Dictionary<string,string> Success=new(){["execute_owned_surface_set_translation"]="owned_surface_set_translation_executed_unverified",["verify_owned_surface_set_translation"]="owned_surface_set_translation_verified_observed",["execute_owned_curve_rotation"]="owned_curve_rotation_executed_unverified",["verify_owned_curve_rotation"]="owned_curve_rotation_verified_observed",["execute_owned_curve_translation"]="owned_translation_executed_unverified",["verify_owned_curve_translation"]="owned_translation_verified_observed",["activate_document"]="document_active_verified",["open_working_copy"]="working_copy_opened_observed",["verify_working_copy_open"]="owned_open_verified_observed",["execute_owned_surface_translation"]="owned_translation_executed_unverified",["verify_owned_surface_translation"]="owned_translation_verified_observed",["execute_owned_translation"]="owned_translation_executed_unverified",["verify_owned_translation"]="owned_translation_verified_observed"};
+    private static readonly Dictionary<string,string> Success=new(){["execute_owned_surface_set_translation_numerical"]="owned_surface_set_translation_executed_unverified",["verify_owned_surface_set_translation_numerical"]="owned_surface_set_translation_verified_observed",["execute_owned_surface_set_translation"]="owned_surface_set_translation_executed_unverified",["verify_owned_surface_set_translation"]="owned_surface_set_translation_verified_observed",["execute_owned_curve_rotation"]="owned_curve_rotation_executed_unverified",["verify_owned_curve_rotation"]="owned_curve_rotation_verified_observed",["execute_owned_curve_translation"]="owned_translation_executed_unverified",["verify_owned_curve_translation"]="owned_translation_verified_observed",["activate_document"]="document_active_verified",["open_working_copy"]="working_copy_opened_observed",["verify_working_copy_open"]="owned_open_verified_observed",["execute_owned_surface_translation"]="owned_translation_executed_unverified",["verify_owned_surface_translation"]="owned_translation_verified_observed",["execute_owned_translation"]="owned_translation_executed_unverified",["verify_owned_translation"]="owned_translation_verified_observed"};
     public static McpServerTool[] Create(BridgeSession session)
     {
         var methods=new ExecutionTools(session);using var stream=typeof(ExecutionTools).Assembly.GetManifestResourceStream("execution-tools.json")!;
         var schemas=JsonNode.Parse(stream)!.AsArray().Select(t=>t!.AsObject()).ToDictionary(t=>t["name"]!.GetValue<string>());
         var surfaceExecute=schemas["execute_owned_translation"].DeepClone().AsObject();surfaceExecute["inputSchema"]!["properties"]!["surfaceGrid"]=SurfaceReadTools.GridSchema(4);surfaceExecute["inputSchema"]!["required"]!.AsArray().Add("surfaceGrid");schemas["execute_owned_surface_translation"]=surfaceExecute;schemas["verify_owned_surface_translation"]=schemas["verify_owned_translation"].DeepClone().AsObject();
         schemas["execute_owned_surface_set_translation"]=schemas["execute_owned_surface_translation"].DeepClone().AsObject();schemas["verify_owned_surface_set_translation"]=schemas["verify_owned_translation"].DeepClone().AsObject();
+        schemas["execute_owned_surface_set_translation_numerical"]=schemas["execute_owned_surface_set_translation"].DeepClone().AsObject();schemas["verify_owned_surface_set_translation_numerical"]=schemas["verify_owned_surface_set_translation"].DeepClone().AsObject();
         var result=new List<McpServerTool>();
         foreach(var method in typeof(ExecutionTools).GetMethods(BindingFlags.Instance|BindingFlags.Public).Where(m=>m.GetCustomAttribute<McpServerToolAttribute>() is not null))
         {
@@ -157,7 +163,7 @@ public sealed class ExecutionTools(BridgeSession session)
             var schema=schemas[name]["inputSchema"]!.DeepClone().AsObject();
             foreach(var parameter in method.GetParameters())
                 if(schema["properties"]?[parameter.Name!] is JsonObject property&&parameter.GetCustomAttribute<DescriptionAttribute>() is { } description)property["description"]=description.Description;
-            result.Add(new StrictTool(McpServerTool.Create(method,methods),session,schema,name is "execute_owned_surface_translation" or "execute_owned_surface_set_translation"?x=>ValidateSurfaceGrid(x["surfaceGrid"]!.AsObject()):null));
+            result.Add(new StrictTool(McpServerTool.Create(method,methods),session,schema,name is "execute_owned_surface_translation" or "execute_owned_surface_set_translation" or "execute_owned_surface_set_translation_numerical"?x=>ValidateSurfaceGrid(x["surfaceGrid"]!.AsObject()):null));
         }
         return result.ToArray();
     }

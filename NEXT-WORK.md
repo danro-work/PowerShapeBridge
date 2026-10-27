@@ -1,3 +1,13 @@
+# CURRENT: NEW NUMERIC SET REAL-QUALIFIED; PERSISTENCE NEXT
+
+Read work/surface-set-numerical-normals-20261027/CURRENT.md and next contract.
+Native70.1/stagedSDK76/ordinary48. New surfaces2then3 WORLD[0,1,0] independently
+verified afterdispatchflagfix; no geometryrepeat. All6public72points/normals
+zeroerror,4exactcontrols/28windows/1617pins.1171/1171 full.NET passed afterreal.
+Oldunknown/archive intact; geometryUNSAVED. Next separate SaveAs/seal/ownwriter-
+close/genericOPEN/checkpoint. No activeexec/userquestion; both processes kept,
+mainpin. PR111bothCI SUCCESS; newpublication inlocalmap. K8-K11OPEN.
+
 # CURRENT: DISPOSITION REAL-QUALIFIED; NEW NUMERICAL SURFACE SET NEXT
 
 Read work/surface-set-stop-disposition-20261027/CURRENT.md and its next contract.

@@ -38,6 +38,9 @@ jobs:
       - name: Check partial-set disposition without CAD
         shell: pwsh
         run: ./verify-surface-set-stop-disposition.ps1
+      - name: Check new numerical-normal set without CAD
+        shell: pwsh
+        run: ./verify-surface-set-numerical.ps1
       - name: Check owned selection lifecycle without CAD
         shell: pwsh
         run: ./verify-owned-selection.ps1
@@ -101,6 +104,7 @@ jobs:
             evidence/open-access-restore-ci
             evidence/surface-set-partial-stop-ci
             evidence/surface-set-stop-disposition-ci
+            evidence/surface-set-numerical-ci
             evidence/owned-surface-rotation-ci
             evidence/owned-surface-scale-ci
             evidence/curve-layout-ci

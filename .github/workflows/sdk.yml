@@ -51,6 +51,9 @@ jobs:
       - name: Verify actual Framework partial-set disposition proofs in SDK
         shell: pwsh
         run: ./verify-surface-set-stop-disposition.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\surface-set-stop-disposition')
+      - name: Verify new numerical-normal SURFACE set proofs in SDK
+        shell: pwsh
+        run: ./verify-surface-set-numerical.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\surface-set-numerical')
       - name: Verify actual Framework surface scale receipts in SDK
         shell: pwsh
         run: ./verify-owned-surface-scale.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\surface-scale')

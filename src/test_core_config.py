@@ -11,6 +11,16 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_numeric_normal_set_separate_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-set-numerical.json').read_text())
+        self.assertIs(settings['ownedSurfaceSetNumericalExperimental'], False)
+        deps = ('ownedSurfaceSetTranslationsExperimental', 'ownedSurfaceTranslationsExperimental', 'surfaceSamplingExperimental', 'ownedTranslationsExperimental', 'ownedOperationPlansExperimental', 'operationPlansExperimental', 'entitySetsExperimental', 'workingCopiesExperimental', 'documentBindingsExperimental')
+        enabled = {**settings, **{k: True for k in deps}, 'ownedSurfaceSetNumericalExperimental': True}
+        general_core(enabled)
+        for k in deps:
+            with self.subTest(dependency=k), self.assertRaises(ValueError): general_core({**enabled, k: False})
+        with self.assertRaises(ValueError): general_core({**enabled, 'ownedSurfaceSetNumericalExperimental': 'true'})
+
     def test_surface_set_disposition_gate(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-set-stop-disposition.json').read_text())
         self.assertIs(settings['surfaceSetStopDispositionExperimental'], False)
