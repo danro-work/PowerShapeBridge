@@ -14,6 +14,9 @@ FIXTURE_FIELDS = ('expectedProject', 'sourceStep', 'protectedProject',
 
 def general_core(settings):
     profile = settings.get('coreProfile')
+    stop = settings.get('surfaceSetStopInspectionExperimental', False)
+    if type(stop) is not bool or stop and (profile != 'general-v1' or any(settings.get(k) is not True for k in ('ownedSurfaceSetTranslationsExperimental', 'surfaceSamplingExperimental', 'ownedTranslationsExperimental', 'entitySetsExperimental', 'workingCopiesExperimental', 'documentBindingsExperimental'))):
+        raise ValueError('Partial set stop requires strict original set and passive dependencies')
     access = settings.get('ownedOpenAccessRestoreExperimental', False)
     if type(access) is not bool or access and (profile != 'general-v1' or any(settings.get(k) is not True for k in ('workingCopyOpenExperimental', 'workingCopiesExperimental', 'entitySetsExperimental', 'documentBindingsExperimental'))):
         raise ValueError('Owned OPEN current-access restore requires strict guarded dependencies')

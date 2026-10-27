@@ -11,6 +11,16 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_surface_set_partial_stop_has_separate_strict_boolean_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-set-partial-stop.json').read_text())
+        self.assertIs(settings['surfaceSetStopInspectionExperimental'], False)
+        dependencies = ('ownedSurfaceSetTranslationsExperimental', 'ownedSurfaceTranslationsExperimental', 'surfaceSamplingExperimental', 'ownedTranslationsExperimental', 'ownedOperationPlansExperimental', 'operationPlansExperimental', 'entitySetsExperimental', 'workingCopiesExperimental', 'documentBindingsExperimental')
+        enabled = {**settings, **{k: True for k in dependencies}, 'surfaceSetStopInspectionExperimental': True}
+        general_core(enabled)
+        for k in dependencies:
+            with self.subTest(dependency=k), self.assertRaises(ValueError): general_core({**enabled, k: False})
+        with self.assertRaises(ValueError): general_core({**enabled, 'surfaceSetStopInspectionExperimental': 'true'})
+
     def test_owned_open_access_restore_requires_explicit_boolean_and_guards(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-owned-open-access-restore.json').read_text())
         self.assertIs(settings['ownedOpenAccessRestoreExperimental'], False)

@@ -1,6 +1,9 @@
 using System.Text.Json.Nodes;
 using PowerShapeMcp;
 
+if(args.Length==4&&args[0]=="--surface-set-partial-stop-live-proof"){try{return SurfaceSetPartialStopCheck.LiveProof(args[1],args[2],args[3]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
+if(args.Length==5&&args[0]=="--surface-set-partial-stop-origin"){try{return SurfaceSetPartialStopCheck.Origin(args[1],args[2],args[3],args[4]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
+if(args.Length==3&&args[0]=="--surface-set-partial-stop"){try{return SurfaceSetPartialStopCheck.Run(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
 if(args.Length==3&&args[0]=="--open-access-history"){try{return OpenAccessHistoryCheck.Run(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
 if(args.Length==3&&args[0]=="--surface-set-translation"){try{return SurfaceSetTranslationCheck.Run(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
 if(args.Length==3&&args[0]=="--curve-scale-stop-recovery-preparation"){try{return CurveScaleStopRecoveryCheck.Preparation(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
