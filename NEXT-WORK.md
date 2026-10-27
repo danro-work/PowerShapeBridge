@@ -1,4 +1,13 @@
-﻿# CURRENT: PARTIAL-STOP OBSERVER QUALIFIED,1151/1151; DISPOSITION STILL NEXT
+# CURRENT: DISPOSITION REAL-QUALIFIED; NEW NUMERICAL SURFACE SET NEXT
+
+Read work/surface-set-stop-disposition-20261027/CURRENT.md and its next contract.
+Native69/stagedSDK75/ordinary48; oldunknown preserved, exactarchive retained,
+matching fences released only after separate qualified verification. All6public
+samples/72points and28windows unchanged. No CADcommands. Full.NET1162/1162 fail0skip0 passed after real block.15Native/11FrameworkSDK/11SDK/34Python passed.
+No user action pending; both PowerShape processes kept, main17304 exactpin.
+PR110 BOTHCI SUCCESS; new publication pending. K8-K11OPEN.
+
+# CURRENT: PARTIAL-STOP OBSERVER QUALIFIED,1151/1151; DISPOSITION STILL NEXT
 
 Native68 installed (backupwork/general-deployment-backup-20261026-234418), staged
 SDK74.1/ordinary48. Branch codex/surface-set-partial-stop from633ee40; publication

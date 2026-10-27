@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -18,6 +18,7 @@ namespace PowerShapeBridge {
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&Equals(a["recipeId"],NativeSurfaceSampling.Recipe)) {
    if(!c.IsGeneralCore||!c.surfaceSamplingExperimental||a.Count!=2||!a.ContainsKey("parameters")||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Passive surface sampling disabled or invalid envelope.");NativeSurfaceSampling.Validate((Dictionary<string,object>)a["parameters"]);return;
   }
+  if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&SurfaceSetStopDisposition.Recipes.Contains(a["recipeId"] as string)){if(!c.IsGeneralCore||!c.surfaceSetStopDispositionExperimental||a.Count!=2||!(a["parameters"] is Dictionary<string,object>))throw new ArgumentException("Partial set disposition disabled or malformed.");SurfaceSetStopDisposition.Validate((string)a["recipeId"],(Dictionary<string,object>)a["parameters"]);return;}
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&Equals(a["recipeId"],SurfaceSetPartialStop.Recipe)){if(!c.IsGeneralCore||!c.surfaceSetStopInspectionExperimental||a.Count!=2||!(a["parameters"]is Dictionary<string,object>))throw new ArgumentException("Partial set inspection disabled or malformed.");OwnedTranslation.ValidateVerification((Dictionary<string,object>)a["parameters"]);return;}
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&Equals(a["recipeId"],OwnedOpenAccessRestore.Recipe)){if(!c.IsGeneralCore||!c.ownedOpenAccessRestoreExperimental||a.Count!=2||!(a["parameters"]is Dictionary<string,object>))throw new ArgumentException("OPEN current-access restore disabled or malformed.");OwnedOpenAccessRestore.Validate((Dictionary<string,object>)a["parameters"]);return;}
   if(op=="recipe.prepare"&&a.ContainsKey("recipeId")&&Equals(a["recipeId"],OwnedScaleRestoration.Recipe)) {
@@ -164,6 +165,7 @@ namespace PowerShapeBridge {
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"prepare_owned_rotation"))return OwnedRotationPlans.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"prepare_owned_uniform_scale"))return OwnedUniformScalePlans.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"prepare_owned_dgk_export"))return OwnedDgkTargets.Prepare(Program.Root,id,(Dictionary<string,object>)readArgs["parameters"]);
+ if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&SurfaceSetStopDisposition.Recipes.Contains(readArgs["recipeId"] as string))return SurfaceSetStopDisposition.Run(id,(string)readArgs["recipeId"],(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],SurfaceSetPartialStop.Recipe))return SurfaceSetPartialStop.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],OwnedOpenAccessRestore.Recipe))return OwnedOpenAccessRestore.Run(id,(Dictionary<string,object>)readArgs["parameters"]);
  if(Equals(request["operation"],"recipe.prepare")&&readArgs.ContainsKey("recipeId")&&Equals(readArgs["recipeId"],"open_working_copy"))return WorkingCopyOpen.Run(id,(Dictionary<string,object>)readArgs["parameters"]);

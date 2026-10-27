@@ -1,10 +1,10 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace PowerShapeMcp;
 
 public sealed record HostOptions(string BridgeRoot, TimeSpan Timeout, bool ReadOnly)
 {
-    public const string Version = "0.74.1-dev";
+    public const string Version = "0.75.0-dev";
     public static HostOptions Parse(string[] args)
     {
         string? root = null;
@@ -84,6 +84,7 @@ public sealed record HostOptions(string BridgeRoot, TimeSpan Timeout, bool ReadO
             ["operationPlansExperimental"] = ["entitySetsExperimental"],
             ["workingCopiesExperimental"] = [],
             ["documentBindingsExperimental"] = ["workingCopiesExperimental", "entitySetsExperimental"],
+            ["surfaceSetStopDispositionExperimental"] = ["surfaceSetStopInspectionExperimental","ownedSurfaceSetTranslationsExperimental","surfaceSamplingExperimental","ownedTranslationsExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"],
             ["surfaceSetStopInspectionExperimental"] = ["ownedSurfaceSetTranslationsExperimental","surfaceSamplingExperimental","ownedTranslationsExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"],
             ["ownedOpenAccessRestoreExperimental"] = ["workingCopyOpenExperimental","workingCopiesExperimental","entitySetsExperimental","documentBindingsExperimental"],
             ["ownedOpenAdoptionExperimental"] = ["workingCopyOpenExperimental", "workingCopiesExperimental", "entitySetsExperimental", "documentBindingsExperimental"],

@@ -35,6 +35,9 @@ jobs:
       - name: Check passive first-returned SURFACE set-stop observation without CAD
         shell: pwsh
         run: ./verify-surface-set-partial-stop.ps1
+      - name: Check partial-set disposition without CAD
+        shell: pwsh
+        run: ./verify-surface-set-stop-disposition.ps1
       - name: Check owned selection lifecycle without CAD
         shell: pwsh
         run: ./verify-owned-selection.ps1
@@ -97,6 +100,7 @@ jobs:
             evidence/process-pin-ci
             evidence/open-access-restore-ci
             evidence/surface-set-partial-stop-ci
+            evidence/surface-set-stop-disposition-ci
             evidence/owned-surface-rotation-ci
             evidence/owned-surface-scale-ci
             evidence/curve-layout-ci
