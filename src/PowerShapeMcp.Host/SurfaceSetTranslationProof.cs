@@ -60,22 +60,26 @@ internal static class SurfaceSetTranslationProof
         {
             Need(Path.GetFileName(events[i])==$"{i:D6}.json");var bytes=FileArtifacts.ReadBytes(root,Path.Combine("operations",id,Path.GetFileName(events[i])),65536);var e=JsonNode.Parse(FileArtifacts.Parse(bytes).GetRawText())!.AsObject();Need(I(e["sequence"])==i&&S(e,"operationId")==id&&JsonNode.DeepEquals(e["planSha256"],raw["planSha256"])&&S(e,"state")==states[i]&&e["previousSha256"]?.GetValue<string>()==previous);previous=FileArtifacts.Sha256(bytes);if(i==3){Need(I(e["details"]!["returnCode"])==1&&I(e["details"]!["setStepCount"])==keys.Count);returned=e;}
         }
-        var proof=raw["stepProof"]!.AsObject();Need(ArtifactProof.Fields(proof,"schemaVersion","profile","operationId","planSha256","targetCount","completedSteps","phase","lastSha256","records")&&I(proof["schemaVersion"])==1&&S(proof,"profile")== (rotation?SurfaceSetRotationProof.Profile:numerical?NumericalProfile:Profile)&&S(proof,"operationId")==id&&JsonNode.DeepEquals(proof["planSha256"],raw["planSha256"])&&I(proof["targetCount"])==keys.Count&&I(proof["completedSteps"])==keys.Count&&S(proof,"phase")=="ready");
+        Steps(root,id,S(raw,"planSha256"),plan,before,raw["stepProof"]!.AsObject(),Time(returned!),returned!["details"]!["stepChainSha256"]!.GetValue<string>(),numerical,rotation);
+        var claim=JsonNode.Parse(FileArtifacts.ReadBytes(root,Path.Combine(rotation?"rotationplans":"operationplans",S(plan,rotation?"rotationPlanId":"operationPlanId")+".execution-once.json"),65536))!.AsObject();Need(S(claim,"operationId")==id&&JsonNode.DeepEquals(claim["planSha256"],raw["planSha256"])&&ArtifactProof.Boolean(claim["automaticReplayForbidden"],true));
+        if(!terminal){var fence=FileArtifacts.ReadBytes(root,Path.Combine("workingcopies",S(plan,"copyId"),"mutation-fence.json"),65536);Need(FileArtifacts.Sha256(fence)==S(raw,"executionFenceSha256"));}
+        return plan;
+    }
+    internal static void Steps(string root,string id,string planSha,JsonObject plan,JsonObject before,JsonObject proof,DateTimeOffset returnedUtc,string returnedChain,bool numerical=false,bool rotation=false)
+    {
+        var keys=Keys(plan);var composites=plan["targetCompositeIds"]!.AsArray();var capture=plan["captureBefore"]!.AsObject();var vector=rotation?new JsonArray(0,0,0):plan["vectorRaw"]!.AsArray();string? previous=null;Need(ArtifactProof.Fields(proof,"schemaVersion","profile","operationId","planSha256","targetCount","completedSteps","phase","lastSha256","records")&&I(proof["schemaVersion"])==1&&S(proof,"profile")== (rotation?SurfaceSetRotationProof.Profile:numerical?NumericalProfile:Profile)&&S(proof,"operationId")==id&&JsonNode.DeepEquals(proof["planSha256"],JsonValue.Create(planSha))&&I(proof["targetCount"])==keys.Count&&I(proof["completedSteps"])==keys.Count&&S(proof,"phase")=="ready");
         var rows=proof["records"]!.AsArray();Need(rows.Count==keys.Count);var stepFolder=FileArtifacts.FixedPath(root,"surfacesetsteps",id);Need(Directory.GetFiles(stepFolder).Length==keys.Count*3&&Directory.GetDirectories(stepFolder).Length==0);previous=null;var prior=LeaseTime.Parse(S(plan,"createdUtc"),"surface_set_time_invalid");
         for(int i=0;i<rows.Count;i++)
         {
             var row=rows[i]!.AsObject();Need(ArtifactProof.Fields(row,"index","startedSha256","returnedSha256","observedSha256")&&I(row["index"])==i);
             foreach(var kind in new[]{"started","returned","observed"})
             {
-                var e=Step(root,id,i,kind,S(row,kind+"Sha256"));Need(e.Count==(kind=="started"?9:kind=="returned"?10:11)&&I(e["schemaVersion"])==1&&S(e,"recordType")==kind&&S(e,"operationId")==id&&JsonNode.DeepEquals(e["planSha256"],raw["planSha256"])&&I(e["index"])==i&&JsonNode.DeepEquals(e["entityKey"],keys[i])&&JsonNode.DeepEquals(e["compositeId"],composites[i])&&e["previousSha256"]?.GetValue<string>()==previous&&Time(e)>=prior&&Time(e)<=Time(returned!));prior=Time(e);previous=S(row,kind+"Sha256");
+                var e=Step(root,id,i,kind,S(row,kind+"Sha256"));Need(e.Count==(kind=="started"?9:kind=="returned"?10:11)&&I(e["schemaVersion"])==1&&S(e,"recordType")==kind&&S(e,"operationId")==id&&JsonNode.DeepEquals(e["planSha256"],JsonValue.Create(planSha))&&I(e["index"])==i&&JsonNode.DeepEquals(e["entityKey"],keys[i])&&JsonNode.DeepEquals(e["compositeId"],composites[i])&&e["previousSha256"]?.GetValue<string>()==previous&&Time(e)>=prior&&Time(e)<=returnedUtc);prior=Time(e);previous=S(row,kind+"Sha256");
                 if(kind=="returned")Need(I(e["returnCode"])==1);
                 if(kind=="observed")Post(before,e["observation"]!.AsObject(),capture,e["capture"]!.AsObject(),vector,new JsonArray(keys.Take(i+1).Select(k=>k!.DeepClone()).ToArray()),numerical,rotation?plan:null);
             }
         }
-        Need(S(proof,"lastSha256")==previous&&returned!["details"]!["stepChainSha256"]!.GetValue<string>()==previous);
-        var claim=JsonNode.Parse(FileArtifacts.ReadBytes(root,Path.Combine(rotation?"rotationplans":"operationplans",S(plan,rotation?"rotationPlanId":"operationPlanId")+".execution-once.json"),65536))!.AsObject();Need(S(claim,"operationId")==id&&JsonNode.DeepEquals(claim["planSha256"],raw["planSha256"])&&ArtifactProof.Boolean(claim["automaticReplayForbidden"],true));
-        if(!terminal){var fence=FileArtifacts.ReadBytes(root,Path.Combine("workingcopies",S(plan,"copyId"),"mutation-fence.json"),65536);Need(FileArtifacts.Sha256(fence)==S(raw,"executionFenceSha256"));}
-        return plan;
+        Need(S(proof,"lastSha256")==previous&&returnedChain==previous);
     }
     internal static void Receipt(string root,JsonObject reply,JsonObject parameters,bool numerical=false,bool rotation=false)
     {

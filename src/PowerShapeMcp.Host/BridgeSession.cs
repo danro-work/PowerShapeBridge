@@ -86,7 +86,7 @@ public sealed class BridgeSession : IDisposable
             execution.Add("activate_document");
             foreach(var (flagName,names) in new[]{
                 ("surfaceSetStopDispositionExperimental",new[]{"prepare_surface_set_stop_disposition","execute_surface_set_stop_disposition","verify_surface_set_stop_disposition"}),
-                ("surfaceSetStopInspectionExperimental",new[]{"inspect_owned_surface_set_partial_stop"}),
+                ("returnedSurfaceSetObservationExperimental",new[]{"observe_returned_surface_set_rotation"}),("surfaceSetStopInspectionExperimental",new[]{"inspect_owned_surface_set_partial_stop"}),
                 ("ownedOpenAccessRestoreExperimental",new[]{"restore_verified_owned_open"}),
                 ("ownedOpenAdoptionExperimental",new[]{"adopt_owned_open_document","restore_owned_open_adoption"}),
                 ("ownedSavedResultRestoreExperimental",new[]{"restore_owned_saved_result"}),

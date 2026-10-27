@@ -1,3 +1,9 @@
+# CURRENT: RETURNED-SET SOURCE OBSERVER BEFORE RECONCILIATION
+
+UPDATE27Oct: observer REAL PASSED, Native73 installed/stagedSDK79.1/ordinary48. df61c4ac9cda40928f7dc0e2ffa5b656 retained2passes/all6 + independent72publicpoints/normals4exactcontrols/28windows,1867pins/31originaldependencies/28savedOPENbytes/18backuppairs passed. Originaltimeout/fence remains, noCADcommands. Full1199/1200 withFile.Replace accessrefusal; unchangedtarget outsideboundary1/1, failedTRXretained. FirstSDK79 schema refused beforeIPC, fixed79.1 with10targettests/STDIO. Finish publication then separate returned-set reconciliation per localCURRENT; NEVER replayrotation/OPEN/save/observer scripts. K5andK6 baseline COMPLETE, oldswitchwording markedhistorical. K8-K11OPEN.
+
+Read work/returned-surface-set-observation-20261027/CURRENT.md FIRST. Original timeout/fence stays. Native73/SDK79 source, runtime72 unchanged. Actual Native+SDK original-data parsers and targeted guards passed; clean package/readiness then early passive retained-context observation. Zero CAD commands/authority/fence release. Reconciliation remains separate, K8-K11OPEN.
+
 # CURRENT: RETURNED ROTATION SET TIMED OUT; PASSIVE GEOMETRY EXACT, FENCE RETAINED
 
 Read work/surface-set-rotation-20261027/CURRENT.md and NEXT-RETURNED-SET-CONTRACT.md FIRST. Original067fe24766c74729bd9b51e0797219fd timeout raw/4journal/6steps/claim/plan/fence immutable; two authoritative returns, all6public72points+normals exactly match,4controls/28windows unchanged. Need separately qualified returned-set reconciliation, no retry or synthetic original receipt. Native72/staged78/ordinary48. Full regression in progress; PR113bothCI SUCCESS. K8-K11OPEN; no user action.
