@@ -1,3 +1,11 @@
+# CURRENT: NUMERIC SET PERSISTENCE REAL-QUALIFIED; PUBLICATION THEN NEXT MATRIX
+
+Read work/surface-set-numerical-persistence-20261027/CURRENT.md FIRST. One SaveAs/seal/ordered ownclose/new genericOPEN and separate verifiers finished; all6grids/72points+normals exactly preserved across4stages. 1777pins. Native71/staged77/ordinary48, bothprocesses kept,28windows. Full1180/1181+unchanged old control2/2; originalfailedTRX retained, no greenfullclaim. No activeexec. Finish draft publication/CI, then next transform matrix contract. NEVER replay any completed CAD script. K8-K11 OPEN; no user action needed.
+
+# CURRENT: NUMERIC SET SAVED/VERIFIED/SEALED; ORDERED FINALIZATION NEXT
+
+Read work/surface-set-numerical-persistence-20261027/CURRENT.md FIRST. No repeat SaveAs/geometry/seal. Own Result window27/28; legacy close must not run. New ordered profile targeted checks passed; clean package readiness/deployment/one ownclose/independent verify/one genericOPEN/independent six-grid persistence proof next. Both PowerShape instances preserved. K8-K11 OPEN.
+
 # CURRENT: NEW NUMERIC SET REAL-QUALIFIED; PERSISTENCE NEXT
 
 Read work/surface-set-numerical-normals-20261027/CURRENT.md and next contract.

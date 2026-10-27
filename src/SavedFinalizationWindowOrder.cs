@@ -1,0 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+namespace PowerShapeBridge {
+ internal static class SavedFinalizationWindowOrder {
+  internal static Dictionary<string,object> Policy(){return new Dictionary<string,object>{{"schemaVersion",1},{"kind","remove_owned_target_preserve_survivor_order_v1"},{"windowNumbersMayReindex",true},{"nativeWindowIdsNotPersistent",true},{"logicalFieldsExact",new[]{"type","modelId","modelName","modelPath"}}};}
+  static void Need(bool ok,string why){if(!ok)throw new InvalidDataException(why);}
+  static string Key(Dictionary<string,object> w){return EntitySets.Canonical(new[]{"type","modelId","modelName","modelPath"}.ToDictionary(k=>k,k=>w[k]));}
+  internal static Dictionary<string,object>[] Rows(Dictionary<string,object> listing){var rows=WorkingCopyOpen.Windows(listing);Need(rows.Length>=1&&rows.Length<=32&&Equals(listing["windowCount"],rows.Length),"Bounded complete window inventory required.");foreach(var w in rows)Need(w.Count==7&&w["windowNumber"]is int&&(int)w["windowNumber"]>0&&w["nativeWindowId"]is int&&w["modelId"]is int&&w["type"]is string&&w["modelName"]is string&&w["modelPath"]is string&&w["selectedRaw"]is int&&new[]{0,1}.Contains((int)w["selectedRaw"]),"Strict single-model window fields required.");Need(rows.Select(w=>w["windowNumber"]).Distinct().Count()==rows.Length&&rows.Select(w=>w["nativeWindowId"]).Distinct().Count()==rows.Length&&rows.Select(w=>w["modelId"]).Distinct().Count()==rows.Length&&rows.Count(w=>Equals(w["selectedRaw"],1))==1,"Unique windows/models and one active view required.");var a=(Dictionary<string,object>)listing["activeWindow"];Need(rows.Count(w=>EntitySets.Canonical(w)==EntitySets.Canonical(a)&&Equals(w["selectedRaw"],1))==1,"Active window not an exact inventory row.");return rows.OrderBy(w=>(int)w["windowNumber"]).ToArray();}
+  internal static void Check(Dictionary<string,object> before,Dictionary<string,object> after,int target){foreach(string k in new[]{"processId","processStartedUtc","windowsSessionId"})Need(Equals(before[k],after[k]),"Close process/session changed.");var old=Rows(before);var now=Rows(after);Need(old.Length>=2&&now.Length==old.Length-1&&old.Count(w=>Equals(w["modelId"],target))==1&&!now.Any(w=>Equals(w["modelId"],target))&&Equals(((Dictionary<string,object>)before["activeWindow"])["modelId"],target),"Only the explicit active owned target may disappear.");var expected=old.Where(w=>!Equals(w["modelId"],target)).Select(Key).ToArray();Need(expected.SequenceEqual(now.Select(Key)),"Survivor model/path/name/type or relative order changed.");}
+ }
+}
