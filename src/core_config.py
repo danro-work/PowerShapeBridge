@@ -75,6 +75,9 @@ def general_core(settings):
     numerical = settings.get('ownedSurfaceSetNumericalExperimental', False)
     if type(numerical) is not bool or numerical and (profile != 'general-v1' or settings.get('ownedSurfaceSetTranslationsExperimental') is not True):
         raise ValueError('Numerical set requires strict set dependencies')
+    returned_set_observation = settings.get('returnedSurfaceSetObservationExperimental', False)
+    if type(returned_set_observation) is not bool or returned_set_observation and (profile != 'general-v1' or settings.get('ownedSurfaceSetRotationsExperimental') is not True or settings.get('ownedOpenAccessRestoreExperimental') is not True):
+        raise ValueError('Returned observation requires set rotation and successful OPEN history')
     surface_set_rotation = settings.get('ownedSurfaceSetRotationsExperimental', False)
     if type(surface_set_rotation) is not bool or surface_set_rotation and (profile != 'general-v1' or settings.get('ownedSurfaceSetTranslationsExperimental') is not True or settings.get('ownedSurfaceRotationsExperimental') is not True):
         raise ValueError('Set rotation requires strict ordered-set and rotation flags')

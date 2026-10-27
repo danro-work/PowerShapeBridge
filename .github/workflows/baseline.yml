@@ -44,6 +44,9 @@ jobs:
       - name: Check ordered SURFACE-set rotation without CAD
         shell: pwsh
         run: ./verify-surface-set-rotation.ps1
+      - name: Check passive returned SURFACE-set timeout observation without CAD
+        shell: pwsh
+        run: ./verify-returned-surface-set-observation.ps1
       - name: Check own saved Result ordered-window finalization without CAD
         shell: pwsh
         run: ./verify-saved-finalization-ordered.ps1

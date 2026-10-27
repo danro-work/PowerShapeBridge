@@ -405,4 +405,11 @@ class CoreConfiguration(unittest.TestCase):
         with self.assertRaises(ValueError): general_core(dict(valid, ownedSurfaceSetRotationsExperimental=True))
 
 
+    def test_returned_set_observer_gate(self):
+        valid = dict(self.settings, returnedSurfaceSetObservationExperimental=False)
+        general_core(valid)
+        for value in ('true', 1, None, True):
+            with self.assertRaises(ValueError): general_core(dict(valid, returnedSurfaceSetObservationExperimental=value))
+
+
 if __name__ == '__main__': unittest.main()
