@@ -112,6 +112,9 @@ def general_core(settings):
     result_close = settings.get('ownedSavedResultCloseExperimental', False)
     if type(result_close) is not bool or result_close and (profile != 'general-v1' or restore is not True or saves is not True or experimental is not True or copies is not True or bindings is not True):
         raise ValueError('Saved Result close requires current saved-result restoration and boolean dependencies')
+    ordered_finalize = settings.get('ownedSavedFinalizationOrderedExperimental', False)
+    if type(ordered_finalize) is not bool or ordered_finalize and (profile != 'general-v1' or settings.get('ownedSavedFinalizationExperimental') is not True):
+        raise ValueError('Ordered finalization requires original sealed finalization guards')
     finalize = settings.get('ownedSavedFinalizationExperimental', False)
     if type(finalize) is not bool or finalize and (profile != 'general-v1' or restore is not True or reopens is not True or saves is not True or experimental is not True or copies is not True or bindings is not True):
         raise ValueError('Saved finalization requires sealed saved reopen and current saved-result restoration')

@@ -53,6 +53,7 @@ namespace PowerShapeBridge
         public bool ownedSavedCopyCloseExperimental { get; set; }
         public bool ownedSavedResultCloseExperimental { get; set; }
         public bool ownedSavedFinalizationExperimental { get; set; }
+        public bool ownedSavedFinalizationOrderedExperimental { get; set; }
         public bool ownedSolidScaleRestoreExperimental { get; set; }
         public bool checkpointRecoveryExperimental { get; set; }
         public bool ownedRotationPlansExperimental { get; set; }
@@ -111,6 +112,7 @@ namespace PowerShapeBridge
             if(ownedSavedResultRestoreExperimental&&(!IsGeneralCore||!ownedSavedReopenExperimental||!entitySetsExperimental||!documentBindingsExperimental))throw new ArgumentException("Saved-result restoration requires guarded reopen, candidates and bindings.");
             if(ownedSolidScaleRestoreExperimental&&(!IsGeneralCore||!ownedSolidScalesExperimental||!ownedSavedReopenExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Scale restoration requires general qualified scale, saved reopen, candidates, copies and bindings.");
             if(ownedSavedResultCloseExperimental&&(!IsGeneralCore||!ownedSavedResultRestoreExperimental||!ownedSavesExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Saved Result close requires current saved-result restoration and general owned context.");
+            if(ownedSavedFinalizationOrderedExperimental&&(!IsGeneralCore||!ownedSavedFinalizationExperimental))throw new ArgumentException("Ordered close requires original sealed finalization dependencies.");
             if(ownedSavedFinalizationExperimental&&(!IsGeneralCore||!ownedSavedResultRestoreExperimental||!ownedSavedReopenExperimental||!ownedSavesExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Saved Result close requires current saved-result restoration and general owned context.");
             if(ownedSavedCopyCloseExperimental&&(!IsGeneralCore||!ownedSavedReopenExperimental||!entitySetsExperimental||!workingCopiesExperimental||!documentBindingsExperimental))throw new ArgumentException("Saved-copy close requires guarded saved reopen, candidates, copies and bindings.");
             if(checkpointRecoveryExperimental&&(!IsGeneralCore||!workingCopiesExperimental))throw new ArgumentException("Checkpoint recovery requires general owned working copies.");
@@ -158,7 +160,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.70.1-dev";
+        public const string ReleaseVersion = "0.71.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -176,6 +178,7 @@ namespace PowerShapeBridge
                 if(!(enabled is bool))throw new ArgumentException("Saved Result close flag must be JSON boolean.");
                 if((bool)enabled)foreach(string flag in new[]{"ownedSavedResultRestoreExperimental","ownedSavesExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Saved Result close dependencies must be true JSON booleans.");}
             }
+            if(raw!=null&&raw.TryGetValue("ownedSavedFinalizationOrderedExperimental",out enabled)){if(!(enabled is bool)||(bool)enabled&&(!raw.ContainsKey("ownedSavedFinalizationExperimental")||!Equals(raw["ownedSavedFinalizationExperimental"],true)))throw new ArgumentException("Ordered close gate and dependency must be strict booleans.");}
             if(raw!=null&&raw.TryGetValue("ownedSavedFinalizationExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Saved Result close flag must be JSON boolean.");
                 if((bool)enabled)foreach(string flag in new[]{"ownedSavedReopenExperimental","ownedSavedResultRestoreExperimental","ownedSavesExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Saved Result close dependencies must be true JSON booleans.");}
@@ -392,6 +395,7 @@ namespace PowerShapeBridge
             if(args.Length==1&&args[0]=="--returned-rotation-test") {
                 try{Console.WriteLine(Json.Serialize(new{state="passed_returned_rotation_evidence",checks=ReturnedRotationEvidenceTests.Run(),cadCommands=0}));return 0;}catch(Exception e){Console.WriteLine(Json.Serialize(new{state="rejected_returned_rotation_evidence",error=e.ToString(),cadCommands=0}));return 3;}
             }
+            if(args.Length==1&&args[0]=="--saved-finalization-ordered-test"){try{SavedFinalizationWindowOrderTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--owned-saved-finalization-test") {
                 try{Console.WriteLine(Json.Serialize(new{state="passed_owned_saved_finalization_guards",checks=OwnedSavedFinalizationTests.Run(),cadCommands=0}));return 0;}catch(Exception e){Console.WriteLine(Json.Serialize(new{state="rejected_owned_saved_finalization_guards",error=e.ToString(),cadCommands=0}));return 3;}
             }

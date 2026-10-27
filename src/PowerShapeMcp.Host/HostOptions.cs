@@ -4,7 +4,7 @@ namespace PowerShapeMcp;
 
 public sealed record HostOptions(string BridgeRoot, TimeSpan Timeout, bool ReadOnly)
 {
-    public const string Version = "0.76.0-dev";
+    public const string Version = "0.77.0-dev";
     public static HostOptions Parse(string[] args)
     {
         string? root = null;
@@ -97,6 +97,7 @@ public sealed record HostOptions(string BridgeRoot, TimeSpan Timeout, bool ReadO
             ["ownedSavedReopenExperimental"] = ["ownedSavesExperimental", "workingCopyOpenExperimental"],
             ["ownedSavedResultRestoreExperimental"] = ["ownedSavedReopenExperimental","ownedSavesExperimental","ownedSaveTargetsExperimental","workingCopyOpenExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"],
             ["ownedSolidScaleRestoreExperimental"] = ["ownedSolidScalesExperimental","ownedSavedReopenExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"],
+            ["ownedSavedFinalizationOrderedExperimental"] = ["ownedSavedFinalizationExperimental","ownedSavedReopenExperimental","ownedSavedResultRestoreExperimental","workingCopiesExperimental"],
             ["ownedSavedFinalizationExperimental"] = ["ownedSavedReopenExperimental","ownedSavedResultRestoreExperimental","ownedSavesExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"],
             ["ownedSavedResultCloseExperimental"] = ["ownedSavedResultRestoreExperimental","ownedSavesExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"],
             ["ownedSavedCopyCloseExperimental"] = ["ownedSavedReopenExperimental","ownedSavesExperimental","ownedSaveTargetsExperimental","workingCopyOpenExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"]
