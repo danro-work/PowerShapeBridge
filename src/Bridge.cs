@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -43,6 +43,7 @@ namespace PowerShapeBridge
         public bool ownedOpenAdoptionExperimental { get; set; }
         public bool ownedOpenAccessRestoreExperimental { get; set; }
         public bool surfaceSetStopInspectionExperimental { get; set; }
+        public bool surfaceSetStopDispositionExperimental { get; set; }
         public bool ownedOperationPlansExperimental { get; set; }
         public bool ownedTranslationsExperimental { get; set; }
         public bool ownedSaveTargetsExperimental { get; set; }
@@ -97,6 +98,7 @@ namespace PowerShapeBridge
             if(workingCopiesExperimental&&!IsGeneralCore)throw new ArgumentException("Working copies require general core.");
             if(documentBindingsExperimental&&(!IsGeneralCore||!workingCopiesExperimental||!entitySetsExperimental))throw new ArgumentException("Document bindings require general core, working copies and entity candidates.");
             if(surfaceSetStopInspectionExperimental&&(!IsGeneralCore||!ownedSurfaceSetTranslationsExperimental||!surfaceSamplingExperimental))throw new ArgumentException("Partial set stop requires original set and passive sampling.");
+            if(surfaceSetStopDispositionExperimental&&(!IsGeneralCore||!surfaceSetStopInspectionExperimental))throw new ArgumentException("Partial set disposition requires the qualified passive observer.");
             if(ownedOpenAccessRestoreExperimental&&(!IsGeneralCore||!workingCopyOpenExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned current-access restore requires guarded OPEN and bindings.");
             if(ownedOpenAdoptionExperimental&&(!IsGeneralCore||!workingCopyOpenExperimental))throw new ArgumentException("Owned OPEN adoption requires the guarded owned OPEN route.");
             if(workingCopyOpenExperimental&&(!IsGeneralCore||!workingCopiesExperimental||!entitySetsExperimental||!documentBindingsExperimental))throw new ArgumentException("Owned open requires general core, working copies, candidates and bindings.");
@@ -154,7 +156,7 @@ namespace PowerShapeBridge
 
     public static class Program
     {
-        public const string ReleaseVersion = "0.68.0-dev";
+        public const string ReleaseVersion = "0.69.0-dev";
         public static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 16000000 };
         public static string Root { get { return AppDomain.CurrentDomain.BaseDirectory; } }
         public static Config ReadConfig()
@@ -186,6 +188,7 @@ namespace PowerShapeBridge
                 if((bool)enabled)foreach(string flag in new[]{"ownedSavedReopenExperimental","ownedSavesExperimental","ownedSaveTargetsExperimental","workingCopyOpenExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}) {object value;if(!raw.TryGetValue(flag,out value)||!(value is bool)||!(bool)value)throw new ArgumentException("Saved-result restoration dependencies must be true JSON booleans.");}
             }
             if(raw!=null&&raw.TryGetValue("surfaceSetStopInspectionExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Partial set stop flag must be boolean.");if((bool)enabled)foreach(string key in new[]{"ownedSurfaceSetTranslationsExperimental","surfaceSamplingExperimental","ownedTranslationsExperimental","entitySetsExperimental","workingCopiesExperimental","documentBindingsExperimental"}){object v;if(!raw.TryGetValue(key,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("Partial set stop requires strict dependencies.");}}
+            if(raw!=null&&raw.TryGetValue("surfaceSetStopDispositionExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("Partial disposition flag must be boolean.");if((bool)enabled&&(!raw.ContainsKey("surfaceSetStopInspectionExperimental")||!Equals(raw["surfaceSetStopInspectionExperimental"],true)))throw new ArgumentException("Partial disposition requires explicit passive observer dependency.");}
             if(raw!=null&&raw.TryGetValue("ownedOpenAccessRestoreExperimental",out enabled)){if(!(enabled is bool))throw new ArgumentException("OPEN current-access restore flag must be boolean.");if((bool)enabled)foreach(string key in new[]{"workingCopyOpenExperimental","workingCopiesExperimental","entitySetsExperimental","documentBindingsExperimental"}){object v;if(!raw.TryGetValue(key,out v)||!(v is bool)||!(bool)v)throw new ArgumentException("OPEN current-access restore dependencies must be true booleans.");}}
             if(raw!=null&&raw.TryGetValue("ownedOpenAdoptionExperimental",out enabled)) {
                 if(!(enabled is bool))throw new ArgumentException("Owned OPEN adoption flag must be JSON boolean.");
@@ -421,6 +424,7 @@ namespace PowerShapeBridge
             if(args.Length==3&&args[0]=="--open-access-origin-check"){try{var c=ReadConfig();if(!c.IsGeneralCore||!c.ownedOpenAccessRestoreExperimental)throw new InvalidOperationException("Explicit general current-access restore configuration required.");var p=Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(args[2]));using(var held=new OwnedOperationPlans.Proofs()){var h=new OwnedOpenAccessRestore.Origin(OwnedCopies.LocalPath(args[1]),p,held);Console.WriteLine(Json.Serialize(new{state="original_successful_open_history_checked",copyId=h.Receipt["copyId"],journalEvents=h.JournalHashes.Count,cadConnectionAttempted=false,cadCommands=0}));}return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==4&&args[0]=="--surface-set-partial-stop-origin"){try{var c=ReadConfig();if(!c.IsGeneralCore||!c.surfaceSetStopInspectionExperimental)throw new InvalidOperationException("Explicit partial-stop inspection configuration required.");using(var held=new OwnedOperationPlans.Proofs()){var h=new SurfaceSetPartialStop.Origin(OwnedCopies.LocalPath(args[1]),args[2],args[3],held);Console.WriteLine(Json.Serialize(new{state="original_partial_set_history_checked",artifactCount=h.Pins.Count,copyId=h.Plan["copyId"],cadConnectionAttempted=false,cadCommands=0}));}return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--surface-set-partial-stop-test"){try{SurfaceSetPartialStopTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
+            if(args.Length==1&&args[0]=="--surface-set-stop-disposition-test"){try{SurfaceSetStopDispositionTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--open-access-restore-test"){try{OwnedOpenAccessRestoreTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--process-pin-test"){try{PowerShapeProcessPinTests.Run();return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}}
             if(args.Length==1&&args[0]=="--pinned-session-read"){object pinned=null;try{Config c=ReadConfig();if(!c.IsGeneralCore||c.powerShapeProcessPin==null)throw new InvalidOperationException("Explicit process pin required for this passive diagnostic.");pinned=DocumentSession.Attach(c);var listing=DocumentSession.ReadStable(pinned);var observation=Probe.ReadInContext(pinned,null);if(!Equals(observation["state"],"succeeded_verified"))throw new InvalidOperationException(Json.Serialize(observation));Console.WriteLine(Json.Serialize(new{state="pinned_session_and_active_model_read_only",processPin=c.powerShapeProcessPin,listing,observation,cadCommands=0,contextChanges=0}));return 0;}catch(Exception e){Console.Error.WriteLine(e);return 3;}finally{if(pinned!=null&&Marshal.IsComObject(pinned))Marshal.ReleaseComObject(pinned);}}

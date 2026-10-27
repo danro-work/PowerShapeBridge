@@ -1,4 +1,4 @@
-﻿"""General core configuration policy; legacy fixture profile remains opt-in."""
+"""General core configuration policy; legacy fixture profile remains opt-in."""
 import datetime
 import ntpath
 import re
@@ -14,6 +14,9 @@ FIXTURE_FIELDS = ('expectedProject', 'sourceStep', 'protectedProject',
 
 def general_core(settings):
     profile = settings.get('coreProfile')
+    disposition = settings.get('surfaceSetStopDispositionExperimental', False)
+    if type(disposition) is not bool or disposition and (profile != 'general-v1' or settings.get('surfaceSetStopInspectionExperimental') is not True):
+        raise ValueError('Partial disposition requires explicit passive observer dependency')
     stop = settings.get('surfaceSetStopInspectionExperimental', False)
     if type(stop) is not bool or stop and (profile != 'general-v1' or any(settings.get(k) is not True for k in ('ownedSurfaceSetTranslationsExperimental', 'surfaceSamplingExperimental', 'ownedTranslationsExperimental', 'entitySetsExperimental', 'workingCopiesExperimental', 'documentBindingsExperimental'))):
         raise ValueError('Partial set stop requires strict original set and passive dependencies')

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 using ModelContextProtocol.Protocol;
@@ -11,7 +11,8 @@ internal static class SurfaceSetPartialStopProof
  static string S(JsonObject v,string k)=>ArtifactProof.String(v,k,"surface_set_partial_stop_proof_invalid");
  static int I(JsonNode? v)=>SurfaceReadTools.Integer(v);static double N(JsonNode? v)=>SurfaceReadTools.Number(v);
  internal sealed record History(JsonObject Receipt,JsonObject Plan,JsonObject Source,JsonObject Pins);
- internal static History Origin(string root,string id,string sha)
+ internal sealed record ArchivedFence(string OriginalId,string CopyId,string Sha256);
+ internal static History Origin(string root,string id,string sha,ArchivedFence? archived=null)
  {
   var pins=new JsonObject();JsonObject Load(string folder,string token,string? expected=null,int limit=16000000){Need(FileArtifacts.Token(token));string relative=Path.Combine(folder,token+".json"),path=FileArtifacts.FixedPath(root,folder,token+".json");var bytes=FileArtifacts.ReadBytes(root,relative,limit);string h=FileArtifacts.Sha256(bytes);Need(expected is null||FileArtifacts.Token(expected,64)&&h==expected);pins[path]=h;return JsonNode.Parse(FileArtifacts.Parse(bytes).GetRawText())!.AsObject();}
   JsonObject LoadFile(string relative,string? expected=null){var bytes=FileArtifacts.ReadBytes(root,relative,16000000);string h=FileArtifacts.Sha256(bytes);Need(expected is null||FileArtifacts.Token(expected,64)&&h==expected);pins[FileArtifacts.FixedPath(root,relative)]=h;return JsonNode.Parse(FileArtifacts.Parse(bytes).GetRawText())!.AsObject();}
@@ -31,7 +32,7 @@ internal static class SurfaceSetPartialStopProof
   for(int i=0;i<4;i++){string name=$"{i:D6}.json";var e=LoadFile(Path.Combine("operations",id,name));Need(e.Count==8&&I(e["schemaVersion"])==1&&S(e,"operationId")==id&&S(e,"planSha256")==S(receipt,"planSha256")&&I(e["sequence"])==i&&e["previousSha256"]?.GetValue<string>()==previous&&S(e,"state")==states[i]);var next=LeaseTime.Parse(S(e,"timestampUtc"),"partial_stop_time_invalid");Need(next>=time);time=next;previous=pins[FileArtifacts.FixedPath(root,"operations",id,name)]!.GetValue<string>();}
   Need(LeaseTime.Parse(S(start,"timestampUtc"),"partial_stop_time_invalid")<=LeaseTime.Parse(S(ret,"timestampUtc"),"partial_stop_time_invalid")&&LeaseTime.Parse(S(ret,"timestampUtc"),"partial_stop_time_invalid")<=time&&time<=LeaseTime.Parse(S(receipt,"timestampUtc"),"partial_stop_time_invalid"));
   var claim=LoadFile(Path.Combine("operationplans",S(plan,"operationPlanId")+".execution-once.json"));Need(claim.Count==5&&S(claim,"operationId")==id&&S(claim,"planSha256")==S(receipt,"planSha256")&&JsonNode.DeepEquals(claim["ownedOperationId"],plan["ownedOperationId"])&&JsonNode.DeepEquals(claim["copyId"],plan["copyId"])&&ArtifactProof.Boolean(claim["automaticReplayForbidden"],true));
-  Need(FileArtifacts.Token(S(plan,"copyId"))&&FileArtifacts.Token(S(plan,"ownershipSha256"),64));var fence=LoadFile(Path.Combine("workingcopies",S(plan,"copyId"),"mutation-fence.json"),S(receipt,"executionFenceSha256"));Need(fence.Count==6&&I(fence["schemaVersion"])==1&&S(fence,"operationId")==id&&S(fence,"planSha256")==S(receipt,"planSha256")&&JsonNode.DeepEquals(fence["copyId"],plan["copyId"])&&JsonNode.DeepEquals(fence["ownershipSha256"],plan["ownershipSha256"])&&ArtifactProof.Boolean(fence["automaticReplayForbidden"],true));
+  Need(FileArtifacts.Token(S(plan,"copyId"))&&FileArtifacts.Token(S(plan,"ownershipSha256"),64));if(archived is not null)Need(archived.OriginalId==id&&archived.CopyId==S(plan,"copyId")&&archived.Sha256==S(receipt,"executionFenceSha256"));var fence=LoadFile(archived is null?Path.Combine("workingcopies",S(plan,"copyId"),"mutation-fence.json"):Path.Combine("surfacesetstoparchives",id+".json"),S(receipt,"executionFenceSha256"));Need(fence.Count==6&&I(fence["schemaVersion"])==1&&S(fence,"operationId")==id&&S(fence,"planSha256")==S(receipt,"planSha256")&&JsonNode.DeepEquals(fence["copyId"],plan["copyId"])&&JsonNode.DeepEquals(fence["ownershipSha256"],plan["ownershipSha256"])&&ArtifactProof.Boolean(fence["automaticReplayForbidden"],true));
   return new(receipt,plan,source,pins);
  }
  internal static JsonObject Compare(JsonObject source,JsonObject current,JsonObject original,JsonObject actual,JsonArray first,JsonArray vector)

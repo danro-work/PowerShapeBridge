@@ -11,6 +11,16 @@ from test_entity_references import snapshot
 
 
 class CoreConfiguration(unittest.TestCase):
+    def test_surface_set_disposition_gate(self):
+        settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-set-stop-disposition.json').read_text())
+        self.assertIs(settings['surfaceSetStopDispositionExperimental'], False)
+        dependencies = ('surfaceSetStopInspectionExperimental', 'ownedSurfaceSetTranslationsExperimental', 'ownedSurfaceTranslationsExperimental', 'surfaceSamplingExperimental', 'ownedTranslationsExperimental', 'ownedOperationPlansExperimental', 'operationPlansExperimental', 'entitySetsExperimental', 'workingCopiesExperimental', 'documentBindingsExperimental')
+        enabled = {**settings, **{k: True for k in dependencies}, 'surfaceSetStopDispositionExperimental': True}
+        general_core(enabled)
+        for k in dependencies:
+            with self.subTest(dependency=k), self.assertRaises(ValueError): general_core({**enabled, k: False})
+        with self.assertRaises(ValueError): general_core({**enabled, 'surfaceSetStopDispositionExperimental': 'true'})
+
     def test_surface_set_partial_stop_has_separate_strict_boolean_gate(self):
         settings = json.loads((Path(__file__).parents[1] / 'config/general-surface-set-partial-stop.json').read_text())
         self.assertIs(settings['surfaceSetStopInspectionExperimental'], False)

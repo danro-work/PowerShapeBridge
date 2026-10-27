@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Nodes;
+using System.Text.Json.Nodes;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 
@@ -85,6 +85,7 @@ public sealed class BridgeSession : IDisposable
         {
             execution.Add("activate_document");
             foreach(var (flagName,names) in new[]{
+                ("surfaceSetStopDispositionExperimental",new[]{"prepare_surface_set_stop_disposition","execute_surface_set_stop_disposition","verify_surface_set_stop_disposition"}),
                 ("surfaceSetStopInspectionExperimental",new[]{"inspect_owned_surface_set_partial_stop"}),
                 ("ownedOpenAccessRestoreExperimental",new[]{"restore_verified_owned_open"}),
                 ("ownedOpenAdoptionExperimental",new[]{"adopt_owned_open_document","restore_owned_open_adoption"}),
@@ -151,7 +152,7 @@ public sealed class BridgeSession : IDisposable
         OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();
         ScalePlans.Clear();
         OwnedScales.Clear();
-        SolidScales.Clear();SurfaceScales.Clear();CurveScales.Clear();CurveScaleStopRecoveries?.Clear();
+        SolidScales.Clear();SurfaceScales.Clear();CurveScales.Clear();CurveScaleStopRecoveries?.Clear();SurfaceSetStopDispositions?.Clear();
         DgkTargets.Clear();
         LevelMoves.ClearPrepared();
         Workplanes.ClearPrepared();
@@ -208,5 +209,6 @@ public sealed class BridgeSession : IDisposable
         return result;
     }
     internal CurveScaleStopRecoveryStore? CurveScaleStopRecoveries { get; set; }
-    public void Dispose(){CurveScaleStopRecoveries?.Clear();Selections.Clear();WorkplaneActivations.Clear();Workplanes.Clear();LevelMoves.Clear();DgkTargets.Clear();SolidScales.Clear();SurfaceScales.Clear();CurveScales.Clear();CurveScaleStopRecoveries?.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
+    internal SurfaceSetStopDispositionStore? SurfaceSetStopDispositions { get; set; }
+    public void Dispose(){CurveScaleStopRecoveries?.Clear();SurfaceSetStopDispositions?.Clear();Selections.Clear();WorkplaneActivations.Clear();Workplanes.Clear();LevelMoves.Clear();DgkTargets.Clear();SolidScales.Clear();SurfaceScales.Clear();CurveScales.Clear();CurveScaleStopRecoveries?.Clear();SurfaceSetStopDispositions?.Clear();OwnedScales.Clear();ScalePlans.Clear();OwnedRotations.Clear();SolidQuarterTurns.Clear();SolidRotations.Clear();RotationPlans.Clear();CheckpointRecoveries.Clear();Reopens.Clear();SavedResults.Clear();Ipc.Dispose();ReferenceGate.Dispose();}
 }

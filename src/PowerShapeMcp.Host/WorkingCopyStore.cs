@@ -94,6 +94,13 @@ public sealed class WorkingCopyStore(Func<double>? clock=null,Func<DateTimeOffse
         var time=LeaseTime.Remaining(ArtifactProof.String(result,"timestampUtc",code),utcNow(),code);var expiry=LeaseTime.Parse(ArtifactProof.String(result,"expiresUtc",code),code);var seconds=Math.Min(time.Remaining,(expiry-LeaseTime.PythonPrecision(utcNow())).TotalSeconds);
         if(seconds<=0||seconds>300)throw new ReferenceRejected(code);return IssueLease(result,seconds);
     }
+    internal JsonObject IssueDisposition(JsonObject result)
+    {
+        const string code="disposition_copy_lease_invalid";
+        if(result["state"]?.GetValue<string>()!="surface_set_stop_disposition_verified_observed"||result["profile"]?.GetValue<string>()!=SurfaceSetStopDispositionProof.Profile||!ArtifactProof.Boolean(result["nativeProviderQualified"],true)||!ArtifactProof.Boolean(result["copyFenceReleased"],true)||!ArtifactProof.Boolean(result["originalSetSucceeded"],false)||!ArtifactProof.Boolean(result["mutationAuthorityGranted"],false))throw new ReferenceRejected(code);
+        var time=LeaseTime.Remaining(ArtifactProof.String(result,"timestampUtc",code),utcNow(),code);var expiry=LeaseTime.Parse(ArtifactProof.String(result,"expiresUtc",code),code);var seconds=Math.Min(time.Remaining,(expiry-LeaseTime.PythonPrecision(utcNow())).TotalSeconds);
+        if(seconds<=0||seconds>300)throw new ReferenceRejected(code);return IssueLease(result,seconds);
+    }
     private JsonObject IssueLease(JsonObject result,double seconds)
     {
         Purge();if(copies.Count>=128)Clear();var handle=Guid.NewGuid().ToString("N");
