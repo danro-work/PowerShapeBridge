@@ -1,3 +1,13 @@
+# CURRENT: RETURNED ROTATION SET TIMED OUT; PASSIVE GEOMETRY EXACT, FENCE RETAINED
+
+Read work/surface-set-rotation-20261027/CURRENT.md and NEXT-RETURNED-SET-CONTRACT.md FIRST. Original067fe24766c74729bd9b51e0797219fd timeout raw/4journal/6steps/claim/plan/fence immutable; two authoritative returns, all6public72points+normals exactly match,4controls/28windows unchanged. Need separately qualified returned-set reconciliation, no retry or synthetic original receipt. Native72/staged78/ordinary48. Full regression in progress; PR113bothCI SUCCESS. K8-K11OPEN; no user action.
+
+# HISTORICAL NOTES BELOW
+
+27 октября, реальный поворот набора: worker остановлен по110сек после записанных возвратов обоих шагов; итог неизвестный, fence/claim/4события/6шаговых файлов сохранены. Повтор запрещён. Сначала work/surface-set-rotation-20261027/CURRENT.md; идёт независимое пассивное чтение и подготовка отдельного returned-set recovery.
+
+27 октября: новый блок поворота набора — сначала work/surface-set-rotation-20261027/CURRENT.md. Source Native72/SDK78; установленный Native71 прежний. Целевые13Native/21FrameworkSDK/9SDK/37Python и legacy11+11+16 прошли. Нового CAD-действия пока нет; ранняя проверка после готовности пакета.
+
 # CURRENT: NUMERIC SET PERSISTENCE REAL-QUALIFIED; PUBLICATION THEN NEXT MATRIX
 
 Read work/surface-set-numerical-persistence-20261027/CURRENT.md FIRST. One SaveAs/seal/ordered ownclose/new genericOPEN and separate verifiers finished; all6grids/72points+normals exactly preserved across4stages. 1777pins. Native71/staged77/ordinary48, bothprocesses kept,28windows. Full1180/1181+unchanged old control2/2; originalfailedTRX retained, no greenfullclaim. No activeexec. Finish draft publication/CI, then next transform matrix contract. NEVER replay any completed CAD script. K8-K11 OPEN; no user action needed.

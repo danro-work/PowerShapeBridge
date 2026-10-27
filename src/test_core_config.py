@@ -397,4 +397,12 @@ class CoreConfiguration(unittest.TestCase):
             self.assertEqual(replies[-1][1]['code'], -32602)
 
 
+    def test_surface_set_rotation_strict_gate(self):
+        valid = dict(self.settings, ownedSurfaceSetRotationsExperimental=False)
+        general_core(valid)
+        for value in ('true', 1, None):
+            with self.assertRaises(ValueError): general_core(dict(valid, ownedSurfaceSetRotationsExperimental=value))
+        with self.assertRaises(ValueError): general_core(dict(valid, ownedSurfaceSetRotationsExperimental=True))
+
+
 if __name__ == '__main__': unittest.main()

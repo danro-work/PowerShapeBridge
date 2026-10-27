@@ -54,6 +54,9 @@ jobs:
       - name: Verify new numerical-normal SURFACE set proofs in SDK
         shell: pwsh
         run: ./verify-surface-set-numerical.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\surface-set-numerical')
+      - name: Verify ordered SURFACE-set rotation Framework proofs in SDK
+        shell: pwsh
+        run: ./verify-surface-set-rotation.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\surface-set-rotation')
       - name: Verify actual Framework ordered-window finalization policy in SDK
         shell: pwsh
         run: ./verify-saved-finalization-ordered.ps1 -DotnetPath (Get-Command dotnet.exe).Source -EvidenceDirectory (Join-Path $PWD 'evidence\SDK\saved-finalization-ordered')
