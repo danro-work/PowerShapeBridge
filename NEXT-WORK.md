@@ -1,4 +1,12 @@
-# CURRENT: RETURNED-SET SOURCE OBSERVER BEFORE RECONCILIATION
+# CURRENT: OLD POWERSHAPE SESSION CLOSED; SOURCE READY; WAIT NEWSESSION
+
+Read work/returned-surface-set-reconciliation-20261028/CURRENT.md AND NEXT-SESSION-CONTRACT.md FIRST. Preflight STOPPEDbeforeMCP/COM/deploy: noPowerShape,23savedCADfilesexternallychangedincludingoldown494...;31originalproofs/fence exact,1888otherpins unchanged. Currentchangedbytes readonlysnapshotted/unqualified. Native74/SDK80 source+package guarded/readiness complete, NOTinstalled/livequalified. Full1208/1209+unchangedFile.Replace1/1; no repeats. OnependinguserrequestlaunchPowerShape2023/reportstarted, no modelsneeded; doNOTrepeatquestionorpreflightwithoutnewstate. Restart cannotrestoreold28windows/baseline; neveroldrotation/OPEN/reconciliation replay/fencecleanup. Next reviewednewsession/newowncopy/newintent ornewsourcepassiveinspection, oldunknownretained. Finishdraftpublication/CI independently, thenquietifnothingnew. K8-K11OPEN.
+
+# HISTORICAL: RETURNED-SET RECONCILIATION SOURCE; CLEANPACKAGE/EARLYLIVE NEXT
+
+Read work/returned-surface-set-reconciliation-20261028/CURRENT.md FIRST. SourceNative74/SDK80, runtime73/ordinary48 unchanged. New2full-onlydefaultfalse archive→separate verifier releasesONLYmatchingfences with explicitnewresolution; originaltimeout/journal stays. TargetedNative/SDK/Framework/Python/source-history checks passed; cleanpackage/readiness then freshownedcontext/earlylive. No repeatsoldCAD/observer scripts. PR115bothCI SUCCESS. K8-K11OPEN.
+
+# HISTORICAL: RETURNED-SET SOURCE OBSERVER BEFORE RECONCILIATION
 
 UPDATE27Oct: observer REAL PASSED, Native73 installed/stagedSDK79.1/ordinary48. df61c4ac9cda40928f7dc0e2ffa5b656 retained2passes/all6 + independent72publicpoints/normals4exactcontrols/28windows,1867pins/31originaldependencies/28savedOPENbytes/18backuppairs passed. Originaltimeout/fence remains, noCADcommands. Full1199/1200 withFile.Replace accessrefusal; unchangedtarget outsideboundary1/1, failedTRXretained. FirstSDK79 schema refused beforeIPC, fixed79.1 with10targettests/STDIO. Finish publication then separate returned-set reconciliation per localCURRENT; NEVER replayrotation/OPEN/save/observer scripts. K5andK6 baseline COMPLETE, oldswitchwording markedhistorical. K8-K11OPEN.
 

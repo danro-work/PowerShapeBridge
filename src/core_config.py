@@ -14,6 +14,9 @@ FIXTURE_FIELDS = ('expectedProject', 'sourceStep', 'protectedProject',
 
 def general_core(settings):
     profile = settings.get('coreProfile')
+    reconcile = settings.get('returnedSurfaceSetReconciliationExperimental', False)
+    if type(reconcile) is not bool or reconcile and (profile != 'general-v1' or settings.get('returnedSurfaceSetObservationExperimental') is not True):
+        raise ValueError('Returned reconciliation requires explicit qualified observer')
     disposition = settings.get('surfaceSetStopDispositionExperimental', False)
     if type(disposition) is not bool or disposition and (profile != 'general-v1' or settings.get('surfaceSetStopInspectionExperimental') is not True):
         raise ValueError('Partial disposition requires explicit passive observer dependency')

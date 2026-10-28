@@ -47,6 +47,9 @@ jobs:
       - name: Check passive returned SURFACE-set timeout observation without CAD
         shell: pwsh
         run: ./verify-returned-surface-set-observation.ps1
+      - name: Check separate returned SURFACE-set reconciliation without CAD
+        shell: pwsh
+        run: ./verify-returned-surface-set-reconciliation.ps1
       - name: Check own saved Result ordered-window finalization without CAD
         shell: pwsh
         run: ./verify-saved-finalization-ordered.ps1
