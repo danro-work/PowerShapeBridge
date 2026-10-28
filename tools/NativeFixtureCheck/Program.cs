@@ -1,6 +1,8 @@
 using System.Text.Json.Nodes;
 using PowerShapeMcp;
 
+if(args.Length==3&&args[0]=="--returned-set-reconciliation"){try{return ReturnedSetReconciliationCheck.Run(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
+
 if(args.Length==4&&args[0]=="--returned-set-origin-sdk"){try{return ReturnedSetObservationCheck.Recorded(args[1],args[2],args[3]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
 if(args.Length==3&&args[0]=="--returned-set-observation"){try{return ReturnedSetObservationCheck.Run(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
 if(args.Length==3&&args[0]=="--surface-set-rotation"){try{return SurfaceSetRotationCheck.Run(args[1],args[2]);}catch(Exception e){Console.Error.WriteLine(e);return 1;}}

@@ -412,4 +412,11 @@ class CoreConfiguration(unittest.TestCase):
             with self.assertRaises(ValueError): general_core(dict(valid, returnedSurfaceSetObservationExperimental=value))
 
 
+    def test_returned_set_reconciliation_gate(self):
+        valid = dict(self.settings, returnedSurfaceSetReconciliationExperimental=False)
+        general_core(valid)
+        for value in ('true', 1, None, True):
+            with self.assertRaises(ValueError): general_core(dict(valid, returnedSurfaceSetReconciliationExperimental=value))
+
+
 if __name__ == '__main__': unittest.main()
